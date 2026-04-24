@@ -57,6 +57,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   const editor = useEditor({
     extensions: [StarterKit],
     content: initialData?.content || '<p>Start writing your recipe here...</p>',
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       setValue('content', editor.getJSON());
     },

@@ -7,7 +7,35 @@ export const categoryApi = apiService.injectEndpoints({
       query: () => '/categories',
       providesTags: ['Category'],
     }),
+    createCategory: builder.mutation<Category, { name: string }>({
+      query: (body) => ({
+        url: '/categories',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    updateCategory: builder.mutation<Category, { id: number; name: string }>({
+      query: ({ id, name }) => ({
+        url: `/categories/${id}`,
+        method: 'PUT',
+        body: { name },
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    deleteCategory: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/categories/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Category'],
+    }),
   }),
 });
 
-export const { useGetAdminCategoriesQuery } = categoryApi;
+export const { 
+  useGetAdminCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation
+} = categoryApi;
