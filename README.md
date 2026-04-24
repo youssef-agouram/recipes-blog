@@ -47,6 +47,11 @@ A scalable, SEO-optimized recipe blog platform built with Next.js, Express, and 
 | `PUT` | `/ingredients/:id` | Update ingredient name | Admin |
 | `DELETE` | `/ingredients/:id` | Delete an ingredient | Admin |
 
+## 🔑 Admin Credentials (Seed Data)
+Use these credentials to access the admin panel at `/admin/login`:
+- **Email:** `admin@recipeblog.com`
+- **Password:** `adminpassword123`
+
 ## 🏁 Getting Started
 
 1. **Install Dependencies:**
