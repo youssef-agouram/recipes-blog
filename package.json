@@ -1,0 +1,21 @@
+{
+  "name": "recipes-blogs",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace=apps/web run dev",
+    "dev:api": "npm --workspace=apps/api run dev",
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+    "db:up": "docker-compose up -d",
+    "db:down": "docker-compose down",
+    "db:logs": "docker-compose logs -f",
+    "lint": "echo 'Add ESLint scripts later'",
+    "format": "echo 'Add Prettier scripts later'"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}
