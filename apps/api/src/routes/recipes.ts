@@ -2,6 +2,7 @@ import { Router } from 'express';
 import prisma from '../lib/prisma';
 import { RecipeSchema } from '../lib/schemas';
 import { generateSlug } from '../lib/utils';
+import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
@@ -65,7 +66,7 @@ router.get('/:slug', async (req, res, next) => {
 });
 
 // Admin: Create recipe
-router.post('/', async (req, res, next) => {
+router.post('/', authMiddleware, async (req, res, next) => {
   try {
     const data = RecipeSchema.parse(req.body);
     const slug = generateSlug(data.title);
@@ -94,7 +95,7 @@ router.post('/', async (req, res, next) => {
 });
 
 // Admin: Update recipe
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', authMiddleware, async (req, res, next) => {
   try {
     const { id } = req.params;
     const data = RecipeSchema.parse(req.body);
@@ -130,7 +131,7 @@ router.put('/:id', async (req, res, next) => {
 });
 
 // Admin: Delete recipe
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', authMiddleware, async (req, res, next) => {
   try {
     const { id } = req.params;
     await prisma.recipe.delete({

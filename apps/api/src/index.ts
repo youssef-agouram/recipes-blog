@@ -4,6 +4,7 @@ import cors from 'cors';
 import recipesRouter from './routes/recipes';
 import categoriesRouter from './routes/categories';
 import ingredientsRouter from './routes/ingredients';
+import authRouter from './routes/auth';
 import { errorHandler } from './middleware/error';
 
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/recipes', recipesRouter);
 app.use('/categories', categoriesRouter);
 app.use('/ingredients', ingredientsRouter);
+app.use('/auth', authRouter);
 
 // Health check
 app.get('/', (_req, res) => res.send('Recipes API is running...'));

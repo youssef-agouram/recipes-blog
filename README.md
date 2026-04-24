@@ -9,7 +9,7 @@ A scalable, SEO-optimized recipe blog platform built with Next.js, Express, and 
 | **🟢 Phase 1** | **Foundation** (Monorepo, Next.js, Express, DB Schema) | ✅ **Done** |
 | **🟡 Phase 2** | **Core Backend (API)** (REST Endpoints, Validation, Search) | ✅ **Done** |
 | **🔵 Phase 3** | **Frontend Core** (Homepage, Recipe Pages, Layout) | ✅ **Done** |
-| **🟣 Phase 4** | **Admin Panel + Editor** (Tiptap Integration, Image Upload) | 📅 Upcoming |
+| **🟣 Phase 4** | **Admin Panel + Editor** (Tiptap Integration, Image Upload) | ✅ **Done** |
 | **🟠 Phase 5** | **Advanced Features** (Filtering, Search UI, Dark Mode) | 📅 Upcoming |
 | **🔴 Phase 6** | **Performance & Optimization** (Caching, Image Opt) | 📅 Upcoming |
 | **⚫ Phase 7** | **SEO Layer** (Schema.org, Meta Tags, Sitemap) | 📅 Upcoming |

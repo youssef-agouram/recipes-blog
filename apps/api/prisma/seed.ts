@@ -1,7 +1,23 @@
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
 async function main() {
+  // Default Admin User
+  const adminEmail = "admin@recipeblog.com";
+  const hashedPassword = await bcrypt.hash("adminpassword123", 10);
+  
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {},
+    create: {
+      email: adminEmail,
+      name: "Admin User",
+      password: hashedPassword,
+    },
+  });
+  console.log("Admin user created: " + adminEmail);
+
   // Upsert Categories
   const categories = ["Breakfast", "Dinner", "Vegan", "Dessert", "Smoothies"];
   for (const name of categories) {
