@@ -33,6 +33,13 @@ export const recipeApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['Recipe'],
     }),
+    uploadImage: builder.mutation<{ imageUrl: string }, FormData>({
+      query: (body) => ({
+        url: '/uploads',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
@@ -40,5 +47,6 @@ export const {
   useGetAdminRecipesQuery, 
   useDeleteRecipeMutation,
   useCreateRecipeMutation,
-  useUpdateRecipeMutation
+  useUpdateRecipeMutation,
+  useUploadImageMutation
 } = recipeApi;

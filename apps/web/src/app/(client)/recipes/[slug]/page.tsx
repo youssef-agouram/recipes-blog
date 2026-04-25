@@ -1,11 +1,16 @@
 import { api } from "@/lib/api-client";
 import { notFound } from "next/navigation";
-import { Clock, Users, ArrowLeft } from "lucide-react";
+import { Clock, Users, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { RelatedRecipes } from "@/components/recipes/RelatedRecipes";
+import { Suspense } from "react";
+import Image from "next/image";
 
 interface RecipePageProps {
   params: Promise<{ slug: string }>;
 }
+
+export const revalidate = 3600; // revalidate every hour
 
 export default async function RecipePage({ params }: RecipePageProps) {
   const { slug } = await params;
@@ -57,9 +62,19 @@ export default async function RecipePage({ params }: RecipePageProps) {
         </header>
 
         <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-muted mb-12">
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground/40 italic">
-            Featured Image Placeholder
-          </div>
+          {recipe.imageUrl ? (
+            <Image
+              src={recipe.imageUrl}
+              alt={recipe.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-muted-foreground/40 italic">
+              Featured Image Placeholder
+            </div>
+          )}
         </div>
 
         <section className="prose prose-neutral dark:prose-invert max-w-none">
@@ -98,6 +113,15 @@ export default async function RecipePage({ params }: RecipePageProps) {
              )}
            </ul>
         </footer>
+
+        {recipe.categories?.[0] && (
+          <Suspense fallback={<div className="mt-20 pt-20 border-t border-border/40 animate-pulse bg-muted h-64 rounded-xl" />}>
+            <RelatedRecipes 
+              categoryId={recipe.categories[0].id} 
+              currentRecipeId={recipe.id} 
+            />
+          </Suspense>
+        )}
       </article>
     );
   } catch (error) {

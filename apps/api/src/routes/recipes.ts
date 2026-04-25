@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { RecipeSchema } from '../lib/schemas';
 import { generateSlug } from '../lib/utils';
@@ -7,7 +7,7 @@ import { authMiddleware } from '../middleware/auth';
 const router = Router();
 
 // Client: Get recipes with pagination and filters
-router.get('/', async (req, res, next) => {
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { page = 1, limit = 10, categoryId, search } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
@@ -18,7 +18,7 @@ router.get('/', async (req, res, next) => {
       where.categories = { some: { id: Number(categoryId) } };
     }
     if (search) {
-      where.title = { contains: String(search), mode: 'insensitive' };
+      where.title = { contains: search as string, mode: 'insensitive' };
     }
 
     const [recipes, total] = await Promise.all([
@@ -47,11 +47,11 @@ router.get('/', async (req, res, next) => {
 });
 
 // Client: Get single recipe by slug
-router.get('/:slug', async (req, res, next) => {
+router.get('/:slug', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { slug } = req.params;
     const recipe = await prisma.recipe.findUnique({
-      where: { slug },
+      where: { slug: slug as string },
       include: { categories: true, ingredients: true, seo: true },
     });
 
@@ -66,7 +66,7 @@ router.get('/:slug', async (req, res, next) => {
 });
 
 // Admin: Create recipe
-router.post('/', authMiddleware, async (req, res, next) => {
+router.post('/', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = RecipeSchema.parse(req.body);
     const slug = generateSlug(data.title);
@@ -77,6 +77,7 @@ router.post('/', authMiddleware, async (req, res, next) => {
         slug,
         summary: data.summary,
         content: data.content,
+        imageUrl: data.imageUrl,
         categories: data.categoryIds
           ? { connect: data.categoryIds.map((id) => ({ id })) }
           : undefined,
@@ -95,7 +96,7 @@ router.post('/', authMiddleware, async (req, res, next) => {
 });
 
 // Admin: Update recipe
-router.put('/:id', authMiddleware, async (req, res, next) => {
+router.put('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const data = RecipeSchema.parse(req.body);
@@ -106,6 +107,7 @@ router.put('/:id', authMiddleware, async (req, res, next) => {
         title: data.title,
         summary: data.summary,
         content: data.content,
+        imageUrl: data.imageUrl,
         categories: data.categoryIds
           ? { set: data.categoryIds.map((id) => ({ id })) }
           : undefined,
@@ -131,7 +133,7 @@ router.put('/:id', authMiddleware, async (req, res, next) => {
 });
 
 // Admin: Delete recipe
-router.delete('/:id', authMiddleware, async (req, res, next) => {
+router.delete('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await prisma.recipe.delete({

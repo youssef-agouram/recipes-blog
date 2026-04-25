@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { UtensilsCrossed } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { SearchBar } from "@/components/ui/SearchBar";
+import { Suspense } from "react";
 
 export function Navbar() {
   return (
@@ -9,6 +12,12 @@ export function Navbar() {
           <UtensilsCrossed className="h-6 w-6 text-primary" />
           <span className="text-xl font-semibold tracking-tight">RecipeBlog</span>
         </Link>
+
+        <div className="hidden flex-1 items-center justify-center px-8 md:flex">
+          <Suspense fallback={<div className="h-9 w-full max-w-sm rounded-full bg-muted animate-pulse" />}>
+            <SearchBar />
+          </Suspense>
+        </div>
         
         <nav className="flex items-center space-x-6 text-sm font-medium">
           <Link href="/" className="transition-colors hover:text-primary text-muted-foreground">
@@ -20,6 +29,9 @@ export function Navbar() {
           <Link href="/about" className="transition-colors hover:text-primary text-muted-foreground">
             About
           </Link>
+          <div className="pl-4 border-l border-border/40">
+            <ThemeToggle />
+          </div>
         </nav>
       </div>
     </header>

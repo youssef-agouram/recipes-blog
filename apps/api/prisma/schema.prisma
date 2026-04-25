@@ -13,17 +13,23 @@ model Recipe {
   slug        String       @unique
   summary     String?
   content     Json
+  imageUrl    String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   seo         SeoMeta?
   categories  Category[]   @relation("RecipeCategories")
   ingredients Ingredient[] @relation("RecipeIngredients")
+
+  @@index([slug])
+  @@index([title])
 }
 
 model Category {
   id      Int      @id @default(autoincrement())
   name    String   @unique
   recipes Recipe[] @relation("RecipeCategories")
+
+  @@index([name])
 }
 
 model Ingredient {

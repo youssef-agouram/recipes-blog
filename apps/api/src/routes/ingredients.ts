@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { IngredientSchema } from '../lib/schemas';
 
 const router = Router();
 
 // Client: Get all ingredients
-router.get('/', async (_req, res, next) => {
+router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const ingredients = await prisma.ingredient.findMany({
       orderBy: { name: 'asc' },
@@ -17,7 +17,7 @@ router.get('/', async (_req, res, next) => {
 });
 
 // Admin: Create ingredient
-router.post('/', async (req, res, next) => {
+router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = IngredientSchema.parse(req.body);
     const ingredient = await prisma.ingredient.create({ data });
@@ -28,7 +28,7 @@ router.post('/', async (req, res, next) => {
 });
 
 // Admin: Update ingredient
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const data = IngredientSchema.parse(req.body);
@@ -43,7 +43,7 @@ router.put('/:id', async (req, res, next) => {
 });
 
 // Admin: Delete ingredient
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await prisma.ingredient.delete({

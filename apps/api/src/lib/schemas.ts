@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const RecipeSchema = z.object({
   title: z.string().min(3).max(255),
   summary: z.string().optional(),
+  imageUrl: z.string().optional(),
   content: z.any(), // Will be Tiptap JSON
   categoryIds: z.array(z.number()).optional(),
   ingredientIds: z.array(z.number()).optional(),

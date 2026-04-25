@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
@@ -19,7 +19,7 @@ const RegisterSchema = z.object({
 });
 
 // POST /auth/login
-router.post('/login', async (req, res, next) => {
+router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = LoginSchema.parse(req.body);
 
@@ -39,7 +39,7 @@ router.post('/login', async (req, res, next) => {
       token,
       user: {
         id: user.id,
-        email: user.id,
+        email: user.email,
         name: user.name,
       },
     });
@@ -49,7 +49,7 @@ router.post('/login', async (req, res, next) => {
 });
 
 // POST /auth/register (Temporary for setup)
-router.post('/register', async (req, res, next) => {
+router.post('/register', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, name, password } = RegisterSchema.parse(req.body);
 

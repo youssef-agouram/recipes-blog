@@ -2,9 +2,20 @@ import { api } from "@/lib/api-client";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { Suspense } from "react";
 
-export default async function HomePage() {
-  const { data: recipes } = await api.recipes.list({ limit: 6 });
+import { Pagination } from "@/components/ui/Pagination";
+
+interface HomePageProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const { page = '1' } = await searchParams;
+  const { data: recipes, meta } = await api.recipes.list({ 
+    limit: 6, 
+    page: Number(page) 
+  });
   const categories = await api.categories.list();
 
   return (
@@ -73,6 +84,12 @@ export default async function HomePage() {
             <Link href="/" className="text-sm font-semibold text-primary">Check back soon!</Link>
           </div>
         )}
+
+        <div className="mt-12">
+          <Suspense fallback={<div className="h-9 w-full bg-muted animate-pulse rounded-md" />}>
+            <Pagination totalPages={meta.totalPages} currentPage={meta.page} />
+          </Suspense>
+        </div>
       </section>
     </div>
   );
