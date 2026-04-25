@@ -1,17 +1,20 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
+import Embed from "./extensions/embed";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
 import Typography from "@tiptap/extension-typography";
 import Highlight from "@tiptap/extension-highlight";
 import CharacterCount from "@tiptap/extension-character-count";
 import Toolbar from "./Toolbar";
+import EmbedModal from "./EmbedModal";
+import { transformEmbedUrl } from '@/lib/utils';
 import BubbleMenuComponent from "./BubbleMenu";
 import LinkModal from "./LinkModal";
 import ImageModal from "./ImageModal";
@@ -29,6 +32,7 @@ export default function GoogleDocsEditor({ initialContent, onChange }: Props) {
     Underline,
     Link.configure({ openOnClick: false }),
     Image,
+    Embed,
     TextAlign.configure({ types: ["heading", "paragraph"] }),
     Placeholder.configure({ placeholder: "Start writing your document..." }),
     Typography,
@@ -51,6 +55,36 @@ export default function GoogleDocsEditor({ initialContent, onChange }: Props) {
     },
   });
 
+  const [showEmbedModal, setShowEmbedModal] = useState(false);
+
+  // Listen for global open-embed-modal events (toolbar fallback)
+  useEffect(() => {
+    const handleOpenEmbedModal = () => setShowEmbedModal(true);
+    document.addEventListener('open-embed-modal', handleOpenEmbedModal);
+    return () => document.removeEventListener('open-embed-modal', handleOpenEmbedModal);
+  }, []);
+
+  const openEmbedModal = useCallback(() => setShowEmbedModal(true), []);
+
+  const handleEmbedInsert = useCallback((url: string) => {
+    if (!editor) return;
+    try {
+      const embedUrl = transformEmbedUrl(url.trim());
+      if (!embedUrl) {
+        // eslint-disable-next-line no-alert
+        alert('Invalid or unsupported video URL');
+        return;
+      }
+
+      editor.chain().focus().insertContent({ type: 'embed', attrs: { src: embedUrl } }).run();
+    } catch (e) {
+      // eslint-disable-next-line no-alert
+      alert('Failed to insert embed');
+    } finally {
+      setShowEmbedModal(false);
+    }
+  }, [editor]);
+
   const getWordCount = useCallback(() => {
     if (!editor) return 0;
     const text = editor.state.doc.textBetween(0, editor.state.doc.content.size, " ");
@@ -71,7 +105,7 @@ export default function GoogleDocsEditor({ initialContent, onChange }: Props) {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="sticky top-4 z-20">
-        <Toolbar editor={editor} onOpenImageModal={openImageModal} onOpenLinkModal={openLinkModal} />
+        <Toolbar editor={editor} onOpenImageModal={openImageModal} onOpenLinkModal={openLinkModal} onOpenEmbedModal={openEmbedModal} />
       </div>
 
       <div className="bg-white shadow-md rounded-lg p-8 mt-4 min-h-[500px]">
@@ -85,6 +119,7 @@ export default function GoogleDocsEditor({ initialContent, onChange }: Props) {
       </div>
       {showLinkModal && <LinkModal editor={editor} onClose={() => setShowLinkModal(false)} />}
       {showImageModal && <ImageModal editor={editor} onClose={() => setShowImageModal(false)} />}
+      {showEmbedModal && <EmbedModal isOpen={showEmbedModal} onClose={() => setShowEmbedModal(false)} onInsert={handleEmbedInsert} />}
     </div>
   );
 }

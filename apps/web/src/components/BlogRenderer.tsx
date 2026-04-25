@@ -9,6 +9,7 @@ import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import Typography from "@tiptap/extension-typography";
+import Embed from "@/components/editor/extensions/embed";
 
 type Props = {
   content: any; // Tiptap JSON
@@ -26,6 +27,7 @@ export default function BlogRenderer({ content, className = "prose dark:prose-in
       inline: false,
       HTMLAttributes: { class: 'mx-auto my-6 max-w-full rounded-md' },
     }),
+    Embed,
     TextAlign.configure({ types: ["heading", "paragraph"] }),
     Typography,
     Highlight,

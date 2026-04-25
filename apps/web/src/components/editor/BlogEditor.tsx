@@ -8,6 +8,8 @@ import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import Typography from '@tiptap/extension-typography';
 import Highlight from '@tiptap/extension-highlight';
+import Embed from './extensions/embed';
+import { transformEmbedUrl } from '@/lib/utils';
 
 import CharacterCount from '@tiptap/extension-character-count';
 
@@ -15,6 +17,7 @@ import { Toolbar } from './Toolbar';
 import { EditorBubbleMenu } from './EditorBubbleMenu';
 import { LinkEditorModal } from './LinkEditorModal';
 import { ImageUpload } from './ImageUpload';
+import EmbedModal from './EmbedModal';
 import { SlashCommand, renderItems, getSuggestionItems } from './SlashCommand';
 
 interface BlogEditorProps {
@@ -25,6 +28,7 @@ interface BlogEditorProps {
 export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange }) => {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isEmbedModalOpen, setIsEmbedModalOpen] = useState(false);
   
   const editor = useEditor({
     extensions: [
@@ -45,6 +49,7 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
           class: 'rounded-md max-w-full mx-auto shadow-sm',
         },
       }),
+      Embed,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -86,8 +91,18 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
     };
   }, []);
 
+  // Custom event listener to open embed modal from toolbar fallback
+  useEffect(() => {
+    const handleOpenEmbedModal = () => setIsEmbedModalOpen(true);
+    document.addEventListener('open-embed-modal', handleOpenEmbedModal);
+    return () => {
+      document.removeEventListener('open-embed-modal', handleOpenEmbedModal);
+    };
+  }, []);
+
   const openImageModal = useCallback(() => setIsImageModalOpen(true), []);
   const openLinkModal = useCallback(() => setIsLinkModalOpen(true), []);
+  const openEmbedModal = useCallback(() => setIsEmbedModalOpen(true), []);
 
   const handleLinkSave = useCallback((url: string, openInNewTab: boolean) => {
     if (!editor) return;
@@ -118,6 +133,27 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
     editor.chain().focus().setImage({ src: url }).run();
   }, [editor]);
 
+  const handleEmbedInsert = useCallback((url: string) => {
+    if (!editor) return;
+    try {
+      const embedUrl = transformEmbedUrl(url.trim());
+      if (!embedUrl) {
+        // invalid or unsupported
+        // eslint-disable-next-line no-alert
+        alert('Invalid or unsupported video URL');
+        return;
+      }
+
+      editor.chain().focus().insertContent({ type: 'embed', attrs: { src: embedUrl } }).run();
+    } catch (e) {
+      // unexpected error — notify user
+      // eslint-disable-next-line no-alert
+      alert('Failed to insert embed');
+    } finally {
+      setIsEmbedModalOpen(false);
+    }
+  }, [editor]);
+
   const getCurrentLinkUrl = () => {
     if (!editor) return '';
     return editor.getAttributes('link').href || '';
@@ -142,6 +178,7 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
         editor={editor} 
         onOpenImageModal={openImageModal}
         onOpenLinkModal={openLinkModal}
+        onOpenEmbedModal={openEmbedModal}
       />
       
       <EditorBubbleMenu 
@@ -170,6 +207,11 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
         onRemove={handleLinkRemove}
         initialUrl={getCurrentLinkUrl()}
         initialOpenInNewTab={isCurrentLinkTargetBlank()}
+      />
+      <EmbedModal
+        isOpen={isEmbedModalOpen}
+        onClose={() => setIsEmbedModalOpen(false)}
+        onInsert={handleEmbedInsert}
       />
 
       <ImageUpload

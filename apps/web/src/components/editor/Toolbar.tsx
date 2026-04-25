@@ -9,6 +9,7 @@ import {
   List, ListOrdered, Quote, Code, Image as ImageIcon,
   Minus, Undo, Redo, Link as LinkIcon
 } from 'lucide-react';
+import { Video } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { ToggleGroup } from '@/components/ui/toggle-group';
 import { Separator } from '@/components/ui/separator';
@@ -18,9 +19,10 @@ interface ToolbarProps {
   editor: Editor | null;
   onOpenImageModal: () => void;
   onOpenLinkModal: () => void;
+  onOpenEmbedModal?: () => void;
 }
 
-export function Toolbar({ editor, onOpenImageModal, onOpenLinkModal }: ToolbarProps) {
+export function Toolbar({ editor, onOpenImageModal, onOpenLinkModal, onOpenEmbedModal }: ToolbarProps) {
   if (!editor) return null;
 
   const ToolbarButton = ({ 
@@ -203,6 +205,15 @@ export function Toolbar({ editor, onOpenImageModal, onOpenLinkModal }: ToolbarPr
           label="Insert Image"
           icon={ImageIcon}
           onClick={onOpenImageModal}
+        />
+        <ToolbarButton
+          label="Insert Video"
+          icon={Video}
+          onClick={() => {
+            if (onOpenEmbedModal) return onOpenEmbedModal();
+            // fallback: dispatch a global event so consumers can open modal
+            document.dispatchEvent(new CustomEvent('open-embed-modal'));
+          }}
         />
         <ToolbarButton
           label="Horizontal Rule"
