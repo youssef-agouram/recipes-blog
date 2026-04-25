@@ -10,7 +10,7 @@ export interface CommandItemProps {
   title: string;
   description: string;
   icon: React.ReactNode;
-  command: ({ editor, range }: { editor: Editor; range: Range }) => void;
+  command: ({ editor, range }: { editor: Editor; range: { from: number; to: number } }) => void;
 }
 
 const COMMAND_ITEMS: CommandItemProps[] = [
@@ -222,7 +222,9 @@ export const renderItems = () => {
         return true;
       }
 
-      return component?.ref?.onKeyDown(props);
+      // ReactRenderer.ref is untyped; cast to any to call host methods implemented in CommandList
+      const refAny: any = (component as any)?.ref;
+      return refAny?.onKeyDown ? refAny.onKeyDown(props) : false;
     },
 
     onExit() {

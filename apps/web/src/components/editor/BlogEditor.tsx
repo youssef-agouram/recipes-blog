@@ -15,7 +15,7 @@ import { Toolbar } from './Toolbar';
 import { EditorBubbleMenu } from './EditorBubbleMenu';
 import { LinkEditorModal } from './LinkEditorModal';
 import { ImageUpload } from './ImageUpload';
-import { SlashCommand, renderItems } from './SlashCommand';
+import { SlashCommand, renderItems, getSuggestionItems } from './SlashCommand';
 
 interface BlogEditorProps {
   initialContent?: JSONContent | string;
@@ -57,9 +57,6 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
       SlashCommand.configure({
         suggestion: {
           items: ({ query }: { query: string }) => {
-            // Import getSuggestionItems dynamically or handle it locally if imported above
-            // We use the imported function from SlashCommand.tsx
-            const { getSuggestionItems } = require('./SlashCommand');
             return getSuggestionItems({ query });
           },
           render: renderItems,
@@ -71,7 +68,7 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
     autofocus: true,
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose-base dark:prose-invert focus:outline-none max-w-none min-h-[400px] p-4',
+        class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[300px] p-4 sm:p-6',
       },
     },
     onUpdate: ({ editor }) => {
@@ -88,6 +85,9 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
       document.removeEventListener('open-image-modal', handleOpenImageModal);
     };
   }, []);
+
+  const openImageModal = useCallback(() => setIsImageModalOpen(true), []);
+  const openLinkModal = useCallback(() => setIsLinkModalOpen(true), []);
 
   const handleLinkSave = useCallback((url: string, openInNewTab: boolean) => {
     if (!editor) return;
@@ -137,23 +137,23 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
   const characters = editor.storage.characterCount?.characters() || 0;
 
   return (
-    <div className="flex flex-col border rounded-lg shadow-sm bg-background">
+    <div className="flex flex-col border rounded-xl shadow-sm bg-background transition-all focus-within:ring-2 focus-within:ring-ring focus-within:border-primary">
       <Toolbar 
         editor={editor} 
-        onOpenImageModal={() => setIsImageModalOpen(true)}
-        onOpenLinkModal={() => setIsLinkModalOpen(true)}
+        onOpenImageModal={openImageModal}
+        onOpenLinkModal={openLinkModal}
       />
       
       <EditorBubbleMenu 
         editor={editor}
-        onOpenLinkModal={() => setIsLinkModalOpen(true)}
+        onOpenLinkModal={openLinkModal}
       />
 
       <div className="relative flex-grow">
         <EditorContent editor={editor} />
       </div>
 
-      <div className="flex justify-between items-center px-4 py-2 border-t bg-muted/20 text-xs text-muted-foreground rounded-b-lg">
+      <div className="flex justify-between items-center px-4 py-2 border-t bg-muted/20 text-xs text-muted-foreground rounded-b-xl">
         <div>
           {editor.isEmpty && <span className="text-destructive">Content is empty</span>}
         </div>

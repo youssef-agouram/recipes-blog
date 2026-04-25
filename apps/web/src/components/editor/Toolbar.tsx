@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { 
@@ -8,10 +10,9 @@ import {
   Minus, Undo, Redo, Link as LinkIcon
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ToggleGroup } from '@/components/ui/toggle-group';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
 
 interface ToolbarProps {
   editor: Editor | null;
@@ -19,10 +20,8 @@ interface ToolbarProps {
   onOpenLinkModal: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ editor, onOpenImageModal, onOpenLinkModal }) => {
-  if (!editor) {
-    return null;
-  }
+export function Toolbar({ editor, onOpenImageModal, onOpenLinkModal }: ToolbarProps) {
+  if (!editor) return null;
 
   const ToolbarButton = ({ 
     onClick, 
@@ -59,7 +58,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor, onOpenImageModal, onOp
   );
 
   return (
-    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 rounded-t-lg border-b bg-background p-2">
+    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 rounded-t-xl border-b bg-background p-2">
       <div className="flex items-center gap-1">
         <ToolbarButton
           label="Undo (Ctrl+Z)"
@@ -213,4 +212,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor, onOpenImageModal, onOp
       </div>
     </div>
   );
-};
+}
+
+export default Toolbar;

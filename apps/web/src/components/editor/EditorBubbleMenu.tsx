@@ -1,5 +1,5 @@
-import React from 'react';
-import { BubbleMenu as TiptapBubbleMenu, Editor } from '@tiptap/react';
+import React, { useEffect, useState } from 'react';
+import type { Editor } from '@tiptap/core';
 import { Bold, Italic, Link as LinkIcon, Highlighter } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -10,7 +10,46 @@ interface EditorBubbleMenuProps {
 }
 
 export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({ editor, onOpenLinkModal }) => {
-  if (!editor) return null;
+  const [visible, setVisible] = useState(false);
+  const [pos, setPos] = useState({ left: 0, top: 0 });
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const update = () => {
+      const { from, to } = editor.state.selection;
+      if (from === to) {
+        setVisible(false);
+        return;
+      }
+
+      try {
+        const start = editor.view.coordsAtPos(from);
+        const end = editor.view.coordsAtPos(to);
+        const midX = (start.left + end.right) / 2 + window.scrollX;
+        const top = Math.min(start.top, end.top) + window.scrollY - 10;
+        setPos({ left: midX, top });
+        setVisible(true);
+      } catch (e) {
+        setVisible(false);
+      }
+    };
+
+    editor.on('selectionUpdate', update);
+    editor.on('transaction', update);
+    editor.on('blur', () => setVisible(false));
+
+    update();
+
+    return () => {
+      try {
+        editor.off('selectionUpdate', update);
+        editor.off('transaction', update);
+      } catch (_) {}
+    };
+  }, [editor]);
+
+  if (!editor || !visible) return null;
 
   const MenuButton = ({ 
     onClick, 
@@ -44,11 +83,7 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({ editor, onOp
   );
 
   return (
-    <TiptapBubbleMenu 
-      editor={editor} 
-      tippyOptions={{ duration: 100 }}
-      className="flex items-center gap-1 rounded-md border bg-background p-1 shadow-md"
-    >
+    <div style={{ position: 'absolute', left: pos.left, top: pos.top, transform: 'translateX(-50%) translateY(-100%)' }} className="flex items-center gap-1 rounded-md border bg-background p-1 shadow-md z-50">
       <MenuButton
         label="Bold"
         icon={Bold}
@@ -73,6 +108,6 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({ editor, onOp
         isActive={editor.isActive('link')}
         onClick={onOpenLinkModal}
       />
-    </TiptapBubbleMenu>
+    </div>
   );
 };
