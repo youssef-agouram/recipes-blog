@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Clock, Users, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { RelatedRecipes } from "@/components/recipes/RelatedRecipes";
+import BlogRenderer from '@/components/BlogRenderer';
 import { Suspense } from "react";
 import Image from "next/image";
 
@@ -78,25 +79,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
         </div>
 
         <section className="prose prose-neutral dark:prose-invert max-w-none">
-           {/* Simple Tiptap JSON rendering logic */}
-           {recipe.content?.content?.map((node: any, idx: number) => {
-             if (node.type === 'paragraph') {
-               return (
-                 <p key={idx} className="mb-6 text-lg leading-relaxed text-foreground/80">
-                   {node.content?.map((textNode: any) => textNode.text).join('')}
-                 </p>
-               );
-             }
-             if (node.type === 'heading') {
-                const Level = `h${node.attrs?.level || 2}` as any;
-                return (
-                  <Level key={idx} className="mt-10 mb-4 font-bold tracking-tight">
-                    {node.content?.map((textNode: any) => textNode.text).join('')}
-                  </Level>
-                );
-             }
-             return null;
-           })}
+          <BlogRenderer content={recipe.content} />
         </section>
 
         <footer className="mt-20 pt-10 border-t border-border/40">
