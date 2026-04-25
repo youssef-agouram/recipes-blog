@@ -3,8 +3,7 @@
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import GoogleDocsEditor from '../editor/GoogleDocsEditor';
 import { useGetAdminCategoriesQuery } from '@/store/api/categoryApi';
 import { useUploadImageMutation } from '@/store/api/recipeApi';
 import { Recipe } from '@/lib/types';
@@ -75,21 +74,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
     }
   };
 
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: initialData?.content || '<p>Start writing your recipe here...</p>',
-    immediatelyRender: false,
-    onUpdate: ({ editor }) => {
-      setValue('content', editor.getJSON());
-    },
-  });
-
-  // Sync editor content if initialData changes (e.g. on edit page load)
-  useEffect(() => {
-    if (initialData && editor) {
-      editor.commands.setContent(initialData.content);
-    }
-  }, [initialData, editor]);
+  // content is managed by the GoogleDocsEditor via onChange
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -157,7 +142,10 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
           <div className="space-y-2">
             <label className="text-sm font-medium">Content</label>
             <div className="rounded-md border border-input bg-background overflow-hidden min-h-[400px]">
-              <EditorContent editor={editor} className="prose prose-sm max-w-none p-4 focus:outline-none min-h-[400px]" />
+              <GoogleDocsEditor
+                initialContent={watch('content')}
+                onChange={(json) => setValue('content', json)}
+              />
             </div>
           </div>
         </div>
