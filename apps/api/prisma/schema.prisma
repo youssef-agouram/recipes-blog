@@ -14,6 +14,7 @@ model Recipe {
   summary     String?
   content     Json
   imageUrl    String?
+  isFeatured  Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   seo         SeoMeta?
@@ -22,6 +23,7 @@ model Recipe {
 
   @@index([slug])
   @@index([title])
+  @@index([isFeatured])
 }
 
 model Category {

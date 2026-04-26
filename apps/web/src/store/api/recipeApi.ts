@@ -10,6 +10,13 @@ export const recipeApi = apiService.injectEndpoints({
       }),
       providesTags: ['Recipe'],
     }),
+    getFeaturedRecipes: builder.query<PaginatedResponse<Recipe>, void>({
+      query: () => ({
+        url: '/recipes',
+        params: { featured: 'true', limit: 10 },
+      }),
+      providesTags: ['Recipe'],
+    }),
     deleteRecipe: builder.mutation<void, number>({
       query: (id) => ({
         url: `/recipes/${id}`,
@@ -33,6 +40,13 @@ export const recipeApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['Recipe'],
     }),
+    toggleFeaturedRecipe: builder.mutation<Recipe, number>({
+      query: (id) => ({
+        url: `/recipes/${id}/feature`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['Recipe'],
+    }),
     uploadImage: builder.mutation<{ imageUrl: string }, FormData>({
       query: (body) => ({
         url: '/uploads',
@@ -44,9 +58,12 @@ export const recipeApi = apiService.injectEndpoints({
 });
 
 export const { 
-  useGetAdminRecipesQuery, 
+  useGetAdminRecipesQuery,
+  useGetFeaturedRecipesQuery,
   useDeleteRecipeMutation,
   useCreateRecipeMutation,
   useUpdateRecipeMutation,
+  useToggleFeaturedRecipeMutation,
   useUploadImageMutation
 } = recipeApi;
+

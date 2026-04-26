@@ -20,6 +20,7 @@ export interface Recipe {
   slug: string;
   summary?: string;
   imageUrl?: string;
+  isFeatured: boolean;
   content: any; // Tiptap JSON content
   createdAt: string;
   updatedAt: string;

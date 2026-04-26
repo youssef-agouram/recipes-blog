@@ -1,13 +1,14 @@
 'use client';
 
-import { useGetAdminRecipesQuery, useDeleteRecipeMutation } from '@/store/api/recipeApi';
-import { Plus, Edit, Trash2, Loader2, ExternalLink } from 'lucide-react';
+import { useGetAdminRecipesQuery, useDeleteRecipeMutation, useToggleFeaturedRecipeMutation } from '@/store/api/recipeApi';
+import { Plus, Edit, Trash2, Loader2, ExternalLink, Star } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
 export default function AdminRecipesPage() {
-  const { data, isLoading, error } = useGetAdminRecipesQuery({ limit: 50 });
+  const { data, isLoading } = useGetAdminRecipesQuery({ limit: 50 });
   const [deleteRecipe, { isLoading: isDeleting }] = useDeleteRecipeMutation();
+  const [toggleFeatured] = useToggleFeaturedRecipeMutation();
 
   const handleDelete = async (id: number) => {
     if (confirm('Are you sure you want to delete this recipe?')) {
@@ -16,6 +17,14 @@ export default function AdminRecipesPage() {
       } catch (err) {
         console.error('Failed to delete recipe:', err);
       }
+    }
+  };
+
+  const handleToggleFeatured = async (id: number) => {
+    try {
+      await toggleFeatured(id).unwrap();
+    } catch (err) {
+      console.error('Failed to toggle featured:', err);
     }
   };
 
@@ -77,6 +86,25 @@ export default function AdminRecipesPage() {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end space-x-2">
+                    {/* ⭐ Featured toggle */}
+                    <button
+                      onClick={() => handleToggleFeatured(recipe.id)}
+                      title={recipe.isFeatured ? 'Remove from featured' : 'Add to featured'}
+                      className={`inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors ${
+                        recipe.isFeatured
+                          ? 'border-yellow-400 bg-yellow-50 hover:bg-yellow-100'
+                          : 'border-border/40 hover:bg-muted'
+                      }`}
+                    >
+                      <Star
+                        className={`h-4 w-4 transition-colors ${
+                          recipe.isFeatured
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-muted-foreground'
+                        }`}
+                      />
+                    </button>
+
                     <Link
                       href={`/admin/recipes/edit/${recipe.id}`}
                       className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/40 hover:bg-muted transition-colors"
