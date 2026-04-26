@@ -7,6 +7,10 @@ interface HomePageProps {
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
+  const categories = await api.categories.list().catch(() => []);
+  const recipesResponse = await api.recipes.list({ limit: 6 }).catch(() => ({ data: [] }));
+  const recipes = recipesResponse.data || [];
+
   return (
     <div className="w-full bg-brand-bg text-brand-dark overflow-hidden font-sans">
       
@@ -65,22 +69,26 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           
           {/* Right Side (List) */}
           <div className="md:w-1/2 w-full grid grid-cols-1 gap-4">
-            {[
-              { icon: '🍳', name: 'Breakfast' },
-              { icon: '🥗', name: 'Vegan' },
-              { icon: '🥩', name: 'Meat' },
-              { icon: '🧁', name: 'Dessert' },
-              { icon: '⏱️', name: 'Quick & Easy' }
-            ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-4 border-b border-blue-200 last:border-0 group cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-lg shadow-sm group-hover:scale-110 transition-transform">
-                    {item.icon}
+            {categories.slice(0, 5).map((category, i) => {
+              let icon = '🍽️';
+              const nameLower = category.name.toLowerCase();
+              if (nameLower.includes('breakfast')) icon = '🍳';
+              else if (nameLower.includes('vegan') || nameLower.includes('salad') || nameLower.includes('veg')) icon = '🥗';
+              else if (nameLower.includes('meat') || nameLower.includes('beef') || nameLower.includes('chicken') || nameLower.includes('pork')) icon = '🥩';
+              else if (nameLower.includes('dessert') || nameLower.includes('sweet') || nameLower.includes('cake')) icon = '🧁';
+              else if (nameLower.includes('quick') || nameLower.includes('easy') || nameLower.includes('fast')) icon = '⏱️';
+
+              return (
+                <Link href={`/category/${category.id}`} key={category.id || i} className="flex items-center justify-between py-4 border-b border-blue-200 last:border-0 group cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-lg shadow-sm group-hover:scale-110 transition-transform">
+                      {icon}
+                    </div>
                   </div>
-                </div>
-                <span className="font-bold text-base uppercase tracking-wider">{item.name}</span>
-              </div>
-            ))}
+                  <span className="font-bold text-base uppercase tracking-wider">{category.name}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -100,60 +108,37 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Card 1 */}
-          <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 flex flex-col group cursor-pointer hover:shadow-md transition-shadow">
-            <div className="relative h-64 overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Chicken" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="p-8 flex-1 flex flex-col">
-              <h3 className="text-xl font-bold mb-3 tracking-tight">Savory Herb-Infused Chicken</h3>
-              <p className="text-sm text-gray-500 mb-6 flex-1">
-                Indulge in the rich and savory harmony of herbs and succulents with our Savory Herb-Infused Chicken.
-              </p>
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-4 text-xs font-semibold text-gray-400">
-                  <span className="flex items-center gap-1"><Clock className="w-4 h-4"/> 40 Min</span>
-                  <span className="flex items-center gap-1"><Users className="w-4 h-4"/> 4 Servings</span>
+          {recipes.slice(0, 2).map((recipe, i) => (
+            <Link href={`/recipes/${recipe.slug}`} key={recipe.id} className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 flex flex-col group cursor-pointer hover:shadow-md transition-shadow relative">
+              {i === 1 && (
+                <div className="absolute top-4 right-4 z-10 w-12 h-12 bg-brand-green rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg transform rotate-12">
+                  NEW
                 </div>
-                <button className="border border-brand-dark text-brand-dark px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider hover:bg-brand-dark hover:text-white transition-colors">
-                  View Recipe
-                </button>
+              )}
+              <div className="relative h-64 overflow-hidden">
+                <img 
+                  src={recipe.imageUrl || "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"} 
+                  alt={recipe.title} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
               </div>
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 flex flex-col group cursor-pointer hover:shadow-md transition-shadow relative">
-            <div className="absolute top-4 right-4 z-10 w-12 h-12 bg-brand-green rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg transform rotate-12">
-              NEW
-            </div>
-            <div className="relative h-64 overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Mousse" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="p-8 flex-1 flex flex-col">
-              <h3 className="text-xl font-bold mb-3 tracking-tight">Decadent Chocolate Mousse</h3>
-              <p className="text-sm text-gray-500 mb-6 flex-1">
-                Dive into the velvety indulgence of our Decadent Chocolate Mousse. A dessert that whispers sweetness!
-              </p>
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-4 text-xs font-semibold text-gray-400">
-                  <span className="flex items-center gap-1"><Clock className="w-4 h-4"/> 25 Min</span>
-                  <span className="flex items-center gap-1"><Users className="w-4 h-4"/> 2 Servings</span>
+              <div className="p-8 flex-1 flex flex-col">
+                <h3 className="text-xl font-bold mb-3 tracking-tight line-clamp-1">{recipe.title}</h3>
+                <p className="text-sm text-gray-500 mb-6 flex-1 line-clamp-2">
+                  {recipe.summary || "No description available."}
+                </p>
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex items-center gap-4 text-xs font-semibold text-gray-400">
+                    <span className="flex items-center gap-1"><Clock className="w-4 h-4"/> 40 Min</span>
+                    <span className="flex items-center gap-1"><Users className="w-4 h-4"/> 4 Servings</span>
+                  </div>
+                  <button className="border border-brand-dark text-brand-dark px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider hover:bg-brand-dark hover:text-white transition-colors">
+                    View Recipe
+                  </button>
                 </div>
-                <button className="border border-brand-dark text-brand-dark px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider hover:bg-brand-dark hover:text-white transition-colors">
-                  View Recipe
-                </button>
               </div>
-            </div>
-          </div>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -173,31 +158,24 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
         {/* Categories Pills */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {['All', 'Vegan', 'Breakfast', 'Meat', 'Dessert', 'Lunch', 'Dinner'].map((cat, i) => (
-            <button 
-              key={cat}
-              className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-colors ${
-                i === 0 
-                ? 'bg-brand-green text-white border-brand-green' 
-                : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-brand-dark'
-              }`}
+          <Link href="/recipes" className="px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-colors bg-brand-green text-white border-brand-green">
+            All
+          </Link>
+          {categories.map((cat) => (
+            <Link 
+              key={cat.id}
+              href={`/category/${cat.id}`}
+              className="px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-colors border-gray-300 text-gray-500 hover:border-gray-400 hover:text-brand-dark"
             >
-              {cat}
-            </button>
+              {cat.name}
+            </Link>
           ))}
         </div>
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            { img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", title: "Savory Herb-Infused Chicken", desc: "A delightful harmony of succulent chicken and herbs." },
-            { img: "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", title: "Lemon Garlic Grilled Chicken", desc: "Experience the perfect balance of zesty lemon and aromatic garlic." },
-            { img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", title: "Quinoa Veggie Stir-Fry", desc: "Quick, wholesome, and bursting with flavors. A perfect healthy meal." },
-            { img: "https://images.unsplash.com/photo-1494597564530-871f2b93ac55?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", title: "Berry Bliss Smoothie Bowl", desc: "Start your day with this refreshing, beautifully arranged bowl of fruits." },
-            { img: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", title: "Spaghetti Aglio e Olio", desc: "A classic Italian pasta dish made with garlic, olive oil, and a hint of spice." },
-            { img: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", title: "Grilled Veggies with Sauce", desc: "A mix of the freshest vegetables charred to perfection." },
-          ].map((recipe, i) => (
-            <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group">
+          {recipes.map((recipe, i) => (
+            <Link href={`/recipes/${recipe.slug}`} key={recipe.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group cursor-pointer">
               <div className="relative h-48 overflow-hidden">
                 {/* Randomly add a green tag to some cards */}
                 {(i === 2 || i === 3 || i === 4) && (
@@ -206,7 +184,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                    </div>
                 )}
                 <img 
-                  src={recipe.img} 
+                  src={recipe.imageUrl || "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"} 
                   alt={recipe.title} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -214,7 +192,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <div className="p-6 flex-1 flex flex-col">
                 <h3 className="text-lg font-bold mb-2 tracking-tight line-clamp-1">{recipe.title}</h3>
                 <p className="text-xs text-gray-500 mb-6 flex-1 line-clamp-2">
-                  {recipe.desc}
+                  {recipe.summary || "No description available."}
                 </p>
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex items-center gap-3 text-[10px] font-semibold text-gray-400">
@@ -226,7 +204,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   </button>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
