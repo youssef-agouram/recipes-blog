@@ -13,9 +13,9 @@ import Typography from "@tiptap/extension-typography";
 import Highlight from "@tiptap/extension-highlight";
 import CharacterCount from "@tiptap/extension-character-count";
 import Toolbar from "./Toolbar";
-import EmbedModal from "./EmbedModal";
-import { transformEmbedUrl } from '@/lib/utils';
-import BubbleMenuComponent from "./BubbleMenu";
+import { EmbedModal } from "./EmbedModal";
+import { transformEmbedUrl } from "@/lib/utils";
+import { EditorBubbleMenu } from "./EditorBubbleMenu";
 import LinkModal from "./LinkModal";
 import ImageModal from "./ImageModal";
 
@@ -25,65 +25,73 @@ type Props = {
 };
 
 export default function GoogleDocsEditor({ initialContent, onChange }: Props) {
-  const extensions = useMemo(() => [
-    StarterKit.configure({
-      heading: { levels: [1, 2, 3] },
-    }),
-    Underline,
-    Link.configure({ openOnClick: false }),
-    Image,
-    Embed,
-    TextAlign.configure({ types: ["heading", "paragraph"] }),
-    Placeholder.configure({ placeholder: "Start writing your document..." }),
-    Typography,
-    Highlight,
-    CharacterCount.configure({ limit: 100000 }),
-  ], []);
+  const extensions = useMemo(
+    () => [
+      StarterKit.configure({
+        heading: { levels: [1, 2, 3] },
+      }),
+      Underline,
+      Link.configure({ openOnClick: false }),
+      Image,
+      Embed,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Placeholder.configure({ placeholder: "Start writing your document..." }),
+      Typography,
+      Highlight,
+      CharacterCount.configure({ limit: 100000 }),
+    ],
+    []
+  );
 
   const editor = useEditor({
     extensions,
     content: initialContent ?? null,
-    // Prevent immediate render during SSR to avoid hydration mismatches
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange?.(editor.getJSON());
     },
     editorProps: {
       attributes: {
-        class: "ProseMirror prose prose-lg max-w-none focus:outline-none",
+        class: "ProseMirror prose prose-lg prose-invert max-w-none focus:outline-none",
       },
     },
   });
 
   const [showEmbedModal, setShowEmbedModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
 
-  // Listen for global open-embed-modal events (toolbar fallback)
   useEffect(() => {
     const handleOpenEmbedModal = () => setShowEmbedModal(true);
-    document.addEventListener('open-embed-modal', handleOpenEmbedModal);
-    return () => document.removeEventListener('open-embed-modal', handleOpenEmbedModal);
+    document.addEventListener("open-embed-modal", handleOpenEmbedModal);
+    return () => document.removeEventListener("open-embed-modal", handleOpenEmbedModal);
   }, []);
 
   const openEmbedModal = useCallback(() => setShowEmbedModal(true), []);
+  const openLinkModal = useCallback(() => setShowLinkModal(true), []);
+  const openImageModal = useCallback(() => setShowImageModal(true), []);
 
-  const handleEmbedInsert = useCallback((url: string) => {
-    if (!editor) return;
-    try {
-      const embedUrl = transformEmbedUrl(url.trim());
-      if (!embedUrl) {
-        // eslint-disable-next-line no-alert
-        alert('Invalid or unsupported video URL');
-        return;
+  const handleEmbedInsert = useCallback(
+    (url: string) => {
+      if (!editor) return;
+      try {
+        const embedUrl = transformEmbedUrl(url.trim());
+        if (!embedUrl) {
+          return;
+        }
+        editor
+          .chain()
+          .focus()
+          .insertContent({ type: "embed", attrs: { src: embedUrl } })
+          .run();
+      } catch {
+        // Silently fail — the modal already validates
+      } finally {
+        setShowEmbedModal(false);
       }
-
-      editor.chain().focus().insertContent({ type: 'embed', attrs: { src: embedUrl } }).run();
-    } catch (e) {
-      // eslint-disable-next-line no-alert
-      alert('Failed to insert embed');
-    } finally {
-      setShowEmbedModal(false);
-    }
-  }, [editor]);
+    },
+    [editor]
+  );
 
   const getWordCount = useCallback(() => {
     if (!editor) return 0;
@@ -91,35 +99,50 @@ export default function GoogleDocsEditor({ initialContent, onChange }: Props) {
     return text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;
   }, [editor]);
 
-  const [showLinkModal, setShowLinkModal] = useState(false);
-  const [showImageModal, setShowImageModal] = useState(false);
-
-  const openLinkModal = useCallback(() => setShowLinkModal(true), []);
-  const openImageModal = useCallback(() => setShowImageModal(true), []);
-
-
   if (!editor) {
-    return <div className="p-6 text-center text-sm text-muted-foreground">Loading editor…</div>;
+    return (
+      <div className="p-6 text-center text-sm text-[#8b929d]">
+        Loading editor...
+      </div>
+    );
   }
 
   return (
     <div className="mx-auto max-w-3xl">
       <div className="sticky top-4 z-20">
-        <Toolbar editor={editor} onOpenImageModal={openImageModal} onOpenLinkModal={openLinkModal} onOpenEmbedModal={openEmbedModal} />
+        <Toolbar
+          editor={editor}
+          onOpenImageModal={openImageModal}
+          onOpenLinkModal={openLinkModal}
+          onOpenEmbedModal={openEmbedModal}
+        />
       </div>
 
-      <div className="bg-white shadow-md rounded-lg p-8 mt-4 min-h-[500px]">
-        <BubbleMenuComponent editor={editor} />
+      <div className="rounded-lg border border-[#272a35] bg-[#1a1d26] p-8 mt-4 min-h-[500px]">
+        <EditorBubbleMenu
+          editor={editor}
+          onOpenLinkModal={openLinkModal}
+        />
         <EditorContent editor={editor} />
       </div>
 
-      <div className="mt-2 text-right text-sm text-muted-foreground">
+      <div className="mt-2 text-right text-sm text-[#8b929d]">
         <span className="mr-4">{getWordCount()} words</span>
         <span>{editor.storage.characterCount.characters()} chars</span>
       </div>
-      {showLinkModal && <LinkModal editor={editor} onClose={() => setShowLinkModal(false)} />}
-      {showImageModal && <ImageModal editor={editor} onClose={() => setShowImageModal(false)} />}
-      {showEmbedModal && <EmbedModal isOpen={showEmbedModal} onClose={() => setShowEmbedModal(false)} onInsert={handleEmbedInsert} />}
+      {showLinkModal && (
+        <LinkModal editor={editor} onClose={() => setShowLinkModal(false)} />
+      )}
+      {showImageModal && (
+        <ImageModal editor={editor} onClose={() => setShowImageModal(false)} />
+      )}
+      {showEmbedModal && (
+        <EmbedModal
+          isOpen={showEmbedModal}
+          onClose={() => setShowEmbedModal(false)}
+          onInsert={handleEmbedInsert}
+        />
+      )}
     </div>
   );
 }

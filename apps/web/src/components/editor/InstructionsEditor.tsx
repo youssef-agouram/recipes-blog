@@ -7,6 +7,7 @@ import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
+import Embed from './extensions/embed';
 import {
   Bold, Italic, Underline as UnderlineIcon,
   List, ListOrdered,
@@ -14,7 +15,11 @@ import {
   Quote, Code, Link as LinkIcon, Image as ImageIcon,
   Video
 } from 'lucide-react';
-import { useCallback } from 'react';
+import { useState } from 'react';
+import LinkModal from './LinkModal';
+import ImageModal from './ImageModal';
+import { EmbedModal } from './EmbedModal';
+import { transformEmbedUrl } from '@/lib/utils';
 
 interface InstructionsEditorProps {
   initialContent?: any;
@@ -22,12 +27,17 @@ interface InstructionsEditorProps {
 }
 
 export function InstructionsEditor({ initialContent, onChange }: InstructionsEditorProps) {
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [showEmbedModal, setShowEmbedModal] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       Underline,
       Link.configure({ openOnClick: false }),
       Image,
+      Embed,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Placeholder.configure({ placeholder: 'Write the step-by-step instructions...' }),
     ],
@@ -71,107 +81,122 @@ export function InstructionsEditor({ initialContent, onChange }: InstructionsEdi
   }
 
   return (
-    <div className="rounded-lg border border-[#272a35] bg-[#141821] overflow-hidden">
-      {/* Inline Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 border-b border-[#272a35] bg-[#1a1d26] px-2 py-1.5">
-        <ToolbarButton
-          icon={Bold}
-          isActive={editor.isActive('bold')}
-          onClick={() => editor.chain().focus().toggleBold().run()}
-        />
-        <ToolbarButton
-          icon={Italic}
-          isActive={editor.isActive('italic')}
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-        />
-        <ToolbarButton
-          icon={UnderlineIcon}
-          isActive={editor.isActive('underline')}
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-        />
+    <>
+      <div className="rounded-lg border border-[#272a35] bg-[#141821] overflow-hidden">
+        {/* Inline Toolbar */}
+        <div className="flex flex-wrap items-center gap-0.5 border-b border-[#272a35] bg-[#1a1d26] px-2 py-1.5">
+          <ToolbarButton
+            icon={Bold}
+            isActive={editor.isActive('bold')}
+            onClick={() => editor.chain().focus().toggleBold().run()}
+          />
+          <ToolbarButton
+            icon={Italic}
+            isActive={editor.isActive('italic')}
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+          />
+          <ToolbarButton
+            icon={UnderlineIcon}
+            isActive={editor.isActive('underline')}
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+          />
 
-        <div className="mx-1 h-4 w-px bg-[#272a35]" />
+          <div className="mx-1 h-4 w-px bg-[#272a35]" />
 
-        <ToolbarButton
-          icon={List}
-          isActive={editor.isActive('bulletList')}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        />
-        <ToolbarButton
-          icon={ListOrdered}
-          isActive={editor.isActive('orderedList')}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        />
+          <ToolbarButton
+            icon={List}
+            isActive={editor.isActive('bulletList')}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+          />
+          <ToolbarButton
+            icon={ListOrdered}
+            isActive={editor.isActive('orderedList')}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          />
 
-        <div className="mx-1 h-4 w-px bg-[#272a35]" />
+          <div className="mx-1 h-4 w-px bg-[#272a35]" />
 
-        <ToolbarButton
-          icon={AlignLeft}
-          isActive={editor.isActive({ textAlign: 'left' })}
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-        />
-        <ToolbarButton
-          icon={AlignCenter}
-          isActive={editor.isActive({ textAlign: 'center' })}
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
-        />
-        <ToolbarButton
-          icon={AlignRight}
-          isActive={editor.isActive({ textAlign: 'right' })}
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
-        />
-        <ToolbarButton
-          icon={AlignJustify}
-          isActive={editor.isActive({ textAlign: 'justify' })}
-          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-        />
+          <ToolbarButton
+            icon={AlignLeft}
+            isActive={editor.isActive({ textAlign: 'left' })}
+            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          />
+          <ToolbarButton
+            icon={AlignCenter}
+            isActive={editor.isActive({ textAlign: 'center' })}
+            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          />
+          <ToolbarButton
+            icon={AlignRight}
+            isActive={editor.isActive({ textAlign: 'right' })}
+            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          />
+          <ToolbarButton
+            icon={AlignJustify}
+            isActive={editor.isActive({ textAlign: 'justify' })}
+            onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+          />
 
-        <div className="mx-1 h-4 w-px bg-[#272a35]" />
+          <div className="mx-1 h-4 w-px bg-[#272a35]" />
 
-        <ToolbarButton
-          icon={Quote}
-          isActive={editor.isActive('blockquote')}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        />
-        <ToolbarButton
-          icon={Code}
-          isActive={editor.isActive('codeBlock')}
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        />
+          <ToolbarButton
+            icon={Quote}
+            isActive={editor.isActive('blockquote')}
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          />
+          <ToolbarButton
+            icon={Code}
+            isActive={editor.isActive('codeBlock')}
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          />
 
-        <div className="mx-1 h-4 w-px bg-[#272a35]" />
+          <div className="mx-1 h-4 w-px bg-[#272a35]" />
 
-        <ToolbarButton
-          icon={LinkIcon}
-          isActive={editor.isActive('link')}
-          onClick={() => {
-            const url = window.prompt('Enter URL');
-            if (url) editor.chain().focus().setLink({ href: url }).run();
-          }}
-        />
-        <ToolbarButton
-          icon={ImageIcon}
-          onClick={() => {
-            const url = window.prompt('Enter image URL');
-            if (url) editor.chain().focus().setImage({ src: url }).run();
-          }}
-        />
-        <ToolbarButton
-          icon={Video}
-          onClick={() => {
-            const url = window.prompt('Enter video URL');
-            if (url) {
-              editor.chain().focus().insertContent({
-                type: 'paragraph',
-                content: [{ type: 'text', text: `Video: ${url}` }],
-              }).run();
-            }
-          }}
-        />
+          <ToolbarButton
+            icon={LinkIcon}
+            isActive={editor.isActive('link')}
+            onClick={() => setShowLinkModal(true)}
+          />
+          <ToolbarButton
+            icon={ImageIcon}
+            onClick={() => setShowImageModal(true)}
+          />
+          <ToolbarButton
+            icon={Video}
+            onClick={() => setShowEmbedModal(true)}
+          />
+        </div>
+
+        {/* Editor Content */}
+        <EditorContent editor={editor} />
       </div>
 
-      {/* Editor Content */}
-      <EditorContent editor={editor} />
-    </div>
+      {/* Modals */}
+      {showLinkModal && (
+        <LinkModal
+          editor={editor}
+          onClose={() => setShowLinkModal(false)}
+        />
+      )}
+      {showImageModal && (
+        <ImageModal
+          editor={editor}
+          onClose={() => setShowImageModal(false)}
+        />
+      )}
+      {showEmbedModal && (
+        <EmbedModal
+          isOpen={showEmbedModal}
+          onClose={() => setShowEmbedModal(false)}
+          onInsert={(url) => {
+            const embedUrl = transformEmbedUrl(url) || url;
+            editor.chain().focus().insertContent({
+              type: 'embed',
+              attrs: { src: embedUrl },
+            }).run();
+          }}
+        />
+      )}
+    </>
   );
 }

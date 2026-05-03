@@ -6,50 +6,40 @@ import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
+// Helper: parse ingredientsJson from string to array for API responses
+function parseRecipe(recipe: any) {
+  if (!recipe) return recipe;
+  if (Array.isArray(recipe)) {
+    return recipe.map(r => ({
+      ...r,
+      ingredientsJson: typeof r.ingredientsJson === 'string' ? JSON.parse(r.ingredientsJson) : r.ingredientsJson ?? [],
+    }));
+  }
+  return {
+    ...recipe,
+    ingredientsJson: typeof recipe.ingredientsJson === 'string' ? JSON.parse(recipe.ingredientsJson) : recipe.ingredientsJson ?? [],
+  };
+}
+
 // Client: Get recipes with pagination and filters
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { page = 1, limit = 10, categoryId, search, featured } = req.query;
+    const { page = 1, limit = 10, categoryId, search, featured, status } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
-    // Use raw SQL so isFeatured is always included regardless of Prisma client version
-    if (featured === 'true') {
-      const recipes = await prisma.$queryRaw<any[]>`
-        SELECT r.*,
-          COALESCE(json_agg(DISTINCT jsonb_build_object('id', c.id, 'name', c.name)) FILTER (WHERE c.id IS NOT NULL), '[]') AS categories,
-          COALESCE(json_agg(DISTINCT jsonb_build_object('id', i.id, 'name', i.name)) FILTER (WHERE i.id IS NOT NULL), '[]') AS ingredients
-        FROM "Recipe" r
-        LEFT JOIN "_RecipeCategories" rc ON rc."B" = r.id
-        LEFT JOIN "Category" c ON c.id = rc."A"
-        LEFT JOIN "_RecipeIngredients" ri ON ri."B" = r.id
-        LEFT JOIN "Ingredient" i ON i.id = ri."A"
-        WHERE r."isFeatured" = true
-        GROUP BY r.id
-        ORDER BY r."createdAt" DESC
-        LIMIT ${take} OFFSET ${skip}
-      `;
-      const [countResult] = await prisma.$queryRaw<[{ count: bigint }]>`
-        SELECT COUNT(*) as count FROM "Recipe" WHERE "isFeatured" = true
-      `;
-      return res.json({
-        data: recipes,
-        meta: {
-          total: Number(countResult.count),
-          page: Number(page),
-          limit: take,
-          totalPages: Math.ceil(Number(countResult.count) / take),
-        },
-      });
-    }
-
-    // General list — use Prisma ORM for filtering, then enrich with isFeatured from raw SQL
     const where: any = {};
     if (categoryId) {
       where.categories = { some: { id: Number(categoryId) } };
     }
     if (search) {
       where.title = { contains: search as string, mode: 'insensitive' };
+    }
+    if (featured === 'true') {
+      where.isFeatured = true;
+    }
+    if (status) {
+      where.status = status as string;
     }
 
     const [recipes, total] = await Promise.all([
@@ -63,24 +53,8 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
       prisma.recipe.count({ where }),
     ]);
 
-    // Enrich with isFeatured from raw SQL (in case Prisma binary is stale)
-    const ids = recipes.map((r: any) => r.id);
-    let featuredSet = new Set<number>();
-    if (ids.length > 0) {
-      const placeholders = ids.map((_: any, i: number) => `$${i + 1}`).join(',');
-      const featuredRows = await prisma.$queryRawUnsafe<{ id: number }[]>(
-        `SELECT id FROM "Recipe" WHERE id IN (${placeholders}) AND "isFeatured" = true`,
-        ...ids
-      );
-      featuredSet = new Set(featuredRows.map((r) => r.id));
-    }
-    const enriched = recipes.map((r: any) => ({
-      ...r,
-      isFeatured: featuredSet.has(r.id),
-    }));
-
     res.json({
-      data: enriched,
+      data: parseRecipe(recipes),
       meta: {
         total,
         page: Number(page),
@@ -106,7 +80,7 @@ router.get('/:slug', async (req: Request, res: Response, next: NextFunction) => 
       return res.status(404).json({ error: 'Recipe not found' });
     }
 
-    res.json(recipe);
+    res.json(parseRecipe(recipe));
   } catch (error) {
     next(error);
   }
@@ -125,6 +99,14 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
         summary: data.summary,
         content: data.content,
         imageUrl: data.imageUrl,
+        status: data.status || 'PUBLISHED',
+        prepTime: data.prepTime,
+        cookTime: data.cookTime,
+        servings: data.servings,
+        difficulty: data.difficulty,
+        allowComments: data.allowComments ?? true,
+        isFeatured: data.isFeatured ?? false,
+        ingredientsJson: data.ingredientsJson ? JSON.stringify(data.ingredientsJson) : undefined,
         categories: data.categoryIds
           ? { connect: data.categoryIds.map((id) => ({ id })) }
           : undefined,
@@ -136,7 +118,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
       include: { categories: true, ingredients: true, seo: true },
     });
 
-    res.status(201).json(recipe);
+    res.status(201).json(parseRecipe(recipe));
   } catch (error) {
     next(error);
   }
@@ -155,8 +137,8 @@ router.patch('/:id/feature', authMiddleware, async (req: Request, res: Response,
 
     const [updated] = await prisma.$queryRaw<any[]>`
       SELECT r.*, 
-        json_agg(DISTINCT jsonb_build_object('id', c.id, 'name', c.name)) FILTER (WHERE c.id IS NOT NULL) AS categories,
-        json_agg(DISTINCT jsonb_build_object('id', i.id, 'name', i.name)) FILTER (WHERE i.id IS NOT NULL) AS ingredients
+        COALESCE(json_agg(DISTINCT jsonb_build_object('id', c.id, 'name', c.name)) FILTER (WHERE c.id IS NOT NULL), '[]') AS categories,
+        COALESCE(json_agg(DISTINCT jsonb_build_object('id', i.id, 'name', i.name)) FILTER (WHERE i.id IS NOT NULL), '[]') AS ingredients
       FROM "Recipe" r
       LEFT JOIN "_RecipeCategories" rc ON rc."B" = r.id
       LEFT JOIN "Category" c ON c.id = rc."A"
@@ -186,6 +168,14 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
         summary: data.summary,
         content: data.content,
         imageUrl: data.imageUrl,
+        status: data.status,
+        prepTime: data.prepTime,
+        cookTime: data.cookTime,
+        servings: data.servings,
+        difficulty: data.difficulty,
+        allowComments: data.allowComments,
+        isFeatured: data.isFeatured,
+        ingredientsJson: data.ingredientsJson ? JSON.stringify(data.ingredientsJson) : undefined,
         categories: data.categoryIds
           ? { set: data.categoryIds.map((id) => ({ id })) }
           : undefined,
@@ -204,7 +194,7 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
       include: { categories: true, ingredients: true, seo: true },
     });
 
-    res.json(recipe);
+    res.json(parseRecipe(recipe));
   } catch (error) {
     next(error);
   }

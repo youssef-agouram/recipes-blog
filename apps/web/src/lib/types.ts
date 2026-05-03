@@ -14,6 +14,11 @@ export interface Ingredient {
   name: string;
 }
 
+export interface RecipeIngredient {
+  name: string;
+  quantity: string;
+}
+
 export interface Recipe {
   id: number;
   title: string;
@@ -21,16 +26,19 @@ export interface Recipe {
   summary?: string;
   imageUrl?: string;
   isFeatured: boolean;
+  status: 'DRAFT' | 'PUBLISHED';
+  prepTime?: string;
+  cookTime?: string;
+  servings?: number;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  allowComments: boolean;
+  ingredientsJson?: RecipeIngredient[];
   content: any; // Tiptap JSON content
   createdAt: string;
   updatedAt: string;
   categories: Category[];
   ingredients: Ingredient[];
   seo?: SeoMeta;
-  prepTime?: number;
-  cookTime?: number;
-  servings?: number;
-  difficulty?: string;
 }
 
 export interface PaginatedResponse<T> {

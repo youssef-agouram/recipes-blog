@@ -7,14 +7,13 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Transform a user-provided video URL into an embeddable URL.
- * Currently supports YouTube watch and youtu.be short links.
+ * Supports YouTube, youtu.be, Vimeo, and TikTok.
  * Returns the embed URL string or null if unsupported/invalid.
  */
 export function transformEmbedUrl(raw: string): string | null {
   if (!raw || typeof raw !== 'string') return null;
 
   let input = raw.trim();
-  // Try to ensure protocol exists for URL parsing
   if (!/^https?:\/\//i.test(input)) {
     input = 'https://' + input;
   }
@@ -25,7 +24,6 @@ export function transformEmbedUrl(raw: string): string | null {
 
     // YouTube long links: youtube.com/watch?v=VIDEO_ID
     if (host.endsWith('youtube.com')) {
-      // handle /watch
       if (url.pathname === '/watch') {
         const v = url.searchParams.get('v');
         if (v && /^[A-Za-z0-9_-]+$/.test(v)) {
@@ -34,7 +32,7 @@ export function transformEmbedUrl(raw: string): string | null {
         return null;
       }
 
-      // handle /shorts/VIDEO_ID or other direct paths
+      // handle /shorts/VIDEO_ID or /embed/VIDEO_ID
       const parts = url.pathname.split('/').filter(Boolean);
       if (parts.length >= 2 && (parts[0] === 'shorts' || parts[0] === 'embed')) {
         const id = parts[1];
@@ -43,9 +41,17 @@ export function transformEmbedUrl(raw: string): string | null {
         }
         return null;
       }
+
+      // Direct /v/VIDEO_ID or /embed/VIDEO_ID patterns
+      const embedMatch = url.pathname.match(/^\/(?:embed|v)\/([A-Za-z0-9_-]+)/);
+      if (embedMatch) {
+        return `https://www.youtube.com/embed/${encodeURIComponent(embedMatch[1])}`;
+      }
+
+      return null;
     }
 
-    // youtu.be short links: youtu.be/VIDEO_ID
+    // youtu.be short links
     if (host === 'youtu.be') {
       const parts = url.pathname.split('/').filter(Boolean);
       const id = parts[0];
@@ -55,9 +61,28 @@ export function transformEmbedUrl(raw: string): string | null {
       return null;
     }
 
-    // Not supported provider
+    // Vimeo links
+    if (host.endsWith('vimeo.com')) {
+      // vimeo.com/VIDEO_ID
+      const parts = url.pathname.split('/').filter(Boolean);
+      const id = parts[0];
+      if (id && /^\d+$/.test(id)) {
+        return `https://player.vimeo.com/video/${id}`;
+      }
+      // vimeo.com/channels/staffpicks/VIDEO_ID etc.
+      if (parts.length >= 2 && /^\d+$/.test(parts[parts.length - 1])) {
+        return `https://player.vimeo.com/video/${parts[parts.length - 1]}`;
+      }
+      return null;
+    }
+
+    // TikTok links — pass through for iframe embedding
+    if (host.endsWith('tiktok.com')) {
+      return input;
+    }
+
     return null;
-  } catch (e) {
+  } catch {
     return null;
   }
 }

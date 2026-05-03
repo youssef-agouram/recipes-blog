@@ -8,22 +8,30 @@ datasource db {
 }
 
 model Recipe {
-  id          Int          @id @default(autoincrement())
-  title       String
-  slug        String       @unique
-  summary     String?
-  content     Json
-  imageUrl    String?
-  isFeatured  Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  seo         SeoMeta?
-  categories  Category[]   @relation("RecipeCategories")
-  ingredients Ingredient[] @relation("RecipeIngredients")
+  id              Int          @id @default(autoincrement())
+  title           String
+  slug            String       @unique
+  summary         String?
+  content         Json
+  imageUrl        String?
+  isFeatured      Boolean      @default(false)
+  status          String       @default("PUBLISHED")
+  prepTime        String?
+  cookTime        String?
+  servings        Int?
+  difficulty      String?
+  allowComments   Boolean      @default(true)
+  ingredientsJson Json?        @default("[]")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  seo             SeoMeta?
+  categories      Category[]   @relation("RecipeCategories")
+  ingredients     Ingredient[] @relation("RecipeIngredients")
 
   @@index([slug])
   @@index([title])
   @@index([isFeatured])
+  @@index([status])
 }
 
 model Category {

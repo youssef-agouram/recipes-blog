@@ -1,6 +1,6 @@
 import { api } from "@/lib/api-client";
 import { notFound } from "next/navigation";
-import { Clock, Users, ArrowLeft, Loader2 } from "lucide-react";
+import { Clock, Users, ArrowLeft, ChefHat, Flame } from "lucide-react";
 import Link from "next/link";
 import { RelatedRecipes } from "@/components/recipes/RelatedRecipes";
 import BlogRenderer from '@/components/BlogRenderer';
@@ -11,18 +11,24 @@ interface RecipePageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 3600; // revalidate every hour
+export const revalidate = 3600;
 
 export default async function RecipePage({ params }: RecipePageProps) {
   const { slug } = await params;
-  
+
   try {
     const recipe = await api.recipes.getBySlug(slug);
 
+    const ingredientItems: { name: string; quantity: string }[] = Array.isArray(recipe.ingredientsJson)
+      ? recipe.ingredientsJson
+      : typeof recipe.ingredientsJson === 'string'
+        ? JSON.parse(recipe.ingredientsJson)
+        : [];
+
     return (
       <article className="container max-w-3xl px-4 py-12 md:py-20">
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-8 transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to recipes
@@ -30,16 +36,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
         <header className="space-y-6 mb-12">
           <div className="flex flex-wrap gap-2">
-            {recipe.categories.map((cat) => (
-              <span 
-                key={cat.id} 
+            {recipe.categories.map((cat: { id: number; name: string }) => (
+              <span
+                key={cat.id}
                 className="text-[10px] font-bold uppercase tracking-widest text-primary border border-primary/20 px-2 py-0.5 rounded"
               >
                 {cat.name}
               </span>
             ))}
           </div>
-          
+
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl leading-[1.1]">
             {recipe.title}
           </h1>
@@ -50,15 +56,31 @@ export default async function RecipePage({ params }: RecipePageProps) {
             </p>
           )}
 
-          <div className="flex items-center space-x-6 text-sm text-muted-foreground pt-4 border-t border-border/40">
-            <div className="flex items-center">
-              <Clock className="mr-2 h-4 w-4" /> 
-              <span>20 mins</span> {/* Placeholder for now */}
-            </div>
-            <div className="flex items-center">
-              <Users className="mr-2 h-4 w-4" /> 
-              <span>2 servings</span> {/* Placeholder for now */}
-            </div>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground pt-4 border-t border-border/40">
+            {recipe.prepTime && (
+              <div className="flex items-center">
+                <Clock className="mr-2 h-4 w-4" />
+                <span>Prep: {recipe.prepTime}</span>
+              </div>
+            )}
+            {recipe.cookTime && (
+              <div className="flex items-center">
+                <Flame className="mr-2 h-4 w-4" />
+                <span>Cook: {recipe.cookTime}</span>
+              </div>
+            )}
+            {recipe.servings && (
+              <div className="flex items-center">
+                <Users className="mr-2 h-4 w-4" />
+                <span>{recipe.servings} servings</span>
+              </div>
+            )}
+            {recipe.difficulty && (
+              <div className="flex items-center">
+                <ChefHat className="mr-2 h-4 w-4" />
+                <span className="capitalize">{recipe.difficulty}</span>
+              </div>
+            )}
           </div>
         </header>
 
@@ -82,26 +104,25 @@ export default async function RecipePage({ params }: RecipePageProps) {
           <BlogRenderer content={recipe.content} />
         </section>
 
-        <footer className="mt-20 pt-10 border-t border-border/40">
-           <h3 className="text-lg font-semibold mb-6">Ingredients</h3>
-           <ul className="grid gap-3 sm:grid-cols-2">
-             {recipe.ingredients.map(ing => (
-               <li key={ing.id} className="flex items-center space-x-3 text-muted-foreground">
-                 <span className="h-1.5 w-1.5 rounded-full bg-primary/40" />
-                 <span>{ing.name}</span>
-               </li>
-             ))}
-             {recipe.ingredients.length === 0 && (
-                <p className="text-sm italic text-muted-foreground">No ingredients listed.</p>
-             )}
-           </ul>
-        </footer>
+        {ingredientItems.length > 0 && (
+          <footer className="mt-20 pt-10 border-t border-border/40">
+            <h3 className="text-lg font-semibold mb-6">Ingredients</h3>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {ingredientItems.map((ing: { name: string; quantity: string }, idx: number) => (
+                <li key={idx} className="flex items-center space-x-3 text-muted-foreground">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary/40" />
+                  <span>{ing.quantity ? `${ing.quantity} ` : ''}{ing.name}</span>
+                </li>
+              ))}
+            </ul>
+          </footer>
+        )}
 
         {recipe.categories?.[0] && (
           <Suspense fallback={<div className="mt-20 pt-20 border-t border-border/40 animate-pulse bg-muted h-64 rounded-xl" />}>
-            <RelatedRecipes 
-              categoryId={recipe.categories[0].id} 
-              currentRecipeId={recipe.id} 
+            <RelatedRecipes
+              categoryId={recipe.categories[0].id}
+              currentRecipeId={recipe.id}
             />
           </Suspense>
         )}

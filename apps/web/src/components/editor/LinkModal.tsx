@@ -2,31 +2,88 @@
 
 import React, { useCallback, useState } from "react";
 import type { Editor } from "@tiptap/core";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
-export default function LinkModal({ editor, onClose }: { editor: Editor; onClose: () => void }) {
+interface LinkModalProps {
+  editor: Editor;
+  onClose: () => void;
+}
+
+export default function LinkModal({ editor, onClose }: LinkModalProps) {
   const [href, setHref] = useState("");
   const [openInNewTab, setOpenInNewTab] = useState(true);
 
   const apply = useCallback(() => {
-    if (!href) return;
-    editor.chain().focus().extendMarkRange("link").setLink({ href, target: openInNewTab ? "_blank" : undefined }).run();
+    if (!href.trim()) return;
+    let url = href.trim();
+    if (!/^https?:\/\//i.test(url)) {
+      url = "https://" + url;
+    }
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({ href: url, target: openInNewTab ? "_blank" : undefined })
+      .run();
     onClose();
   }, [editor, href, openInNewTab, onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="bg-white rounded-lg p-4 z-10 w-[420px]">
-        <h3 className="text-sm font-semibold mb-2">Insert Link</h3>
-        <input autoFocus value={href} onChange={(e) => setHref(e.target.value)} placeholder="https://example.com" className="w-full p-2 border rounded mb-2" />
-        <label className="flex items-center gap-2 text-sm mb-4">
-          <input type="checkbox" checked={openInNewTab} onChange={(e) => setOpenInNewTab(e.target.checked)} /> Open in new tab
-        </label>
-        <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-1 rounded">Cancel</button>
-          <button onClick={apply} className="px-3 py-1 rounded bg-primary text-white">Apply</button>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[440px] bg-[#1a1d26] border-[#272a35] text-[#e4e6eb]">
+        <DialogHeader>
+          <DialogTitle className="text-[#e4e6eb]">Insert Link</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#8b929d]">URL</label>
+            <Input
+              autoFocus
+              value={href}
+              onChange={(e) => setHref(e.target.value)}
+              placeholder="https://example.com"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  apply();
+                }
+              }}
+              className="bg-[#141821] border-[#272a35] text-[#e4e6eb] placeholder:text-[#8b929d]/50 focus-visible:ring-[#f29e1f]/50"
+            />
+          </div>
+          <label className="flex items-center gap-2 text-sm text-[#8b929d] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={openInNewTab}
+              onChange={(e) => setOpenInNewTab(e.target.checked)}
+              className="rounded border-[#272a35] bg-[#141821] text-[#f29e1f] focus:ring-[#f29e1f]/50"
+            />
+            Open in new tab
+          </label>
         </div>
-      </div>
-    </div>
+        <DialogFooter>
+          <button
+            onClick={onClose}
+            className="inline-flex h-9 items-center justify-center rounded-lg border border-[#272a35] bg-transparent px-4 text-sm font-medium text-[#e4e6eb] transition-colors hover:bg-[#1a1d26]"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={apply}
+            disabled={!href.trim()}
+            className="inline-flex h-9 items-center justify-center rounded-lg bg-[#f29e1f] px-4 text-sm font-medium text-[#0f1117] transition-colors hover:bg-[#f29e1f]/90 disabled:opacity-50"
+          >
+            Apply
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

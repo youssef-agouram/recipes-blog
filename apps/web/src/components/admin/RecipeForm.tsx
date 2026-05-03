@@ -6,24 +6,36 @@ import { z } from 'zod';
 import { InstructionsEditor } from '../editor/InstructionsEditor';
 import { useGetAdminCategoriesQuery } from '@/store/api/categoryApi';
 import { useUploadImageMutation } from '@/store/api/recipeApi';
-import { Recipe } from '@/lib/types';
-import { Loader2, Save, Upload, Clock, Users, Trash2, GripVertical, ChevronDown, Award, MessageCircle } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { Recipe, RecipeIngredient } from '@/lib/types';
+import { Loader2, Upload, Clock, Users, Trash2, GripVertical, ChevronDown, Award, MessageCircle, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
-const recipeSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
+const ingredientRowSchema = z.object({
+  name: z.string().min(1, 'Required'),
+  quantity: z.string().min(1, 'Required'),
+});
+
+const recipeFormSchema = z.object({
+  title: z.string().min(3, 'Title is required').max(255),
   summary: z.string().max(160).optional(),
   imageUrl: z.string().optional(),
   content: z.any(),
   categoryIds: z.array(z.number()).min(1, 'Select at least one category'),
-  ingredientIds: z.array(z.number()).optional(),
+  prepTime: z.string().optional(),
+  cookTime: z.string().optional(),
+  servings: z.number().int().min(1).optional(),
+  difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
+  allowComments: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
+  status: z.enum(['DRAFT', 'PUBLISHED']).default('PUBLISHED'),
+  ingredientsJson: z.array(ingredientRowSchema).default([]),
   seo: z.object({
     title: z.string().optional(),
     description: z.string().optional(),
   }).optional(),
 });
 
-type RecipeFormValues = z.infer<typeof recipeSchema>;
+type RecipeFormValues = z.infer<typeof recipeFormSchema>;
 
 interface RecipeFormProps {
   initialData?: Recipe;
@@ -31,15 +43,17 @@ interface RecipeFormProps {
   isLoading?: boolean;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Ingredient row type (UI only, not wired to API schema yet)          */
-/* ------------------------------------------------------------------ */
-type IngredientRow = { id: number; name: string; quantity: string };
-
 export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps) {
   const { data: categories } = useGetAdminCategoriesQuery();
   const [uploadImage, { isLoading: isUploading }] = useUploadImageMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  /* --- Toast notification state --- */
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const showToast = useCallback((type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 5000);
+  }, []);
 
   const {
     register,
@@ -49,14 +63,25 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
     watch,
     formState: { errors },
   } = useForm<RecipeFormValues>({
-    resolver: zodResolver(recipeSchema),
+    resolver: zodResolver(recipeFormSchema),
     defaultValues: {
       title: initialData?.title || '',
       summary: initialData?.summary || '',
       imageUrl: initialData?.imageUrl || '',
       content: initialData?.content || { type: 'doc', content: [] },
       categoryIds: initialData?.categories.map((c) => c.id) || [],
-      ingredientIds: initialData?.ingredients.map((i) => i.id) || [],
+      prepTime: initialData?.prepTime || '',
+      cookTime: initialData?.cookTime || '',
+      servings: initialData?.servings || undefined,
+      difficulty: initialData?.difficulty || undefined,
+      allowComments: initialData?.allowComments ?? true,
+      isFeatured: initialData?.isFeatured ?? false,
+      status: initialData?.status || 'PUBLISHED',
+      ingredientsJson: Array.isArray(initialData?.ingredientsJson)
+        ? initialData.ingredientsJson
+        : (typeof initialData?.ingredientsJson === 'string'
+          ? JSON.parse(initialData.ingredientsJson as string)
+          : []) as RecipeIngredient[],
       seo: initialData?.seo || { title: '', description: '' },
     },
   });
@@ -64,31 +89,38 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   const selectedCategoryIds = watch('categoryIds') || [];
   const imageUrl = watch('imageUrl');
   const summary = watch('summary') || '';
+  const allowComments = watch('allowComments');
+  const isFeatured = watch('isFeatured');
 
-  /* --- Ingredients (UI only for now) --- */
-  const [ingredients, setIngredients] = useState<IngredientRow[]>([
-    { id: 1, name: '', quantity: '' },
-    { id: 2, name: '', quantity: '' },
-  ]);
-  const nextId = useRef(3);
+  /* --- Ingredients (managed via react-hook-form array) --- */
+  const ingredients = watch('ingredientsJson') || [];
+  const nextId = useRef(1);
+
+  // Seed initial ingredients if empty
+  useEffect(() => {
+    if (!initialData && ingredients.length === 0) {
+      setValue('ingredientsJson', [
+        { name: '', quantity: '' },
+        { name: '', quantity: '' },
+      ]);
+    }
+  }, [initialData, ingredients.length, setValue]);
 
   const addIngredient = () => {
-    setIngredients((prev) => [...prev, { id: nextId.current++, name: '', quantity: '' }]);
+    setValue('ingredientsJson', [...ingredients, { name: '', quantity: '' }]);
   };
 
-  const removeIngredient = (id: number) => {
-    setIngredients((prev) => prev.filter((i) => i.id !== id));
+  const removeIngredient = (index: number) => {
+    const next = [...ingredients];
+    next.splice(index, 1);
+    setValue('ingredientsJson', next);
   };
 
-  const updateIngredient = (id: number, field: keyof IngredientRow, value: string) => {
-    setIngredients((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, [field]: value } : i))
-    );
+  const updateIngredient = (index: number, field: keyof RecipeIngredient, value: string) => {
+    const next = [...ingredients];
+    next[index] = { ...next[index], [field]: value };
+    setValue('ingredientsJson', next);
   };
-
-  /* --- Toggles (UI only) --- */
-  const [featured, setFeatured] = useState(false);
-  const [allowComments, setAllowComments] = useState(true);
 
   /* --- Image upload --- */
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,8 +136,37 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
     }
   };
 
+  /* --- Form submission with error handling --- */
+  const onFormSubmit = async (data: RecipeFormValues) => {
+    try {
+      await onSubmit(data);
+      showToast('success', initialData ? 'Recipe updated successfully!' : 'Recipe created successfully!');
+    } catch (err: any) {
+      const message = err?.data?.error || err?.message || 'Something went wrong. Please try again.';
+      showToast('error', message);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 rounded-lg border px-4 py-3 shadow-lg ${
+          toast.type === 'success'
+            ? 'border-[#8cc63f]/30 bg-[#8cc63f]/10 text-[#8cc63f]'
+            : 'border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444]'
+        }`}>
+          {toast.type === 'success' ? (
+            <CheckCircle className="h-5 w-5 shrink-0" />
+          ) : (
+            <AlertCircle className="h-5 w-5 shrink-0" />
+          )}
+          <span className="text-sm font-medium">{toast.message}</span>
+          <button onClick={() => setToast(null)} className="ml-2 shrink-0 hover:opacity-70">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
@@ -115,16 +176,21 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
         <div className="flex items-center gap-3">
           <button
             type="button"
-            className="inline-flex h-10 items-center justify-center rounded-lg border border-[#272a35] bg-transparent px-4 text-sm font-medium text-[#e4e6eb] transition-colors hover:bg-[#1a1d26]"
+            onClick={() => { setValue('status', 'DRAFT'); handleSubmit(onFormSubmit)(); }}
+            disabled={isLoading}
+            className="inline-flex h-10 items-center justify-center rounded-lg border border-[#272a35] bg-transparent px-4 text-sm font-medium text-[#e4e6eb] transition-colors hover:bg-[#1a1d26] disabled:opacity-50"
           >
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Save Draft
           </button>
           <button
-            type="submit"
+            type="button"
+            onClick={() => { setValue('status', 'PUBLISHED'); handleSubmit(onFormSubmit)(); }}
             disabled={isLoading}
             className="inline-flex h-10 items-center justify-center rounded-lg bg-[#f29e1f] px-5 text-sm font-medium text-[#0f1117] transition-colors hover:bg-[#f29e1f]/90 disabled:opacity-50"
           >
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Publish'}
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Publish
           </button>
         </div>
       </div>
@@ -153,9 +219,8 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             </label>
             <div className="relative">
               <select
-                {...register('categoryIds')}
                 className="flex h-11 w-full appearance-none rounded-lg border border-[#272a35] bg-[#141821] px-3.5 text-sm text-[#e4e6eb] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#f29e1f]/50"
-                defaultValue=""
+                value={selectedCategoryIds[0] || ''}
                 onChange={(e) => {
                   const val = Number(e.target.value);
                   if (val) setValue('categoryIds', [val]);
@@ -191,9 +256,15 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             <label className="text-sm font-medium text-[#e4e6eb]">
               Instructions <span className="text-[#ef4444]">*</span>
             </label>
-            <InstructionsEditor
-              initialContent={watch('content')}
-              onChange={(json) => setValue('content', json)}
+            <Controller
+              name="content"
+              control={control}
+              render={({ field }) => (
+                <InstructionsEditor
+                  initialContent={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
           </div>
         </div>
@@ -237,6 +308,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 <div className="relative">
                   <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8b929d]" />
                   <input
+                    {...register('prepTime')}
                     type="text"
                     placeholder="e.g. 15 min"
                     className="flex h-10 w-full rounded-lg border border-[#272a35] bg-[#141821] pl-9 pr-3 text-sm text-[#e4e6eb] placeholder:text-[#8b929d]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#f29e1f]/50"
@@ -249,6 +321,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 <div className="relative">
                   <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8b929d]" />
                   <input
+                    {...register('cookTime')}
                     type="text"
                     placeholder="e.g. 30 min"
                     className="flex h-10 w-full rounded-lg border border-[#272a35] bg-[#141821] pl-9 pr-3 text-sm text-[#e4e6eb] placeholder:text-[#8b929d]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#f29e1f]/50"
@@ -261,7 +334,9 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 <div className="relative">
                   <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8b929d]" />
                   <input
-                    type="text"
+                    {...register('servings', { valueAsNumber: true })}
+                    type="number"
+                    min={1}
                     placeholder="e.g. 4"
                     className="flex h-10 w-full rounded-lg border border-[#272a35] bg-[#141821] pl-9 pr-3 text-sm text-[#e4e6eb] placeholder:text-[#8b929d]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#f29e1f]/50"
                   />
@@ -272,8 +347,9 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 <label className="text-xs text-[#8b929d]">Difficulty</label>
                 <div className="relative">
                   <select
-                    defaultValue=""
+                    {...register('difficulty')}
                     className="flex h-10 w-full appearance-none rounded-lg border border-[#272a35] bg-[#141821] px-3 text-sm text-[#8b929d] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#f29e1f]/50"
+                    defaultValue=""
                   >
                     <option value="" disabled>Select difficulty</option>
                     <option value="easy">Easy</option>
@@ -300,26 +376,26 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             </div>
 
             <div className="space-y-3">
-              {ingredients.map((ing) => (
-                <div key={ing.id} className="flex items-center gap-2">
+              {ingredients.map((ing, index) => (
+                <div key={index} className="flex items-center gap-2">
                   <GripVertical className="h-4 w-4 text-[#8b929d]/40 shrink-0" />
                   <input
                     type="text"
                     placeholder="Ingredient name"
                     value={ing.name}
-                    onChange={(e) => updateIngredient(ing.id, 'name', e.target.value)}
+                    onChange={(e) => updateIngredient(index, 'name', e.target.value)}
                     className="flex h-9 flex-1 rounded-lg border border-[#272a35] bg-[#141821] px-3 text-sm text-[#e4e6eb] placeholder:text-[#8b929d]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#f29e1f]/50"
                   />
                   <input
                     type="text"
                     placeholder="Quantity"
                     value={ing.quantity}
-                    onChange={(e) => updateIngredient(ing.id, 'quantity', e.target.value)}
+                    onChange={(e) => updateIngredient(index, 'quantity', e.target.value)}
                     className="flex h-9 w-[100px] rounded-lg border border-[#272a35] bg-[#141821] px-3 text-sm text-[#e4e6eb] placeholder:text-[#8b929d]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#f29e1f]/50"
                   />
                   <button
                     type="button"
-                    onClick={() => removeIngredient(ing.id)}
+                    onClick={() => removeIngredient(index)}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#8b929d] hover:bg-[#ef4444]/10 hover:text-[#ef4444] transition-colors shrink-0"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -345,14 +421,14 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
               </div>
               <button
                 type="button"
-                onClick={() => setFeatured(!featured)}
+                onClick={() => setValue('isFeatured', !isFeatured)}
                 className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                  featured ? 'bg-[#f29e1f]' : 'bg-[#272a35]'
+                  isFeatured ? 'bg-[#f29e1f]' : 'bg-[#272a35]'
                 }`}
               >
                 <span
                   className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
-                    featured ? 'translate-x-[18px]' : 'translate-x-1'
+                    isFeatured ? 'translate-x-[18px]' : 'translate-x-1'
                   }`}
                 />
               </button>
@@ -370,7 +446,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
               </div>
               <button
                 type="button"
-                onClick={() => setAllowComments(!allowComments)}
+                onClick={() => setValue('allowComments', !allowComments)}
                 className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
                   allowComments ? 'bg-[#f29e1f]' : 'bg-[#272a35]'
                 }`}

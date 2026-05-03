@@ -12,8 +12,9 @@ export default function NewRecipePage() {
     try {
       await createRecipe(data).unwrap();
       router.push('/admin/recipes');
-    } catch (err) {
-      console.error('Failed to create recipe:', err);
+    } catch (err: any) {
+      const message = err?.data?.error || err?.message || 'Failed to create recipe. Please try again.';
+      throw { ...err, message };
     }
   };
 
