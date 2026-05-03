@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RecipeBlog | Minimal Recipe Platform",
-  description: "A clean and minimalist recipe platform for food lovers.",
+  title: "RecipeHub | Admin",
+  description: "RecipeHub admin panel.",
 };
 
 export default function RootLayout({
@@ -25,12 +24,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`}>
       <body className="antialiased font-sans flex min-h-screen flex-col">
         <ReduxProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
-          </ThemeProvider>
+          {children}
         </ReduxProvider>
       </body>
     </html>

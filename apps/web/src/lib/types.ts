@@ -27,6 +27,10 @@ export interface Recipe {
   categories: Category[];
   ingredients: Ingredient[];
   seo?: SeoMeta;
+  prepTime?: number;
+  cookTime?: number;
+  servings?: number;
+  difficulty?: string;
 }
 
 export interface PaginatedResponse<T> {
