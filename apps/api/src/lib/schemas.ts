@@ -31,3 +31,22 @@ export const CategorySchema = z.object({
 export const IngredientSchema = z.object({
   name: z.string().min(2).max(50),
 });
+
+export const ArticleSchema = z.object({
+  title: z.string().min(3).max(255),
+  content: z.string().min(10),
+  summary: z.string().optional(),
+  imageUrl: z.string().optional(),
+  category: z.string().optional(),
+});
+
+export const HeroSettingsSchema = z.object({
+  title: z.string(),
+  subtitle: z.string(),
+  imageUrl: z.string().optional(),
+  ctaText: z.string(),
+});
+
+export const SubscriberSchema = z.object({
+  email: z.string().email(),
+});

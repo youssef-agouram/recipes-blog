@@ -6,6 +6,8 @@ import categoriesRouter from './routes/categories';
 import ingredientsRouter from './routes/ingredients';
 import authRouter from './routes/auth';
 import uploadsRouter from './routes/uploads';
+import articlesRouter from './routes/articles';
+import settingsRouter from './routes/settings';
 import compression from 'compression';
 import { errorHandler } from './middleware/error';
 
@@ -24,6 +26,8 @@ app.use('/categories', categoriesRouter);
 app.use('/ingredients', ingredientsRouter);
 app.use('/auth', authRouter);
 app.use('/uploads', uploadsRouter);
+app.use('/articles', articlesRouter);
+app.use('/settings', settingsRouter);
 
 // Health check
 app.get('/', (_req: express.Request, res: express.Response) => res.send('Recipes API is running...'));

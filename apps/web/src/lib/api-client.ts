@@ -21,12 +21,13 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   recipes: {
-    list: (params?: { page?: number; limit?: number; search?: string; categoryId?: number }) => {
+    list: (params?: { page?: number; limit?: number; search?: string; categoryId?: number; featured?: boolean }) => {
       const searchParams = new URLSearchParams();
       if (params?.page) searchParams.append("page", params.page.toString());
       if (params?.limit) searchParams.append("limit", params.limit.toString());
       if (params?.search) searchParams.append("search", params.search);
       if (params?.categoryId) searchParams.append("categoryId", params.categoryId.toString());
+      if (params?.featured) searchParams.append("featured", "true");
       
       const query = searchParams.toString() ? `?${searchParams.toString()}` : "";
       return fetcher<PaginatedResponse<Recipe>>(`/recipes${query}`);
@@ -35,5 +36,18 @@ export const api = {
   },
   categories: {
     list: () => fetcher<Category[]>("/categories"),
+  },
+  articles: {
+    list: (params?: { limit?: number }) => {
+      const query = params?.limit ? `?limit=${params.limit}` : "";
+      return fetcher<any[]>(`/articles${query}`);
+    },
+  },
+  settings: {
+    getHero: () => fetcher<any>("/settings/hero"),
+    subscribe: (email: string) => fetcher("/settings/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
   },
 };

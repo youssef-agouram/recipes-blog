@@ -1,6 +1,10 @@
 export const generateSlug = (text: string): string => {
-  return text
+  const slug = text
     .toLowerCase()
-    .replace(/[^\w ]+/g, '')
-    .replace(/ +/g, '-');
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  
+  return slug || `recipe-${Date.now()}`;
 };

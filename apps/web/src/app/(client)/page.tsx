@@ -1,241 +1,353 @@
 import Link from "next/link";
-import { ArrowRight, Clock, Users, Play } from "lucide-react";
+import { 
+  ArrowRight, Clock, Users, Star, Search, ChevronRight, ChevronLeft, Heart, Play, Mail, 
+  CheckCircle, ShieldCheck, Zap, Sparkles, X, Coffee, Salad, CookingPot, Cake, Leaf, 
+  WheatOff, Timer, CupSoda, Soup, Waves, Utensils 
+} from "lucide-react";
+import { Footer } from '@/components/layout/Footer';
 import { api } from "@/lib/api-client";
-import { FeaturedRecipesSlider } from "@/components/recipes/FeaturedRecipesSlider";
+import FeaturedRecipes from "@/components/home/FeaturedRecipes";
 
 interface HomePageProps {
   searchParams: Promise<{ page?: string }>;
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const categories = await api.categories.list().catch(() => []);
-  const recipesResponse = await api.recipes.list({ limit: 6 }).catch(() => ({ data: [] }));
+  const resolvedParams = await searchParams;
+  
+  const categories = await api.categories.list().catch((err) => {
+    console.error('Error fetching categories:', err);
+    return [];
+  });
+  
+  const recipesResponse = await api.recipes.list({ limit: 8, featured: true }).catch((err) => {
+    console.error('Error fetching recipes:', err);
+    return { data: [] };
+  });
   const recipes = recipesResponse.data || [];
+  
+  const articles = await api.articles.list({ limit: 5 }).catch((err) => {
+    console.error('Error fetching articles:', err);
+    return [];
+  });
+  
+  const heroSettings = await api.settings.getHero().catch((err) => {
+    console.error('Error fetching hero settings:', err);
+    return {
+      title: "Good Food, Good Mood",
+      subtitle: "Explore thousands of handpicked recipes from around the world.",
+      ctaText: "Explore Recipes",
+      imageUrl: null
+    };
+  });
+
+  const stats = [
+    { label: 'Recipes', value: '15K+', icon: Zap },
+    { label: 'Happy Users', value: '500K+', icon: Users },
+    { label: 'Categories', value: '50+', icon: Sparkles },
+    { label: 'Saved Recipes', value: '100K+', icon: Heart },
+  ];
 
   return (
-    <div className="w-full bg-brand-bg text-brand-dark overflow-hidden font-sans">
+    <div className="w-full bg-background text-foreground overflow-hidden pb-6">
       
       {/* 1. Hero Section */}
-      <section className="container mx-auto px-6 max-w-7xl pt-4 pb-12">
-        <div className="relative w-full h-[500px] rounded-3xl overflow-hidden flex items-center justify-center text-center">
-          {/* Background Image */}
-          <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-black/40 z-10"></div>
-            <img 
-              src="https://images.unsplash.com/photo-1556910103-1c02745a872f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
-              alt="Cooking pan hero" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-          
-          {/* Hero Content */}
-          <div className="relative z-20 max-w-3xl mx-auto px-4 flex flex-col items-center">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight uppercase leading-[1.1]">
-              Unleash Culinary<br />Excellence
+      <section className="container mx-auto px-6 max-w-7xl pt-2 pb-6 relative">
+        <div className="flex flex-col lg:flex-row items-center gap-6">
+          {/* Left Hero Content */}
+          <div className="lg:w-1/2 flex flex-col items-start z-10">
+            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1 rounded-full mb-3 backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground">Discover healthy & delicious recipes</span>
+            </div>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-[64px] font-black text-white leading-[0.9] tracking-tighter mb-3">
+              {heroSettings.title.split(',')[0]}<span className="text-primary">,</span><br />
+              <span className="text-primary">{heroSettings.title.split(',')[1] || heroSettings.title}</span>
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-white/90 max-w-xl font-medium">
-              Taste the world of flavors, discover handcrafted recipes, and let the aroma of our creations fill your kitchen.
+            
+            <p className="mt-3 text-sm text-muted-foreground max-w-md leading-relaxed font-medium">
+              {heroSettings.subtitle}
             </p>
-            <Link 
-              href="/recipes" 
-              className="mt-8 bg-brand-orange text-white px-8 py-3.5 rounded-full text-sm font-bold tracking-widest uppercase hover:bg-orange-500 transition-colors shadow-lg"
-            >
-              Explore Recipes
-            </Link>
+
+            <div className="mt-6 w-full max-w-lg relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-primary/5 blur-xl rounded-2xl group-hover:from-primary/20 transition-all"></div>
+              <div className="relative flex items-center bg-card border border-border rounded-2xl p-1 pl-6 shadow-2xl backdrop-blur-xl">
+                <Search className="w-4 h-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  placeholder="Search recipes..." 
+                  className="flex-1 bg-transparent border-none outline-none px-4 text-xs font-medium text-white placeholder:text-muted-foreground/40"
+                />
+                <button className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl flex items-center gap-2 group/btn">
+                  <span>Search</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-6 w-full border-t border-border pt-6">
+              {stats.map(({ label, value, icon: Icon }) => (
+                <div key={label} className="flex flex-col gap-0.5 group">
+                  <div className="flex items-center gap-1.5">
+                    <Icon className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-xl font-black text-white tracking-tighter">{value}</span>
+                  </div>
+                  <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-5">{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Hero Image/Video */}
+          <div className="lg:w-1/2 relative">
+            <div className="relative w-full aspect-[4/3] lg:aspect-square max-w-[480px] ml-auto">
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent rounded-3xl blur-2xl -z-10 animate-pulse"></div>
+              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-border group">
+                <img 
+                  src={heroSettings.imageUrl || "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80"} 
+                  alt="Hero Dish" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                />
+              </div>
+              
+              <div className="absolute -bottom-3 -left-4 w-full max-w-[220px] bg-card/90 backdrop-blur-2xl border border-border rounded-xl p-3.5 shadow-2xl animate-float z-20">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                    <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground">Sponsored</span>
+                  </div>
+                </div>
+                <div className="relative rounded-lg overflow-hidden mb-2 group aspect-video shadow-lg">
+                  <img src="https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?auto=format&fit=crop&w=400&q=80" alt="Product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                </div>
+                <h4 className="font-black text-[10px] text-white mb-1 tracking-tight">Cookware Pro</h4>
+                <button className="w-full bg-foreground text-background py-1.5 rounded-lg text-[7px] font-black uppercase tracking-[0.2em] hover:bg-primary transition-all">
+                  Shop Now
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 2. Diverse Palette Section */}
-      <section className="container mx-auto px-6 max-w-7xl pb-16">
-        <div className="bg-[#d0e7fb] rounded-3xl p-10 md:p-14 flex flex-col md:flex-row items-center gap-12">
-          {/* Left Side */}
-          <div className="md:w-1/2 flex flex-col items-start">
-            <span className="bg-brand-orange text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
-              Explore
-            </span>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-brand-dark uppercase leading-tight mb-4 tracking-tight">
-              Our Diverse<br />Palette
-            </h2>
-            <p className="text-gray-700 text-sm md:text-base mb-8 max-w-md">
-              Dive into a world of flavors! Our diverse palette caters to all tastes, whether you're a fan of hearty meats, refreshing salads, or sweet delights. Find the right dish to satisfy your cravings.
-            </p>
-            <Link 
-              href="/categories" 
-              className="border-2 border-brand-dark text-brand-dark px-6 py-2 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-brand-dark hover:text-white transition-colors"
-            >
-              See More
-            </Link>
+      {/* 2. Explore by Category */}
+      <section className="container mx-auto px-6 max-w-7xl py-12 border-t border-border">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <h2 className="text-3xl font-black text-white tracking-tighter mb-1 leading-none font-heading">Explore by Category</h2>
           </div>
+          <Link href="/categories" className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] group hover:text-white transition-colors">
+            View all categories
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="relative group/nav">
+          {/* Navigation Arrows */}
+          <button className="absolute -left-6 top-[40%] -translate-y-1/2 z-30 w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all">
+            <ChevronLeft className="w-6 h-6" />
+          </button>
           
-          {/* Right Side (List) */}
-          <div className="md:w-1/2 w-full grid grid-cols-1 gap-4">
-            {categories.slice(0, 5).map((category, i) => {
-              let icon = '🍽️';
-              const nameLower = category.name.toLowerCase();
-              if (nameLower.includes('breakfast')) icon = '🍳';
-              else if (nameLower.includes('vegan') || nameLower.includes('salad') || nameLower.includes('veg')) icon = '🥗';
-              else if (nameLower.includes('meat') || nameLower.includes('beef') || nameLower.includes('chicken') || nameLower.includes('pork')) icon = '🥩';
-              else if (nameLower.includes('dessert') || nameLower.includes('sweet') || nameLower.includes('cake')) icon = '🧁';
-              else if (nameLower.includes('quick') || nameLower.includes('easy') || nameLower.includes('fast')) icon = '⏱️';
+          <div className="flex gap-12 overflow-x-auto pb-6 scrollbar-hide px-4">
+            {categories.map((cat, i) => {
+              const iconMap: Record<string, any> = {
+                'breakfast': Coffee,
+                'lunch': Utensils,
+                'dinner': CookingPot,
+                'desserts': Cake,
+                'vegan': Leaf,
+                'gluten free': WheatOff,
+                'quick & easy': Timer,
+                'drinks': CupSoda,
+                'salads': Salad,
+                'soup': Soup,
+              };
+              
+              const nameLower = cat.name.toLowerCase();
+              const Icon = iconMap[nameLower] || CookingPot; // Default cloche icon
+              const isGF = nameLower.includes('gluten free');
+              const isQuick = nameLower.includes('quick');
 
               return (
-                <Link href={`/category/${category.id}`} key={category.id || i} className="flex items-center justify-between py-4 border-b border-blue-200 last:border-0 group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-lg shadow-sm group-hover:scale-110 transition-transform">
-                      {icon}
-                    </div>
+                <Link key={cat.id || i} href={`/categories/${cat.slug || cat.id}`} className="flex flex-col items-center gap-5 group cursor-pointer min-w-[110px]">
+                  <div className="w-24 h-24 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:scale-110 group-hover:bg-white/[0.05] group-hover:border-primary/30">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <Icon className="w-10 h-10 text-primary stroke-[1.5px] transition-transform duration-500 group-hover:scale-110" />
                   </div>
-                  <span className="font-bold text-base uppercase tracking-wider">{category.name}</span>
+                  <div className="flex flex-col items-center gap-1.5 text-center">
+                    <span className="text-[11px] font-black text-white/80 uppercase tracking-[0.15em] group-hover:text-primary transition-colors leading-none">{cat.name}</span>
+                    {isGF && (
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none">GF</span>
+                    )}
+                    {isQuick && (
+                      <Zap className="w-3 h-3 text-primary animate-pulse" />
+                    )}
+                  </div>
                 </Link>
+              );
+            })}
+          </div>
+
+          <button className="absolute -right-6 top-[40%] -translate-y-1/2 z-30 w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all">
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        </div>
+      </section>
+
+      <FeaturedRecipes recipes={recipes} />
+
+      {/* 4. Top Articles */}
+      <section className="container mx-auto px-6 max-w-7xl py-6 border-t border-border">
+        <div className="flex items-end justify-between mb-4">
+          <div>
+            <h2 className="text-2xl font-black text-white tracking-tighter mb-0.5 leading-none">Top Articles</h2>
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Deep dives into nutrition and lifestyle.</p>
+          </div>
+          <Link href="/blog" className="flex items-center gap-2 text-[8px] font-black text-primary uppercase tracking-[0.2em] group px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-all">
+            View all
+            <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {articles.length > 0 ? articles.map((article, i) => (
+            <Link key={article.id} href={`/blog/${article.slug}`} className="group flex flex-col bg-card/50 border border-border rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500">
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <img 
+                  src={article.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80"} 
+                  alt={article.title} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]"
+                />
+                <div className="absolute top-2 left-2 z-20">
+                   <span className="px-1.5 py-0.5 rounded bg-primary text-[6px] font-black uppercase tracking-wider text-primary-foreground">
+                    {article.category || 'Journal'}
+                  </span>
+                </div>
+              </div>
+              <div className="p-3 flex flex-col flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[7px] font-black text-primary uppercase tracking-wider">{article.category || 'Nutrition'}</span>
+                  <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-wider">{new Date(article.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                </div>
+                <h3 className="text-[12px] font-black text-white leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                  {article.title}
+                </h3>
+                <p className="text-[9px] text-muted-foreground font-medium leading-relaxed mb-2 line-clamp-3 h-[42px]">
+                  {article.summary || "Expert guides and nutritional insights."}
+                </p>
+                <button className="flex items-center gap-1 text-[7px] font-black text-white uppercase tracking-wider group/btn mt-auto">
+                  <span className="border-b border-primary pb-0.5">Read Story</span>
+                  <ArrowRight className="w-2.5 h-2.5 text-primary group-hover/btn:translate-x-0.5 transition-transform" />
+                </button>
+              </div>
+            </Link>
+          )) : (
+             [1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="animate-pulse bg-card rounded-xl h-[260px] border border-border" />
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* 5. Why Choose Tasteful? */}
+      <section className="container mx-auto px-6 max-w-7xl py-6 border-t border-border">
+        <h2 className="text-2xl font-black text-white tracking-tighter mb-6 leading-none">Why Choose Tasteful?</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+          {[
+            { title: 'Handpicked Recipes', desc: 'Only the best recipes.', icon: Sparkles },
+            { title: 'Healthy & Delicious', desc: 'Nutritious & tasty.', icon: Heart },
+            { title: 'Easy to Follow', desc: 'Step-by-step results.', icon: ShieldCheck },
+            { title: 'Community Loved', desc: 'Join our food lovers.', icon: Users },
+          ].map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <div key={i} className="flex items-center gap-3 group">
+                <div className="w-12 h-12 shrink-0 rounded-xl bg-card border border-border flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <div className="flex flex-col">
+                  <h4 className="font-black text-xs text-white mb-0.5 group-hover:text-primary transition-colors">{item.title}</h4>
+                  <p className="text-[9px] text-muted-foreground leading-relaxed font-medium max-w-[150px]">{item.desc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 6. Newsletter */}
+      <section className="container mx-auto px-6 max-w-7xl pb-6 pt-4">
+        <div className="relative bg-card border border-border rounded-xl overflow-hidden flex flex-col lg:flex-row items-stretch shadow-2xl">
+          {/* Left Image Section */}
+          <div className="lg:w-[22%] relative min-h-[150px] overflow-hidden">
+            <img 
+              src="https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80" 
+              alt="Ingredients" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/20 to-background"></div>
+          </div>
+
+          {/* Middle Content Section */}
+          <div className="flex-1 p-8 lg:p-10 flex flex-col justify-center">
+            <h2 className="text-xl font-black text-white tracking-tighter mb-2 leading-none">Join Our Newsletter</h2>
+            <p className="text-[10px] text-muted-foreground mb-6 max-w-md leading-relaxed font-medium">
+              Latest recipes and exclusive offers.
+            </p>
+            
+            <div className="flex w-full max-w-md bg-background border border-border rounded-xl overflow-hidden p-1 focus-within:border-primary transition-all">
+              <input 
+                type="email" 
+                placeholder="Email address" 
+                className="flex-1 bg-transparent px-4 py-2 text-[11px] text-white placeholder:text-muted-foreground/30 outline-none"
+              />
+              <button className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-black text-[8px] uppercase tracking-[0.15em] hover:bg-primary/90 transition-all">
+                Subscribe
+              </button>
+            </div>
+          </div>
+
+          {/* Right Benefits Section */}
+          <div className="lg:w-[32%] bg-white/[0.01] p-8 lg:p-10 flex flex-col justify-center gap-6 border-l border-border">
+            {[
+              { title: 'Weekly new recipes', desc: 'Fresh every week', icon: Mail },
+              { title: 'Exclusive tips', desc: 'Cooking hacks', icon: Sparkles },
+              { title: 'No spam', desc: 'Unsubscribe anytime', icon: CheckCircle },
+            ].map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div key={i} className="flex items-center gap-3 group">
+                  <div className="w-8 h-8 shrink-0 rounded-lg bg-white/5 flex items-center justify-center text-primary">
+                    <Icon className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <h4 className="text-[11px] font-black text-white mb-0.5 tracking-tight leading-none">{item.title}</h4>
+                    <p className="text-[9px] text-muted-foreground font-medium leading-tight">{item.desc}</p>
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
       </section>
 
-      <FeaturedRecipesSlider />
-
-
-      {/* 4. Embark On A Journey (Categories + Grid) */}
-      <section className="container mx-auto px-6 max-w-7xl pb-20">
-        <div className="text-center mb-10">
-          <span className="bg-brand-orange text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block">
-            Recipes
-          </span>
-          <h2 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-brand-dark mb-4">
-            Embark On A<br />Journey
-          </h2>
-          <p className="text-gray-500 text-sm max-w-md mx-auto">
-            With our diverse collection of recipes, we have something to satisfy every palate.
-          </p>
-        </div>
-
-        {/* Categories Pills */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
-          <Link href="/recipes" className="px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-colors bg-brand-green text-white border-brand-green">
-            All
-          </Link>
-          {categories.map((cat) => (
-            <Link 
-              key={cat.id}
-              href={`/category/${cat.id}`}
-              className="px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-colors border-gray-300 text-gray-500 hover:border-gray-400 hover:text-brand-dark"
-            >
-              {cat.name}
-            </Link>
-          ))}
-        </div>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recipes.map((recipe, i) => (
-            <Link href={`/recipes/${recipe.slug}`} key={recipe.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group cursor-pointer">
-              <div className="relative h-48 overflow-hidden">
-                {/* Randomly add a green tag to some cards */}
-                {(i === 2 || i === 3 || i === 4) && (
-                   <div className="absolute bottom-4 right-4 z-10 w-10 h-10 bg-brand-green rounded-full flex items-center justify-center text-white font-bold text-[10px] shadow-sm transform -rotate-12 border-2 border-white">
-                     9.5
-                   </div>
-                )}
-                <img 
-                  src={recipe.imageUrl || "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"} 
-                  alt={recipe.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="text-lg font-bold mb-2 tracking-tight line-clamp-1">{recipe.title}</h3>
-                <p className="text-xs text-gray-500 mb-6 flex-1 line-clamp-2">
-                  {recipe.summary || "No description available."}
-                </p>
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-3 text-[10px] font-semibold text-gray-400">
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3"/> 30 Min</span>
-                    <span className="flex items-center gap-1"><Users className="w-3 h-3"/> 2 P</span>
-                  </div>
-                  <button className="border border-gray-300 text-gray-600 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider hover:bg-brand-dark hover:text-white hover:border-brand-dark transition-colors">
-                    View Recipe
-                  </button>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 5. Chronicle / Articles */}
-      <section className="container mx-auto px-6 max-w-7xl pb-24">
-        <div className="flex flex-col md:flex-row gap-8 items-stretch">
-          {/* Left Text */}
-          <div className="md:w-1/3 flex flex-col justify-center pr-8">
-            <span className="bg-brand-orange text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block w-max">
-              Articles
-            </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-brand-dark uppercase leading-tight mb-4 tracking-tight">
-              Our Culinary<br />Chronicle
-            </h2>
-            <p className="text-gray-500 text-sm mb-8">
-              We explore the latest trends in gastronomy, share expert tips on creating culinary masterpieces, and uncover the secrets of the world's most renowned chefs.
-            </p>
-            <Link 
-              href="/articles" 
-              className="border-2 border-brand-dark text-brand-dark px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-brand-dark hover:text-white transition-colors w-max"
-            >
-              Read More
-            </Link>
-          </div>
-          
-          {/* Right Images */}
-          <div className="md:w-2/3 grid grid-cols-2 gap-4 h-[400px]">
-             <div className="flex flex-col gap-4 h-full">
-               <div className="rounded-3xl overflow-hidden h-1/2">
-                 <img src="https://images.unsplash.com/photo-1544025162-83690dbe8f66?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Cooking Steak" className="w-full h-full object-cover" />
-               </div>
-               <div className="rounded-3xl overflow-hidden h-1/2 relative group">
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors z-10"></div>
-                  <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform">
-                    <Play className="w-5 h-5 ml-1" />
-                  </button>
-                 <img src="https://images.unsplash.com/photo-1507048331197-7d4ac70811cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Cooking Pot" className="w-full h-full object-cover" />
-               </div>
-             </div>
-             <div className="rounded-3xl overflow-hidden h-full">
-                <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Chefs" className="w-full h-full object-cover" />
-             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Newsletter */}
-      <section className="container mx-auto px-6 max-w-7xl pb-12">
-        <div className="bg-gradient-to-r from-[#ff7a70] to-[#ff5d50] rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden">
-          {/* Background decorative elements could go here */}
-          <div className="relative z-10 flex flex-col items-center">
-            <span className="text-white/80 text-[10px] font-bold uppercase tracking-widest mb-4">
-              Join For Joy
-            </span>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-white uppercase leading-tight mb-6 tracking-tight">
-              Join The Fun<br />Subscribe Now!
-            </h2>
-            <p className="text-white/90 text-sm mb-10 max-w-md mx-auto">
-              Subscribe to our newsletter for a weekly serving of recipes, cooking tips, and culinary insights straight to your inbox.
-            </p>
-            
-            <div className="w-full max-w-md bg-white rounded-full p-1.5 flex items-center shadow-xl">
-              <input 
-                type="email" 
-                placeholder="Email Address" 
-                className="flex-1 bg-transparent border-none outline-none px-6 text-sm text-gray-700 placeholder-gray-400 font-medium"
-              />
-              <button className="bg-brand-dark text-white px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors">
-                Subscribe
-              </button>
+      {/* Maximized Sticky Announcement Bar */}
+      <div className="fixed bottom-0 left-0 w-full z-[100] bg-white/10 backdrop-blur-2xl border-t border-border py-8 overflow-hidden shadow-[0_-10px_50px_rgba(0,0,0,0.5)]">
+        <div className="flex whitespace-nowrap animate-marquee items-center gap-20">
+          {[1,2,3,4,5,6,7,8].map(i => (
+            <div key={i} className="flex items-center gap-6">
+              <span className="text-[14px] font-black text-white uppercase tracking-[0.4em]">
+                NEW HEALTHY RECIPES EVERY WEEK • JOIN 10,000+ FOOD LOVERS • GET 20% OFF PREMIUM COOKWARE • PREMIUM CULINARY GUIDES NOW AVAILABLE •
+              </span>
+              <Sparkles className="w-5 h-5 text-primary animate-pulse" />
             </div>
-          </div>
+          ))}
         </div>
-      </section>
-
+      </div>
     </div>
   );
 }

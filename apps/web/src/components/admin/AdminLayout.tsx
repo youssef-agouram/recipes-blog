@@ -19,13 +19,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { logout } from '@/store/slices/authSlice';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const sidebarLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/recipes', label: 'Recipes', icon: Utensils },
   { href: '/admin/categories', label: 'Categories', icon: Tags },
-  { href: '/admin/comments', label: 'Comments', icon: MessageSquare },
+  { href: '/admin/articles', label: 'Articles', icon: MessageSquare },
   { href: '/admin/media', label: 'Media', icon: ImageIcon },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
@@ -36,11 +36,20 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.auth.user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
     router.push('/admin/login');
   };
+
+  if (!mounted) {
+    return <div className="min-h-screen bg-[#0f1117]" />;
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -49,8 +58,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         {/* Logo */}
         <div className="flex h-16 items-center px-5">
           <Link href="/" className="flex items-center gap-2.5">
-            <ChefHat className="h-7 w-7 text-[#f29e1f]" />
-            <span className="text-xl font-bold tracking-tight text-[#f29e1f]">RecipeHub</span>
+            <div className="relative w-7 h-7 rounded-lg bg-gradient-to-br from-[#f29e1f] to-[#f59e0b] flex items-center justify-center text-[#0f1117] font-black text-sm">
+               <span>T</span>
+            </div>
+            <span className="text-xl font-bold tracking-tight text-[#e4e6eb]">Taste<span className="text-[#f29e1f]">ful</span></span>
           </Link>
         </div>
 

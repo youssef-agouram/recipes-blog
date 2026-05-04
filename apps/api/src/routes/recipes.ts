@@ -106,20 +106,26 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
         difficulty: data.difficulty,
         allowComments: data.allowComments ?? true,
         isFeatured: data.isFeatured ?? false,
-        ingredientsJson: data.ingredientsJson ? JSON.stringify(data.ingredientsJson) : undefined,
+        ingredientsJson: data.ingredientsJson || undefined,
         categories: data.categoryIds
           ? { connect: data.categoryIds.map((id) => ({ id })) }
           : undefined,
         ingredients: data.ingredientIds
           ? { connect: data.ingredientIds.map((id) => ({ id })) }
           : undefined,
-        seo: data.seo ? { create: data.seo } : undefined,
+        seo: data.seo && (data.seo.title || data.seo.description) 
+          ? { create: data.seo } 
+          : undefined,
       },
       include: { categories: true, ingredients: true, seo: true },
     });
 
     res.status(201).json(parseRecipe(recipe));
   } catch (error) {
+    console.error('Error creating recipe:', error);
+    if (error instanceof Error) {
+      console.error('Stack trace:', error.stack);
+    }
     next(error);
   }
 });
@@ -175,14 +181,14 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
         difficulty: data.difficulty,
         allowComments: data.allowComments,
         isFeatured: data.isFeatured,
-        ingredientsJson: data.ingredientsJson ? JSON.stringify(data.ingredientsJson) : undefined,
+        ingredientsJson: data.ingredientsJson || undefined,
         categories: data.categoryIds
           ? { set: data.categoryIds.map((id) => ({ id })) }
           : undefined,
         ingredients: data.ingredientIds
           ? { set: data.ingredientIds.map((id) => ({ id })) }
           : undefined,
-        seo: data.seo
+        seo: data.seo && (data.seo.title || data.seo.description)
           ? {
               upsert: {
                 create: data.seo,

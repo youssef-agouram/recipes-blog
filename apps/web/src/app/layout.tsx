@@ -1,21 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Lora, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "800", "900"],
+});
+
+const lora = Lora({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const workSans = Work_Sans({
+  variable: "--font-ui",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "RecipeHub | Admin",
-  description: "RecipeHub admin panel.",
+  title: "RecipeHub | Elegant Recipes",
+  description: "Discover healthy and delicious recipes.",
 };
 
 export default function RootLayout({
@@ -24,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`}>
-      <body className="antialiased font-sans flex min-h-screen flex-col">
+    <html lang="en" className={`${dmSans.variable} ${lora.variable} ${workSans.variable} dark`}>
+      <body className="antialiased font-body flex min-h-screen flex-col">
         <ReduxProvider>
           {children}
         </ReduxProvider>
