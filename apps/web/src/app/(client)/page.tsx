@@ -7,6 +7,7 @@ import {
 import { Footer } from '@/components/layout/Footer';
 import { api } from "@/lib/api-client";
 import FeaturedRecipes from "@/components/home/FeaturedRecipes";
+import DraggableSponsoredCard from "@/components/home/DraggableSponsoredCard";
 
 interface HomePageProps {
   searchParams: Promise<{ page?: string }>;
@@ -26,6 +27,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   });
   const recipes = recipesResponse.data || [];
   
+  const topRecipesResponse = await api.recipes.list({ limit: 5, topArticle: true }).catch((err) => {
+    console.error('Error fetching top recipes:', err);
+    return { data: [] };
+  });
+  const topRecipes = topRecipesResponse.data || [];
+
   const articles = await api.articles.list({ limit: 5 }).catch((err) => {
     console.error('Error fetching articles:', err);
     return [];
@@ -49,92 +56,82 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   ];
 
   return (
-    <div className="w-full bg-background text-foreground overflow-hidden pb-6">
+    <div className="w-full bg-background text-foreground pb-6">
       
       {/* 1. Hero Section */}
-      <section className="container mx-auto px-6 max-w-7xl pt-2 pb-6 relative">
-        <div className="flex flex-col lg:flex-row items-center gap-6">
-          {/* Left Hero Content */}
-          <div className="lg:w-1/2 flex flex-col items-start z-10">
-            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1 rounded-full mb-3 backdrop-blur-md">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-              </span>
-              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground">Discover healthy & delicious recipes</span>
-            </div>
-            
-            <h1 className="text-5xl md:text-6xl lg:text-[64px] font-black text-white leading-[0.9] tracking-tighter mb-3">
-              {heroSettings.title.split(',')[0]}<span className="text-primary">,</span><br />
-              <span className="text-primary">{heroSettings.title.split(',')[1] || heroSettings.title}</span>
-            </h1>
-            
-            <p className="mt-3 text-sm text-muted-foreground max-w-md leading-relaxed font-medium">
-              {heroSettings.subtitle}
-            </p>
-
-            <div className="mt-6 w-full max-w-lg relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-primary/5 blur-xl rounded-2xl group-hover:from-primary/20 transition-all"></div>
-              <div className="relative flex items-center bg-card border border-border rounded-2xl p-1 pl-6 shadow-2xl backdrop-blur-xl">
-                <Search className="w-4 h-4 text-muted-foreground" />
-                <input 
-                  type="text" 
-                  placeholder="Search recipes..." 
-                  className="flex-1 bg-transparent border-none outline-none px-4 text-xs font-medium text-white placeholder:text-muted-foreground/40"
-                />
-                <button className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl flex items-center gap-2 group/btn">
-                  <span>Search</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-6 w-full border-t border-border pt-6">
-              {stats.map(({ label, value, icon: Icon }) => (
-                <div key={label} className="flex flex-col gap-0.5 group">
-                  <div className="flex items-center gap-1.5">
-                    <Icon className="w-3.5 h-3.5 text-primary" />
-                    <span className="text-xl font-black text-white tracking-tighter">{value}</span>
-                  </div>
-                  <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-5">{label}</span>
-                </div>
-              ))}
-            </div>
+      <section className="container mx-auto px-6 max-w-[1536px] pt-4 pb-10">
+        <div className="relative w-full min-h-[500px] lg:min-h-[560px] flex items-center py-16 px-8 lg:px-16 rounded-3xl border border-white/5 shadow-2xl">
+          {/* Full Width Background Image & Overlays inside the container */}
+          <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl">
+            <img 
+              src={heroSettings.imageUrl || "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1920&q=80"} 
+              alt="Hero Background" 
+              className="w-full h-full object-cover scale-105 animate-slow-pan"
+            />
+            {/* Base darkening for contrast */}
+            <div className="absolute inset-0 bg-background/40"></div>
+            {/* Gradient and blur focusing on the left text area */}
+            <div className="absolute inset-y-0 left-0 w-full lg:w-3/4 bg-gradient-to-r from-background via-background/90 to-transparent backdrop-blur-md"></div>
           </div>
 
-          {/* Right Hero Image/Video */}
-          <div className="lg:w-1/2 relative">
-            <div className="relative w-full aspect-[4/3] lg:aspect-square max-w-[480px] ml-auto">
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent rounded-3xl blur-2xl -z-10 animate-pulse"></div>
-              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-border group">
-                <img 
-                  src={heroSettings.imageUrl || "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80"} 
-                  alt="Hero Dish" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
-                />
+          <div className="relative z-20 flex flex-col lg:flex-row items-center justify-between gap-12 w-full">
+            {/* Left Hero Content */}
+            <div className="w-full lg:w-3/5 flex flex-col items-start">
+              <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1 rounded-full mb-4 backdrop-blur-md">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white">Discover healthy & delicious recipes</span>
               </div>
               
-              <div className="absolute -bottom-3 -left-4 w-full max-w-[220px] bg-card/90 backdrop-blur-2xl border border-border rounded-xl p-3.5 shadow-2xl animate-float z-20">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                    <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground">Sponsored</span>
-                  </div>
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter mb-4 drop-shadow-2xl">
+                {heroSettings.title.split(',')[0]}<span className="text-primary">,</span><br />
+                <span className="text-primary">{heroSettings.title.split(',')[1] || heroSettings.title}</span>
+              </h1>
+              
+              <p className="mt-2 text-sm text-white/80 max-w-md leading-relaxed font-medium drop-shadow-md">
+                {heroSettings.subtitle}
+              </p>
+
+              <div className="mt-8 w-full max-w-lg relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/5 blur-xl rounded-2xl group-hover:from-primary/30 transition-all"></div>
+                <div className="relative flex items-center bg-card/80 border border-border rounded-2xl p-1 pl-6 shadow-2xl backdrop-blur-xl">
+                  <Search className="w-4 h-4 text-white" />
+                  <input 
+                    type="text" 
+                    placeholder="Search recipes..." 
+                    className="flex-1 bg-transparent border-none outline-none px-4 text-xs font-medium text-white placeholder:text-white/50"
+                  />
+                  <button className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl flex items-center gap-2 group/btn">
+                    <span>Search</span>
+                  </button>
                 </div>
-                <div className="relative rounded-lg overflow-hidden mb-2 group aspect-video shadow-lg">
-                  <img src="https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?auto=format&fit=crop&w=400&q=80" alt="Product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                </div>
-                <h4 className="font-black text-[10px] text-white mb-1 tracking-tight">Cookware Pro</h4>
-                <button className="w-full bg-foreground text-background py-1.5 rounded-lg text-[7px] font-black uppercase tracking-[0.2em] hover:bg-primary transition-all">
-                  Shop Now
-                </button>
               </div>
+
+              <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-6 w-full pt-6 border-t border-white/10">
+                {stats.map(({ label, value, icon: Icon }) => (
+                  <div key={label} className="flex flex-col gap-0.5 group">
+                    <div className="flex items-center gap-1.5">
+                      <Icon className="w-4 h-4 text-primary drop-shadow-md" />
+                      <span className="text-xl font-black text-white tracking-tighter drop-shadow-lg">{value}</span>
+                    </div>
+                    <span className="text-[8px] font-black text-white/60 uppercase tracking-[0.2em] ml-5.5">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Hero Sponsored Card (Floating over the image) */}
+            <div className="w-full lg:w-2/5 flex justify-center lg:justify-end">
+              <DraggableSponsoredCard />
             </div>
           </div>
         </div>
       </section>
 
       {/* 2. Explore by Category */}
-      <section className="container mx-auto px-6 max-w-7xl py-12 border-t border-border">
+      <section className="container mx-auto px-6 max-w-[1536px] py-12 border-t border-border">
         <div className="flex items-end justify-between mb-10">
           <div>
             <h2 className="text-3xl font-black text-white tracking-tighter mb-1 leading-none font-heading">Explore by Category</h2>
@@ -172,7 +169,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               const isQuick = nameLower.includes('quick');
 
               return (
-                <Link key={cat.id || i} href={`/categories/${cat.slug || cat.id}`} className="flex flex-col items-center gap-5 group cursor-pointer min-w-[110px]">
+                <Link key={cat.id || i} href={`/categories/${cat.id}`} className="flex flex-col items-center gap-5 group cursor-pointer min-w-[110px]">
                   <div className="w-24 h-24 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:scale-110 group-hover:bg-white/[0.05] group-hover:border-primary/30">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <Icon className="w-10 h-10 text-primary stroke-[1.5px] transition-transform duration-500 group-hover:scale-110" />
@@ -200,7 +197,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <FeaturedRecipes recipes={recipes} />
 
       {/* 4. Top Articles */}
-      <section className="container mx-auto px-6 max-w-7xl py-6 border-t border-border">
+      <section id="top-articles" className="container mx-auto px-6 max-w-[1536px] py-6 border-t border-border">
         <div className="flex items-end justify-between mb-4">
           <div>
             <h2 className="text-2xl font-black text-white tracking-tighter mb-0.5 leading-none">Top Articles</h2>
@@ -213,8 +210,41 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {articles.length > 0 ? articles.map((article, i) => (
-            <Link key={article.id} href={`/blog/${article.slug}`} className="group flex flex-col bg-card/50 border border-border rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500">
+          {topRecipes.map((recipe) => (
+            <Link key={`recipe-${recipe.id}`} href={`/recipes/${recipe.slug}`} className="group flex flex-col bg-card/50 border border-border rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500">
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <img 
+                  src={recipe.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80"} 
+                  alt={recipe.title} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]"
+                />
+                <div className="absolute top-2 left-2 z-20">
+                   <span className="px-1.5 py-0.5 rounded bg-blue-500 text-[6px] font-black uppercase tracking-wider text-white">
+                    {recipe.categories?.[0]?.name || 'Top Recipe'}
+                  </span>
+                </div>
+              </div>
+              <div className="p-3 flex flex-col flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[7px] font-black text-blue-400 uppercase tracking-wider">{recipe.categories?.[0]?.name || 'Featured'}</span>
+                  <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-wider">{new Date(recipe.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                </div>
+                <h3 className="text-[12px] font-black text-white leading-tight mb-1 group-hover:text-blue-400 transition-colors line-clamp-1">
+                  {recipe.title}
+                </h3>
+                <p className="text-[9px] text-muted-foreground font-medium leading-relaxed mb-2 line-clamp-3 h-[42px]">
+                  {recipe.summary || "Master this delicious dish with our step-by-step guide."}
+                </p>
+                <button className="flex items-center gap-1 text-[7px] font-black text-white uppercase tracking-wider group/btn mt-auto">
+                  <span className="border-b border-blue-400 pb-0.5">View Recipe</span>
+                  <ArrowRight className="w-2.5 h-2.5 text-blue-400 group-hover/btn:translate-x-0.5 transition-transform" />
+                </button>
+              </div>
+            </Link>
+          ))}
+          
+          {articles.slice(0, 5 - topRecipes.length).map((article, i) => (
+            <Link key={`article-${article.id}`} href={`/blog/${article.slug}`} className="group flex flex-col bg-card/50 border border-border rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <img 
                   src={article.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80"} 
@@ -244,16 +274,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 </button>
               </div>
             </Link>
-          )) : (
+          ))}
+          
+          {topRecipes.length === 0 && articles.length === 0 && (
              [1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="animate-pulse bg-card rounded-xl h-[260px] border border-border" />
+              <div key={`skeleton-${i}`} className="animate-pulse bg-card rounded-xl h-[260px] border border-border" />
             ))
           )}
         </div>
       </section>
 
       {/* 5. Why Choose Tasteful? */}
-      <section className="container mx-auto px-6 max-w-7xl py-6 border-t border-border">
+      <section className="container mx-auto px-6 max-w-[1536px] py-6 border-t border-border">
         <h2 className="text-2xl font-black text-white tracking-tighter mb-6 leading-none">Why Choose Tasteful?</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
@@ -280,7 +312,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </section>
 
       {/* 6. Newsletter */}
-      <section className="container mx-auto px-6 max-w-7xl pb-6 pt-4">
+      <section className="container mx-auto px-6 max-w-[1536px] pb-6 pt-4">
         <div className="relative bg-card border border-border rounded-xl overflow-hidden flex flex-col lg:flex-row items-stretch shadow-2xl">
           {/* Left Image Section */}
           <div className="lg:w-[22%] relative min-h-[150px] overflow-hidden">

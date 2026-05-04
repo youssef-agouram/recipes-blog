@@ -14,7 +14,9 @@ model Recipe {
   summary         String?
   content         Json
   imageUrl        String?
+  images          String[]     @default([])
   isFeatured      Boolean      @default(false)
+  isTopArticle    Boolean      @default(false)
   status          String       @default("PUBLISHED")
   prepTime        String?
   cookTime        String?
@@ -31,6 +33,7 @@ model Recipe {
   @@index([slug])
   @@index([title])
   @@index([isFeatured])
+  @@index([isTopArticle])
   @@index([status])
 }
 

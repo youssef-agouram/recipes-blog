@@ -25,7 +25,7 @@ export default function BlogRenderer({ content, className = "prose dark:prose-in
     Link.configure({ openOnClick: true }),
     Image.configure({
       inline: false,
-      HTMLAttributes: { class: 'mx-auto my-6 max-w-full rounded-md' },
+      HTMLAttributes: { class: 'block !ml-0 mr-auto my-6 max-w-full rounded-md' },
     }),
     Embed,
     TextAlign.configure({ types: ["heading", "paragraph"] }),

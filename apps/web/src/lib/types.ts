@@ -26,6 +26,7 @@ export interface Recipe {
   summary?: string;
   imageUrl?: string;
   isFeatured: boolean;
+  isTopArticle: boolean;
   status: 'DRAFT' | 'PUBLISHED';
   prepTime?: string;
   cookTime?: string;
@@ -39,6 +40,7 @@ export interface Recipe {
   categories: Category[];
   ingredients: Ingredient[];
   seo?: SeoMeta;
+  images: string[];
 }
 
 export interface PaginatedResponse<T> {

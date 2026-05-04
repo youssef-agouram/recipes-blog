@@ -30,7 +30,7 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
   };
 
   return (
-    <section className="container mx-auto px-6 max-w-7xl py-6 border-t border-border">
+    <section className="container mx-auto px-6 max-w-[1536px] py-6 border-t border-border">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h2 className="text-2xl font-black text-white tracking-tighter mb-0.5 leading-none">Featured Recipes</h2>

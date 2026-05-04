@@ -25,7 +25,7 @@ export function Navbar() {
     <div className="w-full flex flex-col">
       {/* 1. Top Bar */}
       <div className="w-full bg-background border-b border-border py-2">
-        <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
+        <div className="container mx-auto px-6 max-w-[1536px] flex items-center justify-between">
           <div className="flex items-center gap-5">
             <SocialIcon name="Facebook" icon={FacebookIcon} />
             <SocialIcon name="Instagram" icon={InstagramIcon} />
@@ -49,7 +49,7 @@ export function Navbar() {
 
       {/* 2. Main Navbar */}
       <header className="w-full bg-background/95 sticky top-0 z-50 backdrop-blur-xl border-b border-border">
-        <div className="container mx-auto px-6 max-w-7xl h-20 flex items-center justify-between">
+        <div className="container mx-auto px-6 max-w-[1536px] h-20 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-2xl group-hover:scale-105 transition-transform">

@@ -1,7 +1,7 @@
 'use client';
 
-import { useGetAdminRecipesQuery, useDeleteRecipeMutation, useToggleFeaturedRecipeMutation } from '@/store/api/recipeApi';
-import { Plus, Edit, Trash2, Loader2, ExternalLink, Star } from 'lucide-react';
+import { useGetAdminRecipesQuery, useDeleteRecipeMutation, useToggleFeaturedRecipeMutation, useToggleTopArticleRecipeMutation } from '@/store/api/recipeApi';
+import { Plus, Edit, Trash2, Loader2, ExternalLink, Star, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
@@ -9,6 +9,7 @@ export default function AdminRecipesPage() {
   const { data, isLoading } = useGetAdminRecipesQuery({ limit: 50 });
   const [deleteRecipe, { isLoading: isDeleting }] = useDeleteRecipeMutation();
   const [toggleFeatured] = useToggleFeaturedRecipeMutation();
+  const [toggleTopArticle] = useToggleTopArticleRecipeMutation();
 
   const handleDelete = async (id: number) => {
     if (confirm('Are you sure you want to delete this recipe?')) {
@@ -25,6 +26,14 @@ export default function AdminRecipesPage() {
       await toggleFeatured(id).unwrap();
     } catch (err) {
       console.error('Failed to toggle featured:', err);
+    }
+  };
+
+  const handleToggleTopArticle = async (id: number) => {
+    try {
+      await toggleTopArticle(id).unwrap();
+    } catch (err) {
+      console.error('Failed to toggle top article:', err);
     }
   };
 
@@ -105,6 +114,21 @@ export default function AdminRecipesPage() {
                       />
                     </button>
 
+                    {/* ❤️ Link to Top Articles Section */}
+                    <button
+                      onClick={() => handleToggleTopArticle(recipe.id)}
+                      title={recipe.isTopArticle ? 'Remove from Top Articles' : 'Add to Top Articles'}
+                      className={`inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors ${
+                        recipe.isTopArticle
+                          ? 'border-blue-400 bg-blue-500/10 hover:bg-blue-500/20'
+                          : 'border-border/40 hover:bg-muted'
+                      }`}
+                    >
+                      <Heart className={`h-4 w-4 transition-colors ${
+                        recipe.isTopArticle ? 'text-blue-400 fill-blue-400' : 'text-muted-foreground'
+                      }`} />
+                    </button>
+
                     <Link
                       href={`/admin/recipes/edit/${recipe.id}`}
                       className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/40 hover:bg-muted transition-colors"
@@ -114,9 +138,9 @@ export default function AdminRecipesPage() {
                     <button
                       onClick={() => handleDelete(recipe.id)}
                       disabled={isDeleting}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/40 hover:bg-destructive/10 hover:border-destructive/20 transition-colors"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/40 hover:bg-destructive/10 hover:border-destructive/20 transition-all duration-300 group"
                     >
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-4 w-4 text-destructive group-hover:scale-110" />
                     </button>
                   </div>
                 </td>

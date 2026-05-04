@@ -38,6 +38,9 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     if (featured === 'true') {
       where.isFeatured = true;
     }
+    if (req.query.topArticle === 'true') {
+      where.isTopArticle = true;
+    }
     if (status) {
       where.status = status as string;
     }
@@ -99,6 +102,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
         summary: data.summary,
         content: data.content,
         imageUrl: data.imageUrl,
+        images: data.images ?? [],
         status: data.status || 'PUBLISHED',
         prepTime: data.prepTime,
         cookTime: data.cookTime,
@@ -130,7 +134,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
   }
 });
 
-// Admin: Toggle featured status (must be BEFORE /:id routes)
+// Admin: Toggle featured status
 router.patch('/:id/feature', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
@@ -139,6 +143,36 @@ router.patch('/:id/feature', authMiddleware, async (req: Request, res: Response,
     // Use raw SQL to toggle isFeatured — bypasses stale Prisma client binary
     await prisma.$executeRaw`
       UPDATE "Recipe" SET "isFeatured" = NOT "isFeatured", "updatedAt" = NOW() WHERE id = ${id}
+    `;
+
+    const [updated] = await prisma.$queryRaw<any[]>`
+      SELECT r.*, 
+        COALESCE(json_agg(DISTINCT jsonb_build_object('id', c.id, 'name', c.name)) FILTER (WHERE c.id IS NOT NULL), '[]') AS categories,
+        COALESCE(json_agg(DISTINCT jsonb_build_object('id', i.id, 'name', i.name)) FILTER (WHERE i.id IS NOT NULL), '[]') AS ingredients
+      FROM "Recipe" r
+      LEFT JOIN "_RecipeCategories" rc ON rc."B" = r.id
+      LEFT JOIN "Category" c ON c.id = rc."A"
+      LEFT JOIN "_RecipeIngredients" ri ON ri."B" = r.id
+      LEFT JOIN "Ingredient" i ON i.id = ri."A"
+      WHERE r.id = ${id}
+      GROUP BY r.id
+    `;
+
+    if (!updated) return res.status(404).json({ error: 'Recipe not found' });
+    res.json({ ...updated, categories: updated.categories ?? [], ingredients: updated.ingredients ?? [] });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Admin: Toggle top article status
+router.patch('/:id/top-article', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid recipe ID' });
+
+    await prisma.$executeRaw`
+      UPDATE "Recipe" SET "isTopArticle" = NOT "isTopArticle", "updatedAt" = NOW() WHERE id = ${id}
     `;
 
     const [updated] = await prisma.$queryRaw<any[]>`
@@ -174,6 +208,7 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
         summary: data.summary,
         content: data.content,
         imageUrl: data.imageUrl,
+        images: data.images ?? [],
         status: data.status,
         prepTime: data.prepTime,
         cookTime: data.cookTime,

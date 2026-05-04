@@ -47,6 +47,13 @@ export const recipeApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['Recipe'],
     }),
+    toggleTopArticleRecipe: builder.mutation<Recipe, number>({
+      query: (id) => ({
+        url: `/recipes/${id}/top-article`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['Recipe'],
+    }),
     uploadImage: builder.mutation<{ imageUrl: string }, FormData>({
       query: (body) => ({
         url: '/uploads',
@@ -64,6 +71,7 @@ export const {
   useCreateRecipeMutation,
   useUpdateRecipeMutation,
   useToggleFeaturedRecipeMutation,
+  useToggleTopArticleRecipeMutation,
   useUploadImageMutation
 } = recipeApi;
 

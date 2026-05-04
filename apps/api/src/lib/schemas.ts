@@ -18,6 +18,7 @@ export const RecipeSchema = z.object({
     name: z.string(),
     quantity: z.string(),
   })).optional(),
+  images: z.array(z.string()).optional(),
   seo: z.object({
     title: z.string().optional(),
     description: z.string().optional(),

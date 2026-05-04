@@ -7,7 +7,7 @@ import { InstructionsEditor } from '../editor/InstructionsEditor';
 import { useGetAdminCategoriesQuery } from '@/store/api/categoryApi';
 import { useUploadImageMutation } from '@/store/api/recipeApi';
 import { Recipe, RecipeIngredient } from '@/lib/types';
-import { Loader2, Upload, Clock, Users, Trash2, GripVertical, ChevronDown, Award, MessageCircle, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { Loader2, Upload, Clock, Users, Trash2, GripVertical, ChevronDown, Award, MessageCircle, CheckCircle, AlertCircle, X, Plus, ImagePlus } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 const ingredientRowSchema = z.object({
@@ -33,6 +33,7 @@ const recipeFormSchema = z.object({
     title: z.string().optional(),
     description: z.string().optional(),
   }).optional(),
+  images: z.array(z.string()).optional(),
 });
 
 type RecipeFormValues = z.infer<typeof recipeFormSchema>;
@@ -47,6 +48,9 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   const { data: categories } = useGetAdminCategoriesQuery();
   const [uploadImage, { isLoading: isUploading }] = useUploadImageMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [galleryImages, setGalleryImages] = useState<string[]>(initialData?.images || []);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
 
   /* --- Toast notification state --- */
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -83,6 +87,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
           ? JSON.parse(initialData.ingredientsJson as string)
           : []) as RecipeIngredient[],
       seo: initialData?.seo || { title: '', description: '' },
+      images: initialData?.images || [],
     },
   });
 
@@ -134,6 +139,36 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
     } catch (err) {
       console.error('Failed to upload image:', err);
     }
+  };
+
+  /* --- Gallery image upload --- */
+  const handleGalleryFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setIsUploadingGallery(true);
+    try {
+      const urls: string[] = [];
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('image', file);
+        const result = await uploadImage(formData).unwrap();
+        urls.push(result.imageUrl);
+      }
+      const newImages = [...galleryImages, ...urls];
+      setGalleryImages(newImages);
+      setValue('images', newImages);
+    } catch (err) {
+      console.error('Failed to upload gallery image:', err);
+    } finally {
+      setIsUploadingGallery(false);
+      if (galleryInputRef.current) galleryInputRef.current.value = '';
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    const next = galleryImages.filter((_, i) => i !== index);
+    setGalleryImages(next);
+    setValue('images', next);
   };
 
   /* --- Form submission with error handling --- */
@@ -297,6 +332,70 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 accept="image/*"
               />
             </div>
+          </div>
+
+          {/* Gallery Images */}
+          <div className="rounded-lg border border-[#272a35] bg-[#1a1d26] p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-[#e4e6eb]">Gallery Images</label>
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#f29e1f] hover:text-[#f29e1f]/80 transition-colors"
+              >
+                {isUploadingGallery ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ImagePlus className="h-4 w-4" />
+                )}
+                Add Images
+              </button>
+              <input
+                type="file"
+                ref={galleryInputRef}
+                onChange={handleGalleryFileChange}
+                className="hidden"
+                accept="image/*"
+                multiple
+              />
+            </div>
+
+            {galleryImages.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3">
+                {galleryImages.map((url, idx) => (
+                  <div key={idx} className="relative group rounded-lg overflow-hidden border border-[#272a35] aspect-video">
+                    <img src={url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(idx)}
+                      className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                {isUploadingGallery && (
+                  <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-[#272a35] bg-[#141821] aspect-video">
+                    <Loader2 className="h-6 w-6 animate-spin text-[#8b929d]" />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div
+                onClick={() => galleryInputRef.current?.click()}
+                className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#272a35] bg-[#141821] px-6 py-8 transition-colors hover:border-[#f29e1f]/30"
+              >
+                {isUploadingGallery ? (
+                  <Loader2 className="h-8 w-8 animate-spin text-[#8b929d]" />
+                ) : (
+                  <>
+                    <ImagePlus className="h-8 w-8 text-[#8b929d] mb-2" />
+                    <p className="text-sm text-[#8b929d]">Add multiple photos of your recipe</p>
+                    <p className="text-xs text-[#8b929d]/60 mt-1">They appear in the gallery on the recipe page</p>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Recipe Details */}
