@@ -29,7 +29,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
     return (
       <div className="w-full bg-background min-h-screen pb-10">
         <article className="container mx-auto px-6 max-w-[1536px] pt-4">
-          
+
           {/* Breadcrumbs */}
           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4">
             <Link href="/" className="hover:text-primary transition-colors">Home</Link>
@@ -68,7 +68,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                   </span>
                 </div>
               </div>
-              
+
               {/* Thumbnail Gallery - only shown if gallery images exist */}
               {recipe.images && recipe.images.length > 0 && (
                 <div className="grid grid-cols-4 gap-3">
@@ -91,11 +91,11 @@ export default async function RecipePage({ params }: RecipePageProps) {
               <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-white leading-[1.05] tracking-tighter mb-6 font-heading">
                 {recipe.title}
               </h1>
-              
+
               <p className="text-[15px] text-muted-foreground leading-relaxed font-medium mb-8">
                 {recipe.summary || "Fruits are nutrient-dense, sweet or sour plant-based foods that develop from the flower's ovary and contain seeds. Essential for a healthy diet, they provide vital vitamins, minerals, and fiber."}
               </p>
-              
+
               <div className="flex items-center gap-8 mb-8">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-primary fill-primary drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
@@ -129,10 +129,10 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
           {/* Main Content & Sidebar Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-            
+
             {/* Left: Article, Ingredients, Instructions */}
             <div className="lg:col-span-2 space-y-8">
-              
+
               {/* About This Recipe (Article Content) */}
               <section className="prose prose-neutral dark:prose-invert max-w-none font-body">
                 <h2 className="text-2xl font-black text-white tracking-tighter mb-4 font-heading not-prose">About This Recipe</h2>
@@ -145,68 +145,41 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 </div>
               </section>
 
-              {/* Ingredients Box */}
-              {ingredientItems.length > 0 && (
-                <section className="bg-card/30 backdrop-blur-md border border-white/5 rounded-[24px] p-6 md:p-8 shadow-2xl">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-border/50 pb-5">
-                    <h2 className="text-2xl font-black text-white tracking-tighter font-heading">Ingredients</h2>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-4 bg-background/80 border border-white/5 rounded-xl px-2 py-1 shadow-inner">
-                        <button className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-white/5 hover:text-white transition-all"><Minus className="w-3.5 h-3.5" /></button>
-                        <span className="text-sm font-black text-white w-4 text-center">{recipe.servings || 4}</span>
-                        <button className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-white/5 hover:text-white transition-all"><Plus className="w-3.5 h-3.5" /></button>
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">servings</span>
-                    </div>
-                  </div>
-                  
-                  <ul className="grid sm:grid-cols-2 gap-y-4 gap-x-8">
-                    {ingredientItems.map((ing, idx) => (
-                      <li key={idx} className="flex items-start gap-3 group">
-                        <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0 group-hover:scale-125 transition-transform drop-shadow-[0_0_4px_rgba(245,158,11,0.5)]" />
-                        <span className="text-[13px] font-medium text-white/80 leading-relaxed group-hover:text-white transition-colors">
-                          <span className="font-bold text-white">{ing.quantity}</span> {ing.name}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
 
               {/* Instructions (If not inside Tiptap content) */}
               <section>
-                 <h2 className="text-2xl font-black text-white tracking-tighter mb-4 font-heading">Instructions</h2>
-                 <div className="space-y-4">
-                    {[
-                      "Cook the pasta according to package instructions. Drain and set aside.",
-                      "Heat olive oil in a large skillet over medium heat. Add minced garlic and sauté for 1-2 minutes until fragrant.",
-                      "Pour in the heavy cream and broth, stirring to combine. Bring to a simmer.",
-                      "Add parmesan cheese and Italian seasoning. Stir until the cheese is melted and the sauce is smooth.",
-                      "Season with salt and black pepper to taste.",
-                      "Add the cooked pasta to the skillet and toss to coat in the creamy sauce.",
-                      "Garnish with fresh parsley and extra parmesan. Serve warm and enjoy!"
-                    ].map((step, idx) => (
-                      <div key={idx} className="flex gap-4 group">
-                        <div className="w-7 h-7 shrink-0 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-black text-xs group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                          {idx + 1}
-                        </div>
-                        <p className="text-sm font-medium text-muted-foreground leading-relaxed pt-0.5 group-hover:text-white/90 transition-colors">
-                          {step}
-                        </p>
+                <h2 className="text-2xl font-black text-white tracking-tighter mb-4 font-heading">Instructions</h2>
+                <div className="space-y-4">
+                  {[
+                    "Cook the pasta according to package instructions. Drain and set aside.",
+                    "Heat olive oil in a large skillet over medium heat. Add minced garlic and sauté for 1-2 minutes until fragrant.",
+                    "Pour in the heavy cream and broth, stirring to combine. Bring to a simmer.",
+                    "Add parmesan cheese and Italian seasoning. Stir until the cheese is melted and the sauce is smooth.",
+                    "Season with salt and black pepper to taste.",
+                    "Add the cooked pasta to the skillet and toss to coat in the creamy sauce.",
+                    "Garnish with fresh parsley and extra parmesan. Serve warm and enjoy!"
+                  ].map((step, idx) => (
+                    <div key={idx} className="flex gap-4 group">
+                      <div className="w-7 h-7 shrink-0 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-black text-xs group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                        {idx + 1}
                       </div>
-                    ))}
-                 </div>
+                      <p className="text-sm font-medium text-muted-foreground leading-relaxed pt-0.5 group-hover:text-white/90 transition-colors">
+                        {step}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </section>
             </div>
 
             {/* Right: Sidebar */}
             <div className="space-y-6">
-              
+
               {/* Nutrition Information Card */}
               <div className="bg-card/40 backdrop-blur-xl border border-border/50 rounded-[24px] p-6 shadow-xl">
                 <h3 className="text-xl font-black text-white tracking-tighter mb-1 font-heading">Nutrition Information</h3>
                 <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-[0.2em] mb-6">(Per Serving)</p>
-                
+
                 <div className="space-y-1 mb-8">
                   {[
                     { label: 'Calories', value: '520 kcal', icon: Flame },
@@ -233,7 +206,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                     </div>
                     <p className="text-[13px] font-bold text-white ml-3.5">{recipe.categories[0]?.name || 'Dinner'}</p>
                   </div>
-                  
+
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -241,7 +214,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                     </div>
                     <p className="text-[13px] font-bold text-white ml-3.5">Italian</p>
                   </div>
-                  
+
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -268,6 +241,32 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
               {/* Sidebar Sponsored Card */}
               <DraggableSidebarAd />
+
+              {/* Ingredients Box in Sidebar */}
+              {ingredientItems.length > 0 && (
+                <div className="bg-card/40 backdrop-blur-xl border border-border/50 rounded-[24px] p-6 shadow-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
+                    <h3 className="text-xl font-black text-white tracking-tighter font-heading">Ingredients</h3>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 bg-background/80 border border-white/5 rounded-xl px-2 py-1">
+                        <button className="w-6 h-6 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-white/5 hover:text-white transition-all"><Minus className="w-3 h-3" /></button>
+                        <span className="text-sm font-black text-white w-4 text-center">{recipe.servings || 4}</span>
+                        <button className="w-6 h-6 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-white/5 hover:text-white transition-all"><Plus className="w-3 h-3" /></button>
+                      </div>
+                    </div>
+                  </div>
+                  <ul className="space-y-3">
+                    {ingredientItems.map((ing, idx) => (
+                      <li key={idx} className="flex items-start gap-3 group">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0 group-hover:scale-125 transition-transform" />
+                        <span className="text-[13px] font-medium text-white/80 leading-relaxed group-hover:text-white transition-colors">
+                          <span className="font-bold text-white">{ing.quantity}</span> {ing.name}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
             </div>
           </div>

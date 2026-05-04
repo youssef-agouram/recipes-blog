@@ -43,22 +43,22 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
       </div>
 
       <div className="relative group">
-        <button 
+        <button
           onClick={() => scroll('left')}
           className="absolute -left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all opacity-0 group-hover:opacity-100 shadow-2xl"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
 
-        <div 
+        <div
           ref={scrollRef}
           className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {recipes.map((recipe) => (
-            <Link 
-              key={recipe.id} 
-              href={`/recipes/${recipe.slug}`} 
+            <Link
+              key={recipe.id}
+              href={`/recipes/${recipe.slug}`}
               className="min-w-[220px] md:min-w-[calc(20%-13px)] snap-start group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border"
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -72,9 +72,9 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
                     <Bookmark className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <img 
-                  src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"} 
-                  alt={recipe.title} 
+                <img
+                  src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
+                  alt={recipe.title}
                   className="w-full h-full object-cover group-card:scale-105 transition-transform duration-[1.5s]"
                 />
                 <div className="absolute bottom-2.5 left-2.5 z-20">
@@ -107,8 +107,8 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
 
           {/* Placeholders */}
           {recipes.length < 5 && Array.from({ length: 5 - recipes.length }).map((_, i) => (
-            <div 
-              key={`placeholder-${i}`} 
+            <div
+              key={`placeholder-${i}`}
               className="min-w-[220px] md:min-w-[calc(20%-13px)] bg-card/30 rounded-xl flex flex-col border border-dashed border-border"
             >
               <div className="aspect-[4/3] w-full bg-white/[0.03] rounded-t-xl" />
@@ -124,7 +124,7 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
           ))}
         </div>
 
-        <button 
+        <button
           onClick={() => scroll('right')}
           className="absolute -right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all opacity-0 group-hover:opacity-100 shadow-2xl"
         >
