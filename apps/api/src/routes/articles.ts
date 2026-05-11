@@ -41,7 +41,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
 router.get('/:slug', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const article = await prisma.article.findUnique({
-      where: { slug: req.params.slug },
+      where: { slug: String(req.params.slug) },
     });
     if (!article) return res.status(404).json({ message: 'Article not found' });
     res.json(article);

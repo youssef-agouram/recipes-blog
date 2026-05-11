@@ -18,9 +18,5 @@ export default function NewRecipePage() {
     }
   };
 
-  return (
-    <div className="max-w-[1200px]">
-      <RecipeForm onSubmit={handleSubmit} isLoading={isLoading} />
-    </div>
-  );
+  return <RecipeForm onSubmit={handleSubmit} isLoading={isLoading} />;
 }

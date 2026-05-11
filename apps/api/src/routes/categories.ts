@@ -1,13 +1,23 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { CategorySchema } from '../lib/schemas';
+import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
-// Client: Get all categories
-router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
+// Get all categories
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { all } = req.query;
+    const where = all === 'true' ? {} : { status: 'PUBLISHED' };
+    
     const categories = await prisma.category.findMany({
+      where,
+      include: {
+        _count: {
+          select: { recipes: true }
+        }
+      },
       orderBy: { name: 'asc' },
     });
     res.json(categories);
@@ -16,8 +26,24 @@ router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+// Admin: Get single category
+router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const category = await prisma.category.findUnique({
+      where: { id: Number(id) },
+    });
+    if (!category) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    res.json(category);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Admin: Create category
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = CategorySchema.parse(req.body);
     const category = await prisma.category.create({ data });
@@ -28,7 +54,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // Admin: Update category
-router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const data = CategorySchema.parse(req.body);
@@ -43,7 +69,7 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // Admin: Delete category
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await prisma.category.delete({

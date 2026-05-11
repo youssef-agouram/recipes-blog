@@ -4,9 +4,28 @@ export interface SeoMeta {
   description?: string;
 }
 
+export interface CategoryGroup {
+  id: number;
+  name: string;
+  description?: string;
+  _count?: {
+    categories: number;
+  };
+}
+
 export interface Category {
   id: number;
   name: string;
+  slug: string;
+  description?: string;
+  imageUrl?: string;
+  icon?: string;
+  parentId?: number;
+  groupId?: number;
+  status: 'PUBLISHED' | 'HIDDEN';
+  displayOnHome: boolean;
+  isFeatured: boolean;
+  menuOrder: number;
 }
 
 export interface Ingredient {
@@ -17,6 +36,7 @@ export interface Ingredient {
 export interface RecipeIngredient {
   name: string;
   quantity: string;
+  unit?: string;
 }
 
 export interface Recipe {

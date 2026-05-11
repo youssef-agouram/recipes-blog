@@ -19,72 +19,74 @@ const TikTokIcon = () => (
 
 export function Footer() {
   return (
-    <footer className="bg-background pt-20 pb-32 text-foreground border-t border-border font-body">
+    <footer className="bg-[#05060b] pt-24 pb-12 text-foreground border-t border-white/5 font-body">
       <div className="container mx-auto px-6 max-w-[1536px]">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-16 lg:gap-12 mb-20">
           
           {/* Brand Info */}
-          <div className="lg:col-span-2 space-y-6">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-2xl">
+          <div className="lg:col-span-2 space-y-8">
+            <Link href="/" className="flex items-center gap-4 group">
+              <div className="relative w-12 h-12 rounded-full bg-[#f59e0b] flex items-center justify-center text-black font-black text-2xl shadow-[0_0_20px_rgba(245,158,11,0.2)]">
                 <span>T</span>
               </div>
-              <span className="font-black text-2xl tracking-tighter text-white font-heading">Taste<span className="text-primary">ful</span></span>
+              <span className="font-black text-3xl tracking-tighter text-white font-heading">Taste<span className="text-[#f59e0b]">ful</span></span>
             </Link>
-            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed font-medium">
+            <p className="text-[15px] text-slate-400 max-w-sm leading-relaxed font-medium">
               Delicious recipes for everyone. Explore thousands of handpicked recipes from around the world and share your culinary journey.
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {[FacebookIcon, InstagramIcon, TwitterIcon, YoutubeIcon].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 text-muted-foreground hover:text-primary hover:bg-white/10 transition-all border border-border group">
+                <a key={i} href="#" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-500 hover:text-white hover:bg-[#5850ec] transition-all border border-white/5 group shadow-lg">
                   <Icon />
                 </a>
               ))}
             </div>
           </div>
           
-          {/* Quick Links */}
-          <div className="space-y-6">
-            <h4 className="text-sm font-black uppercase tracking-widest text-white font-heading">Explore</h4>
+          {/* Explore Links */}
+          <div className="space-y-8">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white font-heading">Explore</h4>
             <ul className="space-y-4">
               {['All Recipes', 'Categories', 'Meal Plans', 'Popular Recipes', 'Latest Recipes'].map((item) => (
                 <li key={item}>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{item}</Link>
+                  <Link href="#" className="text-[14px] font-bold text-slate-500 hover:text-white transition-colors">{item}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="space-y-6">
-            <h4 className="text-sm font-black uppercase tracking-widest text-white font-heading">Information</h4>
+          {/* Information Links */}
+          <div className="space-y-8">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white font-heading">Information</h4>
             <ul className="space-y-4">
               {['About Us', 'Contact Us', 'Privacy Policy', 'Terms of Service', 'FAQ'].map((item) => (
                 <li key={item}>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{item}</Link>
+                  <Link href="#" className="text-[14px] font-bold text-slate-500 hover:text-white transition-colors">{item}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="space-y-6">
-            <h4 className="text-sm font-black uppercase tracking-widest text-white font-heading">Support</h4>
+          {/* Support Links */}
+          <div className="space-y-8">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white font-heading">Support</h4>
             <ul className="space-y-4">
               {['Help Center', 'Submit a Recipe', 'Community', 'Advertise with Us'].map((item) => (
                 <li key={item}>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{item}</Link>
+                  <Link href="#" className="text-[14px] font-bold text-slate-500 hover:text-white transition-colors">{item}</Link>
                 </li>
               ))}
             </ul>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">
             © {new Date().getFullYear()} Tasteful. All rights reserved.
           </p>
-          <div className="flex items-center gap-8">
-            <Link href="#" className="text-[11px] font-bold text-muted-foreground hover:text-primary uppercase tracking-[0.2em] transition-colors">Privacy Policy</Link>
-            <Link href="#" className="text-[11px] font-bold text-muted-foreground hover:text-primary uppercase tracking-[0.2em] transition-colors">Terms of Service</Link>
+          <div className="flex items-center gap-10">
+            <Link href="#" className="text-[10px] font-black text-slate-600 hover:text-white uppercase tracking-[0.3em] transition-colors">Privacy Policy</Link>
+            <Link href="#" className="text-[10px] font-black text-slate-600 hover:text-white uppercase tracking-[0.3em] transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>

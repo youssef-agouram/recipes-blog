@@ -21,14 +21,43 @@ function parseRecipe(recipe: any) {
   };
 }
 
+// Admin: Get recipe stats
+router.get('/stats', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const [total, published, draft, trash] = await Promise.all([
+      prisma.recipe.count({ where: { status: { not: 'TRASH' } } }),
+      prisma.recipe.count({ where: { status: 'PUBLISHED' } }),
+      prisma.recipe.count({ where: { status: 'DRAFT' } }),
+      prisma.recipe.count({ where: { status: 'TRASH' } }),
+    ]);
+
+    res.json({
+      total,
+      published,
+      draft,
+      trash,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Client: Get recipes with pagination and filters
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { page = 1, limit = 10, categoryId, search, featured, status } = req.query;
+    const { page = 1, limit = 10, categoryId, search, featured, status, all } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
     const where: any = {};
+    
+    // Default visibility: only PUBLISHED for public, all non-TRASH for Admin
+    if (all !== 'true') {
+      where.status = 'PUBLISHED';
+    } else {
+      where.status = { not: 'TRASH' };
+    }
+
     if (categoryId) {
       where.categories = { some: { id: Number(categoryId) } };
     }
@@ -93,7 +122,13 @@ router.get('/:slug', async (req: Request, res: Response, next: NextFunction) => 
 router.post('/', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = RecipeSchema.parse(req.body);
-    const slug = generateSlug(data.title);
+    let slug = generateSlug(data.title);
+    
+    // Check for unique slug
+    const existing = await prisma.recipe.findUnique({ where: { slug } });
+    if (existing) {
+      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    }
 
     const recipe = await prisma.recipe.create({
       data: {
@@ -199,39 +234,32 @@ router.patch('/:id/top-article', authMiddleware, async (req: Request, res: Respo
 router.put('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const data = RecipeSchema.parse(req.body);
+    const data = RecipeSchema.partial().parse(req.body);
+
+    const updateData: any = { ...data };
+    delete updateData.categoryIds;
+    delete updateData.ingredientIds;
+    delete updateData.seo;
+
+    // Handle relations
+    if (data.categoryIds) {
+      updateData.categories = { set: data.categoryIds.map((id) => ({ id })) };
+    }
+    if (data.ingredientIds) {
+      updateData.ingredients = { set: data.ingredientIds.map((id) => ({ id })) };
+    }
+    if (data.seo && (data.seo.title || data.seo.description)) {
+      updateData.seo = {
+        upsert: {
+          create: data.seo,
+          update: data.seo,
+        },
+      };
+    }
 
     const recipe = await prisma.recipe.update({
       where: { id: Number(id) },
-      data: {
-        title: data.title,
-        summary: data.summary,
-        content: data.content,
-        imageUrl: data.imageUrl,
-        images: data.images ?? [],
-        status: data.status,
-        prepTime: data.prepTime,
-        cookTime: data.cookTime,
-        servings: data.servings,
-        difficulty: data.difficulty,
-        allowComments: data.allowComments,
-        isFeatured: data.isFeatured,
-        ingredientsJson: data.ingredientsJson || undefined,
-        categories: data.categoryIds
-          ? { set: data.categoryIds.map((id) => ({ id })) }
-          : undefined,
-        ingredients: data.ingredientIds
-          ? { set: data.ingredientIds.map((id) => ({ id })) }
-          : undefined,
-        seo: data.seo && (data.seo.title || data.seo.description)
-          ? {
-              upsert: {
-                create: data.seo,
-                update: data.seo,
-              },
-            }
-          : undefined,
-      },
+      data: updateData,
       include: { categories: true, ingredients: true, seo: true },
     });
 

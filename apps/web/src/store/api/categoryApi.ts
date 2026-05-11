@@ -4,10 +4,14 @@ import { Category } from '@/lib/types';
 export const categoryApi = apiService.injectEndpoints({
   endpoints: (builder) => ({
     getAdminCategories: builder.query<Category[], void>({
-      query: () => '/categories',
+      query: () => '/categories?all=true',
       providesTags: ['Category'],
     }),
-    createCategory: builder.mutation<Category, { name: string }>({
+    getCategory: builder.query<Category, number>({
+      query: (id) => `/categories/${id}`,
+      providesTags: (_result, _error, id) => [{ type: 'Category', id }],
+    }),
+    createCategory: builder.mutation<Category, Partial<Category>>({
       query: (body) => ({
         url: '/categories',
         method: 'POST',
@@ -15,11 +19,11 @@ export const categoryApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['Category'],
     }),
-    updateCategory: builder.mutation<Category, { id: number; name: string }>({
-      query: ({ id, name }) => ({
+    updateCategory: builder.mutation<Category, { id: number } & Partial<Category>>({
+      query: ({ id, ...body }) => ({
         url: `/categories/${id}`,
         method: 'PUT',
-        body: { name },
+        body,
       }),
       invalidatesTags: ['Category'],
     }),
@@ -35,6 +39,7 @@ export const categoryApi = apiService.injectEndpoints({
 
 export const { 
   useGetAdminCategoriesQuery,
+  useGetCategoryQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation

@@ -1,5 +1,7 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import cors from 'cors';
 import recipesRouter from './routes/recipes';
 import categoriesRouter from './routes/categories';
@@ -8,10 +10,21 @@ import authRouter from './routes/auth';
 import uploadsRouter from './routes/uploads';
 import articlesRouter from './routes/articles';
 import settingsRouter from './routes/settings';
+import categoryGroupsRouter from './routes/categoryGroups';
 import compression from 'compression';
 import { errorHandler } from './middleware/error';
 
-dotenv.config();
+// Log JWT configuration status
+const jwtSecretStatus = process.env.JWT_SECRET ? 'LOADED' : 'MISSING (using fallback: "secret")';
+console.log('='.repeat(60));
+console.log('[STARTUP] Environment Configuration:');
+console.log(`  JWT_SECRET: ${jwtSecretStatus}`);
+if (process.env.JWT_SECRET) {
+  console.log(`  JWT_SECRET Preview: ${process.env.JWT_SECRET.substring(0, 15)}...`);
+}
+console.log(`  NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+console.log(`  DATABASE_URL: ${process.env.DATABASE_URL ? 'LOADED' : 'MISSING'}`);
+console.log('='.repeat(60));
 
 const app = express();
 
@@ -28,6 +41,7 @@ app.use('/auth', authRouter);
 app.use('/uploads', uploadsRouter);
 app.use('/articles', articlesRouter);
 app.use('/settings', settingsRouter);
+app.use('/category-groups', categoryGroupsRouter);
 
 // Health check
 app.get('/', (_req: express.Request, res: express.Response) => res.send('Recipes API is running...'));

@@ -12,12 +12,14 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isHydrating: boolean;
 }
 
 const initialState: AuthState = {
-  user: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null,
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-  isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('token') : false,
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  isHydrating: true,
 };
 
 const authSlice = createSlice({
@@ -42,8 +44,27 @@ const authSlice = createSlice({
         localStorage.removeItem('user');
       }
     },
+    hydrateFromStorage: (state) => {
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+        if (token) {
+          state.token = token;
+          state.isAuthenticated = true;
+        }
+        if (user) {
+          try {
+            state.user = JSON.parse(user);
+          } catch {
+            // Invalid JSON, clear it
+            localStorage.removeItem('user');
+          }
+        }
+      }
+      state.isHydrating = false;
+    },
   },
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, logout, hydrateFromStorage } = authSlice.actions;
 export default authSlice.reducer;

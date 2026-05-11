@@ -4,8 +4,9 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
 
+import { getJwtSecret } from '../lib/config';
+
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 const LoginSchema = z.object({
   email: z.string().email(),
@@ -33,7 +34,7 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ userId: user.id }, getJwtSecret(), { expiresIn: '1d' });
 
     res.json({
       token,
@@ -67,7 +68,7 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       },
     });
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ userId: user.id }, getJwtSecret(), { expiresIn: '1d' });
 
     res.status(201).json({
       token,

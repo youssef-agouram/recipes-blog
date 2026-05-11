@@ -3,32 +3,48 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
-  Utensils, 
-  Tags, 
-  MessageSquare, 
-  ImageIcon, 
+  BookOpen, 
+  Folder, 
+  Users, 
+  MessageCircle, 
+  TrendingUp,
   Settings,
   LogOut,
   Menu,
   Search,
   Bell,
   ChevronDown,
-  ChefHat
+  ChefHat,
+  ShieldCheck,
+  Camera,
+  Upload
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { logout } from '@/store/slices/authSlice';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 const sidebarLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/recipes', label: 'Recipes', icon: Utensils },
-  { href: '/admin/categories', label: 'Categories', icon: Tags },
-  { href: '/admin/articles', label: 'Articles', icon: MessageSquare },
-  { href: '/admin/media', label: 'Media', icon: ImageIcon },
+  { href: '/admin/recipes', label: 'Recipes', icon: BookOpen },
+  { href: '/admin/categories', label: 'Categories', icon: Folder },
+  { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/comments', label: 'Comments', icon: MessageCircle },
+  { href: '/admin/seo', label: 'SEO', icon: TrendingUp },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
+
+const settingSubLinks = [
+  { label: 'General', href: '/admin/settings' },
+  { label: 'Site Identity', href: '/admin/settings/identity' },
+  { label: 'Email Settings', href: '/admin/settings/email' },
+  { label: 'Social Profiles', href: '/admin/settings/social' },
+  { label: 'Advanced', href: '/admin/settings/advanced' },
+  { label: 'Backup & Restore', href: '/admin/settings/backup' },
+];
+
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -37,6 +53,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = useSelector((state: RootState) => state.auth.user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -47,68 +64,100 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     router.push('/admin/login');
   };
 
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
+      const url = URL.createObjectURL(file);
+      setLogoPreview(url);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
+    };
+  }, [logoPreview]);
+
   if (!mounted) {
-    return <div className="min-h-screen bg-[#0f1117]" />;
+    return null;
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-[#05060b]">
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 z-40 h-screen w-[240px] bg-[#0f1117] border-r border-[#272a35] transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-        {/* Logo */}
-        <div className="flex h-16 items-center px-5">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="relative w-7 h-7 rounded-lg bg-gradient-to-br from-[#f29e1f] to-[#f59e0b] flex items-center justify-center text-[#0f1117] font-black text-sm">
-               <span>T</span>
+      <aside className={`fixed left-0 top-0 z-40 h-screen w-[260px] bg-[#0a0b14] border-r border-white/5 transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 overflow-y-auto scrollbar-hide`}>
+        {/* Logo Section */}
+        <div className="pt-8 pb-10 px-6">
+          <Link href="/admin" className="flex items-center gap-3 group">
+            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl">
+               <ChefHat className="w-7 h-7 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-[#e4e6eb]">Taste<span className="text-[#f29e1f]">ful</span></span>
+            <div className="flex flex-col">
+              <span className="text-xl font-black text-white leading-none tracking-tight">
+                Tasty<span className="text-[#f59e0b]">Recipes</span>
+              </span>
+              <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mt-1.5">
+                Admin Panel
+              </span>
+            </div>
           </Link>
         </div>
 
-        {/* Nav */}
-        <nav className="px-3 py-4 space-y-1">
+        {/* Main Navigation */}
+        <nav className="px-4 space-y-1.5">
           {sidebarLinks.map((link) => {
             const Icon = link.icon;
-            const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+            const isActive = pathname === link.href || (link.href !== '/admin' && pathname.startsWith(link.href));
+            
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-4 rounded-xl px-4 py-3 text-[14px] font-bold transition-all duration-300 ${
                   isActive 
-                    ? 'bg-[#1a1d26] text-[#e4e6eb]' 
-                    : 'text-[#8b929d] hover:bg-[#1a1d26]/50 hover:text-[#e4e6eb]'
+                    ? 'bg-[#5850ec] text-white shadow-lg shadow-[#5850ec]/30 scale-[1.02]' 
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
                 }`}
               >
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-[#f29e1f]" />
-                )}
-                <Icon className="h-[18px] w-[18px]" />
+                <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span>{link.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Bottom User Card */}
-        <div className="absolute bottom-0 w-full px-3 pb-4">
-          <div className="flex items-center gap-3 rounded-lg bg-[#1a1d26] p-3 border border-[#272a35]">
-            <div className="h-9 w-9 rounded-full overflow-hidden bg-muted shrink-0">
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.name || 'User'} className="h-full w-full object-cover" />
-              ) : (
-                <div className="h-full w-full bg-[#272a35] flex items-center justify-center text-xs font-bold text-[#8b929d]">
-                  {user?.name?.charAt(0).toUpperCase() || 'J'}
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[#e4e6eb] truncate">{user?.name || 'John Doe'}</p>
-              <p className="text-xs text-[#8b929d]">{user?.role || 'Administrator'}</p>
-            </div>
-            <button onClick={handleLogout} className="text-[#8b929d] hover:text-[#e4e6eb] transition-colors shrink-0">
-              <ChevronDown className="h-4 w-4" />
-            </button>
+        {/* Settings Hierarchical Section */}
+        <div className="mt-10 px-8 pb-10">
+          <div className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.25em] mb-6">
+            Settings
+          </div>
+          
+          <div className="relative space-y-1">
+            {/* Vertical Line Connector */}
+            <div className="absolute left-[3px] top-2 bottom-4 w-[1.5px] bg-gradient-to-b from-white/10 via-white/5 to-transparent" />
+            
+            {settingSubLinks.map((sub, i) => {
+              const isSubActive = pathname === sub.href;
+              return (
+                <Link 
+                  key={sub.label} 
+                  href={sub.href}
+                  className="relative pl-7 py-2 group block"
+                >
+                  {/* Dot Connector */}
+                  <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-[7px] h-[7px] rounded-full border transition-all z-10 ${
+                    isSubActive ? 'border-[#5850ec] bg-[#5850ec] shadow-[0_0_8px_#5850ec]' : 'border-white/20 bg-[#0a0b14] group-hover:border-[#5850ec]'
+                  }`} />
+                  
+                  <span className={`text-[13px] font-bold transition-colors ${
+                    isSubActive ? 'text-white' : 'text-slate-500 group-hover:text-white'
+                  }`}>
+                    {sub.label}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </aside>
@@ -122,7 +171,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col lg:pl-[240px]">
+      <div className="flex flex-1 flex-col lg:pl-[260px]">
         {/* Header */}
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#272a35] bg-[#0f1117]/95 px-6 backdrop-blur">
           <div className="flex items-center gap-4">

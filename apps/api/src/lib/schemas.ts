@@ -7,7 +7,7 @@ export const RecipeSchema = z.object({
   content: z.any(), // Will be Tiptap JSON
   categoryIds: z.array(z.number()).optional(),
   ingredientIds: z.array(z.number()).optional(),
-  status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
+  status: z.enum(["DRAFT", "PUBLISHED", "HIDDEN", "TRASH"]).optional(),
   prepTime: z.string().optional(),
   cookTime: z.string().optional(),
   servings: z.number().int().min(1).optional(),
@@ -27,6 +27,21 @@ export const RecipeSchema = z.object({
 
 export const CategorySchema = z.object({
   name: z.string().min(2).max(50),
+  slug: z.string().min(2).max(50),
+  description: z.string().nullable().optional().or(z.literal("")),
+  imageUrl: z.string().nullable().optional().or(z.literal("")),
+  icon: z.string().nullable().optional().or(z.literal("")),
+  parentId: z.number().nullable().optional(),
+  groupId: z.number().nullable().optional(),
+  status: z.enum(["PUBLISHED", "HIDDEN"]).optional(),
+  displayOnHome: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
+  menuOrder: z.number().int().optional(),
+});
+
+export const CategoryGroupSchema = z.object({
+  name: z.string().min(2).max(50),
+  description: z.string().optional(),
 });
 
 export const IngredientSchema = z.object({

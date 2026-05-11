@@ -11,8 +11,8 @@ export default function EditRecipePage() {
   const params = useParams();
   const id = Number(params.id);
   
-  // Reuse the general recipes query for now, or add a getRecipeById if needed
-  const { data, isLoading: isFetching } = useGetAdminRecipesQuery({ limit: 100 });
+  // Use all: 'true' to ensure we can find drafts
+  const { data, isLoading: isFetching } = useGetAdminRecipesQuery({ limit: 100, all: 'true' as any });
   const [updateRecipe, { isLoading: isUpdating }] = useUpdateRecipeMutation();
 
   const recipe = data?.data.find((r) => r.id === id);
@@ -46,22 +46,6 @@ export default function EditRecipePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/admin/recipes" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border/40 hover:bg-muted">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Edit Recipe</h1>
-            <p className="text-sm text-muted-foreground">Modify your recipe details</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="pt-4">
-        <RecipeForm initialData={recipe} onSubmit={handleSubmit} isLoading={isUpdating} />
-      </div>
-    </div>
+    <RecipeForm initialData={recipe} onSubmit={handleSubmit} isLoading={isUpdating} />
   );
 }
