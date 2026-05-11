@@ -21,7 +21,7 @@ import { ActivityFeed } from '@/components/admin/dashboard/ActivityFeed';
 
 export default function AdminDashboardPage() {
   const user = useSelector((state: RootState) => state.auth.user);
-  const { data: recipesData } = useGetAdminRecipesQuery({ limit: 5 });
+  const { data: recipesData, isLoading: isLoadingRecipes } = useGetAdminRecipesQuery({ limit: 4 });
   const { data: categories } = useGetAdminCategoriesQuery();
 
   const stats = [
@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Bottom Grid */}
-      <RecentRecipesGrid />
+      <RecentRecipesGrid recipes={recipesData?.data} isLoading={isLoadingRecipes} />
     </div>
   );
 }

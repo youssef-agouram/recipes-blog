@@ -176,9 +176,12 @@ export default function SocialProfilesPage() {
                 <div className="space-y-3">
                   <label className="text-xs font-black text-white/60 uppercase tracking-widest">Size</label>
                   <div className="relative">
-                    <select className="appearance-none w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec] cursor-pointer">
+                    <select 
+                      defaultValue="Medium"
+                      className="appearance-none w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec] cursor-pointer"
+                    >
                       <option>Small</option>
-                      <option selected>Medium</option>
+                      <option>Medium</option>
                       <option>Large</option>
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 pointer-events-none" />

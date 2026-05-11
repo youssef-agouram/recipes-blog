@@ -144,10 +144,10 @@ export default function AdvancedSettingsPage() {
                     <div className="space-y-2">
                        <label className="text-sm font-bold text-white/90">Cache TTL</label>
                        <div className="relative">
-                          <select className="appearance-none w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec] cursor-pointer">
+                          <select defaultValue="24 Hours" className="appearance-none w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec] cursor-pointer">
                              <option>1 Hour</option>
                              <option>12 Hours</option>
-                             <option selected>24 Hours</option>
+                             <option>24 Hours</option>
                              <option>7 Days</option>
                           </select>
                           <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 pointer-events-none" />
