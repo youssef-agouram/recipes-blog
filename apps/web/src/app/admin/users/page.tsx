@@ -10,25 +10,13 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 
-const dummyUsers = [
-  { id: 1, name: 'John Doe', username: 'johndoe', email: 'john.doe@example.com', role: 'Administrator', status: 'Active', registeredOn: 'May 31, 2024 10:30 AM', recipes: 23, avatar: 'https://i.pravatar.cc/150?u=1' },
-  { id: 2, name: 'Jane Smith', username: 'janesmith', email: 'jane.smith@example.com', role: 'Editor', status: 'Active', registeredOn: 'May 30, 2024 09:15 AM', recipes: 18, avatar: 'https://i.pravatar.cc/150?u=2' },
-  { id: 3, name: 'Mike Johnson', username: 'mikejohnson', email: 'mike.johnson@example.com', role: 'Author', status: 'Active', registeredOn: 'May 29, 2024 04:45 AM', recipes: 12, avatar: 'https://i.pravatar.cc/150?u=3' },
-  { id: 4, name: 'Sarah Wilson', username: 'sarahwilson', email: 'sarah.wilson@example.com', role: 'Subscriber', status: 'Active', registeredOn: 'May 28, 2024 11:20 AM', recipes: 7, avatar: 'https://i.pravatar.cc/150?u=4' },
-  { id: 5, name: 'David Brown', username: 'davidbrown', email: 'david.brown@example.com', role: 'Subscriber', status: 'Inactive', registeredOn: 'May 27, 2024 02:30 PM', recipes: 0, avatar: 'https://i.pravatar.cc/150?u=5' },
-  { id: 6, name: 'Emily Davis', username: 'emilydavis', email: 'emily.davis@example.com', role: 'Author', status: 'Active', registeredOn: 'May 26, 2024 08:10 AM', recipes: 15, avatar: 'https://i.pravatar.cc/150?u=6' },
-  { id: 7, name: 'Chris Martin', username: 'chrismartin', email: 'chris.martin@example.com', role: 'Subscriber', status: 'Active', registeredOn: 'May 25, 2024 03:55 PM', recipes: 3, avatar: 'https://i.pravatar.cc/150?u=7' },
-  { id: 8, name: 'Lisa Anderson', username: 'lisaanderson', email: 'lisa.anderson@example.com', role: 'Subscriber', status: 'Inactive', registeredOn: 'May 24, 2024 01:40 PM', recipes: 0, avatar: 'https://i.pravatar.cc/150?u=8' },
-  { id: 9, name: 'Paul Taylor', username: 'paultaylor', email: 'paul.taylor@example.com', role: 'Author', status: 'Active', registeredOn: 'May 23, 2024 10:05 AM', recipes: 9, avatar: 'https://i.pravatar.cc/150?u=9' },
-  { id: 10, name: 'Anna White', username: 'annawhite', email: 'anna.white@example.com', role: 'Subscriber', status: 'Active', registeredOn: 'May 22, 2024 05:25 PM', recipes: 2, avatar: 'https://i.pravatar.cc/150?u=10' },
-];
-
-const stats = [
-  { label: 'Total Users', value: '156', sub: 'All registered users', icon: UsersIcon, color: 'bg-purple-500/10 text-purple-500' },
-  { label: 'Active Users', value: '142', sub: 'Users with active status', icon: UserCheck, color: 'bg-green-500/10 text-green-500' },
-  { label: 'Subscribers', value: '87', sub: 'Users subscribed to newsletter', icon: UserPlus, color: 'bg-orange-500/10 text-orange-500' },
-  { label: 'Administrators', value: '3', sub: 'Users with admin access', icon: ShieldCheck, color: 'bg-blue-500/10 text-blue-500' },
-];
+import { 
+  useGetUsersQuery, 
+  useGetUserStatsQuery, 
+  useUpdateUserRoleMutation,
+  useUpdateUserDetailsMutation,
+  useDeleteUserMutation
+} from '@/store/api/userApi';
 
 const getRoleColor = (role: string) => {
   switch (role) {
@@ -41,6 +29,60 @@ const getRoleColor = (role: string) => {
 
 export default function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const { data: users = [], isLoading: isUsersLoading } = useGetUsersQuery();
+  const { data: userStats, isLoading: isStatsLoading } = useGetUserStatsQuery();
+  const [updateRole, { isLoading: isUpdatingRole }] = useUpdateUserRoleMutation();
+  const [updateUserDetails] = useUpdateUserDetailsMutation();
+  const [deleteUser] = useDeleteUserMutation();
+
+  const [editingUser, setEditingUser] = useState<any>(null);
+
+  const handleRoleChange = async (userId: number, newRole: string) => {
+    try {
+      await updateRole({ id: userId, role: newRole }).unwrap();
+    } catch (error) {
+      console.error('Failed to update role:', error);
+    }
+  };
+
+  const handleDeleteUser = async (userId: number) => {
+    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      try {
+        await deleteUser(userId).unwrap();
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+      }
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    try {
+      await updateUserDetails({
+        id: editingUser.id,
+        name: editingUser.name,
+        email: editingUser.email,
+        status: editingUser.status,
+      }).unwrap();
+      setEditingUser(null);
+    } catch (error) {
+      console.error('Failed to update user:', error);
+    }
+  };
+
+  const filteredUsers = users.filter(user => 
+    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const stats = [
+    { label: 'Total Users', value: userStats?.totalUsers || 0, sub: 'All registered users', icon: UsersIcon, color: 'bg-purple-500/10 text-purple-500' },
+    { label: 'Active Users', value: userStats?.activeUsers || 0, sub: 'Users with active status', icon: UserCheck, color: 'bg-green-500/10 text-green-500' },
+    { label: 'Subscribers', value: userStats?.subscribers || 0, sub: 'Users with Subscriber role', icon: UserPlus, color: 'bg-orange-500/10 text-orange-500' },
+    { label: 'Administrators', value: userStats?.admins || 0, sub: 'Users with admin access', icon: ShieldCheck, color: 'bg-blue-500/10 text-blue-500' },
+  ];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -127,6 +169,7 @@ export default function AdminUsersPage() {
                 </th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">User</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Email</th>
+                <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Password</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Role</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Status</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50 text-center">Recipes</th>
@@ -134,29 +177,57 @@ export default function AdminUsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {dummyUsers.map((user) => (
+              {isUsersLoading ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-10 text-center text-muted-foreground">Loading users...</td>
+                </tr>
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-10 text-center text-muted-foreground">No users found</td>
+                </tr>
+              ) : filteredUsers.map((user) => (
                 <tr key={user.id} className="group hover:bg-white/[0.02] transition-colors">
                   <td className="px-6 py-5">
                     <input type="checkbox" className="rounded bg-background border-white/10 text-[#5850ec] focus:ring-offset-0 focus:ring-0" />
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-4">
-                      <div className="relative w-11 h-11 rounded-2xl overflow-hidden bg-white/5 border border-white/10 group-hover:scale-105 transition-transform">
-                        <Image src={user.avatar} alt={user.name} fill className="object-cover" />
+                      <div className="relative w-11 h-11 rounded-2xl overflow-hidden bg-white/5 border border-white/10 group-hover:scale-105 transition-transform flex items-center justify-center">
+                        {user.avatar ? (
+                           <Image src={user.avatar} alt={user.name || 'User'} fill className="object-cover" />
+                        ) : (
+                           <UsersIcon className="w-5 h-5 text-muted-foreground/40" />
+                        )}
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[14px] font-bold text-white group-hover:text-[#5850ec] transition-colors">{user.name}</span>
-                        <span className="text-[11px] font-medium text-muted-foreground/60 tracking-wider">@{user.username}</span>
+                        <span className="text-[14px] font-bold text-white group-hover:text-[#5850ec] transition-colors">{user.name || 'Anonymous User'}</span>
+                        <span className="text-[11px] font-medium text-muted-foreground/60 tracking-wider">
+                          Registered: {new Date(user.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-5">
                     <span className="text-sm font-medium text-muted-foreground group-hover:text-white transition-colors">{user.email}</span>
                   </td>
-                  <td className="px-6 py-5">
-                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${getRoleColor(user.role)}`}>
-                      {user.role}
+                  <td className="px-6 py-5 max-w-[150px]">
+                    <span className="text-sm font-mono text-muted-foreground/40 group-hover:text-muted-foreground transition-colors truncate block" title={user.password}>
+                      {user.password ? `${user.password.substring(0, 15)}...` : 'N/A'}
                     </span>
+                  </td>
+                  <td className="px-6 py-5">
+                    <select
+                      value={user.role}
+                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                      disabled={isUpdatingRole}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border appearance-none focus:outline-none focus:ring-2 focus:ring-[#5850ec] cursor-pointer transition-colors ${getRoleColor(user.role)} disabled:opacity-50`}
+                      style={{ backgroundImage: 'none' }}
+                    >
+                      <option value="Subscriber" className="bg-[#0c1021] text-orange-500 font-bold">SUBSCRIBER</option>
+                      <option value="Author" className="bg-[#0c1021] text-cyan-500 font-bold">AUTHOR</option>
+                      <option value="Editor" className="bg-[#0c1021] text-blue-500 font-bold">EDITOR</option>
+                      <option value="Administrator" className="bg-[#0c1021] text-purple-500 font-bold">ADMINISTRATOR</option>
+                    </select>
                   </td>
                   <td className="px-6 py-5">
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
@@ -166,17 +237,26 @@ export default function AdminUsersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-5 text-center">
-                    <span className="text-sm font-bold text-white">{user.recipes}</span>
+                    <span className="text-sm font-bold text-white">-</span>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-2">
-                      <button className="p-2 hover:bg-[#5850ec]/10 hover:text-[#5850ec] text-muted-foreground/40 rounded-lg transition-all" title="View Profile">
+                      <button 
+                        onClick={() => alert(`Viewing profile for ${user.name || user.email}`)}
+                        className="p-2 hover:bg-[#5850ec]/10 hover:text-[#5850ec] text-muted-foreground/40 rounded-lg transition-all" title="View Profile"
+                      >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button className="p-2 hover:bg-[#5850ec]/10 hover:text-[#5850ec] text-muted-foreground/40 rounded-lg transition-all" title="Edit User">
+                      <button 
+                        onClick={() => setEditingUser(user)}
+                        className="p-2 hover:bg-[#5850ec]/10 hover:text-[#5850ec] text-muted-foreground/40 rounded-lg transition-all" title="Edit User"
+                      >
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button className="p-2 hover:bg-red-500/10 hover:text-red-500 text-muted-foreground/40 rounded-lg transition-all" title="Delete User">
+                      <button 
+                        onClick={() => handleDeleteUser(user.id)}
+                        className="p-2 hover:bg-red-500/10 hover:text-red-500 text-muted-foreground/40 rounded-lg transition-all" title="Delete User"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -190,7 +270,7 @@ export default function AdminUsersPage() {
         {/* Pagination */}
         <div className="p-6 border-t border-white/5 flex items-center justify-between">
           <p className="text-xs font-bold text-muted-foreground/40">
-            Showing <span className="text-white/60">1</span> to <span className="text-white/60">10</span> of <span className="text-white/60">156</span> users
+            Showing <span className="text-white/60">1</span> to <span className="text-white/60">{filteredUsers.length}</span> of <span className="text-white/60">{users.length}</span> users
           </p>
           <div className="flex items-center gap-1.5">
             <button className="p-2 hover:bg-white/5 text-muted-foreground rounded-xl transition-all disabled:opacity-30" disabled>
@@ -212,6 +292,49 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
+      {/* Edit User Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="bg-[#0c1021] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+            <h2 className="text-xl font-bold text-white mb-6">Edit User Details</h2>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Name</label>
+                <input 
+                  type="text" 
+                  value={editingUser.name || ''} 
+                  onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec] transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Email</label>
+                <input 
+                  type="email" 
+                  value={editingUser.email || ''} 
+                  onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec] transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Status</label>
+                <select 
+                  value={editingUser.status}
+                  onChange={(e) => setEditingUser({...editingUser, status: e.target.value})}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec] transition-all appearance-none cursor-pointer"
+                >
+                  <option value="Active" className="bg-[#0c1021]">Active</option>
+                  <option value="Inactive" className="bg-[#0c1021]">Inactive</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-white text-sm font-bold hover:bg-white/5 transition-all">Cancel</button>
+                <button type="submit" className="flex-1 px-4 py-2.5 rounded-xl bg-[#5850ec] text-white text-sm font-bold hover:bg-[#4d45d1] transition-all">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

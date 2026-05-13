@@ -11,6 +11,7 @@ import uploadsRouter from './routes/uploads';
 import articlesRouter from './routes/articles';
 import settingsRouter from './routes/settings';
 import categoryGroupsRouter from './routes/categoryGroups';
+import usersRouter from './routes/users';
 import compression from 'compression';
 import { errorHandler } from './middleware/error';
 
@@ -42,6 +43,7 @@ app.use('/uploads', uploadsRouter);
 app.use('/articles', articlesRouter);
 app.use('/settings', settingsRouter);
 app.use('/category-groups', categoryGroupsRouter);
+app.use('/users', usersRouter);
 
 // Health check
 app.get('/', (_req: express.Request, res: express.Response) => res.send('Recipes API is running...'));

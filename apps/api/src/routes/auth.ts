@@ -42,6 +42,8 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
@@ -76,6 +78,8 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
