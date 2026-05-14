@@ -34,15 +34,18 @@ export default function RecipePreviewPage() {
           servings: data.servings,
           difficulty: data.difficulty,
           isFeatured: data.isFeatured,
+          isTopArticle: false,
           status: data.status,
           ingredientsJson: data.ingredientsJson,
+          instructions: data.instructions,
+          videoUrl: data.videoUrl,
           images: data.images || [],
           slug: data.slug || 'preview',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           categories: recipeCategories as any,
+          ingredients: [],
           allowComments: data.allowComments,
-          authorId: 0,
         };
         setRecipe(mockRecipe);
         setLoading(false);

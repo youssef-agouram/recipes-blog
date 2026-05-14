@@ -13,12 +13,17 @@ export const RecipeSchema = z.object({
   totalTime: z.string().optional(),
   servings: z.number().int().min(1).optional(),
   difficulty: z.enum(["easy", "medium", "hard"]).optional(),
+  videoUrl: z.string().url().optional().or(z.literal("")),
   allowComments: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   isTopArticle: z.boolean().optional(),
   ingredientsJson: z.array(z.object({
     name: z.string(),
     quantity: z.string(),
+    unit: z.string().optional(),
+  })).optional(),
+  instructions: z.array(z.object({
+    text: z.string(),
   })).optional(),
   images: z.array(z.string()).optional(),
   seo: z.object({

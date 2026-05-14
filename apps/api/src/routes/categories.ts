@@ -57,7 +57,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
 router.put('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const data = CategorySchema.parse(req.body);
+    const data = CategorySchema.partial().parse(req.body);
     const category = await prisma.category.update({
       where: { id: Number(id) },
       data,

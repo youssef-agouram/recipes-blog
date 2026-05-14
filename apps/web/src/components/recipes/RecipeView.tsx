@@ -16,6 +16,17 @@ interface RecipeViewProps {
 }
 
 export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) {
+  const getEmbedUrl = (url?: string) => {
+    if (!url) return null;
+    
+    // YouTube
+    const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+    
+    return null; // Not embeddable or different platform
+  };
+
+  const embedUrl = getEmbedUrl(recipe.videoUrl);
   const [selectedImage, setSelectedImage] = useState(recipe.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80");
   const [servings, setServings] = useState(recipe.servings || 4);
 
@@ -23,6 +34,12 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
     ? recipe.ingredientsJson
     : typeof recipe.ingredientsJson === 'string'
       ? JSON.parse(recipe.ingredientsJson)
+      : [];
+
+  const instructionItems = Array.isArray(recipe.instructions)
+    ? recipe.instructions
+    : typeof recipe.instructions === 'string'
+      ? JSON.parse(recipe.instructions)
       : [];
 
   const allImages = [recipe.imageUrl, ...(recipe.images || [])].filter(Boolean) as string[];
@@ -141,14 +158,14 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-primary fill-primary" />
-                  <span className="text-lg font-black text-white">4.8</span>
+                  <span className="text-lg font-black text-white">5.0</span>
                 </div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">324 Reviews</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">New Recipe</span>
               </div>
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4 text-primary" />
-                  <span className="text-lg font-black text-white">{recipe.nutrition?.calories || 450}</span>
+                  <span className="text-lg font-black text-white">{recipe.nutrition?.calories || 0}</span>
                 </div>
                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Calories</span>
               </div>
@@ -182,6 +199,43 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           {/* Left Content Area (8 cols) */}
           <div className="lg:col-span-8 space-y-16">
             
+            {/* Video Section */}
+            {recipe.videoUrl && (
+              <section className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                <div className="flex items-center gap-3 not-prose">
+                  <div className="w-1.5 h-8 bg-rose-500 rounded-full" />
+                  <h2 className="text-3xl font-black text-white tracking-tighter font-heading">Watch the Recipe</h2>
+                </div>
+                
+                {embedUrl ? (
+                  <div className="relative aspect-video rounded-[40px] overflow-hidden border border-white/5 shadow-2xl group">
+                    <iframe
+                      src={embedUrl}
+                      className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <a 
+                    href={recipe.videoUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center justify-center gap-6 aspect-video rounded-[40px] bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                      <PlayCircle className="w-10 h-10" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-black text-white tracking-tight">Watch on External Platform</p>
+                      <p className="text-sm text-muted-foreground font-medium">Click to view video on source site</p>
+                    </div>
+                  </a>
+                )}
+              </section>
+            )}
+
             {/* Content / Story */}
             <section className="prose prose-neutral dark:prose-invert max-w-none">
               <div className="flex items-center gap-3 mb-8 not-prose">
@@ -230,16 +284,20 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
 
               <ul className="space-y-4">
-                {ingredientItems.map((ing: any, idx: number) => (
-                  <li key={idx} className="flex items-start gap-4 group cursor-pointer">
-                    <div className="mt-1.5 w-4 h-4 rounded border border-white/10 flex items-center justify-center transition-all group-hover:border-primary group-hover:bg-primary/10">
-                      <div className="w-1.5 h-1.5 rounded-sm bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                    <span className="text-[14px] font-medium text-white/70 leading-relaxed group-hover:text-white transition-colors">
-                      <span className="font-bold text-white">{ing.quantity} {ing.unit}</span> {ing.name}
-                    </span>
-                  </li>
-                ))}
+                {ingredientItems.length > 0 ? (
+                  ingredientItems.map((ing: any, idx: number) => (
+                    <li key={idx} className="flex items-start gap-4 group cursor-pointer">
+                      <div className="mt-1.5 w-4 h-4 rounded border border-white/10 flex items-center justify-center transition-all group-hover:border-primary group-hover:bg-primary/10">
+                        <div className="w-1.5 h-1.5 rounded-sm bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-[14px] font-medium text-white/70 leading-relaxed group-hover:text-white transition-colors">
+                        <span className="font-bold text-white">{ing.quantity} {ing.unit}</span> {ing.name}
+                      </span>
+                    </li>
+                  ))
+                ) : (
+                  <p className="text-[11px] text-muted-foreground italic">No ingredients listed yet.</p>
+                )}
               </ul>
               
               <button className="w-full mt-10 py-4 rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-[0.25em] text-white transition-all group">
@@ -261,25 +319,27 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
 
               <div className="space-y-8">
-                {[
-                  { step: 1, title: "Prepare Base", desc: "Chop aromatics and heat pan over medium." },
-                  { step: 2, title: "Initial Searing", desc: "Sear ingredients until golden brown." },
-                  { step: 3, title: "Simmer & Infuse", desc: "Add liquid and simmer for 15-20 min." },
-                  { step: 4, title: "Final Garnish", desc: "Adjust seasoning and add fresh herbs." }
-                ].map((s) => (
-                  <div key={s.step} className="flex gap-4 group/step">
-                    <div className="flex flex-col items-center">
-                      <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">
-                        {s.step}
+                {instructionItems.length > 0 ? (
+                  instructionItems.map((s: any, idx: number) => (
+                    <div key={idx} className="flex gap-4 group/step">
+                      <div className="flex flex-col items-center">
+                        <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">
+                          {idx + 1}
+                        </div>
+                        {idx < instructionItems.length - 1 && (
+                          <div className="flex-1 w-px bg-white/5 my-2" />
+                        )}
                       </div>
-                      <div className="flex-1 w-px bg-white/5 my-2 group-last/step:hidden" />
+                      <div className="flex-1 pt-0.5">
+                        <p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">
+                          {s.text}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 pt-0.5">
-                      <h4 className="text-[13px] font-black text-white mb-1 tracking-tight group-hover/step:text-primary transition-colors">{s.title}</h4>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>
+                )}
               </div>
             </div>
 
@@ -295,12 +355,13 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {[
-                  { label: 'Protein', value: `${recipe.nutrition?.protein || '24g'}`, color: 'text-blue-400' },
-                  { label: 'Carbs', value: `${recipe.nutrition?.carbohydrates || '38g'}`, color: 'text-amber-400' },
-                  { label: 'Fat', value: `${recipe.nutrition?.fat || '12g'}`, color: 'text-red-400' },
-                  { label: 'Fiber', value: `${recipe.nutrition?.fiber || '6g'}`, color: 'text-emerald-400' },
+                  { label: 'Calories', value: `${recipe.nutrition?.calories || '0'}`, color: 'text-orange-400' },
+                  { label: 'Protein', value: `${recipe.nutrition?.protein ? recipe.nutrition.protein + 'g' : '0g'}`, color: 'text-blue-400' },
+                  { label: 'Carbs', value: `${recipe.nutrition?.carbohydrates ? recipe.nutrition.carbohydrates + 'g' : '0g'}`, color: 'text-amber-400' },
+                  { label: 'Fat', value: `${recipe.nutrition?.fat ? recipe.nutrition.fat + 'g' : '0g'}`, color: 'text-red-400' },
+                  { label: 'Fiber', value: `${recipe.nutrition?.fiber ? recipe.nutrition.fiber + 'g' : '0g'}`, color: 'text-emerald-400' },
                 ].map(nut => (
                   <div key={nut.label} className="p-4 rounded-3xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all">
                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>

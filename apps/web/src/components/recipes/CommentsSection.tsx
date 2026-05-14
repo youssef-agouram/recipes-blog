@@ -58,7 +58,7 @@ export default function CommentsSection({ recipeId }: { recipeId: number }) {
       
       // Optimistic update
       const newComment: Comment = {
-        ...response,
+        ...(response as any),
         user: {
           name: user?.name || 'You',
           avatar: user?.avatar

@@ -5,7 +5,7 @@ import React from 'react';
 interface GaugeChartProps {
   value: number;
   max?: number;
-  label: string;
+  label?: string;
   subLabel?: string;
   color?: string;
   size?: number;

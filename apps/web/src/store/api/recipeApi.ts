@@ -3,7 +3,7 @@ import { Recipe, PaginatedResponse } from '@/lib/types';
 
 export const recipeApi = apiService.injectEndpoints({
   endpoints: (builder) => ({
-    getAdminRecipes: builder.query<PaginatedResponse<Recipe>, { page?: number; limit?: number }>({
+    getAdminRecipes: builder.query<PaginatedResponse<Recipe>, { page?: number; limit?: number; all?: string }>({
       query: (params) => ({
         url: '/recipes',
         params,

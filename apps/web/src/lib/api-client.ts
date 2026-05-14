@@ -56,7 +56,7 @@ export const api = {
   },
   comments: {
     list: (recipeId: number) => fetcher<any[]>(`/comments/recipe/${recipeId}`),
-    create: (data: { text: string; rating?: number; recipeId: number; name?: string; email?: string }) => 
+    create: (data: { text: string; rating?: number; recipeId: number; name?: string; email?: string; parentId?: number }) => 
       fetcher("/comments", {
         method: "POST",
         body: JSON.stringify(data),

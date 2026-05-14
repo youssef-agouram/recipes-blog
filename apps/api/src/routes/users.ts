@@ -49,7 +49,7 @@ router.patch('/:id/role', async (req: Request, res: Response, next: NextFunction
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id as string) },
       data: { role },
     });
 
@@ -67,7 +67,7 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
     const { name, email, status } = req.body;
 
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id as string) },
       data: { name, email, status },
     });
 
@@ -83,7 +83,7 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
   try {
     const { id } = req.params;
     await prisma.user.delete({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id as string) },
     });
     res.json({ message: 'User deleted successfully' });
   } catch (error) {

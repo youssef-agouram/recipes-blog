@@ -56,8 +56,8 @@ export default function AdminCategoriesPage() {
         id,
         status: currentStatus === 'PUBLISHED' ? 'HIDDEN' : 'PUBLISHED'
       }).unwrap();
-    } catch (err) {
-      console.error('Failed to toggle status:', err);
+    } catch (err: any) {
+      console.error('Failed to toggle status:', err?.data?.error || err?.message || err);
     }
   };
 
@@ -291,14 +291,17 @@ export default function AdminCategoriesPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-xl overflow-hidden border border-border bg-muted flex items-center justify-center p-1.5">
-                            <img 
-                              src={`https://images.unsplash.com/photo-${[
-                                '1495147466023-ac5c588e2e94', '1546069901-ba9599a7e63c', '1473093226795-af9932fe5856', 
-                                '1551024506-0bccd828d307', '1512621776951-a57141f2eefd'
-                              ][i % 5]}?auto=format&fit=crop&w=100&q=80`} 
-                              className="h-full w-full object-cover rounded-lg"
-                            />
+                          <div className="h-10 w-10 rounded-xl overflow-hidden border border-border bg-muted flex items-center justify-center p-1.5 shrink-0">
+                            {cat.imageUrl ? (
+                              <img 
+                                src={cat.imageUrl} 
+                                className="h-full w-full object-cover rounded-lg"
+                              />
+                            ) : (
+                              <div className="h-full w-full rounded-lg bg-secondary/50 flex items-center justify-center">
+                                <LayoutGrid className="h-4 w-4 text-muted-foreground/40" />
+                              </div>
+                            )}
                           </div>
                           <span className="text-sm font-black text-white">{cat.name}</span>
                         </div>

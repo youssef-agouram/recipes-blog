@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Clock, Star, Heart, Bookmark, ChevronUp, ArrowRight, Search } from 'lucide-react';
-import { Recipe, Article } from '@/lib/types';
+import { Recipe } from '@/lib/types';
 
 interface TopArticlesSectionProps {
   items: any[];

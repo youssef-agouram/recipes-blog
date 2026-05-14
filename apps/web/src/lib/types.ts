@@ -1,5 +1,5 @@
 export interface SeoMeta {
-  id: number;
+  id?: number;
   title?: string;
   description?: string;
 }
@@ -26,6 +26,7 @@ export interface Category {
   displayOnHome: boolean;
   isFeatured: boolean;
   menuOrder: number;
+  _count?: { recipes: number };
 }
 
 export interface Ingredient {
@@ -47,7 +48,8 @@ export interface Recipe {
   imageUrl?: string;
   isFeatured: boolean;
   isTopArticle: boolean;
-  status: 'DRAFT' | 'PUBLISHED';
+  status: 'DRAFT' | 'PUBLISHED' | 'HIDDEN' | 'TRASH';
+  authorId?: number;
   prepTime?: string;
   cookTime?: string;
   totalTime?: string;
@@ -62,6 +64,9 @@ export interface Recipe {
   };
   allowComments: boolean;
   ingredientsJson?: RecipeIngredient[];
+  instructions?: { text: string }[];
+  videoUrl?: string;
+  views?: number;
   content: any; // Tiptap JSON content
   createdAt: string;
   updatedAt: string;
@@ -87,6 +92,7 @@ export interface Comment {
     avatar?: string;
   };
   replies?: Comment[];
+  recipe?: { id: number; title: string; slug: string; imageUrl?: string };
 }
 
 export interface PaginatedResponse<T> {

@@ -13,11 +13,13 @@ function parseRecipe(recipe: any) {
     return recipe.map(r => ({
       ...r,
       ingredientsJson: typeof r.ingredientsJson === 'string' ? JSON.parse(r.ingredientsJson) : r.ingredientsJson ?? [],
+      instructions: typeof r.instructions === 'string' ? JSON.parse(r.instructions) : r.instructions ?? [],
     }));
   }
   return {
     ...recipe,
     ingredientsJson: typeof recipe.ingredientsJson === 'string' ? JSON.parse(recipe.ingredientsJson) : recipe.ingredientsJson ?? [],
+    instructions: typeof recipe.instructions === 'string' ? JSON.parse(recipe.instructions) : recipe.instructions ?? [],
   };
 }
 
@@ -148,6 +150,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
         allowComments: data.allowComments ?? true,
         isFeatured: data.isFeatured ?? false,
         ingredientsJson: data.ingredientsJson || undefined,
+        instructions: data.instructions || undefined,
         categories: data.categoryIds
           ? { connect: data.categoryIds.map((id) => ({ id })) }
           : undefined,
