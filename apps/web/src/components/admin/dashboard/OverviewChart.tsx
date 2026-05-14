@@ -22,7 +22,7 @@ const data = [
   { name: 'May 21', recipes: 950, users: 600, comments: 280 },
 ];
 
-export const OverviewChart = () => {
+export const OverviewChart = ({ data }: { data?: any[] }) => {
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-[400px] flex flex-col">
       <div className="flex justify-between items-center mb-8">
@@ -39,7 +39,7 @@ export const OverviewChart = () => {
       
       <div className="flex-1 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+          <LineChart data={data || []} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
             <XAxis 
               dataKey="name" 

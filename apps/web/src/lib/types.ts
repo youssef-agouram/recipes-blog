@@ -71,6 +71,24 @@ export interface Recipe {
   images: string[];
 }
 
+export interface Comment {
+  id: number;
+  text: string;
+  rating?: number;
+  status: 'PENDING' | 'APPROVED' | 'SPAM';
+  recipeId: number;
+  name?: string;
+  avatar?: string;
+  createdAt: string;
+  likeCount: number;
+  parentId?: number;
+  user?: {
+    name: string;
+    avatar?: string;
+  };
+  replies?: Comment[];
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {

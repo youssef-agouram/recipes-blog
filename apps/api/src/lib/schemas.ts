@@ -93,4 +93,5 @@ export const SiteSettingsSchema = z.object({
   socialLinks: z.any().optional(),
   copyrightText: z.string(),
   aboutText: z.string().nullable().optional(),
+  commentSettings: z.any().optional(),
 });

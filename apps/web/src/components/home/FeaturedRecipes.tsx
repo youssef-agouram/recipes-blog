@@ -99,7 +99,11 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
             <Link
               key={recipe.id}
               href={`/recipes/${recipe.slug}`}
-              className="min-w-[220px] md:min-w-[calc(20%-13px)] md:max-w-[calc(20%-13px)] w-full snap-start group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border"
+              className={`${
+                isExpanded 
+                  ? "w-full" 
+                  : "min-w-[280px] md:min-w-[calc(20%-13px)] md:max-w-[calc(20%-13px)]"
+              } snap-start group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border`}
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden">
                 <div className="absolute top-2.5 left-2.5 z-20">
@@ -149,7 +153,11 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
           {recipes.length < 5 && Array.from({ length: 5 - recipes.length }).map((_, i) => (
             <div
               key={`placeholder-${i}`}
-              className="min-w-[220px] md:min-w-[calc(20%-13px)] bg-card/30 rounded-xl flex flex-col border border-dashed border-border"
+              className={`${
+                isExpanded 
+                  ? "w-full" 
+                  : "min-w-[280px] md:min-w-[calc(20%-13px)]"
+              } bg-card/30 rounded-xl flex flex-col border border-dashed border-border`}
             >
               <div className="aspect-[4/3] w-full bg-white/[0.03] rounded-t-xl" />
               <div className="p-3.5 space-y-2">

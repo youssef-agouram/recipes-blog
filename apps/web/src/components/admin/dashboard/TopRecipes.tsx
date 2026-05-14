@@ -47,7 +47,7 @@ const topRecipes = [
   }
 ];
 
-export const TopRecipes = () => {
+export const TopRecipes = ({ recipes = [] }: { recipes?: any[] }) => {
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full flex flex-col">
       <div className="flex justify-between items-center mb-6">
@@ -56,12 +56,12 @@ export const TopRecipes = () => {
       </div>
       
       <div className="space-y-5 flex-1">
-        {topRecipes.map((recipe, index) => (
+        {recipes.map((recipe, index) => (
           <div key={recipe.id} className="flex items-center gap-4 group">
             <div className="relative">
               <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-800 border border-white/5 relative">
                 <Image 
-                  src={recipe.image} 
+                  src={recipe.imageUrl || 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80'} 
                   alt={recipe.title}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -78,17 +78,17 @@ export const TopRecipes = () => {
               <div className="flex items-center gap-3 mt-1">
                 <div className="flex items-center gap-1">
                   <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
-                  <span className="text-xs font-bold text-white">{recipe.rating}</span>
-                  <span className="text-[10px] text-slate-500 font-medium">({recipe.reviews})</span>
+                  <span className="text-xs font-bold text-white">{recipe.rating || '0.0'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Eye className="w-3 h-3 text-slate-500" />
-                  <span className="text-[10px] text-slate-500 font-medium">{recipe.views}</span>
+                  <span className="text-[10px] text-slate-500 font-medium">1.2K</span>
                 </div>
               </div>
             </div>
           </div>
         ))}
+        {recipes.length === 0 && <p className="text-slate-500 text-xs italic text-center py-10">No top recipes data</p>}
       </div>
     </div>
   );

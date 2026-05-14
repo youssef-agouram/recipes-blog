@@ -1,52 +1,58 @@
 'use client';
 
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
-import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 interface StatsCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
   trend: {
     value: string;
     isUp: boolean;
   };
+  period: string;
   data: { value: number }[];
   color: string;
 }
 
-export const StatsCard = ({ title, value, icon: Icon, trend, data, color }: StatsCardProps) => {
+export const StatsCard = ({ title, value, trend, period, data, color }: StatsCardProps) => {
   return (
-    <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 relative overflow-hidden group hover:border-white/10 transition-all duration-300">
-      <div className="flex justify-between items-start mb-4">
-        <div className={`p-3 rounded-xl ${color} bg-opacity-10`}>
-          <Icon className={`w-6 h-6 ${color.replace('bg-', 'text-')}`} />
-        </div>
-        <div className="h-10 w-24">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={color.includes('orange') ? '#f97316' : color.includes('purple') ? '#a855f7' : color.includes('emerald') ? '#10b981' : '#f43f5e'}
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+    <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-5 relative overflow-hidden group hover:border-white/10 transition-all duration-300">
+      <div className="relative z-10">
+        <p className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-3">{title}</p>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h3 className="text-2xl font-black text-white mb-1">{value}</h3>
+            <div className="flex items-center gap-1.5">
+              <span className={`text-[11px] font-black ${trend.isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                {trend.isUp ? '↑' : '↓'} {trend.value}
+              </span>
+              <span className="text-slate-600 text-[10px] font-bold">{period}</span>
+            </div>
+          </div>
         </div>
       </div>
       
-      <div>
-        <p className="text-slate-400 text-sm font-medium mb-1">{title}</p>
-        <h3 className="text-3xl font-bold text-white mb-2">{value}</h3>
-        <div className="flex items-center gap-1.5">
-          <span className={`text-sm font-bold ${trend.isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
-            {trend.isUp ? '↑' : '↓'} {trend.value}
-          </span>
-          <span className="text-slate-500 text-xs font-medium">vs last week</span>
-        </div>
+      {/* Background Sparkline */}
+      <div className="absolute inset-x-0 bottom-0 h-12 opacity-50">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id={`gradient-${color}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity={0.4} />
+                <stop offset="100%" stopColor={color} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke={color}
+              strokeWidth={2}
+              fill={`url(#gradient-${color})`}
+              dot={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

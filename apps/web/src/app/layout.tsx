@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, Lora, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
+import { Toaster } from "sonner";
 
 const dmSans = DM_Sans({
   variable: "--font-heading",
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className="antialiased font-body flex min-h-screen flex-col">
         <ReduxProvider>
           {children}
+          <Toaster position="top-right" richColors theme="dark" closeButton />
         </ReduxProvider>
       </body>
     </html>

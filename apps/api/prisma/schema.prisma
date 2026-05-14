@@ -32,12 +32,37 @@ model Recipe {
   seo             SeoMeta?
   categories      Category[]   @relation("RecipeCategories")
   ingredients     Ingredient[] @relation("RecipeIngredients")
+  comments        Comment[]
 
   @@index([slug])
   @@index([title])
   @@index([isFeatured])
   @@index([isTopArticle])
   @@index([status])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String
+  rating    Int?
+  status    String   @default("PENDING") // PENDING, APPROVED, SPAM
+  likeCount Int      @default(0)
+  recipeId  Int
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  parentId  Int?
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+  name      String?  // For guests
+  email     String?  // For guests
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([recipeId])
+  @@index([status])
+  @@index([parentId])
 }
 
 model Category {
@@ -87,6 +112,7 @@ model User {
   role      String   @default("Subscriber")
   status    String   @default("Active")
   avatar    String?
+  comments  Comment[]
   createdAt DateTime @default(now())
 }
 
@@ -135,6 +161,7 @@ model SiteSettings {
   socialLinks     Json?   @default("[]")
   copyrightText   String  @default("© {year} Tasteful. All rights reserved.")
   aboutText       String?
+  commentSettings Json?   @default("{\"autoApprove\": false, \"allowGuest\": true, \"showRatings\": true, \"notifications\": true}")
 }
 
 model HeroSettings {
@@ -148,5 +175,15 @@ model HeroSettings {
 model Subscriber {
   id        Int      @id @default(autoincrement())
   email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Visit {
+  id        Int      @id @default(autoincrement())
+  path      String
+  ip        String?
+  userAgent String?
+  sessionId String?  // To group visits into sessions
+  duration  Int      @default(0) // Seconds spent
   createdAt DateTime @default(now())
 }

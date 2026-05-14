@@ -98,7 +98,11 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
               <Link
                 key={item.id || idx}
                 href={url}
-                className="min-w-[220px] md:min-w-[calc(20%-13px)] md:max-w-[calc(20%-13px)] w-full snap-start group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border"
+                className={`${
+                  isExpanded 
+                    ? "w-full" 
+                    : "min-w-[280px] md:min-w-[calc(20%-13px)] md:max-w-[calc(20%-13px)]"
+                } snap-start group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border`}
               >
                 <div className="relative aspect-[4/3] w-full overflow-hidden">
                   <div className="absolute top-2 left-2 z-20">
@@ -138,7 +142,11 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
           {items.length === 0 && Array.from({ length: 5 }).map((_, i) => (
             <div
               key={`placeholder-${i}`}
-              className="min-w-[220px] md:min-w-[calc(20%-13px)] animate-pulse bg-card rounded-xl h-[260px] border border-border"
+              className={`${
+                isExpanded 
+                  ? "w-full" 
+                  : "min-w-[280px] md:min-w-[calc(20%-13px)]"
+              } animate-pulse bg-card rounded-xl h-[260px] border border-border`}
             />
           ))}
         </div>

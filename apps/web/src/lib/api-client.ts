@@ -3,10 +3,13 @@ import { PaginatedResponse, Recipe, Category } from "./types";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
       ...options?.headers,
     },
   });
@@ -50,5 +53,14 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ email }),
     }),
+  },
+  comments: {
+    list: (recipeId: number) => fetcher<any[]>(`/comments/recipe/${recipeId}`),
+    create: (data: { text: string; rating?: number; recipeId: number; name?: string; email?: string }) => 
+      fetcher("/comments", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    like: (id: number) => fetcher(`/comments/${id}/like`, { method: "PATCH" }),
   },
 };

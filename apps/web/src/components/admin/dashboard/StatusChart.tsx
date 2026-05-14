@@ -9,7 +9,13 @@ const data = [
   { name: 'Pending Review', value: 148, color: '#0ea5e9' },
 ];
 
-export const StatusChart = () => {
+export const StatusChart = ({ published = 0, draft = 0, pending = 0 }: { published?: number, draft?: number, pending?: number }) => {
+  const data = [
+    { name: 'Published', value: published, color: '#f97316' },
+    { name: 'Draft', value: draft, color: '#a855f7' },
+    { name: 'Pending Review', value: pending, color: '#0ea5e9' },
+  ];
+  
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
@@ -54,7 +60,7 @@ export const StatusChart = () => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-white text-sm font-bold">{item.value}</span>
-                <span className="text-slate-500 text-xs">({((item.value / total) * 100).toFixed(1)}%)</span>
+                <span className="text-slate-500 text-xs">({total ? ((item.value / total) * 100).toFixed(1) : 0}%)</span>
               </div>
             </div>
           ))}
