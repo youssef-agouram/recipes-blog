@@ -9,7 +9,9 @@ const router = Router();
 // Storage configuration
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    const uploadPath = path.join(__dirname, '../../../web/public/uploads');
+    // Resolve path relative to the process root to be more reliable
+    const uploadPath = path.resolve(process.cwd(), '../web/public/uploads');
+    
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
@@ -23,7 +25,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // Increase to 10MB limit
   fileFilter: (_req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());

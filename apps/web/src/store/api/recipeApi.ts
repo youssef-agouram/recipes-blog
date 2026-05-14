@@ -68,7 +68,7 @@ export const recipeApi = apiService.injectEndpoints({
   }),
 });
 
-export const { 
+export const {
   useGetAdminRecipesQuery,
   useGetRecipeStatsQuery,
   useGetFeaturedRecipesQuery,

@@ -7,9 +7,9 @@ import { InstructionsEditor } from '../editor/InstructionsEditor';
 import { useGetAdminCategoriesQuery } from '@/store/api/categoryApi';
 import { useUploadImageMutation } from '@/store/api/recipeApi';
 import { Recipe, RecipeIngredient } from '@/lib/types';
-import { 
-  Loader2, Upload, Clock, Users, Trash2, ChevronDown, 
-  CheckCircle, AlertCircle, X, Plus, ImagePlus, 
+import {
+  Loader2, Upload, Clock, Users, Trash2, ChevronDown,
+  CheckCircle, AlertCircle, X, Plus, ImagePlus,
   ArrowLeft, Eye, Save, Star, Calendar, Edit2, Lightbulb, Check
 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -32,15 +32,23 @@ const recipeFormSchema = z.object({
   categoryIds: z.array(z.number()).min(1, 'Select at least one category'),
   prepTime: z.string().optional(),
   cookTime: z.string().optional(),
+  totalTime: z.string().optional(),
   servings: z.number().int().min(1).optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
   allowComments: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
-  status: z.enum(['DRAFT', 'PUBLISHED']).default('PUBLISHED'),
+  status: z.enum(['DRAFT', 'PUBLISHED', 'HIDDEN', 'TRASH']).default('PUBLISHED'),
   ingredientsJson: z.array(ingredientRowSchema).default([]),
   seo: z.object({
     title: z.string().optional(),
     description: z.string().optional(),
+  }).optional(),
+  nutrition: z.object({
+    calories: z.string().optional(),
+    protein: z.string().optional(),
+    carbohydrates: z.string().optional(),
+    fat: z.string().optional(),
+    fiber: z.string().optional(),
   }).optional(),
   images: z.array(z.string()).optional(),
   slug: z.string().optional(),
@@ -113,6 +121,23 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   const status = watch('status');
   const difficulty = watch('difficulty');
   const slug = watch('slug');
+  const prepTime = watch('prepTime') || '';
+  const cookTime = watch('cookTime') || '';
+
+  // Auto-calculate total time based on prepTime and cookTime
+  useEffect(() => {
+    const extractMins = (val: string) => {
+      const n = parseInt(val.replace(/[^0-9]/g, ''), 10);
+      return isNaN(n) ? 0 : n;
+    };
+    
+    if (prepTime || cookTime) {
+      const total = extractMins(prepTime) + extractMins(cookTime);
+      if (total > 0) {
+        setValue('totalTime', `${total} mins`);
+      }
+    }
+  }, [prepTime, cookTime, setValue]);
 
   /* --- Ingredients (managed via react-hook-form array) --- */
   const ingredients = watch('ingredientsJson') || [];
@@ -159,8 +184,10 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       setValue('imageUrl', result.imageUrl);
       showToast('success', 'Image uploaded successfully!');
     } catch (err: any) {
+      console.error('Upload error:', err);
       const errorMessage = err?.data?.error || err?.message || 'Failed to upload image. Please try again.';
-      showToast('error', errorMessage);
+      const status = err?.status ? ` (${err.status})` : '';
+      showToast('error', `${errorMessage}${status}`);
     }
   };
 
@@ -188,8 +215,10 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       setValue('images', newImages);
       showToast('success', `${urls.length} image(s) uploaded successfully!`);
     } catch (err: any) {
-      const errorMessage = err?.data?.error || err?.message || 'Failed to upload gallery images. Please try again.';
-      showToast('error', errorMessage);
+      console.error('Gallery upload error:', err);
+      const errorMessage = err?.data?.error || err?.message || 'Failed to upload some images.';
+      const status = err?.status ? ` (${err.status})` : '';
+      showToast('error', `${errorMessage}${status}`);
     } finally {
       setIsUploadingGallery(false);
       if (galleryInputRef.current) galleryInputRef.current.value = '';
@@ -218,15 +247,14 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       {/* Toast Notification */}
       <AnimatePresence>
         {toast && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20, x: 20 }}
             animate={{ opacity: 1, y: 0, x: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className={`fixed top-4 right-4 z-50 flex items-center gap-3 rounded-xl border px-5 py-4 shadow-2xl backdrop-blur-md ${
-            toast.type === 'success'
-              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-              : 'border-rose-500/30 bg-rose-500/10 text-rose-400'
-          }`}>
+            className={`fixed top-4 right-4 z-50 flex items-center gap-3 rounded-xl border px-5 py-4 shadow-2xl backdrop-blur-md ${toast.type === 'success'
+                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                : 'border-rose-500/30 bg-rose-500/10 text-rose-400'
+              }`}>
             {toast.type === 'success' ? (
               <CheckCircle className="h-5 w-5 shrink-0" />
             ) : (
@@ -243,7 +271,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       {/* Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-40 bg-background/80 backdrop-blur-md py-4 border-b border-border/50 -mx-4 px-4 sm:-mx-6 sm:px-6">
         <div className="flex items-center gap-4">
-          <button 
+          <button
             type="button"
             onClick={() => router.back()}
             className="flex items-center justify-center h-10 w-10 rounded-full border border-border bg-card hover:bg-secondary transition-colors"
@@ -287,7 +315,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
         {/* ─── Left Column ─── */}
         <div className="space-y-8">
-          
+
           {/* Recipe Title & Summary */}
           <div className="space-y-6">
             <div className="space-y-2">
@@ -365,11 +393,10 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                     key={level.value}
                     type="button"
                     onClick={() => setValue('difficulty', level.value as any)}
-                    className={`flex-1 flex items-center justify-center gap-2 h-10 px-3 rounded-full border text-xs font-bold transition-all ${
-                      difficulty === level.value 
+                    className={`flex-1 flex items-center justify-center gap-2 h-10 px-3 rounded-full border text-xs font-bold transition-all ${difficulty === level.value
                         ? `bg-${level.color}-500/10 border-${level.color}-500/50 text-${level.color}-400 ring-2 ring-${level.color}-500/20`
                         : 'bg-card border-border text-muted-foreground hover:border-muted-foreground/50'
-                    }`}
+                      }`}
                   >
                     <div className={`h-2 w-2 rounded-full ${difficulty === level.value ? `bg-${level.color}-400` : 'border border-muted-foreground'}`} />
                     {level.label}
@@ -415,6 +442,17 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 className="w-full h-11 rounded-xl border border-border bg-card px-4 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-amber-500" />
+                Total Time
+              </label>
+              <input
+                {...register('totalTime')}
+                placeholder="e.g. 50 mins"
+                className="w-full h-11 rounded-xl border border-border bg-amber-500/5 px-4 text-sm font-bold text-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all placeholder:text-amber-500/30"
+              />
+            </div>
           </div>
 
           {/* Featured Toggle */}
@@ -431,9 +469,8 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             <button
               type="button"
               onClick={() => setValue('isFeatured', !isFeatured)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isFeatured ? 'bg-primary' : 'bg-border'
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isFeatured ? 'bg-primary' : 'bg-border'
+                }`}
             >
               <motion.span
                 animate={{ x: isFeatured ? 22 : 4 }}
@@ -447,7 +484,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             <label className="text-sm font-semibold flex items-center gap-1.5">
               Ingredients <span className="text-rose-500">*</span>
             </label>
-            
+
             <div className="rounded-2xl border border-border bg-card overflow-hidden">
               <table className="w-full text-left">
                 <thead>
@@ -543,7 +580,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
 
         {/* ─── Right Column ─── */}
         <div className="space-y-8">
-          
+
           {/* Main Image Upload */}
           <div className="space-y-4">
             <label className="text-sm font-semibold flex items-center gap-1.5">
@@ -551,11 +588,10 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             </label>
             <div
               onClick={() => fileInputRef.current?.click()}
-              className={`relative aspect-[16/10] flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all ${
-                imageUrl 
-                  ? 'border-border overflow-hidden' 
+              className={`relative aspect-[16/10] flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all ${imageUrl
+                  ? 'border-border overflow-hidden'
                   : 'border-border bg-card hover:border-primary/50 hover:bg-secondary/30'
-              }`}
+                }`}
             >
               {imageUrl ? (
                 <>
@@ -641,7 +677,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
           {/* Publish Settings */}
           <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Publish</h3>
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</label>
@@ -674,7 +710,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 <div className="flex gap-2">
                   <div className="flex-1 flex items-center h-11 rounded-xl border border-border bg-background px-3 text-xs font-medium text-muted-foreground overflow-hidden">
                     <span className="opacity-50">/recipes/</span>
-                    <input 
+                    <input
                       {...register('slug')}
                       className="bg-transparent border-none outline-none text-foreground ml-0.5 w-full"
                       placeholder="recipe-url-slug"
@@ -685,6 +721,33 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Nutrition Information */}
+          <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Nutrition Information</h3>
+            <div className="space-y-4">
+              {[
+                { key: 'calories', label: 'Calories', unit: 'kcal', color: 'rose' },
+                { key: 'protein', label: 'Protein', unit: 'g', color: 'blue' },
+                { key: 'carbohydrates', label: 'Carbs', unit: 'g', color: 'amber' },
+                { key: 'fat', label: 'Fat', unit: 'g', color: 'orange' },
+                { key: 'fiber', label: 'Fiber', unit: 'g', color: 'emerald' },
+              ].map(({ key, label, unit, color }) => (
+                <div key={key} className="flex items-center gap-3">
+                  <div className={`h-2 w-2 rounded-full shrink-0 bg-${color}-400`} />
+                  <label className="text-xs font-semibold text-muted-foreground w-24 shrink-0">{label}</label>
+                  <div className="relative flex-1">
+                    <input
+                      {...register(`nutrition.${key as keyof typeof register}` as const)}
+                      placeholder="0"
+                      className="w-full h-9 rounded-lg border border-border bg-background px-3 pr-12 text-sm font-bold text-right focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase">{unit}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

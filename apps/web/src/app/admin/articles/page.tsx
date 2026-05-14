@@ -1,7 +1,7 @@
 'use client';
 
-import { useGetArticlesQuery, useDeleteArticleMutation } from '@/store/api/articleApi';
-import { Plus, Search, MoreHorizontal, Edit, Trash2, ExternalLink } from 'lucide-react';
+import { useGetArticlesQuery, useDeleteArticleMutation, useToggleTopArticleMutation } from '@/store/api/articleApi';
+import { Plus, Search, MoreHorizontal, Edit, Trash2, ExternalLink, Crown } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -14,6 +14,15 @@ export default function ArticlesPage() {
   );
 
   const [deleteArticle] = useDeleteArticleMutation();
+  const [toggleTopArticle] = useToggleTopArticleMutation();
+
+  const handleToggleTopArticle = async (id: number) => {
+    try {
+      await toggleTopArticle(id).unwrap();
+    } catch (err) {
+      console.error('Failed to toggle top article status:', err);
+    }
+  };
 
   const handleDelete = async (id: number) => {
     if (confirm('Are you sure you want to delete this article?')) {
@@ -92,7 +101,18 @@ export default function ArticlesPage() {
                     {new Date(article.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-2 transition-opacity">
+                      <button
+                        onClick={() => handleToggleTopArticle(article.id)}
+                        title={article.isTopArticle ? "Remove from Top Articles" : "Set as Top Article"}
+                        className={`p-2 rounded-lg border transition-all active:scale-95 ${
+                          article.isTopArticle 
+                            ? 'bg-[#f29e1f]/20 border-[#f29e1f]/50 text-[#f29e1f]' 
+                            : 'text-[#8b929d] hover:text-white'
+                        }`}
+                      >
+                        <Crown className={`h-4 w-4 ${article.isTopArticle ? 'fill-[#f29e1f]' : ''}`} />
+                      </button>
                       <Link href={`/blog/${article.slug}`} target="_blank" className="p-2 text-[#8b929d] hover:text-white transition-colors"><ExternalLink className="h-4 w-4" /></Link>
                       <button className="p-2 text-[#8b929d] hover:text-white transition-colors"><Edit className="h-4 w-4" /></button>
                       <button 

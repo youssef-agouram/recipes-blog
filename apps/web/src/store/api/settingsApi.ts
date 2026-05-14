@@ -14,10 +14,24 @@ export const settingsApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['Settings'],
     }),
+    getSiteSettings: builder.query<any, void>({
+      query: () => '/settings/site',
+      providesTags: ['Settings'],
+    }),
+    updateSiteSettings: builder.mutation<any, any>({
+      query: (body) => ({
+        url: '/settings/site',
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['Settings'],
+    }),
   }),
 });
 
 export const {
   useGetHeroSettingsQuery,
   useUpdateHeroSettingsMutation,
+  useGetSiteSettingsQuery,
+  useUpdateSiteSettingsMutation,
 } = settingsApi;

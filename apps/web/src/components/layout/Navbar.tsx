@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { logout } from '@/store/slices/authSlice';
+import { useGetSiteSettingsQuery } from '@/store/api/settingsApi';
 import {
   Search, Bell, User, Globe, ChevronDown, Plus,
   Menu, X, LogIn, UserPlus, Settings, LogOut,
@@ -25,16 +26,10 @@ const YoutubeIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.42a2.78 2.78 0 0 0-1.94 2C1 8.11 1 12 1 12s0 3.89.42 5.58a2.78 2.78 0 0 0 1.94 2c1.71.42 8.6.42 8.6.42s6.88 0 8.6-.42a2.78 2.78 0 0 0 1.94-2C23 15.89 23 12 23 12s0-3.89-.42-5.58z"></path><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"></polygon></svg>
 );
 
-const navLinks = [
-  { label: 'Home', href: '/' },
-  { label: 'Recipes', href: '/recipes' },
-  { label: 'Categories', href: '/categories' },
-  { label: 'Meal Plans', href: '/meal-plans' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'About Us', href: '/about' },
-];
+
 
 export function Navbar() {
+  const { data: settings, isLoading: isLoadingSettings } = useGetSiteSettingsQuery();
   const [mounted, setMounted] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,6 +42,14 @@ export function Navbar() {
   const { isAuthenticated, user, isHydrating } = useSelector(
     (state: RootState) => state.auth
   );
+
+  // Dynamic values from settings
+  const brandName = settings?.brandName;
+  const tagline = settings?.tagline;
+  const logoUrl = settings?.logoUrl;
+  const navLinks = settings?.menuItems?.length > 0 
+    ? settings.menuItems.filter((m: any) => m.visible !== false)
+    : []; // Remove default links completely if not in settings
 
   useEffect(() => {
     setMounted(true);
@@ -95,10 +98,13 @@ export function Navbar() {
     </div>
   );
 
+  if (!mounted || isLoadingSettings) return null; // Hide completely until ready with real data
+
   return (
     <div className="w-full flex flex-col">
       {/* 1. Top Bar */}
-      <div className="w-full bg-background border-b border-border py-2">
+      {settings?.showTopBar !== false && (
+        <div className="w-full bg-background border-b border-border py-2">
         <div className="container mx-auto px-6 max-w-[1536px] flex items-center justify-between">
           <div className="flex items-center gap-5">
             <SocialIcon name="Facebook" icon={FacebookIcon} />
@@ -122,38 +128,49 @@ export function Navbar() {
           </div>
         </div>
       </div>
+      )}
 
       {/* 2. Main Navbar */}
-      <header className="w-full bg-background/95 sticky top-0 z-50 backdrop-blur-xl border-b border-border">
+      <header className={`w-full bg-background/95 z-50 backdrop-blur-xl border-b border-border ${settings?.stickyNavbar !== false ? 'sticky top-0' : ''}`}>
         <div className="container mx-auto px-6 max-w-[1536px] h-20 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-2xl group-hover:scale-105 transition-transform ring-2 ring-primary/20 group-hover:ring-primary/40">
-              <Image
-                src="/logo.png"
-                alt="Tasteful Logo"
-                width={44}
-                height={44}
-                className="w-full h-full object-cover"
-                priority
-              />
+            <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-2xl group-hover:scale-105 transition-transform ring-2 ring-primary/20 group-hover:ring-primary/40 flex items-center justify-center">
+              {logoUrl ? (
+                <Image
+                  src={logoUrl}
+                  alt={`${brandName} Logo`}
+                  width={44}
+                  height={44}
+                  className="w-full h-full object-cover"
+                  priority
+                />
+              ) : (
+                <ChefHat className="w-7 h-7 text-primary" />
+              )}
             </div>
             <div className="flex flex-col leading-[1.1]">
-              <span className="font-black text-2xl tracking-tighter text-white font-heading">
-                Taste<span className="text-primary">ful</span>
-              </span>
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em] ml-0.5">
-                Delicious Recipes
-              </span>
+              {brandName ? (
+                <>
+                  <span className="font-black text-2xl tracking-tighter text-white font-heading">
+                    {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
+                  </span>
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em] ml-0.5">
+                    {tagline}
+                  </span>
+                </>
+              ) : (
+                <div className="h-8 w-32 bg-white/5 animate-pulse rounded-lg" />
+              )}
             </div>
           </Link>
 
           {/* Navigation — Desktop */}
           <nav className="hidden lg:flex items-center gap-8">
-            {navLinks.map((item) => (
+            {navLinks.map((item: any) => (
               <Link
                 key={item.label}
-                href={item.href}
+                href={item.url || item.href}
                 className="group relative py-2"
               >
                 <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground group-hover:text-white transition-colors">
@@ -166,56 +183,7 @@ export function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
-            {/* Search */}
-            <div className="relative flex items-center">
-              <div
-                className={`
-                  flex items-center overflow-hidden transition-all duration-500 ease-in-out
-                  ${searchOpen
-                    ? 'w-[260px] bg-white/5 border border-white/10 rounded-2xl px-4 shadow-lg shadow-primary/5'
-                    : 'w-10'
-                  }
-                `}
-              >
-                <button
-                  id="navbar-search-toggle"
-                  onClick={() => {
-                    setSearchOpen(!searchOpen);
-                    if (searchOpen) setSearchQuery('');
-                  }}
-                  className={`
-                    flex items-center justify-center shrink-0 transition-all group
-                    ${searchOpen
-                      ? 'w-8 h-10 text-primary'
-                      : 'w-10 h-10 rounded-2xl bg-white/5 text-muted-foreground hover:text-white hover:bg-white/10 border border-border'
-                    }
-                  `}
-                >
-                  {searchOpen ? (
-                    <X className="w-4 h-4" />
-                  ) : (
-                    <Search className="w-4.5 h-4.5 group-hover:scale-110 transition-transform" />
-                  )}
-                </button>
-                {searchOpen && (
-                  <input
-                    ref={searchInputRef}
-                    id="navbar-search-input"
-                    type="text"
-                    placeholder="Search recipes..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') {
-                        setSearchOpen(false);
-                        setSearchQuery('');
-                      }
-                    }}
-                    className="w-full bg-transparent text-sm text-white placeholder:text-muted-foreground/50 focus:outline-none py-2.5 ml-1"
-                  />
-                )}
-              </div>
-            </div>
+
 
             {/* Auth Area */}
             {mounted && !isHydrating && (
@@ -352,24 +320,26 @@ export function Navbar() {
                   </>
                 ) : (
                   /* ──── Logged Out State ──── */
-                  <div className="flex items-center gap-3 ml-1 pl-4 border-l border-border">
-                    <Link
-                      href="/login"
-                      id="navbar-login"
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white/80 hover:text-white bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all"
-                    >
-                      <LogIn className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Login</span>
-                    </Link>
-                    <Link
-                      href="/register"
-                      id="navbar-register"
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-primary/30"
-                    >
-                      <UserPlus className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Register</span>
-                    </Link>
-                  </div>
+                  settings?.showAuthButtons !== false && (
+                    <div className="flex items-center gap-3 ml-1 pl-4 border-l border-border">
+                      <Link
+                        href="/login"
+                        id="navbar-login"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white/80 hover:text-white bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all"
+                      >
+                        <LogIn className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Login</span>
+                      </Link>
+                      <Link
+                        href="/register"
+                        id="navbar-register"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-primary/30"
+                      >
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Register</span>
+                      </Link>
+                    </div>
+                  )
                 )}
               </>
             )}
@@ -397,23 +367,14 @@ export function Navbar() {
           `}
         >
           <div className="container mx-auto px-6 max-w-[1536px] py-6">
-            {/* Mobile Search */}
-            <div className="relative mb-6">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-              <input
-                id="navbar-mobile-search"
-                type="text"
-                placeholder="Search recipes, categories..."
-                className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/30 transition-all"
-              />
-            </div>
+
 
             {/* Mobile Nav Links */}
             <nav className="flex flex-col gap-1 mb-6">
-              {navLinks.map((item, idx) => (
+              {navLinks.map((item: any, idx: number) => (
                 <Link
                   key={item.label}
-                  href={item.href}
+                  href={item.url || item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-muted-foreground hover:text-white hover:bg-white/5 transition-all group"
                   style={{ animationDelay: `${idx * 50}ms` }}
@@ -427,7 +388,7 @@ export function Navbar() {
             </nav>
 
             {/* Mobile Auth Buttons */}
-            {mounted && !isHydrating && !isAuthenticated && (
+            {mounted && !isHydrating && !isAuthenticated && settings?.showAuthButtons !== false && (
               <div className="flex items-center gap-3 pt-4 border-t border-white/5">
                 <Link
                   href="/login"

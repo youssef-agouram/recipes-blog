@@ -10,10 +10,12 @@ export const RecipeSchema = z.object({
   status: z.enum(["DRAFT", "PUBLISHED", "HIDDEN", "TRASH"]).optional(),
   prepTime: z.string().optional(),
   cookTime: z.string().optional(),
+  totalTime: z.string().optional(),
   servings: z.number().int().min(1).optional(),
   difficulty: z.enum(["easy", "medium", "hard"]).optional(),
   allowComments: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
+  isTopArticle: z.boolean().optional(),
   ingredientsJson: z.array(z.object({
     name: z.string(),
     quantity: z.string(),
@@ -22,6 +24,13 @@ export const RecipeSchema = z.object({
   seo: z.object({
     title: z.string().optional(),
     description: z.string().optional(),
+  }).optional(),
+  nutrition: z.object({
+    calories: z.string().optional(),
+    protein: z.string().optional(),
+    carbohydrates: z.string().optional(),
+    fat: z.string().optional(),
+    fiber: z.string().optional(),
   }).optional(),
 });
 
@@ -54,6 +63,7 @@ export const ArticleSchema = z.object({
   summary: z.string().optional(),
   imageUrl: z.string().optional(),
   category: z.string().optional(),
+  isTopArticle: z.boolean().optional(),
 });
 
 export const HeroSettingsSchema = z.object({
@@ -65,4 +75,22 @@ export const HeroSettingsSchema = z.object({
 
 export const SubscriberSchema = z.object({
   email: z.string().email(),
+});
+
+export const SiteSettingsSchema = z.object({
+  logoUrl: z.string().nullable().optional(),
+  faviconUrl: z.string().nullable().optional(),
+  footerLogoUrl: z.string().nullable().optional(),
+  brandName: z.string(),
+  tagline: z.string(),
+  stickyNavbar: z.boolean(),
+  showSearchBar: z.boolean(),
+  showAuthButtons: z.boolean(),
+  showTopBar: z.boolean(),
+  menuItems: z.any().optional(),
+  profileMenu: z.any().optional(),
+  footerLinks: z.any().optional(),
+  socialLinks: z.any().optional(),
+  copyrightText: z.string(),
+  aboutText: z.string().nullable().optional(),
 });

@@ -36,6 +36,13 @@ export const articleApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['Article'],
     }),
+    toggleTopArticle: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/articles/${id}/toggle-top-article`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['Article'],
+    }),
   }),
 });
 
@@ -45,4 +52,5 @@ export const {
   useCreateArticleMutation,
   useUpdateArticleMutation,
   useDeleteArticleMutation,
+  useToggleTopArticleMutation,
 } = articleApi;

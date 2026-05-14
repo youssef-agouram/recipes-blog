@@ -50,7 +50,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     const take = Number(limit);
 
     const where: any = {};
-    
+
     // Default visibility: only PUBLISHED for public, all non-TRASH for Admin
     if (all !== 'true') {
       where.status = 'PUBLISHED';
@@ -123,7 +123,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
   try {
     const data = RecipeSchema.parse(req.body);
     let slug = generateSlug(data.title);
-    
+
     // Check for unique slug
     const existing = await prisma.recipe.findUnique({ where: { slug } });
     if (existing) {
@@ -141,6 +141,8 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
         status: data.status || 'PUBLISHED',
         prepTime: data.prepTime,
         cookTime: data.cookTime,
+        totalTime: data.totalTime,
+        nutrition: data.nutrition || undefined,
         servings: data.servings,
         difficulty: data.difficulty,
         allowComments: data.allowComments ?? true,
@@ -152,8 +154,8 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
         ingredients: data.ingredientIds
           ? { connect: data.ingredientIds.map((id) => ({ id })) }
           : undefined,
-        seo: data.seo && (data.seo.title || data.seo.description) 
-          ? { create: data.seo } 
+        seo: data.seo && (data.seo.title || data.seo.description)
+          ? { create: data.seo }
           : undefined,
       },
       include: { categories: true, ingredients: true, seo: true },

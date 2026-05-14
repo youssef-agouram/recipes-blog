@@ -71,7 +71,7 @@ export default function RecipeView({ recipe }: RecipeViewProps) {
               </div>
               <div className="absolute bottom-6 right-6">
                 <span className="px-4 py-2 rounded-full bg-black/50 backdrop-blur-md border border-white/5 text-[10px] font-bold uppercase tracking-widest text-white/90 flex items-center gap-1.5 shadow-lg">
-                  <Clock className="w-3.5 h-3.5 text-white/70" /> {recipe.cookTime || '0'}
+                  <Clock className="w-3.5 h-3.5 text-white/70" /> {recipe.totalTime || recipe.cookTime || '0'}
                 </span>
               </div>
             </div>
@@ -80,7 +80,7 @@ export default function RecipeView({ recipe }: RecipeViewProps) {
             {allImages.length > 1 && (
               <div className="relative group">
                 {/* Left Arrow */}
-                <button 
+                <button
                   onClick={() => {
                     const currentIndex = allImages.indexOf(selectedImage);
                     const nextIndex = (currentIndex - 1 + allImages.length) % allImages.length;
@@ -93,35 +93,33 @@ export default function RecipeView({ recipe }: RecipeViewProps) {
                   <Plus className="w-4 h-4 rotate-[225deg]" />
                 </button>
 
-                <div 
+                <div
                   id="thumbnail-slider"
                   className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth"
                 >
                   {allImages.map((imgUrl, i) => (
-                    <button 
-                      key={i} 
+                    <button
+                      key={i}
                       id={`thumb-${i}`}
                       onClick={() => setSelectedImage(imgUrl)}
-                      className={`relative flex-none w-[140px] aspect-[4/3] rounded-[24px] overflow-hidden border transition-all duration-300 snap-center ${
-                        selectedImage === imgUrl 
-                          ? 'border-primary ring-2 ring-primary/20 scale-95 shadow-2xl shadow-primary/20' 
+                      className={`relative flex-none w-[140px] aspect-[4/3] rounded-[24px] overflow-hidden border transition-all duration-300 snap-center ${selectedImage === imgUrl
+                          ? 'border-primary ring-2 ring-primary/20 scale-95 shadow-2xl shadow-primary/20'
                           : 'border-white/5 hover:border-primary/50 bg-card/30'
-                      }`}
+                        }`}
                     >
                       <Image
                         src={imgUrl}
                         alt={`${recipe.title} photo ${i + 1}`}
                         fill
-                        className={`object-cover transition-opacity duration-300 ${
-                          selectedImage === imgUrl ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'
-                        }`}
+                        className={`object-cover transition-opacity duration-300 ${selectedImage === imgUrl ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'
+                          }`}
                       />
                     </button>
                   ))}
                 </div>
 
                 {/* Right Arrow */}
-                <button 
+                <button
                   onClick={() => {
                     const currentIndex = allImages.indexOf(selectedImage);
                     const nextIndex = (currentIndex + 1) % allImages.length;
@@ -131,7 +129,7 @@ export default function RecipeView({ recipe }: RecipeViewProps) {
                   }}
                   className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-primary shadow-xl"
                 >
-                   <Plus className="w-4 h-4 -rotate-45" />
+                  <Plus className="w-4 h-4 -rotate-45" />
                 </button>
               </div>
             )}
@@ -154,7 +152,7 @@ export default function RecipeView({ recipe }: RecipeViewProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs font-bold text-white tracking-wide">{recipe.prepTime || '15'}</span>
+                <span className="text-xs font-bold text-white tracking-wide">{recipe.totalTime || recipe.prepTime || '15'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3.5 h-3.5 rounded-full border-2 border-muted-foreground flex items-center justify-center">
@@ -207,11 +205,11 @@ export default function RecipeView({ recipe }: RecipeViewProps) {
 
               <div className="space-y-1 mb-8">
                 {[
-                  { label: 'Calories', value: '520 kcal', icon: Flame },
-                  { label: 'Protein', value: '18 g' },
-                  { label: 'Carbohydrates', value: '54 g' },
-                  { label: 'Fat', value: '28 g' },
-                  { label: 'Fiber', value: '2 g' },
+                  { label: 'Calories', value: `${recipe.nutrition?.calories || 0} kcal`, icon: Flame },
+                  { label: 'Protein', value: `${recipe.nutrition?.protein || 0} g` },
+                  { label: 'Carbohydrates', value: `${recipe.nutrition?.carbohydrates || 0} g` },
+                  { label: 'Fat', value: `${recipe.nutrition?.fat || 0} g` },
+                  { label: 'Fiber', value: `${recipe.nutrition?.fiber || 0} g` },
                 ].map(nut => (
                   <div key={nut.label} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0 group">
                     <div className="flex items-center gap-3">
@@ -268,10 +266,10 @@ export default function RecipeView({ recipe }: RecipeViewProps) {
         {/* Footer Advertisement Banner */}
         <section className="mt-16 mb-8">
           <div className="relative w-full h-[180px] sm:h-[220px] rounded-[32px] overflow-hidden border border-white/5 group shadow-2xl">
-            <Image 
-              src="/cooking_ad_banner_1778463092338.png" 
-              alt="Premium Kitchenware Advertisement" 
-              fill 
+            <Image
+              src="/cooking_ad_banner_1778463092338.png"
+              alt="Premium Kitchenware Advertisement"
+              fill
               className="object-cover group-hover:scale-105 transition-transform duration-[5s]"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex flex-col justify-center px-10">

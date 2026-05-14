@@ -20,8 +20,10 @@ model Recipe {
   status          String       @default("PUBLISHED")
   prepTime        String?
   cookTime        String?
+  totalTime       String?
   servings        Int?
   difficulty      String?
+  nutrition       Json?
   views           Int          @default(0)
   allowComments   Boolean      @default(true)
   ingredientsJson Json?        @default("[]")
@@ -104,10 +106,35 @@ model Article {
   summary     String?
   imageUrl    String?
   category    String?
+  isTopArticle Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([slug])
+  @@index([isTopArticle])
+}
+
+model SiteSettings {
+  id              Int     @id @default(1)
+  logoUrl         String?
+  faviconUrl      String?
+  footerLogoUrl   String?
+  brandName       String  @default("Tasteful")
+  tagline         String  @default("Delicious Recipes")
+  
+  // Navbar settings
+  stickyNavbar    Boolean @default(true)
+  showSearchBar   Boolean @default(true)
+  showAuthButtons Boolean @default(true)
+  showTopBar      Boolean @default(true)
+  
+  // JSON fields for complex structures
+  menuItems       Json?   @default("[]")
+  profileMenu     Json?   @default("[]")
+  footerLinks     Json?   @default("{}")
+  socialLinks     Json?   @default("[]")
+  copyrightText   String  @default("© {year} Tasteful. All rights reserved.")
+  aboutText       String?
 }
 
 model HeroSettings {

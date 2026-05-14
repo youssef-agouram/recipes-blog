@@ -5,7 +5,8 @@ import {
   Plus, Edit2, Trash2, Loader2, Search, Bell, 
   Calendar, ChevronDown, Filter, Download, 
   MoreVertical, Copy, Eye, ArrowUpRight, ArrowDownRight,
-  LayoutGrid, List, CheckCircle2, Clock, Ban
+  LayoutGrid, List, CheckCircle2, Clock, Ban,
+  Crown
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -68,6 +69,17 @@ export default function AdminRecipesPage() {
       await createRecipe(cleanedData).unwrap();
     } catch (err) {
       console.error('Failed to duplicate recipe:', err);
+    }
+  };
+
+  const handleToggleTopArticle = async (id: number, currentVal: boolean) => {
+    try {
+      await updateRecipe({
+        id,
+        body: { isTopArticle: !currentVal }
+      }).unwrap();
+    } catch (err) {
+      console.error('Failed to toggle top article status:', err);
     }
   };
 
@@ -269,7 +281,7 @@ export default function AdminRecipesPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-2 transition-opacity">
                       {recipe.status === 'DRAFT' ? (
                         <button
                           onClick={() => handleToggleStatus(recipe.id, recipe.status)}
@@ -287,6 +299,18 @@ export default function AdminRecipesPage() {
                           <Clock className="h-3 w-3" /> Draft
                         </button>
                       )}
+
+                      <button
+                        onClick={() => handleToggleTopArticle(recipe.id, recipe.isTopArticle)}
+                        title={recipe.isTopArticle ? "Remove from Top Articles" : "Set as Top Article"}
+                        className={`h-8 w-8 flex items-center justify-center rounded-lg border transition-all active:scale-95 ${
+                          recipe.isTopArticle 
+                            ? 'bg-primary/20 border-primary/50 text-primary' 
+                            : 'bg-background border-border text-muted-foreground hover:bg-secondary'
+                        }`}
+                      >
+                        <Crown className={`h-3.5 w-3.5 ${recipe.isTopArticle ? 'fill-primary' : ''}`} />
+                      </button>
                       <Link
                         href={`/admin/recipes/edit/${recipe.id}`}
                         className="h-8 w-8 flex items-center justify-center rounded-lg border border-border bg-background hover:bg-secondary transition-colors"

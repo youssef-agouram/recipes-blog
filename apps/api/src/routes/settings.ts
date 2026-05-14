@@ -1,9 +1,45 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
-import { HeroSettingsSchema, SubscriberSchema } from '../lib/schemas';
+import { SiteSettingsSchema, HeroSettingsSchema, SubscriberSchema } from '../lib/schemas';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
+
+// Get site settings
+router.get('/site', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const settings = await prisma.siteSettings.findFirst();
+    res.json(settings || {
+      brandName: "Tasteful",
+      tagline: "Delicious Recipes",
+      stickyNavbar: true,
+      showSearchBar: true,
+      showAuthButtons: true,
+      showTopBar: true,
+      menuItems: [],
+      profileMenu: [],
+      socialLinks: [],
+      copyrightText: "© {year} Tasteful. All rights reserved."
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update site settings (Admin)
+router.put('/site', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = SiteSettingsSchema.parse(req.body);
+    const settings = await prisma.siteSettings.upsert({
+      where: { id: 1 },
+      update: data,
+      create: { ...data, id: 1 },
+    });
+    res.json(settings);
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Get hero settings
 router.get('/hero', async (_req: Request, res: Response, next: NextFunction) => {

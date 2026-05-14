@@ -16,9 +16,9 @@ export default function RecipePreviewPage() {
     if (previewData && categories) {
       try {
         const data = JSON.parse(previewData);
-        
+
         // Map category IDs to full category objects
-        const recipeCategories = categories.filter(c => 
+        const recipeCategories = categories.filter(c =>
           data.categoryIds?.includes(c.id)
         );
 

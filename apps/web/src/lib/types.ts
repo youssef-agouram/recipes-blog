@@ -50,8 +50,16 @@ export interface Recipe {
   status: 'DRAFT' | 'PUBLISHED';
   prepTime?: string;
   cookTime?: string;
+  totalTime?: string;
   servings?: number;
   difficulty?: 'easy' | 'medium' | 'hard';
+  nutrition?: {
+    calories?: string;
+    protein?: string;
+    carbohydrates?: string;
+    fat?: string;
+    fiber?: string;
+  };
   allowComments: boolean;
   ingredientsJson?: RecipeIngredient[];
   content: any; // Tiptap JSON content
