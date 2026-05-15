@@ -2,7 +2,8 @@ import Link from "next/link";
 import {
   ArrowRight, Clock, Users, Star, Search, ChevronRight, ChevronLeft, Heart, Play, Mail,
   CheckCircle, ShieldCheck, Zap, Sparkles, X, Coffee, Salad, CookingPot, Cake, Leaf,
-  WheatOff, Timer, CupSoda, Soup, Waves, Utensils
+  WheatOff, Timer, CupSoda, Soup, Waves, Utensils,
+  Pizza, Sandwich, Apple, Fish, Croissant, Carrot, Flame, Tag, LayoutGrid
 } from "lucide-react";
 import { Footer } from '@/components/layout/Footer';
 import { api } from "@/lib/api-client";
@@ -88,7 +89,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
           <div className="flex gap-4 overflow-x-auto pb-1 scrollbar-hide px-4">
             {categories.map((cat, i) => {
-              const iconMap: Record<string, any> = {
+              const availableIcons: Record<string, any> = {
+                Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
+                Apple, Fish, Croissant, Carrot, Soup, CupSoda,
+                Flame, Star, Heart, Clock, Tag, LayoutGrid
+              };
+
+              const fallbackIconMap: Record<string, any> = {
                 'breakfast': Coffee,
                 'lunch': Utensils,
                 'dinner': CookingPot,
@@ -102,7 +109,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               };
 
               const nameLower = cat.name.toLowerCase();
-              const Icon = iconMap[nameLower] || CookingPot; // Default cloche icon
+              
+              let Icon = CookingPot;
+              if (cat.icon && availableIcons[cat.icon]) {
+                Icon = availableIcons[cat.icon];
+              } else if (fallbackIconMap[nameLower]) {
+                Icon = fallbackIconMap[nameLower];
+              }
+
               const isGF = nameLower.includes('gluten free');
               const isQuick = nameLower.includes('quick');
 
