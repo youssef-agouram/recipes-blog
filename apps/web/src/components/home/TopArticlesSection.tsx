@@ -2,8 +2,39 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Clock, Star, Heart, Bookmark, ChevronUp, ArrowRight, Search } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Clock, 
+  Star, 
+  Heart, 
+  Bookmark, 
+  ChevronUp, 
+  ArrowRight, 
+  Search 
+} from 'lucide-react';
 import { Recipe } from '@/lib/types';
+import { 
+  useSaveRecipeMutation, 
+  useUnsaveRecipeMutation, 
+  useFavoriteRecipeMutation, 
+  useUnfavoriteRecipeMutation,
+  useGetSavedRecipesQuery,
+  useGetFavoritedRecipesQuery
+} from '@/store/api/recipeApi';
+import { 
+  useSaveArticleMutation, 
+  useUnsaveArticleMutation,
+  useFavoriteArticleMutation,
+  useUnfavoriteArticleMutation,
+  useGetSavedArticlesQuery,
+  useGetFavoritedArticlesQuery
+} from '@/store/api/articleApi';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface TopArticlesSectionProps {
   items: any[];
@@ -12,9 +43,110 @@ interface TopArticlesSectionProps {
 }
 
 export default function TopArticlesSection({ items, title, subtitle }: TopArticlesSectionProps) {
+  const router = useRouter();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  
+  const [saveRecipe] = useSaveRecipeMutation();
+  const [unsaveRecipe] = useUnsaveRecipeMutation();
+  const [favoriteRecipe] = useFavoriteRecipeMutation();
+  const [unfavoriteRecipe] = useUnfavoriteRecipeMutation();
+  const [saveArticle] = useSaveArticleMutation();
+  const [unsaveArticle] = useUnsaveArticleMutation();
+  const [favoriteArticle] = useFavoriteArticleMutation();
+  const [unfavoriteArticle] = useUnfavoriteArticleMutation();
+  
+  const { data: savedRecipes } = useGetSavedRecipesQuery(undefined, { skip: !isAuthenticated });
+  const { data: favoritedRecipes } = useGetFavoritedRecipesQuery(undefined, { skip: !isAuthenticated });
+  const { data: savedArticles } = useGetSavedArticlesQuery(undefined, { skip: !isAuthenticated });
+  const { data: favoritedArticles } = useGetFavoritedArticlesQuery(undefined, { skip: !isAuthenticated });
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [localSaved, setLocalSaved] = useState<Record<string, boolean>>({});
+  const [localFavorited, setLocalFavorited] = useState<Record<string, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleSaveToggle = async (e: React.MouseEvent, item: any, isRecipe: boolean) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to save");
+      router.push("/login");
+      return;
+    }
+
+    const key = `${isRecipe ? 'recipe' : 'article'}-${item.id}`;
+    const isSaved = localSaved[key] ?? item.isSaved;
+
+    try {
+      if (isRecipe) {
+        if (isSaved) {
+          setLocalSaved(prev => ({ ...prev, [key]: false }));
+          await unsaveRecipe(item.id).unwrap();
+          toast.success("Recipe removed from saved collection");
+        } else {
+          setLocalSaved(prev => ({ ...prev, [key]: true }));
+          await saveRecipe(item.id).unwrap();
+          toast.success("Recipe added to saved collection");
+        }
+      } else {
+        if (isSaved) {
+          setLocalSaved(prev => ({ ...prev, [key]: false }));
+          await unsaveArticle(item.id).unwrap();
+          toast.success("Article removed from saved collection");
+        } else {
+          setLocalSaved(prev => ({ ...prev, [key]: true }));
+          await saveArticle(item.id).unwrap();
+          toast.success("Article added to saved collection");
+        }
+      }
+    } catch (error) {
+      setLocalSaved(prev => ({ ...prev, [key]: isSaved })); // revert
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleFavoriteToggle = async (e: React.MouseEvent, item: any, isRecipe: boolean) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to favorite items");
+      router.push("/login");
+      return;
+    }
+
+    const key = `${isRecipe ? 'recipe' : 'article'}-${item.id}`;
+    const isFavorited = localFavorited[key] ?? item.isFavorited;
+
+    try {
+      if (isRecipe) {
+        if (isFavorited) {
+          setLocalFavorited(prev => ({ ...prev, [key]: false }));
+          await unfavoriteRecipe(item.id).unwrap();
+          toast.success("Recipe removed from favorites");
+        } else {
+          setLocalFavorited(prev => ({ ...prev, [key]: true }));
+          await favoriteRecipe(item.id).unwrap();
+          toast.success("Recipe added to favorites");
+        }
+      } else {
+        if (isFavorited) {
+          setLocalFavorited(prev => ({ ...prev, [key]: false }));
+          await unfavoriteArticle(item.id).unwrap();
+          toast.success("Article removed from favorites");
+        } else {
+          setLocalFavorited(prev => ({ ...prev, [key]: true }));
+          await favoriteArticle(item.id).unwrap();
+          toast.success("Article added to favorites");
+        }
+      }
+    } catch (error) {
+      setLocalFavorited(prev => ({ ...prev, [key]: isFavorited })); // revert
+      toast.error("Something went wrong");
+    }
+  };
 
   const filteredItems = [...items].filter(item => 
     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -94,6 +226,23 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
             const category = isRecipe ? (item.categories?.[0]?.name || 'Recipe') : (item.category || 'Article');
             const date = new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
+            const key = `${isRecipe ? 'recipe' : 'article'}-${item.id}`;
+            
+            // Hydrate from global state if available
+            let isSavedFromStore = false;
+            let isFavoritedFromStore = false;
+            
+            if (isRecipe) {
+              isSavedFromStore = savedRecipes?.some((r: any) => r.id === item.id) ?? false;
+              isFavoritedFromStore = favoritedRecipes?.some((r: any) => r.id === item.id) ?? false;
+            } else {
+              isSavedFromStore = savedArticles?.some((a: any) => a.id === item.id) ?? false;
+              isFavoritedFromStore = favoritedArticles?.some((a: any) => a.id === item.id) ?? false;
+            }
+
+            const isSaved = localSaved[key] ?? isSavedFromStore ?? item.isSaved;
+            const isFavorited = localFavorited[key] ?? isFavoritedFromStore ?? item.isFavorited;
+
             return (
               <Link
                 key={item.id || idx}
@@ -109,6 +258,30 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                     <span className={`px-1.5 py-0.5 rounded text-[6px] font-black uppercase tracking-wider text-white ${isRecipe ? 'bg-blue-500' : 'bg-primary'}`}>
                       {category}
                     </span>
+                  </div>
+                  <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+                    <button
+                      onClick={(e) => handleSaveToggle(e, item, isRecipe)}
+                      className={cn(
+                        "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                        isSaved
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : "bg-black/40 text-white hover:bg-primary"
+                      )}
+                    >
+                      <Bookmark className={cn("w-4.5 h-4.5", isSaved && "fill-current")} />
+                    </button>
+                    <button
+                      onClick={(e) => handleFavoriteToggle(e, item, isRecipe)}
+                      className={cn(
+                        "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                        isFavorited
+                          ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
+                          : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
+                      )}
+                    >
+                      <Heart className={cn("w-4.5 h-4.5", isFavorited && "fill-current")} />
+                    </button>
                   </div>
                   <img
                     src={item.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80"}

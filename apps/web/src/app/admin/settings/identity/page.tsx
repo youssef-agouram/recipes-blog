@@ -11,7 +11,12 @@ import {
 import { Reorder } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useGetSiteSettingsQuery, useUpdateSiteSettingsMutation } from '@/store/api/settingsApi';
+import { 
+  useGetSiteSettingsQuery, 
+  useUpdateSiteSettingsMutation,
+  useGetHeroSettingsQuery,
+  useUpdateHeroSettingsMutation
+} from '@/store/api/settingsApi';
 import { useUploadImageMutation } from '@/store/api/recipeApi';
 
 export default function SiteIdentityPage() {
@@ -21,6 +26,8 @@ export default function SiteIdentityPage() {
   // Site Settings state
   const { data: settings, isLoading: isLoadingSettings } = useGetSiteSettingsQuery();
   const [updateSettings, { isLoading: isUpdating }] = useUpdateSiteSettingsMutation();
+  const { data: heroSettings, isLoading: isLoadingHero } = useGetHeroSettingsQuery();
+  const [updateHeroSettings, { isLoading: isUpdatingHero }] = useUpdateHeroSettingsMutation();
   const [uploadImage] = useUploadImageMutation();
 
   const [formData, setFormData] = useState<any>({
@@ -36,6 +43,14 @@ export default function SiteIdentityPage() {
     socialLinks: [],
     copyrightText: '',
     aboutText: '',
+    aboutText: '',
+  });
+
+  const [heroFormData, setHeroFormData] = useState<any>({
+    imageUrl: '',
+    title: '',
+    subtitle: '',
+    ctaText: ''
   });
 
   useEffect(() => {
@@ -61,6 +76,17 @@ export default function SiteIdentityPage() {
   }, [settings]);
 
   useEffect(() => {
+    if (heroSettings) {
+      setHeroFormData({
+        imageUrl: heroSettings.imageUrl || '',
+        title: heroSettings.title || '',
+        subtitle: heroSettings.subtitle || '',
+        ctaText: heroSettings.ctaText || ''
+      });
+    }
+  }, [heroSettings]);
+
+  useEffect(() => {
     setMounted(true);
   }, []);
 
@@ -71,7 +97,10 @@ export default function SiteIdentityPage() {
         ...formData,
         menuItems: formData.menuItems.map(({ id, ...rest }: any) => rest)
       };
-      await updateSettings(dataToSave).unwrap();
+      await Promise.all([
+        updateSettings(dataToSave).unwrap(),
+        updateHeroSettings(heroFormData).unwrap()
+      ]);
     } catch (err) {
       console.error('Failed to save settings:', err);
     }
@@ -154,11 +183,11 @@ export default function SiteIdentityPage() {
         </div>
         <button 
           onClick={handleSave}
-          disabled={isUpdating}
+          disabled={isUpdating || isUpdatingHero}
           className="flex items-center gap-2 px-8 py-2.5 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-[#5850ec]/40 active:scale-95 disabled:opacity-50"
         >
-          {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          <span>{isUpdating ? 'Saving...' : 'Save Changes'}</span>
+          {(isUpdating || isUpdatingHero) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          <span>{(isUpdating || isUpdatingHero) ? 'Saving...' : 'Save Changes'}</span>
         </button>
       </div>
 
@@ -459,7 +488,74 @@ export default function SiteIdentityPage() {
             </div>
           </section>
 
-          {/* Hero Section Settings - Not yet implemented fully here, stays as is for now or link to dedicated page */}
+          {/* Hero Section Settings */}
+          <section id="hero-section" className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-10 scroll-mt-32 transition-all duration-500 hover:border-white/10">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-1">Hero Section Settings</h2>
+              <p className="text-sm text-muted-foreground/60">Manage the hero banner image displayed on the homepage</p>
+            </div>
+
+            <div className="space-y-6">
+              {/* Banner Upload / URL */}
+              <div className="space-y-4">
+                <label className="text-xs font-black text-white/60 uppercase tracking-widest">Hero Banner Image</label>
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                  <div className="w-full md:w-1/2 aspect-[21/9] rounded-2xl bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden group hover:border-[#5850ec]/50 transition-all cursor-pointer relative">
+                    {heroFormData.imageUrl ? (
+                      <img src={heroFormData.imageUrl} alt="Hero Banner" className="w-full h-full object-cover rounded-xl" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground/40">
+                        <ImageIcon className="w-8 h-8" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">No Image</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button 
+                        onClick={() => {
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.accept = 'image/*';
+                          input.onchange = async (e: any) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const data = new FormData();
+                            data.append('image', file);
+                            const res = await uploadImage(data).unwrap();
+                            setHeroFormData({ ...heroFormData, imageUrl: res.imageUrl });
+                          };
+                          input.click();
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-black text-[11px] font-bold rounded-lg shadow-xl"
+                      >
+                        <Upload className="w-4 h-4" /> Upload New
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 space-y-4 w-full">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Or provide an image URL</label>
+                      <input 
+                        type="text" 
+                        value={heroFormData.imageUrl}
+                        onChange={(e) => setHeroFormData({ ...heroFormData, imageUrl: e.target.value })}
+                        placeholder="https://example.com/banner.jpg"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="px-2 py-1 bg-[#5850ec]/10 text-[#5850ec] border border-[#5850ec]/20 rounded text-[10px] font-black tracking-widest">
+                        1920px × 500px
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/40 italic">
+                        Recommended Resolution
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
           
           {/* Footer Settings Section */}
           <section id="footer-section" className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-10 scroll-mt-32 transition-all duration-500 hover:border-white/10 pb-12">

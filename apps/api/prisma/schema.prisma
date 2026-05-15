@@ -35,6 +35,8 @@ model Recipe {
   categories      Category[]   @relation("RecipeCategories")
   ingredients     Ingredient[] @relation("RecipeIngredients")
   comments        Comment[]
+  savedRecipes    SavedRecipe[]
+  favoriteRecipes FavoriteRecipe[]
 
   @@index([slug])
   @@index([title])
@@ -105,7 +107,6 @@ model Ingredient {
   name    String   @unique
   recipes Recipe[] @relation("RecipeIngredients")
 }
-
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -115,7 +116,63 @@ model User {
   status    String   @default("Active")
   avatar    String?
   comments  Comment[]
+  savedRecipes SavedRecipe[]
+  savedArticles SavedArticle[]
+  favoriteRecipes FavoriteRecipe[]
+  favoriteArticles FavoriteArticle[]
   createdAt DateTime @default(now())
+}
+
+model SavedRecipe {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipeId  Int
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, recipeId])
+  @@index([userId])
+  @@index([recipeId])
+}
+
+model FavoriteRecipe {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipeId  Int
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, recipeId])
+  @@index([userId])
+  @@index([recipeId])
+}
+
+model SavedArticle {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleId Int
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, articleId])
+  @@index([userId])
+  @@index([articleId])
+}
+
+model FavoriteArticle {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleId Int
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, articleId])
+  @@index([userId])
+  @@index([articleId])
 }
 
 model SeoMeta {
@@ -137,6 +194,8 @@ model Article {
   isTopArticle Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  savedArticles SavedArticle[]
+  favoriteArticles FavoriteArticle[]
 
   @@index([slug])
   @@index([isTopArticle])

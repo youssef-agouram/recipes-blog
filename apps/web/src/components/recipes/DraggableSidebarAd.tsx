@@ -21,12 +21,12 @@ export default function DraggableSidebarAd() {
       whileDrag={{ scale: 1.05, cursor: 'grabbing' }}
       style={{
         position: 'fixed',
-        top: 80,
+        top: 120,
         right: 24,
         width: 280,
-        zIndex: 9999,
+        zIndex: 9999999,
       }}
-      className="rounded-[24px] overflow-hidden border border-border/50 group shadow-2xl cursor-grab bg-card aspect-[4/3]"
+      className="rounded-[24px] overflow-hidden border border-border/50 group shadow-2xl cursor-grab bg-card aspect-[4/3] print:hidden"
     >
       <div className="pointer-events-none w-full h-full absolute inset-0">
         <img

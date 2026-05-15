@@ -7,10 +7,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { logout } from '@/store/slices/authSlice';
 import { useGetSiteSettingsQuery } from '@/store/api/settingsApi';
+import { useGetSavedRecipesQuery, useGetFavoritedRecipesQuery } from '@/store/api/recipeApi';
+import { useGetSavedArticlesQuery, useGetFavoritedArticlesQuery } from '@/store/api/articleApi';
+import { cn } from '@/lib/utils';
 import {
   Search, Bell, User, Globe, ChevronDown, Plus,
   Menu, X, LogIn, UserPlus, Settings, LogOut,
-  BookOpen, Heart, ChefHat, Bookmark
+  BookOpen, Heart, ChefHat, Bookmark, Sparkles
 } from 'lucide-react';
 
 const FacebookIcon = () => (
@@ -43,11 +46,19 @@ export function Navbar() {
     (state: RootState) => state.auth
   );
 
+  const { data: savedRecipes } = useGetSavedRecipesQuery(undefined, { skip: !isAuthenticated });
+  const { data: favoritedRecipes } = useGetFavoritedRecipesQuery(undefined, { skip: !isAuthenticated });
+  const { data: savedArticles } = useGetSavedArticlesQuery(undefined, { skip: !isAuthenticated });
+  const { data: favoritedArticles } = useGetFavoritedArticlesQuery(undefined, { skip: !isAuthenticated });
+
+  const totalSaved = (savedRecipes?.length || 0) + (savedArticles?.length || 0);
+  const totalFavorited = (favoritedRecipes?.length || 0) + (favoritedArticles?.length || 0);
+
   // Dynamic values from settings
   const brandName = settings?.brandName;
   const tagline = settings?.tagline;
   const logoUrl = settings?.logoUrl;
-  const navLinks = settings?.menuItems?.length > 0 
+  const navLinks = settings?.menuItems?.length > 0
     ? settings.menuItems.filter((m: any) => m.visible !== false)
     : []; // Remove default links completely if not in settings
 
@@ -86,6 +97,26 @@ export function Navbar() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [showTopAd, setShowTopAd] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > 200) {
+        setShowTopAd(true);
+      } else {
+        setShowTopAd(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -98,36 +129,61 @@ export function Navbar() {
     </div>
   );
 
-  if (!mounted || isLoadingSettings) return null; // Hide completely until ready with real data
+  // We no longer block the entire Navbar render. 
+  // Instead, we use inline skeletons for specific parts.
 
   return (
-    <div className="w-full flex flex-col">
+    <>
+      {/* Floating Top Ad Bar - Appears when navbar is hidden */}
+      <div className={cn(
+        "fixed top-4 left-1/2 -translate-x-1/2 w-[32%] min-w-[320px] z-[999999] transition-all duration-500 ease-out pointer-events-auto print:hidden",
+        showTopAd ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-12 pointer-events-none"
+      )}>
+        <div className="bg-[#f59e0b]/90 backdrop-blur-2xl border border-white/20 rounded-3xl px-6 py-3.5 shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex items-center justify-between gap-6 group hover:scale-[1.02] transition-transform">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white animate-pulse" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">Limited Time Deal</span>
+              <span className="text-[8px] font-bold text-white/70 uppercase tracking-[0.1em]">Save 50% on all premium plans</span>
+            </div>
+          </div>
+          <button className="bg-white text-[#f59e0b] px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all shadow-xl">
+            Get Pro
+          </button>
+        </div>
+      </div>
+
+      <div className={cn(
+        "w-full flex flex-col transition-all duration-500 ease-in-out print:hidden"
+      )}>
       {/* 1. Top Bar */}
       {settings?.showTopBar !== false && (
         <div className="w-full bg-background border-b border-border py-2">
-        <div className="container mx-auto px-6 max-w-[1536px] flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <SocialIcon name="Facebook" icon={FacebookIcon} />
-            <SocialIcon name="Instagram" icon={InstagramIcon} />
-            <SocialIcon name="Twitter" icon={TwitterIcon} />
-            <SocialIcon name="Youtube" icon={YoutubeIcon} />
-          </div>
+          <div className="container mx-auto px-6 max-w-[1536px] flex items-center justify-between">
+            <div className="flex items-center gap-5">
+              <SocialIcon name="Facebook" icon={FacebookIcon} />
+              <SocialIcon name="Instagram" icon={InstagramIcon} />
+              <SocialIcon name="Twitter" icon={TwitterIcon} />
+              <SocialIcon name="Youtube" icon={YoutubeIcon} />
+            </div>
 
-          <div className="hidden md:flex items-center gap-2">
-            <p className="text-[10px] font-black text-muted-foreground tracking-[0.2em] uppercase">
-              Get 30% Off on Premium Meal Plans — Limited Time Offer! ✨
-            </p>
-          </div>
+            <div className="hidden md:flex items-center gap-2">
+              <p className="text-[10px] font-black text-muted-foreground tracking-[0.2em] uppercase">
+                Get 30% Off on Premium Meal Plans — Limited Time Offer! ✨
+              </p>
+            </div>
 
-          <div className="flex items-center gap-2 cursor-pointer group">
-            <Globe className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest group-hover:text-white transition-colors">
-              English
-            </span>
-            <ChevronDown className="w-3 h-3 text-muted-foreground/60 group-hover:text-white transition-colors" />
+            <div className="flex items-center gap-2 cursor-pointer group">
+              <Globe className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest group-hover:text-white transition-colors">
+                English
+              </span>
+              <ChevronDown className="w-3 h-3 text-muted-foreground/60 group-hover:text-white transition-colors" />
+            </div>
           </div>
         </div>
-      </div>
       )}
 
       {/* 2. Main Navbar */}
@@ -167,18 +223,26 @@ export function Navbar() {
 
           {/* Navigation — Desktop */}
           <nav className="hidden lg:flex items-center gap-8">
-            {navLinks.map((item: any) => (
-              <Link
-                key={item.label}
-                href={item.url || item.href}
-                className="group relative py-2"
-              >
-                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground group-hover:text-white transition-colors">
-                  {item.label}
-                </span>
-                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary transition-all duration-300 group-hover:w-full rounded-full" />
-              </Link>
-            ))}
+            {isLoadingSettings ? (
+              <>
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="w-16 h-2.5 bg-white/10 animate-pulse rounded-full" />
+                ))}
+              </>
+            ) : (
+              navLinks.map((item: any) => (
+                <Link
+                  key={item.label}
+                  href={item.url || item.href}
+                  className="group relative py-2"
+                >
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground group-hover:text-white transition-colors">
+                    {item.label}
+                  </span>
+                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary transition-all duration-300 group-hover:w-full rounded-full" />
+                </Link>
+              ))
+            )}
           </nav>
 
           {/* Right Actions */}
@@ -186,7 +250,12 @@ export function Navbar() {
 
 
             {/* Auth Area */}
-            {mounted && !isHydrating && (
+            {(!mounted || isHydrating) ? (
+              <div className="flex items-center gap-3 ml-1 pl-4 border-l border-border">
+                <div className="w-20 h-10 bg-white/5 animate-pulse rounded-2xl hidden sm:block" />
+                <div className="w-24 h-10 bg-white/5 animate-pulse rounded-2xl" />
+              </div>
+            ) : (
               <>
                 {isAuthenticated ? (
                   /* ──── Logged In State ──── */
@@ -242,9 +311,8 @@ export function Navbar() {
                             </span>
                           </div>
                           <ChevronDown
-                            className={`hidden md:block w-3.5 h-3.5 text-muted-foreground/50 transition-transform duration-300 ${
-                              profileDropdownOpen ? 'rotate-180' : ''
-                            }`}
+                            className={`hidden md:block w-3.5 h-3.5 text-muted-foreground/50 transition-transform duration-300 ${profileDropdownOpen ? 'rotate-180' : ''
+                              }`}
                           />
                         </button>
 
@@ -278,27 +346,49 @@ export function Navbar() {
                               </div>
                             </div>
 
-                            {/* Menu Items */}
-                            <div className="p-2">
-                              {[
-                                { icon: BookOpen, label: 'My Recipes', href: '/my-recipes' },
-                                { icon: Heart, label: 'Favorites', href: '/favorites' },
-                                { icon: Bookmark, label: 'Saved', href: '/saved' },
-                                { icon: Settings, label: 'Settings', href: '/settings' },
-                              ].map((item) => (
-                                <Link
-                                  key={item.label}
-                                  href={item.href}
-                                  onClick={() => setProfileDropdownOpen(false)}
-                                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:text-white hover:bg-white/5 transition-all group"
-                                >
-                                  <item.icon className="w-4 h-4 group-hover:text-primary transition-colors" />
-                                  <span className="text-[13px] font-semibold">
-                                    {item.label}
-                                  </span>
-                                </Link>
-                              ))}
-                            </div>
+                             {/* Menu Items */}
+                             <div className="p-2">
+                               {[
+                                 { icon: BookOpen, label: 'My Recipes', href: '/my-recipes' },
+                                 { 
+                                   icon: Heart, 
+                                   label: 'Favorites', 
+                                   href: '/favorites',
+                                   count: totalFavorited,
+                                   color: 'text-rose-400'
+                                 },
+                                 { 
+                                   icon: Bookmark, 
+                                   label: 'Saved', 
+                                   href: '/saved',
+                                   count: totalSaved,
+                                   color: 'text-primary'
+                                 },
+                                 { icon: Settings, label: 'Settings', href: '/settings' },
+                               ].map((item) => (
+                                 <Link
+                                   key={item.label}
+                                   href={item.href}
+                                   onClick={() => setProfileDropdownOpen(false)}
+                                   className="flex items-center justify-between px-4 py-3 rounded-xl text-muted-foreground hover:text-white hover:bg-white/5 transition-all group"
+                                 >
+                                   <div className="flex items-center gap-3">
+                                     <item.icon className={cn("w-4 h-4 transition-colors", item.color || "group-hover:text-primary")} />
+                                     <span className="text-[13px] font-semibold">
+                                       {item.label}
+                                     </span>
+                                   </div>
+                                   {item.count !== undefined && (
+                                     <span className={cn(
+                                       "text-[10px] font-black px-2 py-0.5 rounded-lg bg-white/5",
+                                       item.count > 0 ? "text-white" : "text-white/20"
+                                     )}>
+                                       {item.count}
+                                     </span>
+                                   )}
+                                 </Link>
+                               ))}
+                             </div>
 
                             {/* Logout */}
                             <div className="p-2 border-t border-white/5">
@@ -456,6 +546,7 @@ export function Navbar() {
           </div>
         </div>
       </header>
-    </div>
+      </div>
+    </>
   );
 }

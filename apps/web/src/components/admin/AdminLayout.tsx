@@ -17,7 +17,8 @@ import {
   ChefHat,
   ShieldCheck,
   Camera,
-  Upload
+  Upload,
+  FileText
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';

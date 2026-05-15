@@ -259,9 +259,21 @@ export default function LoginPage() {
             </form>
 
             {/* Terms */}
-            <p className="text-center text-[13px] text-muted-foreground/50 mt-6">
-              By logging in, you agree to our <Link href="#" className="font-semibold text-primary hover:underline">Terms of Service</Link><br className="hidden sm:block"/> and <Link href="#" className="font-semibold text-primary hover:underline">Privacy Policy</Link>.
-            </p>
+            <div className="text-center mt-6 space-y-4">
+              <p className="text-[13px] text-muted-foreground/50">
+                By logging in, you agree to our <Link href="#" className="font-semibold text-primary hover:underline">Terms of Service</Link> and <Link href="#" className="font-semibold text-primary hover:underline">Privacy Policy</Link>.
+              </p>
+              
+              <div className="pt-4 border-t border-white/5">
+                <p className="text-sm text-muted-foreground mb-4 font-medium">New to Tasteful?</p>
+                <Link 
+                  href="/register" 
+                  className="inline-flex items-center justify-center w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white text-sm font-bold hover:bg-white/10 transition-all"
+                >
+                  Create an Account
+                </Link>
+              </div>
+            </div>
 
             <div className="mt-auto pt-8"></div>
 

@@ -74,6 +74,8 @@ export interface Recipe {
   ingredients: Ingredient[];
   seo?: SeoMeta;
   images: string[];
+  isSaved?: boolean;
+  isFavorited?: boolean;
 }
 
 export interface Comment {

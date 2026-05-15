@@ -35,9 +35,9 @@ const nutritionItemSchema = z.object({
 });
 
 const recipeFormSchema = z.object({
-  title: z.string().min(3, 'Title (min 3 chars) is required').max(100),
-  summary: z.string().min(3, 'Description (min 3 chars) is required').max(160),
-  imageUrl: z.string().min(1, 'Main image is required'),
+  title: z.string().min(1, 'Title is required').max(100),
+  summary: z.string().max(160).optional().or(z.literal('')),
+  imageUrl: z.string().optional().or(z.literal('')),
   videoUrl: z.string().optional().or(z.literal('')),
   content: z.any(),
   categoryIds: z.array(z.number()).default([]),

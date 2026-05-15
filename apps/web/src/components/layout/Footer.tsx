@@ -19,7 +19,7 @@ const TikTokIcon = () => (
 
 export function Footer() {
   return (
-    <footer className="bg-[#05060b] pt-24 pb-12 text-foreground border-t border-white/5 font-body">
+    <footer className="bg-[#05060b] pt-24 pb-12 text-foreground border-t border-white/5 font-body print:hidden">
       <div className="container mx-auto px-6 max-w-[1536px]">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-16 lg:gap-12 mb-20">
           

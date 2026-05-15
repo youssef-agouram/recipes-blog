@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const RecipeSchema = z.object({
-  title: z.string().min(3).max(255),
+  title: z.string().min(1).max(255),
   summary: z.string().max(160).optional(),
   imageUrl: z.string().optional(),
   content: z.any(), // Will be Tiptap JSON
@@ -63,7 +63,7 @@ export const IngredientSchema = z.object({
 });
 
 export const ArticleSchema = z.object({
-  title: z.string().min(3).max(255),
+  title: z.string().min(1).max(255),
   content: z.string().min(10),
   summary: z.string().optional(),
   imageUrl: z.string().optional(),

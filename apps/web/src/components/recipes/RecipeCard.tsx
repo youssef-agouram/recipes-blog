@@ -1,14 +1,90 @@
+'use client';
+
 import Link from "next/link";
 import { Recipe } from "@/lib/types";
-import { Clock, Star, Heart } from "lucide-react";
+import { useSaveRecipeMutation, useUnsaveRecipeMutation, useFavoriteRecipeMutation, useUnfavoriteRecipeMutation } from "@/store/api/recipeApi";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Heart, Bookmark, Clock, Star } from "lucide-react";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 interface RecipeCardProps {
   recipe: Recipe;
 }
 
 export function RecipeCard({ recipe }: RecipeCardProps) {
+  const router = useRouter();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const [saveRecipe] = useSaveRecipeMutation();
+  const [unsaveRecipe] = useUnsaveRecipeMutation();
+  const [favoriteRecipe] = useFavoriteRecipeMutation();
+  const [unfavoriteRecipe] = useUnfavoriteRecipeMutation();
+
+  const [isSaved, setIsSaved] = useState(recipe.isSaved);
+  const [isFavorited, setIsFavorited] = useState(recipe.isFavorited);
+
+  useEffect(() => {
+    setIsSaved(recipe.isSaved);
+    setIsFavorited(recipe.isFavorited);
+  }, [recipe.isSaved, recipe.isFavorited]);
+
   const category = recipe.categories?.[0]?.name || 'Recipe';
+
+  const handleSaveToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to save recipes");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      if (isSaved) {
+        setIsSaved(false);
+        await unsaveRecipe(recipe.id).unwrap();
+        toast.success("Recipe removed from saved collection");
+      } else {
+        setIsSaved(true);
+        await saveRecipe(recipe.id).unwrap();
+        toast.success("Recipe added to saved collection");
+      }
+    } catch (error) {
+      setIsSaved(!isSaved); // revert on error
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to favorite recipes");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      if (isFavorited) {
+        setIsFavorited(false);
+        await unfavoriteRecipe(recipe.id).unwrap();
+        toast.success("Removed from favorites");
+      } else {
+        setIsFavorited(true);
+        await favoriteRecipe(recipe.id).unwrap();
+        toast.success("Added to favorites");
+      }
+    } catch (error) {
+      setIsFavorited(!isFavorited); // revert on error
+      toast.error("Something went wrong");
+    }
+  };
   
   return (
     <Link
@@ -16,9 +92,30 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
       className="group flex flex-col bg-card/40 backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 hover:border-primary/30 transition-all duration-500 shadow-xl hover:shadow-primary/5 hover:-translate-y-2 h-full"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden">
-        <div className="absolute top-4 left-4 z-20">
-          <button className="w-9 h-9 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90 hover:bg-primary hover:text-primary-foreground transition-all">
-            <Heart className="w-4 h-4" />
+        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+          <button
+            onClick={handleSaveToggle}
+            className={cn(
+              "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+              isSaved 
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
+                : "bg-black/40 text-white/90 hover:bg-primary hover:text-primary-foreground"
+            )}
+            title={isSaved ? "Unsave recipe" : "Save recipe"}
+          >
+            <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
+          </button>
+          <button
+            onClick={handleFavoriteToggle}
+            className={cn(
+              "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+              isFavorited 
+                ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" 
+                : "bg-black/40 text-white/90 hover:bg-rose-500 hover:text-white"
+            )}
+            title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
           </button>
         </div>
         

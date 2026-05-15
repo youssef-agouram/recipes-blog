@@ -46,6 +46,7 @@ export const api = {
       const query = params?.limit ? `?limit=${params.limit}` : "";
       return fetcher<any[]>(`/articles${query}`);
     },
+    getBySlug: (slug: string) => fetcher<any>(`/articles/${slug}`),
   },
   settings: {
     getHero: () => fetcher<any>("/settings/hero"),

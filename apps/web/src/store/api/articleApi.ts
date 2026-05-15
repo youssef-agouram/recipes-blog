@@ -43,6 +43,42 @@ export const articleApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['Article'],
     }),
+    saveArticle: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/articles/${id}/save`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['SavedArticle'],
+    }),
+    unsaveArticle: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/articles/${id}/save`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['SavedArticle'],
+    }),
+    favoriteArticle: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/articles/${id}/favorite`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['FavoriteArticle'],
+    }),
+    unfavoriteArticle: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/articles/${id}/favorite`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['FavoriteArticle'],
+    }),
+    getSavedArticles: builder.query<any[], void>({
+      query: () => '/articles/saved',
+      providesTags: ['SavedArticle'],
+    }),
+    getFavoritedArticles: builder.query<any[], void>({
+      query: () => '/articles/favorited',
+      providesTags: ['FavoriteArticle'],
+    }),
   }),
 });
 
@@ -53,4 +89,10 @@ export const {
   useUpdateArticleMutation,
   useDeleteArticleMutation,
   useToggleTopArticleMutation,
+  useSaveArticleMutation,
+  useUnsaveArticleMutation,
+  useFavoriteArticleMutation,
+  useUnfavoriteArticleMutation,
+  useGetSavedArticlesQuery,
+  useGetFavoritedArticlesQuery
 } = articleApi;

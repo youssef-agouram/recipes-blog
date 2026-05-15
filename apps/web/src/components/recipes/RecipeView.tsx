@@ -9,6 +9,19 @@ import CommentsSection from "@/components/recipes/CommentsSection";
 import { Recipe } from "@/lib/types";
 
 import { useState, useEffect } from "react";
+import { 
+  useSaveRecipeMutation, 
+  useUnsaveRecipeMutation, 
+  useFavoriteRecipeMutation, 
+  useUnfavoriteRecipeMutation,
+  useGetSavedRecipesQuery,
+  useGetFavoritedRecipesQuery
+} from "@/store/api/recipeApi";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface RecipeViewProps {
   recipe: Recipe;
@@ -16,14 +29,94 @@ interface RecipeViewProps {
 }
 
 export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) {
+  const router = useRouter();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const [saveRecipe] = useSaveRecipeMutation();
+  const [unsaveRecipe] = useUnsaveRecipeMutation();
+  const [favoriteRecipe] = useFavoriteRecipeMutation();
+  const [unfavoriteRecipe] = useUnfavoriteRecipeMutation();
+
+  const [isSaved, setIsSaved] = useState(recipe.isSaved);
+  const [isFavorited, setIsFavorited] = useState(recipe.isFavorited);
+
+  const { data: savedRecipes } = useGetSavedRecipesQuery(undefined, { skip: !isAuthenticated });
+  const { data: favoritedRecipes } = useGetFavoritedRecipesQuery(undefined, { skip: !isAuthenticated });
+
+  useEffect(() => {
+    if (savedRecipes) {
+      setIsSaved(savedRecipes.some(r => r.id === recipe.id));
+    }
+  }, [savedRecipes, recipe.id]);
+
+  useEffect(() => {
+    if (favoritedRecipes) {
+      setIsFavorited(favoritedRecipes.some(r => r.id === recipe.id));
+    }
+  }, [favoritedRecipes, recipe.id]);
+
+  const handleSaveToggle = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to save recipes");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      if (isSaved) {
+        setIsSaved(false);
+        await unsaveRecipe(recipe.id).unwrap();
+        toast.success("Recipe removed from saved collection");
+      } else {
+        setIsSaved(true);
+        await saveRecipe(recipe.id).unwrap();
+        toast.success("Recipe added to saved collection");
+      }
+    } catch (error) {
+      setIsSaved(!isSaved); // revert
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to favorite recipes");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      if (isFavorited) {
+        setIsFavorited(false);
+        await unfavoriteRecipe(recipe.id).unwrap();
+        toast.success("Recipe removed from favorites");
+      } else {
+        setIsFavorited(true);
+        await favoriteRecipe(recipe.id).unwrap();
+        toast.success("Recipe added to favorites");
+      }
+    } catch (error) {
+      setIsFavorited(!isFavorited); // revert
+      toast.error("Something went wrong");
+    }
+  };
+
   const getEmbedUrl = (url?: string) => {
     if (!url) return null;
     
     // YouTube
-    const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
     if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
     
-    return null; // Not embeddable or different platform
+    // Vimeo
+    const vimeoMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:vimeo\.com\/)([0-9]+)/);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+
+    return null;
+  };
+
+  const isDirectVideo = (url?: string) => {
+    if (!url) return false;
+    return url.match(/\.(mp4|webm|ogg)$/i) || url.includes('storage.googleapis.com') || url.includes('res.cloudinary.com');
   };
 
   const embedUrl = getEmbedUrl(recipe.videoUrl);
@@ -55,6 +148,61 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
 
   return (
     <div className="w-full bg-background min-h-screen pb-20">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          /* Force backgrounds and colors to appear */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          
+          body {
+            background-color: #05060b !important;
+          }
+
+          /* Hide UI elements that shouldn't be printed */
+          .print-hidden, 
+          header, 
+          footer, 
+          aside, 
+          .fixed, 
+          button:not(.print-only) {
+            display: none !important;
+          }
+
+          /* Ensure the container takes full width and has padding */
+          .container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 20px !important;
+            margin: 0 !important;
+          }
+
+          /* Preserve the dark card backgrounds */
+          .bg-card, .bg-white\/\[0\.02\], .bg-black\/40 {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+          }
+
+          /* Ensure text colors are maintained or adjusted for legibility */
+          .text-white { color: white !important; }
+          .text-muted-foreground { color: #94a3b8 !important; }
+          .text-primary { color: #f59e0b !important; }
+
+          /* Layout adjustments for print */
+          .flex-col.lg\\:flex-row {
+            flex-direction: column !important;
+          }
+          .w-full.lg\\:w-\\[60\\%\\] {
+            width: 100% !important;
+          }
+          
+          /* Prevent page breaks inside important sections */
+          article, section, .grid {
+            page-break-inside: avoid;
+          }
+        }
+      ` }} />
       <article className="container mx-auto px-6 max-w-[1536px] pt-4">
 
         {/* Breadcrumbs */}
@@ -83,9 +231,32 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               {/* Image Overlays */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
-              <button className="absolute top-8 right-8 w-14 h-14 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white/90 hover:bg-primary hover:text-primary-foreground transition-all shadow-2xl hover:scale-110 group/heart active:scale-95">
-                <Heart className="w-6 h-6 group-hover/heart:fill-current" />
-              </button>
+              <div className="absolute top-8 right-8 flex flex-col gap-3">
+                <button 
+                  onClick={handleSaveToggle}
+                  className={cn(
+                    "w-14 h-14 rounded-2xl backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all shadow-2xl hover:scale-110 active:scale-95",
+                    isSaved 
+                      ? "bg-primary text-primary-foreground" 
+                      : "bg-black/40 text-white/90 hover:bg-primary hover:text-primary-foreground"
+                  )}
+                  title={isSaved ? "Unsave recipe" : "Save recipe"}
+                >
+                  <Bookmark className={cn("w-6 h-6", isSaved && "fill-current")} />
+                </button>
+                <button 
+                  onClick={handleFavoriteToggle}
+                  className={cn(
+                    "w-14 h-14 rounded-2xl backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all shadow-2xl hover:scale-110 active:scale-95",
+                    isFavorited 
+                      ? "bg-rose-500 text-white" 
+                      : "bg-black/40 text-white/90 hover:bg-rose-500"
+                  )}
+                  title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Heart className={cn("w-6 h-6", isFavorited && "fill-current")} />
+                </button>
+              </div>
 
               <div className="absolute bottom-8 left-8 flex items-center gap-4">
                 <span className="px-6 py-2.5 rounded-2xl bg-primary text-[10px] font-black uppercase tracking-[0.2em] text-primary-foreground shadow-2xl shadow-primary/20">
@@ -179,15 +350,44 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-              <button className="flex-1 min-w-[160px] bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all shadow-2xl shadow-primary/20 active:scale-95 flex items-center justify-center gap-3">
+              <button 
+                onClick={() => window.print()}
+                className="flex-1 min-w-[160px] bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all shadow-2xl shadow-primary/20 active:scale-95 flex items-center justify-center gap-3"
+              >
                 <Printer className="w-4 h-4" /> Print Recipe
               </button>
               <div className="flex items-center gap-2">
-                {[Share2, Bookmark].map((Icon, i) => (
-                  <button key={i} className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90">
-                    <Icon className="w-5 h-5" />
-                  </button>
-                ))}
+                <button 
+                  onClick={() => {/* Share logic could go here */ toast.info("Sharing link copied!"); navigator.clipboard.writeText(window.location.href); }}
+                  className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
+                  title="Share recipe"
+                >
+                  <Share2 className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={handleSaveToggle}
+                  className={cn(
+                    "w-14 h-14 rounded-2xl border flex items-center justify-center transition-all active:scale-90",
+                    isSaved
+                      ? "bg-primary/20 border-primary text-primary"
+                      : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-primary/50"
+                  )}
+                  title={isSaved ? "Unsave recipe" : "Save recipe"}
+                >
+                  <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
+                </button>
+                <button 
+                  onClick={handleFavoriteToggle}
+                  className={cn(
+                    "w-14 h-14 rounded-2xl border flex items-center justify-center transition-all active:scale-90",
+                    isFavorited
+                      ? "bg-rose-500/20 border-rose-500 text-rose-500"
+                      : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-rose-500/50"
+                  )}
+                  title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
+                </button>
               </div>
             </div>
           </div>
@@ -214,6 +414,14 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                       className="absolute inset-0 w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
+                    />
+                  </div>
+                ) : isDirectVideo(recipe.videoUrl) ? (
+                  <div className="relative aspect-video rounded-[40px] overflow-hidden border border-white/5 shadow-2xl group bg-black">
+                    <video
+                      src={recipe.videoUrl}
+                      className="absolute inset-0 w-full h-full"
+                      controls
                     />
                   </div>
                 ) : (
@@ -252,7 +460,9 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </section>
 
             {/* Community Feedback */}
-            <CommentsSection recipeId={recipe.id} />
+            <div className="print:hidden">
+              <CommentsSection recipeId={recipe.id} />
+            </div>
 
           </div>
 
@@ -371,15 +581,17 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
             </div>
 
-            <DraggableSidebarAd />
+            {/* Ad rendered at end of component for z-index layering */}
           </aside>
         </div>
 
         {/* Related Recipes Section */}
-        {relatedRecipes}
+        <div className="print:hidden">
+          {relatedRecipes}
+        </div>
 
         {/* Footer Ad Banner */}
-        <section className="mt-24">
+        <section className="mt-24 print:hidden">
           <div className="relative w-full h-[240px] sm:h-[300px] rounded-[56px] overflow-hidden border border-white/5 group shadow-2xl">
             <Image
               src="/cooking_ad_banner_1778463092338.png"
@@ -400,6 +612,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         </section>
 
       </article>
+      <DraggableSidebarAd />
     </div>
   );
 }

@@ -237,11 +237,7 @@ export default function CommentsSection({ recipeId }: { recipeId: number }) {
              <Loader2 className="w-10 h-10 animate-spin text-primary" />
              <span className="text-[10px] font-black uppercase tracking-widest">Loading community thoughts...</span>
           </div>
-        ) : comments.length === 0 ? (
-          <div className="bg-white/[0.02] border border-dashed border-white/10 rounded-[32px] py-20 text-center">
-            <p className="text-muted-foreground text-sm font-medium">No reviews yet. Be the first to share your experience!</p>
-          </div>
-        ) : (
+        ) : comments.length === 0 ? null : (
           comments.map((comment) => (
             <CommentItem 
               key={comment.id} 

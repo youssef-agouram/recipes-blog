@@ -59,81 +59,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <div className="w-full bg-background text-foreground pb-6">
 
-      {/* 1. Hero Section */}
-      <section className="container mx-auto px-6 max-w-[1536px] pt-4 pb-10">
-        <div className="relative w-full min-h-[500px] lg:min-h-[560px] flex items-center py-16 px-8 lg:px-16 rounded-3xl border border-white/5 shadow-2xl">
-          {/* Full Width Background Image & Overlays inside the container */}
-          <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl">
-            <img
-              src={heroSettings.imageUrl || "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1920&q=80"}
-              alt="Hero Background"
-              className="w-full h-full object-cover scale-105 animate-slow-pan"
-            />
-            {/* Base darkening for contrast */}
-            <div className="absolute inset-0 bg-background/40"></div>
-            {/* Gradient and blur focusing on the left text area */}
-            <div className="absolute inset-y-0 left-0 w-full lg:w-3/4 bg-gradient-to-r from-background via-background/90 to-transparent backdrop-blur-md"></div>
-          </div>
-
-          <div className="relative z-20 flex flex-col lg:flex-row items-center justify-between gap-12 w-full">
-            {/* Left Hero Content */}
-            <div className="w-full lg:w-3/5 flex flex-col items-start">
-              <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1 rounded-full mb-4 backdrop-blur-md">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                </span>
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white">Discover healthy & delicious recipes</span>
-              </div>
-
-              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter mb-4 drop-shadow-2xl">
-                {heroSettings.title.split(',')[0]}<span className="text-primary">,</span><br />
-                <span className="text-primary">{heroSettings.title.split(',')[1] || heroSettings.title}</span>
-              </h1>
-
-              <p className="mt-2 text-sm text-white/80 max-w-md leading-relaxed font-medium drop-shadow-md">
-                {heroSettings.subtitle}
-              </p>
-
-              <div className="mt-8 flex flex-col sm:flex-row items-start gap-4">
-                <Link
-                  href="/recipes"
-                  className="bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-2xl hover:-translate-y-1 hover:shadow-primary/30 flex items-center gap-3 group/btn"
-                >
-                  <span>{heroSettings.ctaText || "Explore Recipes"}</span>
-                  <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                </Link>
-                <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="w-6 h-6 rounded-full border-2 border-background bg-card overflow-hidden">
-                        <img src={`https://i.pravatar.cc/150?u=${i}`} alt="User" className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                  <span className="text-[9px] font-bold text-white/70 uppercase tracking-wider">Join 500k+ foodies</span>
-                </div>
-              </div>
-
-              <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-6 w-full pt-6 border-t border-white/10">
-                {stats.map(({ label, value, icon: Icon }) => (
-                  <div key={label} className="flex flex-col gap-0.5 group">
-                    <div className="flex items-center gap-1.5">
-                      <Icon className="w-4 h-4 text-primary drop-shadow-md" />
-                      <span className="text-xl font-black text-white tracking-tighter drop-shadow-lg">{value}</span>
-                    </div>
-                    <span className="text-[8px] font-black text-white/60 uppercase tracking-[0.2em] ml-5.5">{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right Hero Sponsored Card (Floating over the image) */}
-            <div className="w-full lg:w-2/5 flex justify-center lg:justify-end">
-              <DraggableSponsoredCard />
-            </div>
-          </div>
-        </div>
+      {/* 1. Image-Only Hero Section */}
+      <section className="relative w-full h-[45vh] min-h-[300px] overflow-hidden border-b border-white/5 mb-16 bg-black">
+        <img
+          src={heroSettings.imageUrl || "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1920&q=80"}
+          alt="Hero Banner"
+          className="w-full h-full object-cover"
+        />
       </section>
 
       {/* 2. Explore by Category */}
@@ -292,18 +224,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </section>
 
       {/* Maximized Sticky Announcement Bar */}
-      <div className="fixed bottom-0 left-0 w-full z-[100] bg-white/10 backdrop-blur-2xl border-t border-border py-8 overflow-hidden shadow-[0_-10px_50px_rgba(0,0,0,0.5)]">
-        <div className="flex whitespace-nowrap animate-marquee items-center gap-20">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-            <div key={i} className="flex items-center gap-6">
-              <span className="text-[14px] font-black text-white uppercase tracking-[0.4em]">
-                NEW HEALTHY RECIPES EVERY WEEK • JOIN 10,000+ FOOD LOVERS • GET 20% OFF PREMIUM COOKWARE • PREMIUM CULINARY GUIDES NOW AVAILABLE •
-              </span>
-              <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-            </div>
-          ))}
-        </div>
-      </div>
+      <DraggableSponsoredCard />
     </div>
   );
 }

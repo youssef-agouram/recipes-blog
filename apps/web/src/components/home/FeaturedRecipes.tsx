@@ -4,15 +4,96 @@ import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Clock, Star, Heart, Bookmark, ChevronUp, Search } from 'lucide-react';
 import { Recipe } from '@/lib/types';
+import { 
+  useSaveRecipeMutation, 
+  useUnsaveRecipeMutation, 
+  useFavoriteRecipeMutation, 
+  useUnfavoriteRecipeMutation,
+  useGetSavedRecipesQuery,
+  useGetFavoritedRecipesQuery
+} from '@/store/api/recipeApi';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface FeaturedRecipesProps {
   recipes: Recipe[];
 }
 
 export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
+  const router = useRouter();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const [saveRecipe] = useSaveRecipeMutation();
+  const [unsaveRecipe] = useUnsaveRecipeMutation();
+  const [favoriteRecipe] = useFavoriteRecipeMutation();
+  const [unfavoriteRecipe] = useUnfavoriteRecipeMutation();
+  
+  const { data: savedRecipes } = useGetSavedRecipesQuery(undefined, { skip: !isAuthenticated });
+  const { data: favoritedRecipes } = useGetFavoritedRecipesQuery(undefined, { skip: !isAuthenticated });
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [localSaved, setLocalSaved] = useState<Record<number, boolean>>({});
+  const [localFavorited, setLocalFavorited] = useState<Record<number, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleSaveToggle = async (e: React.MouseEvent, recipe: Recipe) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to save recipes");
+      router.push("/login");
+      return;
+    }
+
+    const isSaved = localSaved[recipe.id] ?? recipe.isSaved;
+
+    try {
+      if (isSaved) {
+        setLocalSaved(prev => ({ ...prev, [recipe.id]: false }));
+        await unsaveRecipe(recipe.id).unwrap();
+        toast.success("Recipe removed from saved collection");
+      } else {
+        setLocalSaved(prev => ({ ...prev, [recipe.id]: true }));
+        await saveRecipe(recipe.id).unwrap();
+        toast.success("Recipe added to saved collection");
+      }
+    } catch (error) {
+      setLocalSaved(prev => ({ ...prev, [recipe.id]: isSaved })); // revert on error
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleFavoriteToggle = async (e: React.MouseEvent, recipe: Recipe) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to favorite recipes");
+      router.push("/login");
+      return;
+    }
+
+    const isFavorited = localFavorited[recipe.id] ?? recipe.isFavorited;
+
+    try {
+      if (isFavorited) {
+        setLocalFavorited(prev => ({ ...prev, [recipe.id]: false }));
+        await unfavoriteRecipe(recipe.id).unwrap();
+        toast.success("Recipe removed from favorites");
+      } else {
+        setLocalFavorited(prev => ({ ...prev, [recipe.id]: true }));
+        await favoriteRecipe(recipe.id).unwrap();
+        toast.success("Recipe added to favorites");
+      }
+    } catch (error) {
+      setLocalFavorited(prev => ({ ...prev, [recipe.id]: isFavorited })); // revert on error
+      toast.error("Something went wrong");
+    }
+  };
 
   const filteredRecipes = [...recipes].filter(recipe => 
     recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,7 +176,14 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
           }
           style={isExpanded ? {} : { scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {filteredRecipes.map((recipe) => (
+          {filteredRecipes.map((recipe) => {
+            const isSavedFromStore = savedRecipes?.some(r => r.id === recipe.id) ?? false;
+            const isFavoritedFromStore = favoritedRecipes?.some(r => r.id === recipe.id) ?? false;
+
+            const isSaved = localSaved[recipe.id] ?? isSavedFromStore ?? recipe.isSaved;
+            const isFavorited = localFavorited[recipe.id] ?? isFavoritedFromStore ?? recipe.isFavorited;
+
+            return (
             <Link
               key={recipe.id}
               href={`/recipes/${recipe.slug}`}
@@ -106,14 +194,28 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
               } snap-start group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border`}
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden">
-                <div className="absolute top-2.5 left-2.5 z-20">
-                  <button className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-primary transition-all">
-                    <Heart className="w-3.5 h-3.5" />
+                <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+                  <button
+                    onClick={(e) => handleSaveToggle(e, recipe)}
+                    className={cn(
+                      "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                      isSaved
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                        : "bg-black/40 text-white hover:bg-primary"
+                    )}
+                  >
+                    <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
                   </button>
-                </div>
-                <div className="absolute top-2.5 right-2.5 z-20">
-                  <button className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-primary transition-all">
-                    <Bookmark className="w-3.5 h-3.5" />
+                  <button
+                    onClick={(e) => handleFavoriteToggle(e, recipe)}
+                    className={cn(
+                      "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                      isFavorited
+                        ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
+                        : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
+                    )}
+                  >
+                    <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
                   </button>
                 </div>
                 <img
@@ -147,7 +249,8 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
 
           {/* Placeholders */}
           {recipes.length < 5 && Array.from({ length: 5 - recipes.length }).map((_, i) => (

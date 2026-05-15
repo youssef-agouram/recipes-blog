@@ -65,6 +65,42 @@ export const recipeApi = apiService.injectEndpoints({
         body,
       }),
     }),
+    saveRecipe: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/recipes/${id}/save`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['SavedRecipe'],
+    }),
+    unsaveRecipe: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/recipes/${id}/save`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['SavedRecipe'],
+    }),
+    favoriteRecipe: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/recipes/${id}/favorite`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['FavoriteRecipe'],
+    }),
+    unfavoriteRecipe: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/recipes/${id}/favorite`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['FavoriteRecipe'],
+    }),
+    getSavedRecipes: builder.query<Recipe[], void>({
+      query: () => '/recipes/saved',
+      providesTags: ['SavedRecipe'],
+    }),
+    getFavoritedRecipes: builder.query<Recipe[], void>({
+      query: () => '/recipes/favorited',
+      providesTags: ['FavoriteRecipe'],
+    }),
   }),
 });
 
@@ -77,6 +113,11 @@ export const {
   useUpdateRecipeMutation,
   useToggleFeaturedRecipeMutation,
   useToggleTopArticleRecipeMutation,
-  useUploadImageMutation
+  useUploadImageMutation,
+  useSaveRecipeMutation,
+  useUnsaveRecipeMutation,
+  useFavoriteRecipeMutation,
+  useUnfavoriteRecipeMutation,
+  useGetSavedRecipesQuery,
+  useGetFavoritedRecipesQuery
 } = recipeApi;
-
