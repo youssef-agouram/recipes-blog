@@ -9,7 +9,18 @@ const router = Router();
 router.get('/site', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const settings = await prisma.siteSettings.findFirst();
-    res.json(settings || {
+    
+    let adSettings = undefined;
+    if (settings && settings.commentSettings && typeof settings.commentSettings === 'object' && 'ads' in (settings.commentSettings as any)) {
+      adSettings = (settings.commentSettings as any).ads;
+    }
+    
+    // Fallback: Also try to read from actual adSettings column if it exists and has keys
+    if (!adSettings && settings && 'adSettings' in settings && settings.adSettings && Object.keys(settings.adSettings as any).length > 0) {
+      adSettings = settings.adSettings;
+    }
+
+    res.json(settings ? { ...settings, adSettings } : {
       brandName: "Tasteful",
       tagline: "Delicious Recipes",
       stickyNavbar: true,
@@ -19,7 +30,8 @@ router.get('/site', async (_req: Request, res: Response, next: NextFunction) => 
       menuItems: [],
       profileMenu: [],
       socialLinks: [],
-      copyrightText: "© {year} Tasteful. All rights reserved."
+      copyrightText: "© {year} Tasteful. All rights reserved.",
+      adSettings: undefined
     });
   } catch (error) {
     next(error);
@@ -30,12 +42,22 @@ router.get('/site', async (_req: Request, res: Response, next: NextFunction) => 
 router.put('/site', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = SiteSettingsSchema.parse(req.body);
+    const { adSettings, ...restData } = data;
+    
+    const updatePayload = {
+      ...restData,
+      commentSettings: {
+        ...(typeof restData.commentSettings === 'object' ? restData.commentSettings : {}),
+        ads: adSettings
+      }
+    };
+
     const settings = await prisma.siteSettings.upsert({
       where: { id: 1 },
-      update: data,
-      create: { ...data, id: 1 },
+      update: updatePayload,
+      create: { ...updatePayload, id: 1 },
     });
-    res.json(settings);
+    res.json({ ...settings, adSettings });
   } catch (error) {
     next(error);
   }
@@ -48,6 +70,7 @@ router.get('/hero', async (_req: Request, res: Response, next: NextFunction) => 
     res.json(settings || {
       title: "Good Food, Good Mood",
       subtitle: "Explore thousands of handpicked recipes from around the world.",
+      images: [],
       ctaText: "Explore Recipes"
     });
   } catch (error) {

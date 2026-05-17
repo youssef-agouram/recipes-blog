@@ -201,7 +201,7 @@ router.get('/:slug', optionalAuth, async (req: AuthRequest, res: Response, next:
 router.post('/', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = RecipeSchema.parse(req.body);
-    let slug = generateSlug(data.title);
+    let slug = data.slug ? generateSlug(data.slug) : generateSlug(data.title);
 
     // Check for unique slug
     const existing = await prisma.recipe.findUnique({ where: { slug } });
@@ -369,6 +369,17 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
     delete updateData.ingredientIds;
     delete updateData.seo;
 
+    if (data.slug) {
+      let slug = generateSlug(data.slug);
+      const existing = await prisma.recipe.findFirst({
+        where: { slug, id: { not: Number(id) } }
+      });
+      if (existing) {
+        slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+      }
+      updateData.slug = slug;
+    }
+
     // Handle relations
     if (data.categoryIds) {
       updateData.categories = { set: data.categoryIds.map((id) => ({ id })) };
@@ -376,7 +387,7 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
     if (data.ingredientIds) {
       updateData.ingredients = { set: data.ingredientIds.map((id) => ({ id })) };
     }
-    if (data.seo && (data.seo.title || data.seo.description)) {
+    if (data.seo && (data.seo.title || data.seo.description || data.seo.seoTitle || data.seo.metaDescription)) {
       updateData.seo = {
         upsert: {
           create: data.seo,

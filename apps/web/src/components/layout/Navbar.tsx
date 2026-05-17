@@ -9,6 +9,7 @@ import { logout } from '@/store/slices/authSlice';
 import { useGetSiteSettingsQuery } from '@/store/api/settingsApi';
 import { useGetSavedRecipesQuery, useGetFavoritedRecipesQuery } from '@/store/api/recipeApi';
 import { useGetSavedArticlesQuery, useGetFavoritedArticlesQuery } from '@/store/api/articleApi';
+import { apiService } from '@/store/api/apiService';
 import { cn } from '@/lib/utils';
 import {
   Search, Bell, User, Globe, ChevronDown, Plus,
@@ -42,6 +43,43 @@ export function Navbar() {
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   const dispatch = useDispatch();
+
+  const [topAdIndex, setTopAdIndex] = useState(0);
+
+  const topBarUrls = (() => {
+    const rawVal = settings?.adSettings?.topBarAdUrls || settings?.adSettings?.topBarAdUrl;
+    if (Array.isArray(rawVal)) {
+      return rawVal
+        .map((item: any) => {
+          if (typeof item === 'object' && item !== null && 'url' in item) {
+            return item.enabled !== false ? item.url : null;
+          }
+          return String(item || '');
+        })
+        .filter(Boolean);
+    }
+    if (typeof rawVal === 'string') return rawVal.split(',').map((s: string) => s.trim()).filter(Boolean);
+    return [];
+  })();
+
+  const activeTopAdUrl = topBarUrls[topAdIndex] || '';
+
+  const getYoutubeId = (url: string) => {
+    return url?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i)?.[1];
+  };
+
+  const youtubeIds = topBarUrls.map(getYoutubeId).filter(Boolean);
+
+  useEffect(() => {
+    if (topBarUrls.length <= 1) return;
+    const isImage = activeTopAdUrl && !getYoutubeId(activeTopAdUrl) && !activeTopAdUrl.match(/\.(mp4|webm|ogg)(\?.*)?$/i);
+    if (isImage) {
+      const timer = setTimeout(() => {
+        setTopAdIndex((prev) => (prev + 1) % topBarUrls.length);
+      }, 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTopAdUrl, topBarUrls, topAdIndex]);
   const { isAuthenticated, user, isHydrating } = useSelector(
     (state: RootState) => state.auth
   );
@@ -102,6 +140,11 @@ export function Navbar() {
   const [showTopAd, setShowTopAd] = useState(false);
 
   useEffect(() => {
+    if (settings?.adSettings?.showTopBarAd && settings?.adSettings?.topBarAdUrl) {
+      setShowTopAd(true);
+      return;
+    }
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
@@ -116,11 +159,14 @@ export function Navbar() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, settings]);
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(apiService.util.resetApiState());
     setProfileDropdownOpen(false);
+    // Hard redirect to home to clear all memory state
+    window.location.href = '/';
   };
 
   const SocialIcon = ({ name, icon: Icon }: { name: string; icon: any }) => (
@@ -135,25 +181,42 @@ export function Navbar() {
   return (
     <>
       {/* Floating Top Ad Bar - Appears when navbar is hidden */}
-      <div className={cn(
-        "fixed top-4 left-1/2 -translate-x-1/2 w-[32%] min-w-[320px] z-[999999] transition-all duration-500 ease-out pointer-events-auto print:hidden",
-        showTopAd ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-12 pointer-events-none"
-      )}>
-        <div className="bg-[#f59e0b]/90 backdrop-blur-2xl border border-white/20 rounded-3xl px-6 py-3.5 shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex items-center justify-between gap-6 group hover:scale-[1.02] transition-transform">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white animate-pulse" />
+      {settings?.adSettings?.showTopBarAd && activeTopAdUrl && (
+        <div className={cn(
+          "fixed top-4 left-1/2 -translate-x-1/2 w-[32%] min-w-[320px] z-[999999] transition-all duration-500 ease-out pointer-events-auto print:hidden",
+          showTopAd ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-12 pointer-events-none"
+        )}>
+          <Link href={activeTopAdUrl || '#'} target="_blank" className="block relative w-full h-16 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] group hover:scale-[1.02] transition-transform border border-white/20">
+            {getYoutubeId(activeTopAdUrl) ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${getYoutubeId(activeTopAdUrl)}?autoplay=1&mute=1&controls=0&loop=1&playlist=${youtubeIds.join(',')}&showinfo=0&modestbranding=1`}
+                className="absolute inset-0 w-full h-[300%] -top-[100%] object-cover pointer-events-none"
+                allow="autoplay; encrypted-media"
+              />
+            ) : activeTopAdUrl.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
+              <video 
+                src={activeTopAdUrl} 
+                autoPlay 
+                muted 
+                playsInline 
+                onEnded={() => setTopAdIndex((prev) => (prev + 1) % topBarUrls.length)}
+                className="absolute inset-0 w-full h-full object-cover" 
+              />
+            ) : (
+              <img src={activeTopAdUrl} alt="Ad" className="absolute inset-0 w-full h-full object-cover" />
+            )}
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all duration-500"></div>
+            <div className="absolute inset-y-0 right-4 flex items-center">
+              <span className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border border-white/20 shadow-xl group-hover:bg-white group-hover:text-black transition-all">
+                Visit Link
+              </span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">Limited Time Deal</span>
-              <span className="text-[8px] font-bold text-white/70 uppercase tracking-[0.1em]">Save 50% on all premium plans</span>
+            <div className="absolute top-2 left-4">
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/70 bg-black/40 px-2 py-0.5 rounded backdrop-blur-sm">Sponsored</span>
             </div>
-          </div>
-          <button className="bg-white text-[#f59e0b] px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all shadow-xl">
-            Get Pro
-          </button>
+          </Link>
         </div>
-      </div>
+      )}
 
       <div className={cn(
         "w-full flex flex-col transition-all duration-500 ease-in-out print:hidden"

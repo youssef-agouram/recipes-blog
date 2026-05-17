@@ -23,6 +23,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { logout } from '@/store/slices/authSlice';
+import { apiService } from '@/store/api/apiService';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
@@ -62,7 +63,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     dispatch(logout());
-    router.push('/admin/login');
+    dispatch(apiService.util.resetApiState());
+    // Hard redirect to login to clear all memory state
+    window.location.href = '/admin/login';
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,6 +163,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               );
             })}
           </div>
+        </div>
+
+        {/* Logout Button */}
+        <div className="mt-auto px-4 pb-8">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-[14px] font-bold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-300"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
 

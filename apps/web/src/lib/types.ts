@@ -2,6 +2,13 @@ export interface SeoMeta {
   id?: number;
   title?: string;
   description?: string;
+  seoTitle?: string;
+  metaDescription?: string;
+  focusKeyword?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  robotsMeta?: string;
+  faqJson?: string;
 }
 
 export interface CategoryGroup {

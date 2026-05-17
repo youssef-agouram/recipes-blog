@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const RecipeSchema = z.object({
   title: z.string().min(1).max(255),
+  slug: z.string().optional(),
   summary: z.string().max(160).optional(),
   imageUrl: z.string().optional(),
   content: z.any(), // Will be Tiptap JSON
@@ -27,8 +28,15 @@ export const RecipeSchema = z.object({
   })).optional(),
   images: z.array(z.string()).optional(),
   seo: z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
+    title: z.string().optional().nullable(),
+    description: z.string().optional().nullable(),
+    seoTitle: z.string().optional().nullable(),
+    metaDescription: z.string().optional().nullable(),
+    focusKeyword: z.string().optional().nullable(),
+    canonicalUrl: z.string().optional().nullable(),
+    ogImage: z.string().optional().nullable(),
+    robotsMeta: z.string().optional().nullable(),
+    faqJson: z.string().optional().nullable(),
   }).optional(),
   nutrition: z.object({
     calories: z.string().optional(),
@@ -74,7 +82,8 @@ export const ArticleSchema = z.object({
 export const HeroSettingsSchema = z.object({
   title: z.string(),
   subtitle: z.string(),
-  imageUrl: z.string().optional(),
+  imageUrl: z.string().optional().nullable(),
+  images: z.array(z.string()).optional(),
   ctaText: z.string(),
 });
 
@@ -99,4 +108,40 @@ export const SiteSettingsSchema = z.object({
   copyrightText: z.string(),
   aboutText: z.string().nullable().optional(),
   commentSettings: z.any().optional(),
+  adSettings: z.any().optional(),
 });
+
+export const SeoSettingsSchema = z.object({
+  metaTitle: z.string().min(1).max(255),
+  metaDescription: z.string().min(1).max(500),
+  metaKeywords: z.string().optional().or(z.literal("")),
+  ogImage: z.string().nullable().optional().or(z.literal("")),
+  twitterCard: z.string().default("summary_large_image"),
+  canonicalUrl: z.string().nullable().optional().or(z.literal("")),
+  robotsTxt: z.string().nullable().optional().or(z.literal("")),
+  brandName: z.string().min(1).max(255).default("TastyRecipes"),
+  twitterUsername: z.string().min(1).max(255).default("@tastyrecipes"),
+  themeColor: z.string().min(1).max(255).default("#5850ec"),
+});
+
+export const AnalyticsSettingsSchema = z.object({
+  googleAnalyticsId: z.string().nullable().optional().or(z.literal("")),
+  customScriptsCode: z.string().nullable().optional().or(z.literal("")),
+  ga4Id: z.string().nullable().optional().or(z.literal("")),
+  gtmId: z.string().nullable().optional().or(z.literal("")),
+  analyticsEnabled: z.boolean().default(true),
+  debugMode: z.boolean().default(false),
+  trackingSettings: z.any().optional(),
+});
+
+export const WebmasterToolsSchema = z.object({
+  googleVerification: z.string().nullable().optional().or(z.literal("")),
+  bingVerification: z.string().nullable().optional().or(z.literal("")),
+  yandexVerification: z.string().nullable().optional().or(z.literal("")),
+  pinterestVerify: z.string().nullable().optional().or(z.literal("")),
+  sitemapUrl: z.string().nullable().optional().or(z.literal("")),
+  autoSitemapSubmit: z.boolean().default(true),
+  indexingStats: z.any().optional(),
+  crawlErrors: z.any().optional(),
+});
+

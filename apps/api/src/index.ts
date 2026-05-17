@@ -14,6 +14,7 @@ import categoryGroupsRouter from './routes/categoryGroups';
 import usersRouter from './routes/users';
 import commentsRouter from './routes/comments';
 import statsRouter from './routes/stats';
+import seoRouter from './routes/seo';
 import compression from 'compression';
 import { errorHandler } from './middleware/error';
 
@@ -48,6 +49,7 @@ app.use('/category-groups', categoryGroupsRouter);
 app.use('/users', usersRouter);
 app.use('/comments', commentsRouter);
 app.use('/stats', statsRouter);
+app.use('/seo', seoRouter);
 
 // Health check
 app.get('/', (_req: express.Request, res: express.Response) => res.send('Recipes API is running...'));

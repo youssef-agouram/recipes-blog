@@ -10,6 +10,7 @@ import { api } from "@/lib/api-client";
 import FeaturedRecipes from "@/components/home/FeaturedRecipes";
 import DraggableSponsoredCard from "@/components/home/DraggableSponsoredCard";
 import TopArticlesSection from "@/components/home/TopArticlesSection";
+import { HeroSlider } from "@/components/home/HeroSlider";
 
 interface HomePageProps {
   searchParams: Promise<{ page?: string }>;
@@ -46,7 +47,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       title: "Good Food, Good Mood",
       subtitle: "Explore thousands of handpicked recipes from around the world.",
       ctaText: "Explore Recipes",
-      imageUrl: null
+      imageUrl: null,
+      images: []
     };
   });
 
@@ -60,12 +62,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <div className="w-full bg-background text-foreground pb-6">
 
-      {/* 1. Image-Only Hero Section */}
-      <section className="relative w-full h-[45vh] min-h-[300px] overflow-hidden border-b border-white/5 mb-16 bg-black">
-        <img
-          src={heroSettings.imageUrl || "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1920&q=80"}
-          alt="Hero Banner"
-          className="w-full h-full object-cover"
+      {/* 1. Hero Slider Section */}
+      <section className="relative w-full h-[45vh] min-h-[300px] border-b border-white/5 mb-16 bg-black">
+        <HeroSlider 
+          images={heroSettings.images || []} 
+          fallbackImage={heroSettings.imageUrl} 
         />
       </section>
 

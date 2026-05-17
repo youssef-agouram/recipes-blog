@@ -25,8 +25,9 @@ const baseQueryWithReauth: BaseQueryFn<
   if (result.error && result.error.status === 401) {
     // If we get a 401, it means the token is invalid or expired
     api.dispatch(logout());
+    api.dispatch(apiService.util.resetApiState());
     if (typeof window !== 'undefined') {
-      window.location.href = '/admin/login';
+      window.location.href = '/login';
     }
   }
 

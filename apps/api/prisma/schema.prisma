@@ -31,12 +31,15 @@ model Recipe {
   instructions    Json?        @default("[]")
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
-  seo             SeoMeta?
+  seo             RecipeSeo?
   categories      Category[]   @relation("RecipeCategories")
   ingredients     Ingredient[] @relation("RecipeIngredients")
   comments        Comment[]
   savedRecipes    SavedRecipe[]
   favoriteRecipes FavoriteRecipe[]
+  aiRecommendations AiSeoRecommendation[]
+  aiMetadata        AiGeneratedMetadata?
+  keywordOpportunities KeywordOpportunity[]
 
   @@index([slug])
   @@index([title])
@@ -86,6 +89,7 @@ model Category {
   isFeatured    Boolean        @default(false)
   menuOrder     Int            @default(0)
   recipes       Recipe[]       @relation("RecipeCategories")
+  seo           CategorySeo?
 
   @@index([name])
   @@index([slug])
@@ -175,13 +179,108 @@ model FavoriteArticle {
   @@index([articleId])
 }
 
-model SeoMeta {
-  id          Int     @id @default(autoincrement())
-  title       String?
-  description String?
-  recipeId    Int?    @unique
-  recipe      Recipe? @relation(fields: [recipeId], references: [id])
+model SeoSettings {
+  id              Int      @id @default(1)
+  metaTitle       String   @default("TastyRecipes - Best Food and Cooking Recipes")
+  metaDescription String   @default("Find the best and most delicious cooking recipes online on TastyRecipes.")
+  metaKeywords    String   @default("recipes, cooking, food, easy recipes, quick dinner")
+  ogImage         String?
+  twitterCard     String   @default("summary_large_image")
+  canonicalUrl    String?
+  robotsTxt       String?  @default("User-agent: *\nAllow: /")
+  brandName       String   @default("TastyRecipes")
+  twitterUsername String   @default("@tastyrecipes")
+  themeColor      String   @default("#5850ec")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("seo_settings")
 }
+
+model RecipeSeo {
+  id              Int      @id @default(autoincrement())
+  metaTitle       String?
+  seoTitle        String?
+  metaDescription String?
+  metaKeywords    String?
+  focusKeyword    String?
+  canonicalUrl    String?
+  ogTitle         String?
+  ogDescription   String?
+  ogImage         String?
+  robotsMeta      String?  @default("index, follow")
+  faqJson         String?
+  recipeId        Int      @unique
+  recipe          Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("recipe_seo")
+}
+
+model CategorySeo {
+  id              Int      @id @default(autoincrement())
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  focusKeyword    String?
+  canonicalUrl    String?
+  ogTitle         String?
+  ogDescription   String?
+  ogImage         String?
+  categoryId      Int      @unique
+  category        Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("category_seo")
+}
+
+model AnalyticsSettings {
+  id                Int      @id @default(1)
+  googleAnalyticsId String?  @default("")
+  customScriptsCode String?  @default("")
+  ga4Id             String?  @default("")
+  gtmId             String?  @default("")
+  analyticsEnabled  Boolean  @default(true)
+  debugMode         Boolean  @default(false)
+  trackingSettings  Json?    @default("{\"pageTracking\": true, \"recipeTracking\": true, \"searchTracking\": true}")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("analytics_settings")
+}
+
+model WebmasterTools {
+  id                 Int      @id @default(1)
+  googleVerification String?  @default("")
+  bingVerification   String?  @default("")
+  yandexVerification String?  @default("")
+  pinterestVerify    String?  @default("")
+  sitemapUrl         String?  @default("")
+  autoSitemapSubmit  Boolean  @default(true)
+  indexingStats      Json?    @default("{\"indexed\": 124, \"notIndexed\": 12, \"submitted\": 136}")
+  crawlErrors        Json?    @default("[]")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("webmaster_tools")
+}
+
+model CrawlReport {
+  id           Int      @id @default(autoincrement())
+  url          String
+  status       String   @default("success") // success, error, warning
+  statusCode   Int?     @default(200)
+  errorMessage String?  @default("")
+  lastCrawled  DateTime @default(now())
+  issues       Json?    @default("[]")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("crawl_reports")
+}
+
 
 model Article {
   id          Int      @id @default(autoincrement())
@@ -223,14 +322,16 @@ model SiteSettings {
   copyrightText   String  @default("© {year} Tasteful. All rights reserved.")
   aboutText       String?
   commentSettings Json?   @default("{\"autoApprove\": false, \"allowGuest\": true, \"showRatings\": true, \"notifications\": true}")
+  adSettings      Json?   @default("{}")
 }
 
 model HeroSettings {
-  id          Int     @id @default(1)
-  title       String  @default("Good Food, Good Mood")
-  subtitle    String  @default("Explore thousands of handpicked recipes from around the world.")
+  id          Int      @id @default(1)
+  title       String   @default("Good Food, Good Mood")
+  subtitle    String   @default("Explore thousands of handpicked recipes from around the world.")
   imageUrl    String?
-  ctaText     String  @default("Explore Recipes")
+  images      String[] @default([])
+  ctaText     String   @default("Explore Recipes")
 }
 
 model Subscriber {
@@ -247,4 +348,161 @@ model Visit {
   sessionId String?  // To group visits into sessions
   duration  Int      @default(0) // Seconds spent
   createdAt DateTime @default(now())
+}
+
+model TechnicalSeoReport {
+  id               Int      @id @default(autoincrement())
+  issueType        String   // e.g. MISSING_ALT_TEXT, MISSING_META_DESC, DUPLICATE_TITLE, etc.
+  pageUrl          String
+  severity         String   // e.g. error, warning, info
+  detectionDate    DateTime @default(now())
+  resolutionStatus String   @default("pending") // pending, resolved
+  description      String?  @default("")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("technical_seo_reports")
+}
+
+model CrawlError {
+  id               Int      @id @default(autoincrement())
+  issueType        String   // e.g. HTTP_404, BROKEN_LINK, INVALID_REDIRECT
+  pageUrl          String
+  targetUrl        String?  @default("") // target of broken link / redirect
+  severity         String   // e.g. error, warning
+  detectionDate    DateTime @default(now())
+  resolutionStatus String   @default("pending") // pending, resolved
+  errorMessage     String?  @default("")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("crawl_errors")
+}
+
+model SeoHealthReport {
+  id               Int      @id @default(autoincrement())
+  healthScore      Int      @default(100)
+  sitemapStatus    String   @default("valid")
+  robotsStatus     String   @default("valid")
+  sslStatus        String   @default("valid")
+  mobileFriendly   String   @default("valid")
+  indexedPages     Int      @default(0)
+  crawlErrorsCount Int      @default(0)
+  duplicateMetaCount Int    @default(0)
+  detectionDate    DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("seo_health_reports")
+}
+
+model Redirect {
+  id          Int      @id @default(autoincrement())
+  sourceUrl   String   @unique
+  destUrl     String
+  type        Int      @default(301) // 301 or 302
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("redirects")
+}
+
+model PerformanceReport {
+  id               Int      @id @default(autoincrement())
+  device           String   // mobile or desktop
+  lcp              Float    // Largest Contentful Paint in seconds
+  fid              Float    // First Input Delay in ms
+  cls              Float    // Cumulative Layout Shift
+  ttfb             Float    // Time to First Byte in ms
+  score            Int      // PageSpeed score (0-100)
+  url              String   @default("/")
+  detectionDate    DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("performance_reports")
+}
+
+model BacklinkReport {
+  id               Int      @id @default(autoincrement())
+  sourceUrl        String   // referring page URL
+  targetUrl        String   // your page URL
+  domainRating     Int      @default(0) // referrer rating
+  anchorText       String   @default("")
+  status           String   @default("active") // active, lost
+  discoveryDate    DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("backlinks_reports")
+}
+
+model AiSeoRecommendation {
+  id               Int      @id @default(autoincrement())
+  recType          String   // e.g. TITLE_LENGTH, MISSING_ALT, READABILITY, KEYWORD_PLACEMENT
+  aiOutput         String   // Detailed text suggestion from AI
+  recipeId         Int?     // Optional link to recipe
+  recipe           Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  scoreImprovement Int      @default(5) // Estimated points improvement e.g. 5, 10
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("ai_seo_recommendations")
+}
+
+model AiGeneratedMetadata {
+  id               Int      @id @default(autoincrement())
+  recipeId         Int      @unique
+  recipe           Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  suggestedTitle   String?  @default("")
+  suggestedMeta    String?  @default("")
+  suggestedKeywords String? @default("")
+  readabilityScore Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("ai_generated_metadata")
+}
+
+model AiSeoAudit {
+  id               Int      @id @default(autoincrement())
+  auditScore       Int      @default(70)
+  strengthsJson    String   // List of passed audits
+  weaknessesJson   String   // List of failed audits
+  missingOptJson   String   // Missing tags, schema configurations
+  technicalIssuesJson String // Redirect chains, duplicate content flags
+  recommendationsJson String // Next actions
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("ai_seo_audits")
+}
+
+model KeywordOpportunity {
+  id               Int      @id @default(autoincrement())
+  keyword          String   @unique
+  competition      String   // low, medium, high
+  trendingStatus   String   // rising, breakout, stable
+  trafficPotential Int      // monthly searches
+  rankDifficulty   Int      // 0 to 100 difficulty
+  recipeId         Int?     // Target recipe suggestion for keywords
+  recipe           Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("keyword_opportunities")
+}
+
+model InternalLinkingSuggestion {
+  id                Int      @id @default(autoincrement())
+  sourceUrl         String
+  targetUrl         String
+  recommendedAnchor String
+  relevanceScore    Int      @default(80)
+  status            String   @default("pending") // pending, applied, ignored
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("internal_linking_suggestions")
 }

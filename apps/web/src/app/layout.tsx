@@ -20,10 +20,15 @@ const workSans = Work_Sans({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "RecipeHub | Elegant Recipes",
-  description: "Discover healthy and delicious recipes.",
-};
+import { constructMetadata } from "@/lib/seo";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
+
+export const metadata = constructMetadata({
+  title: "TastyRecipes | Elegant Cooking & Delicious Recipes",
+  description: "Discover and explore thousands of handpicked, healthy, and delicious cooking recipes from around the world.",
+  keywords: "recipes, cooking, food, easy recipes, quick dinner, tasty recipes, cooking guide",
+  path: "/",
+});
 
 export default function RootLayout({
   children,
@@ -35,6 +40,7 @@ export default function RootLayout({
       <body className="antialiased font-body flex min-h-screen flex-col">
         <ReduxProvider>
           {children}
+          <AnalyticsTracker />
           <Toaster position="top-right" richColors theme="dark" closeButton />
         </ReduxProvider>
       </body>
