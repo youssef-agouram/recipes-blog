@@ -103,6 +103,18 @@ router.get('/favorited', authMiddleware, async (req: AuthRequest, res: Response,
   }
 });
 
+// Admin: Clear all recipes in trash
+router.delete('/trash/clear', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const deleted = await prisma.recipe.deleteMany({
+      where: { status: 'TRASH' },
+    });
+    res.json({ message: 'Trash cleared successfully', count: deleted.count });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Client: Get recipes with pagination and filters
 router.get('/', optionalAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetAdminRecipesQuery, useGetRecipeStatsQuery, useUpdateRecipeMutation, useCreateRecipeMutation, useDeleteRecipeMutation } from '@/store/api/recipeApi';
+import { useGetAdminRecipesQuery, useGetRecipeStatsQuery, useUpdateRecipeMutation, useCreateRecipeMutation, useDeleteRecipeMutation, useClearTrashRecipesMutation } from '@/store/api/recipeApi';
 import { 
   Plus, Edit2, Trash2, Loader2, Search, Bell, 
   Calendar, ChevronDown, Filter, Download, 
@@ -20,6 +20,17 @@ export default function AdminRecipesPage() {
   const [createRecipe] = useCreateRecipeMutation();
   const [updateRecipe] = useUpdateRecipeMutation();
   const [deleteRecipe, { isLoading: isDeleting }] = useDeleteRecipeMutation();
+  const [clearTrashRecipes, { isLoading: isClearing }] = useClearTrashRecipesMutation();
+
+  const handleClearTrash = async () => {
+    if (confirm('Are you sure you want to permanently delete all recipes in the trash? This action cannot be undone.')) {
+      try {
+        await clearTrashRecipes().unwrap();
+      } catch (err) {
+        console.error('Failed to clear trash:', err);
+      }
+    }
+  };
 
   const handleMoveToTrash = async (id: number) => {
     if (confirm('Move this recipe to trash? It will no longer be visible on your site.')) {
@@ -163,6 +174,18 @@ export default function AdminRecipesPage() {
               <div className={`h-12 w-12 rounded-2xl bg-${stat.color}-500/10 flex items-center justify-center text-${stat.color}-500`}>
                 <stat.icon className="h-6 w-6" />
               </div>
+              {stat.label === 'Trash Recipes' && Number(statsData?.trash) > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClearTrash();
+                  }}
+                  disabled={isClearing}
+                  className="px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Trash2 className="h-3 w-3" /> Clear Trash
+                </button>
+              )}
             </div>
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
             <h3 className="text-2xl font-black text-white">{stat.value}</h3>

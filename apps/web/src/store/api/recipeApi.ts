@@ -28,6 +28,13 @@ export const recipeApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['Recipe'],
     }),
+    clearTrashRecipes: builder.mutation<{ message: string; count: number }, void>({
+      query: () => ({
+        url: '/recipes/trash/clear',
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Recipe'],
+    }),
     createRecipe: builder.mutation<Recipe, Partial<Recipe>>({
       query: (body) => ({
         url: '/recipes',
@@ -109,6 +116,7 @@ export const {
   useGetRecipeStatsQuery,
   useGetFeaturedRecipesQuery,
   useDeleteRecipeMutation,
+  useClearTrashRecipesMutation,
   useCreateRecipeMutation,
   useUpdateRecipeMutation,
   useToggleFeaturedRecipeMutation,
