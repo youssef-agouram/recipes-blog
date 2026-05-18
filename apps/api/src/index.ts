@@ -58,7 +58,11 @@ app.get('/', (_req: express.Request, res: express.Response) => res.send('Recipes
 app.use(errorHandler);
 
 const port = process.env.PORT || 4000;
-app.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`API server running on http://localhost:${port}`);
-});
+if (process.env.VERCEL !== '1') {
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`API server running on http://localhost:${port}`);
+  });
+}
+
+export default app;

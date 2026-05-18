@@ -24,7 +24,10 @@ async function main() {
     await prisma.category.upsert({
       where: { name },
       update: {},
-      create: { name },
+      create: { 
+        name,
+        slug: name.toLowerCase()
+      },
     });
   }
 
