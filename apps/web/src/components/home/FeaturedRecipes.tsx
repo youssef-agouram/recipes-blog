@@ -4,10 +4,10 @@ import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Clock, Star, Heart, Bookmark, ChevronUp, Search } from 'lucide-react';
 import { Recipe } from '@/lib/types';
-import { 
-  useSaveRecipeMutation, 
-  useUnsaveRecipeMutation, 
-  useFavoriteRecipeMutation, 
+import {
+  useSaveRecipeMutation,
+  useUnsaveRecipeMutation,
+  useFavoriteRecipeMutation,
   useUnfavoriteRecipeMutation,
   useGetSavedRecipesQuery,
   useGetFavoritedRecipesQuery
@@ -15,23 +15,38 @@ import {
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 interface FeaturedRecipesProps {
   recipes: Recipe[];
+  selectedCategoryId?: string;
 }
 
-export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
+export default function FeaturedRecipes({ recipes, selectedCategoryId }: FeaturedRecipesProps) {
   const router = useRouter();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [saveRecipe] = useSaveRecipeMutation();
   const [unsaveRecipe] = useUnsaveRecipeMutation();
   const [favoriteRecipe] = useFavoriteRecipeMutation();
   const [unfavoriteRecipe] = useUnfavoriteRecipeMutation();
-  
+
   const { data: savedRecipes } = useGetSavedRecipesQuery(undefined, { skip: !isAuthenticated });
   const { data: favoritedRecipes } = useGetFavoritedRecipesQuery(undefined, { skip: !isAuthenticated });
+
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const rawTab = searchParams.get('tab');
+  const activeTab = rawTab
+    ? (rawTab as 'all' | 'featured')
+    : (selectedCategoryId ? null : 'featured');
+
+  const setActiveTab = (tab: 'all' | 'featured') => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', tab);
+    params.delete('category');
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,10 +110,15 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
     }
   };
 
-  const filteredRecipes = [...recipes].filter(recipe => 
-    recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.summary?.toLowerCase().includes(searchQuery.toLowerCase())
-  ).sort((a, b) => {
+  const filteredRecipes = [...recipes].filter(recipe => {
+    const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      recipe.summary?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === 'featured' ? recipe.isFeatured : true;
+    const matchesCategory = selectedCategoryId
+      ? recipe.categories?.some(c => c.id.toString() === selectedCategoryId)
+      : true;
+    return matchesSearch && matchesTab && matchesCategory;
+  }).sort((a, b) => {
     const q = searchQuery.toLowerCase();
     const aTitleMatch = a.title.toLowerCase().includes(q);
     const bTitleMatch = b.title.toLowerCase().includes(q);
@@ -124,35 +144,73 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
     return 'bg-primary';
   };
 
+  const selectedCategoryName = selectedCategoryId
+    ? recipes.flatMap(r => r.categories || []).find(c => c.id.toString() === selectedCategoryId)?.name
+    : undefined;
+
   return (
     <section className="container mx-auto px-6 max-w-[1536px] py-6 border-t border-border">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
         <div className="flex-1">
-          <h2 className="text-2xl font-black text-white tracking-tighter mb-0.5 leading-none">Featured Recipes</h2>
-          <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Handpicked culinary masterpieces for you.</p>
+          <h2 className="text-2xl font-black text-white tracking-tighter mb-0.5 leading-none">
+            {activeTab === 'featured'
+              ? selectedCategoryName ? `Featured ${selectedCategoryName} Recipes` : 'Featured Recipes'
+              : selectedCategoryName ? `All ${selectedCategoryName} Recipes` : 'All Recipes'}
+          </h2>
+          <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
+            {activeTab === 'featured'
+              ? selectedCategoryName ? `Our handpicked ${selectedCategoryName.toLowerCase()} masterpieces.` : 'Handpicked culinary masterpieces for you.'
+              : selectedCategoryName ? `Explore our full selection of ${selectedCategoryName.toLowerCase()} recipes.` : 'Explore our entire culinary collection.'}
+          </p>
         </div>
-        
-        <div className="flex items-center gap-4">
+
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Tab Switcher */}
+          <div className="flex bg-white/[0.02] border border-white/10 rounded-lg p-0.5 gap-1">
+            <button
+              onClick={() => setActiveTab('all')}
+              className={cn(
+                "px-4 py-2 rounded-md text-xs font-black uppercase tracking-wider transition-all duration-300",
+                activeTab === 'all'
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                  : "text-muted-foreground hover:text-white"
+              )}
+            >
+              All Recipes
+            </button>
+            <button
+              onClick={() => setActiveTab('featured')}
+              className={cn(
+                "px-4 py-2 rounded-md text-xs font-black uppercase tracking-wider transition-all duration-300",
+                activeTab === 'featured'
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                  : "text-muted-foreground hover:text-white"
+              )}
+            >
+              Featured Recipes
+            </button>
+          </div>
+
           <div className="relative group/search">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
-            <input 
-              type="text" 
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
+            <input
+              type="text"
               placeholder="Search recipes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-48 md:w-64 bg-white/[0.02] border border-white/10 rounded-lg pl-9 pr-4 text-[11px] font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
+              className="h-10 w-48 md:w-64 bg-white/[0.02] border border-white/10 rounded-lg pl-10 pr-4 text-xs font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
             />
           </div>
 
-          <button 
+          <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-[8px] font-black text-primary hover:text-white uppercase tracking-[0.2em] group transition-colors"
+            className="flex items-center gap-2 text-xs font-black text-primary hover:text-white uppercase tracking-[0.2em] group transition-colors"
           >
             {isExpanded ? 'Show less' : 'View all'}
             {isExpanded ? (
-              <ChevronUp className="w-3 h-3 group-hover:-translate-y-1 transition-transform" />
+              <ChevronUp className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
             ) : (
-              <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             )}
           </button>
         </div>
@@ -170,8 +228,8 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
 
         <div
           ref={scrollRef}
-          className={isExpanded 
-            ? `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 ${filteredRecipes.length > 10 ? 'max-h-[850px] overflow-y-auto pr-2 custom-scrollbar' : ''}` 
+          className={isExpanded
+            ? `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 ${filteredRecipes.length > 10 ? 'max-h-[850px] overflow-y-auto pr-2 custom-scrollbar' : ''}`
             : "flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4"
           }
           style={isExpanded ? {} : { scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -184,71 +242,70 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
             const isFavorited = localFavorited[recipe.id] ?? isFavoritedFromStore ?? recipe.isFavorited;
 
             return (
-            <Link
-              key={recipe.id}
-              href={`/recipes/${recipe.slug}`}
-              className={`${
-                isExpanded 
-                  ? "w-full" 
-                  : "min-w-[280px] md:min-w-[calc(20%-13px)] md:max-w-[calc(20%-13px)]"
-              } snap-start group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border`}
-            >
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
-                <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
-                  <button
-                    onClick={(e) => handleSaveToggle(e, recipe)}
-                    className={cn(
-                      "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-                      isSaved
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                        : "bg-black/40 text-white hover:bg-primary"
-                    )}
-                  >
-                    <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
-                  </button>
-                  <button
-                    onClick={(e) => handleFavoriteToggle(e, recipe)}
-                    className={cn(
-                      "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-                      isFavorited
-                        ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
-                        : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
-                    )}
-                  >
-                    <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
-                  </button>
+              <Link
+                key={recipe.id}
+                href={`/recipes/${recipe.slug}`}
+                className={`${isExpanded
+                    ? "w-full"
+                    : "min-w-[280px] md:min-w-[calc(20%-13px)] md:max-w-[calc(20%-13px)]"
+                  } snap-start group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border`}
+              >
+                <div className="relative aspect-[4/3] w-full overflow-hidden">
+                  <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+                    <button
+                      onClick={(e) => handleSaveToggle(e, recipe)}
+                      className={cn(
+                        "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                        isSaved
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : "bg-black/40 text-white hover:bg-primary"
+                      )}
+                    >
+                      <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
+                    </button>
+                    <button
+                      onClick={(e) => handleFavoriteToggle(e, recipe)}
+                      className={cn(
+                        "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                        isFavorited
+                          ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
+                          : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
+                      )}
+                    >
+                      <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
+                    </button>
+                  </div>
+                  <img
+                    src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
+                    alt={recipe.title}
+                    className="w-full h-full object-cover group-card:scale-105 transition-transform duration-[1.5s]"
+                  />
+                  <div className="absolute bottom-2.5 left-2.5 z-20">
+                    <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider text-white ${getCategoryColor(recipe.categories?.[0]?.name)}`}>
+                      {recipe.categories?.[0]?.name || 'Recipe'}
+                    </span>
+                  </div>
                 </div>
-                <img
-                  src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
-                  alt={recipe.title}
-                  className="w-full h-full object-cover group-card:scale-105 transition-transform duration-[1.5s]"
-                />
-                <div className="absolute bottom-2.5 left-2.5 z-20">
-                  <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider text-white ${getCategoryColor(recipe.categories?.[0]?.name)}`}>
-                    {recipe.categories?.[0]?.name || 'Recipe'}
-                  </span>
-                </div>
-              </div>
 
-              <div className="p-3.5 flex flex-col flex-1">
-                <h3 className="text-[13px] font-black text-white leading-tight mb-1.5 group-hover/card:text-primary transition-colors line-clamp-1">
-                  {recipe.title}
-                </h3>
-                <p className="text-[10px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-3 h-[46px]">
-                  {recipe.summary || "Master this delicious dish with our step-by-step guide and expert culinary tips."}
-                </p>
-                <div className="flex items-center justify-between mt-auto pt-2.5 border-t border-border">
-                  <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
-                    <Clock className="w-3 h-3 text-primary" />
-                    <span>{recipe.totalTime || recipe.prepTime || '30m'}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 fill-primary text-primary" />
-                    <span className="text-[9px] font-black text-white">4.9</span>
+                <div className="p-3.5 flex flex-col flex-1">
+                  <h3 className="text-[13px] font-black text-white leading-tight mb-1.5 group-hover/card:text-primary transition-colors line-clamp-1">
+                    {recipe.title}
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-3 h-[46px]">
+                    {recipe.summary || "Master this delicious dish with our step-by-step guide and expert culinary tips."}
+                  </p>
+                  <div className="flex items-center justify-between mt-auto pt-2.5 border-t border-border">
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
+                      <Clock className="w-3 h-3 text-primary" />
+                      <span>{recipe.totalTime || recipe.prepTime || '30m'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-primary text-primary" />
+                      <span className="text-[9px] font-black text-white">4.9</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
             );
           })}
 
@@ -256,11 +313,10 @@ export default function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
           {recipes.length < 5 && Array.from({ length: 5 - recipes.length }).map((_, i) => (
             <div
               key={`placeholder-${i}`}
-              className={`${
-                isExpanded 
-                  ? "w-full" 
+              className={`${isExpanded
+                  ? "w-full"
                   : "min-w-[280px] md:min-w-[calc(20%-13px)]"
-              } bg-card/30 rounded-xl flex flex-col border border-dashed border-border`}
+                } bg-card/30 rounded-xl flex flex-col border border-dashed border-border`}
             >
               <div className="aspect-[4/3] w-full bg-white/[0.03] rounded-t-xl" />
               <div className="p-3.5 space-y-2">

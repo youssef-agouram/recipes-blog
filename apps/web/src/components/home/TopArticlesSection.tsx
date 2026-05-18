@@ -178,25 +178,25 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
 
         <div className="flex items-center gap-4">
           <div className="relative group/search">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
             <input 
               type="text" 
               placeholder={`Search ${title.toLowerCase()}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-48 md:w-64 bg-white/[0.02] border border-white/10 rounded-lg pl-9 pr-4 text-[11px] font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
+              className="h-10 w-48 md:w-64 bg-white/[0.02] border border-white/10 rounded-lg pl-10 pr-4 text-xs font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
             />
           </div>
 
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-[8px] font-black text-primary hover:text-white uppercase tracking-[0.2em] group transition-colors"
+            className="flex items-center gap-2 text-xs font-black text-primary hover:text-white uppercase tracking-[0.2em] group transition-colors"
           >
             {isExpanded ? 'Show less' : 'View all'}
             {isExpanded ? (
-              <ChevronUp className="w-3 h-3 group-hover:-translate-y-1 transition-transform" />
+              <ChevronUp className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
             ) : (
-              <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             )}
           </button>
         </div>

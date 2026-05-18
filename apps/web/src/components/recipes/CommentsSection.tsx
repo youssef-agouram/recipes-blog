@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import Link from 'next/link';
 
-export default function CommentsSection({ recipeId }: { recipeId: number }) {
+export default function CommentsSection({ recipeId, className }: { recipeId: number; className?: string }) {
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,7 +104,7 @@ export default function CommentsSection({ recipeId }: { recipeId: number }) {
   };
 
   return (
-    <section className="mt-16 pt-16 border-t border-white/5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <section className={className || "mt-16 pt-16 border-t border-white/5 animate-in fade-in slide-in-from-bottom-4 duration-700"}>
       <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">

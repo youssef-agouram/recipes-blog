@@ -11,9 +11,10 @@ import FeaturedRecipes from "@/components/home/FeaturedRecipes";
 import DraggableSponsoredCard from "@/components/home/DraggableSponsoredCard";
 import TopArticlesSection from "@/components/home/TopArticlesSection";
 import { HeroSlider } from "@/components/home/HeroSlider";
+import { cn } from "@/lib/utils";
 
 interface HomePageProps {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; category?: string; tab?: string }>;
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
@@ -24,7 +25,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     return [];
   });
 
-  const recipesResponse = await api.recipes.list({ limit: 20, featured: true }).catch((err) => {
+  const recipesResponse = await api.recipes.list({ limit: 100 }).catch((err) => {
     console.error('Error fetching recipes:', err);
     return { data: [] };
   });
@@ -64,9 +65,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       {/* 1. Hero Slider Section */}
       <section className="relative w-full h-[45vh] min-h-[300px] border-b border-white/5 mb-16 bg-black">
-        <HeroSlider 
-          images={heroSettings.images || []} 
-          fallbackImage={heroSettings.imageUrl} 
+        <HeroSlider
+          images={heroSettings.images || []}
+          fallbackImage={heroSettings.imageUrl}
         />
       </section>
 
@@ -76,7 +77,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <div>
             <h2 className="text-3xl font-black text-white tracking-tighter mb-1 leading-none font-heading">Explore by Category</h2>
           </div>
-          <Link href="/categories" className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] group hover:text-white transition-colors">
+          <Link href="/categories" className="flex items-center gap-2 text-xs font-black text-primary uppercase tracking-[0.2em] group hover:text-white transition-colors">
             View all categories
             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
@@ -88,7 +89,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <ChevronLeft className="w-6 h-6" />
           </button>
 
-          <div className="flex gap-4 overflow-x-auto pb-1 scrollbar-hide px-4">
+          <div className="flex justify-start md:justify-center gap-4 overflow-x-auto pb-1 scrollbar-hide px-4">
             {categories.map((cat, i) => {
               const availableIcons: Record<string, any> = {
                 Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
@@ -110,7 +111,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               };
 
               const nameLower = cat.name.toLowerCase();
-              
+
               let Icon = CookingPot;
               if (cat.icon && availableIcons[cat.icon]) {
                 Icon = availableIcons[cat.icon];
@@ -120,20 +121,38 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
               const isGF = nameLower.includes('gluten free');
               const isQuick = nameLower.includes('quick');
+              const isSelected = resolvedParams.category === cat.id.toString();
+              const href = isSelected ? '/' : `/?category=${cat.id}`;
 
               return (
-                <Link key={cat.id || i} href={`/categories/${cat.id}`} className="flex flex-col items-center gap-1.5 group cursor-pointer min-w-[70px]">
-                  <div className="w-12 h-12 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:scale-110 group-hover:bg-white/[0.05] group-hover:border-primary/30">
+                <Link
+                  key={cat.id || i}
+                  href={href}
+                  scroll={false}
+                  className="flex flex-col items-center gap-2.5 group cursor-pointer min-w-[85px]"
+                >
+                  <div className={cn(
+                    "w-12 h-12 rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:scale-110",
+                    isSelected
+                      ? "bg-primary/10 border border-primary shadow-lg shadow-primary/20"
+                      : "bg-white/[0.02] border border-white/5 group-hover:bg-white/[0.05] group-hover:border-primary/30"
+                  )}>
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <Icon className="w-5 h-5 text-primary stroke-[1.5px] transition-transform duration-500 group-hover:scale-110" />
+                    <Icon className={cn(
+                      "w-[26px] h-[26px] stroke-[1.5px] transition-transform duration-500 group-hover:scale-110",
+                      isSelected ? "text-primary scale-110" : "text-primary/70 group-hover:text-primary"
+                    )} />
                   </div>
-                  <div className="flex flex-col items-center gap-0.5 text-center">
-                    <span className="text-[9px] font-black text-white/80 uppercase tracking-[0.1em] group-hover:text-primary transition-colors leading-none">{cat.name}</span>
+                  <div className="flex flex-col items-center gap-1.5 text-center">
+                    <span className={cn(
+                      "text-[11px] font-black uppercase tracking-[0.08em] transition-colors leading-none",
+                      isSelected ? "text-primary" : "text-white/80 group-hover:text-primary"
+                    )}>{cat.name}</span>
                     {isGF && (
-                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none">GF</span>
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none">GF</span>
                     )}
                     {isQuick && (
-                      <Zap className="w-3 h-3 text-primary animate-pulse" />
+                      <Zap className="w-3.5 h-3.5 text-primary animate-pulse" />
                     )}
                   </div>
                 </Link>
@@ -147,11 +166,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
       </section>
 
-      <FeaturedRecipes recipes={recipes} />
+      <FeaturedRecipes recipes={recipes} selectedCategoryId={resolvedParams.category} />
 
-      <TopArticlesSection 
-        items={[...topRecipes, ...articles]} 
-        title="Top Articles" 
+      <TopArticlesSection
+        items={[...topRecipes, ...articles]}
+        title="Top Articles"
         subtitle="Deep dives into nutrition and lifestyle."
       />
 
