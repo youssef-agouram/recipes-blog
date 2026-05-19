@@ -2,7 +2,7 @@ const { Client } = require('pg');
 
 async function main() {
   const localUrl = "postgresql://postgres:postgres@localhost:5432/recipes_db";
-  const remoteUrl = "postgresql://postgres.vzngrcrdyzsahnuofvmw:Ayou123beMr@aws-1-eu-west-2.pooler.supabase.com:6543/postgres";
+  const remoteUrl = "postgresql://postgres.vzngrcrdyzsahnuofvmw:Ayou123beMr@aws-1-eu-west-2.pooler.supabase.com:5432/postgres";
 
   console.log("Initializing database sync...");
   console.log(`Source (Local): ${localUrl}`);
@@ -31,12 +31,15 @@ async function main() {
     console.log("Disabling constraints on Supabase...");
     await remoteClient.query("SET session_replication_role = 'replica';");
 
-    // 3. Sync table contents
+    // 3. Clear all remote tables in one single command to prevent cascading deletes during sync
+    console.log("Truncating all remote tables...");
+    const truncateQuery = `TRUNCATE TABLE ${tables.map(t => `"${t}"`).join(', ')} CASCADE;`;
+    await remoteClient.query(truncateQuery);
+    console.log("All remote tables truncated successfully.");
+
+    // 4. Sync table contents
     for (const table of tables) {
       console.log(`\nSyncing table: "${table}"...`);
-
-      // Clear table on remote
-      await remoteClient.query(`TRUNCATE TABLE "${table}" CASCADE;`);
 
       // Read rows from local
       const rowsRes = await localClient.query(`SELECT * FROM "${table}"`);
