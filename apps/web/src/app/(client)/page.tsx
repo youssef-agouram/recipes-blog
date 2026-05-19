@@ -15,7 +15,7 @@ import { HeroSlider } from "@/components/home/HeroSlider";
 import { cn } from "@/lib/utils";
 
 interface HomePageProps {
-  searchParams: Promise<{ page?: string; category?: string; tab?: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
@@ -122,32 +122,28 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
               const isGF = nameLower.includes('gluten free');
               const isQuick = nameLower.includes('quick');
-              const isSelected = resolvedParams.category === cat.id.toString();
-              const href = isSelected ? '/' : `/?category=${cat.id}`;
+              const href = `/category/${cat.slug}`;
 
               return (
                 <Link
                   key={cat.id || i}
                   href={href}
-                  scroll={false}
                   className="flex flex-col items-center gap-2.5 group cursor-pointer min-w-[85px]"
                 >
                   <div className={cn(
                     "w-12 h-12 rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:scale-110",
-                    isSelected
-                      ? "bg-primary/10 border border-primary shadow-lg shadow-primary/20"
-                      : "bg-white/[0.02] border border-white/5 group-hover:bg-white/[0.05] group-hover:border-primary/30"
+                    "bg-white/[0.02] border border-white/5 group-hover:bg-white/[0.05] group-hover:border-primary/30"
                   )}>
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <Icon className={cn(
                       "w-[26px] h-[26px] stroke-[1.5px] transition-transform duration-500 group-hover:scale-110",
-                      isSelected ? "text-primary scale-110" : "text-primary/70 group-hover:text-primary"
+                      "text-primary/70 group-hover:text-primary"
                     )} />
                   </div>
                   <div className="flex flex-col items-center gap-1.5 text-center">
                     <span className={cn(
                       "text-[11px] font-black uppercase tracking-[0.08em] transition-colors leading-none",
-                      isSelected ? "text-primary" : "text-white/80 group-hover:text-primary"
+                      "text-white/80 group-hover:text-primary"
                     )}>{cat.name}</span>
                     {isGF && (
                       <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none">GF</span>
@@ -167,7 +163,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
       </section>
 
-      <FeaturedRecipes recipes={recipes} selectedCategoryId={resolvedParams.category} />
+      <FeaturedRecipes recipes={recipes} />
 
       <TopArticlesSection
         items={[...topRecipes, ...articles]}

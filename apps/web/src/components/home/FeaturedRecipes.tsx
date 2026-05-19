@@ -16,7 +16,7 @@ import {
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { toast } from 'sonner';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 interface FeaturedRecipesProps {
@@ -35,19 +35,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
   const { data: savedRecipes } = useGetSavedRecipesQuery(undefined, { skip: !isAuthenticated });
   const { data: favoritedRecipes } = useGetFavoritedRecipesQuery(undefined, { skip: !isAuthenticated });
 
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const rawTab = searchParams.get('tab');
-  const activeTab = rawTab
-    ? (rawTab as 'all' | 'featured')
-    : (selectedCategoryId ? null : 'featured');
 
-  const setActiveTab = (tab: 'all' | 'featured') => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('tab', tab);
-    params.delete('category');
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,14 +99,13 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
     }
   };
 
-  const filteredRecipes = [...recipes].filter(recipe => {
+  const featuredRecipes = recipes.filter(r => r.isFeatured);
+  const recipesToDisplay = featuredRecipes.length > 0 ? featuredRecipes : recipes;
+
+  const filteredRecipes = [...recipesToDisplay].filter(recipe => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       recipe.summary?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'featured' ? recipe.isFeatured : true;
-    const matchesCategory = selectedCategoryId
-      ? recipe.categories?.some(c => c.id.toString() === selectedCategoryId)
-      : true;
-    return matchesSearch && matchesTab && matchesCategory;
+    return matchesSearch;
   }).sort((a, b) => {
     const q = searchQuery.toLowerCase();
     const aTitleMatch = a.title.toLowerCase().includes(q);
@@ -145,53 +132,22 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
     return 'bg-primary';
   };
 
-  const selectedCategoryName = selectedCategoryId
-    ? recipes.flatMap(r => r.categories || []).find(c => c.id.toString() === selectedCategoryId)?.name
-    : undefined;
+
 
   return (
     <LayoutGroup id="featured-recipes-group">
       <section className="container mx-auto px-6 max-w-[1536px] py-6 border-t border-border">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
           <div className="flex-1">
-            <h2 className="text-2xl font-black text-white tracking-tighter mb-0.5 leading-none">
-              {activeTab === 'featured'
-                ? selectedCategoryName ? `Featured ${selectedCategoryName} Recipes` : 'Featured Recipes'
-                : selectedCategoryName ? `All ${selectedCategoryName} Recipes` : 'All Recipes'}
+            <h2 className="text-2xl font-black text-white tracking-tighter mb-0.5 leading-none font-heading">
+              Featured Recipes
             </h2>
             <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
-              {activeTab === 'featured'
-                ? selectedCategoryName ? `Our handpicked ${selectedCategoryName.toLowerCase()} masterpieces.` : 'Handpicked culinary masterpieces for you.'
-                : selectedCategoryName ? `Explore our full selection of ${selectedCategoryName.toLowerCase()} recipes.` : 'Explore our entire culinary collection.'}
+              Handpicked culinary masterpieces for you.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            {/* Tab Switcher */}
-            <div className="flex bg-white/[0.02] border border-white/10 rounded-lg p-0.5 gap-1">
-              <button
-                onClick={() => setActiveTab('all')}
-                className={cn(
-                  "px-4 py-2 rounded-md text-xs font-black uppercase tracking-wider transition-all duration-300",
-                  activeTab === 'all'
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                    : "text-muted-foreground hover:text-white"
-                )}
-              >
-                All Recipes
-              </button>
-              <button
-                onClick={() => setActiveTab('featured')}
-                className={cn(
-                  "px-4 py-2 rounded-md text-xs font-black uppercase tracking-wider transition-all duration-300",
-                  activeTab === 'featured'
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                    : "text-muted-foreground hover:text-white"
-                )}
-              >
-                Featured Recipes
-              </button>
-            </div>
 
             <div className="relative group/search">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
