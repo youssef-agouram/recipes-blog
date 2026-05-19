@@ -234,132 +234,228 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
             )}
           </AnimatePresence>
 
-        <motion.div
-          layout
-          ref={scrollRef}
-          className={isExpanded
-            ? `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 ${filteredRecipes.length > 10 ? 'max-h-[850px] overflow-y-auto pr-2 custom-scrollbar' : ''}`
-            : "flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4"
-          }
-          style={isExpanded ? {} : { scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          <AnimatePresence mode="popLayout">
-            {filteredRecipes.map((recipe) => {
-              const isSavedFromStore = savedRecipes?.some(r => r.id === recipe.id) ?? false;
-              const isFavoritedFromStore = favoritedRecipes?.some(r => r.id === recipe.id) ?? false;
+          <AnimatePresence mode="wait">
+            {!isExpanded ? (
+              <motion.div
+                key="carousel"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                ref={scrollRef}
+                className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {filteredRecipes.map((recipe) => {
+                  const isSavedFromStore = savedRecipes?.some(r => r.id === recipe.id) ?? false;
+                  const isFavoritedFromStore = favoritedRecipes?.some(r => r.id === recipe.id) ?? false;
 
-              const isSaved = localSaved[recipe.id] ?? isSavedFromStore ?? recipe.isSaved;
-              const isFavorited = localFavorited[recipe.id] ?? isFavoritedFromStore ?? recipe.isFavorited;
+                  const isSaved = localSaved[recipe.id] ?? isSavedFromStore ?? recipe.isSaved;
+                  const isFavorited = localFavorited[recipe.id] ?? isFavoritedFromStore ?? recipe.isFavorited;
 
-              const cardClass = isExpanded
-                ? "w-full"
-                : "min-w-[280px] md:min-w-[calc(20%-13px)] md:max-w-[calc(20%-13px)] snap-start";
+                  return (
+                    <motion.div
+                      key={recipe.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border min-w-[280px] md:min-w-[calc(20%-13px)] md:max-w-[calc(20%-13px)] snap-start"
+                    >
+                      <Link
+                        href={`/recipes/${recipe.slug}`}
+                        className="flex flex-col flex-1"
+                      >
+                        <div className="relative aspect-[4/3] w-full overflow-hidden">
+                          <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+                            <button
+                              onClick={(e) => handleSaveToggle(e, recipe)}
+                              className={cn(
+                                "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                                isSaved
+                                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                  : "bg-black/40 text-white hover:bg-primary"
+                              )}
+                            >
+                              <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
+                            </button>
+                            <button
+                              onClick={(e) => handleFavoriteToggle(e, recipe)}
+                              className={cn(
+                                "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                                isFavorited
+                                  ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
+                                  : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
+                              )}
+                            >
+                              <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
+                            </button>
+                          </div>
+                          <img
+                            src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover group-card:scale-105 transition-transform duration-[1.5s]"
+                          />
+                          <div className="absolute bottom-2.5 left-2.5 z-20">
+                            <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider text-white ${getCategoryColor(recipe.categories?.[0]?.name)}`}>
+                              {recipe.categories?.[0]?.name || 'Recipe'}
+                            </span>
+                          </div>
+                        </div>
 
-              return (
-                <motion.div
-                  layout
-                  key={recipe.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className={cn(
-                    "group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border",
-                    cardClass
-                  )}
-                >
-                  <Link
-                    href={`/recipes/${recipe.slug}`}
-                    className="flex flex-col flex-1"
+                        <div className="p-3.5 flex flex-col flex-1">
+                          <h3 className="text-[13px] font-black text-white leading-tight mb-1.5 group-hover/card:text-primary transition-colors line-clamp-1">
+                            {recipe.title}
+                          </h3>
+                          <p className="text-[10px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-3 h-[46px]">
+                            {recipe.summary || "Master this delicious dish with our step-by-step guide and expert culinary tips."}
+                          </p>
+                          <div className="flex items-center justify-between mt-auto pt-2.5 border-t border-border">
+                            <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
+                              <Clock className="w-3 h-3 text-primary" />
+                              <span>{recipe.totalTime || recipe.prepTime || '30m'}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-primary text-primary" />
+                              <span className="text-[9px] font-black text-white">4.9</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+
+                {/* Placeholders */}
+                {recipes.length < 5 && Array.from({ length: 5 - recipes.length }).map((_, i) => (
+                  <div
+                    key={`placeholder-${i}`}
+                    className="bg-card/30 rounded-xl flex flex-col border border-dashed border-border min-w-[280px] md:min-w-[calc(20%-13px)]"
                   >
-                    <div className="relative aspect-[4/3] w-full overflow-hidden">
-                      <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
-                        <button
-                          onClick={(e) => handleSaveToggle(e, recipe)}
-                          className={cn(
-                            "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-                            isSaved
-                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                              : "bg-black/40 text-white hover:bg-primary"
-                          )}
-                        >
-                          <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
-                        </button>
-                        <button
-                          onClick={(e) => handleFavoriteToggle(e, recipe)}
-                          className={cn(
-                            "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-                            isFavorited
-                              ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
-                              : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
-                          )}
-                        >
-                          <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
-                        </button>
+                    <div className="aspect-[4/3] w-full bg-white/[0.03] rounded-t-xl" />
+                    <div className="p-3.5 space-y-2">
+                      <div className="h-3 w-3/4 bg-white/5 rounded" />
+                      <div className="h-10 w-full bg-white/5 rounded" />
+                      <div className="flex justify-between pt-2">
+                        <div className="h-2 w-1/4 bg-white/5 rounded" />
+                        <div className="h-2 w-1/4 bg-white/5 rounded" />
                       </div>
-                      <img
-                        src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
-                        alt={recipe.title}
-                        className="w-full h-full object-cover group-card:scale-105 transition-transform duration-[1.5s]"
-                      />
-                      <div className="absolute bottom-2.5 left-2.5 z-20">
-                        <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider text-white ${getCategoryColor(recipe.categories?.[0]?.name)}`}>
-                          {recipe.categories?.[0]?.name || 'Recipe'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="p-3.5 flex flex-col flex-1">
-                      <h3 className="text-[13px] font-black text-white leading-tight mb-1.5 group-hover/card:text-primary transition-colors line-clamp-1">
-                        {recipe.title}
-                      </h3>
-                      <p className="text-[10px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-3 h-[46px]">
-                        {recipe.summary || "Master this delicious dish with our step-by-step guide and expert culinary tips."}
-                      </p>
-                      <div className="flex items-center justify-between mt-auto pt-2.5 border-t border-border">
-                        <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
-                          <Clock className="w-3 h-3 text-primary" />
-                          <span>{recipe.totalTime || recipe.prepTime || '30m'}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-primary text-primary" />
-                          <span className="text-[9px] font-black text-white">4.9</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-
-            {/* Placeholders */}
-            {recipes.length < 5 && Array.from({ length: 5 - recipes.length }).map((_, i) => {
-              const cardClass = isExpanded
-                ? "w-full"
-                : "min-w-[280px] md:min-w-[calc(20%-13px)]";
-              return (
-                <motion.div
-                  layout
-                  key={`placeholder-${i}`}
-                  className={cn(
-                    "bg-card/30 rounded-xl flex flex-col border border-dashed border-border",
-                    cardClass
-                  )}
-                >
-                  <div className="aspect-[4/3] w-full bg-white/[0.03] rounded-t-xl" />
-                  <div className="p-3.5 space-y-2">
-                    <div className="h-3 w-3/4 bg-white/5 rounded" />
-                    <div className="h-10 w-full bg-white/5 rounded" />
-                    <div className="flex justify-between pt-2">
-                      <div className="h-2 w-1/4 bg-white/5 rounded" />
-                      <div className="h-2 w-1/4 bg-white/5 rounded" />
                     </div>
                   </div>
-                </motion.div>
-              );
-            })}
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="grid"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className={cn(
+                  "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4",
+                  filteredRecipes.length > 10 ? 'max-h-[850px] overflow-y-auto pr-2 custom-scrollbar' : ''
+                )}
+              >
+                {filteredRecipes.map((recipe) => {
+                  const isSavedFromStore = savedRecipes?.some(r => r.id === recipe.id) ?? false;
+                  const isFavoritedFromStore = favoritedRecipes?.some(r => r.id === recipe.id) ?? false;
+
+                  const isSaved = localSaved[recipe.id] ?? isSavedFromStore ?? recipe.isSaved;
+                  const isFavorited = localFavorited[recipe.id] ?? isFavoritedFromStore ?? recipe.isFavorited;
+
+                  return (
+                    <motion.div
+                      key={recipe.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border w-full"
+                    >
+                      <Link
+                        href={`/recipes/${recipe.slug}`}
+                        className="flex flex-col flex-1"
+                      >
+                        <div className="relative aspect-[4/3] w-full overflow-hidden">
+                          <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+                            <button
+                              onClick={(e) => handleSaveToggle(e, recipe)}
+                              className={cn(
+                                "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                                isSaved
+                                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                  : "bg-black/40 text-white hover:bg-primary"
+                              )}
+                            >
+                              <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
+                            </button>
+                            <button
+                              onClick={(e) => handleFavoriteToggle(e, recipe)}
+                              className={cn(
+                                "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                                isFavorited
+                                  ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
+                                  : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
+                              )}
+                            >
+                              <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
+                            </button>
+                          </div>
+                          <img
+                            src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover group-card:scale-105 transition-transform duration-[1.5s]"
+                          />
+                          <div className="absolute bottom-2.5 left-2.5 z-20">
+                            <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider text-white ${getCategoryColor(recipe.categories?.[0]?.name)}`}>
+                              {recipe.categories?.[0]?.name || 'Recipe'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-3.5 flex flex-col flex-1">
+                          <h3 className="text-[13px] font-black text-white leading-tight mb-1.5 group-hover/card:text-primary transition-colors line-clamp-1">
+                            {recipe.title}
+                          </h3>
+                          <p className="text-[10px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-3 h-[46px]">
+                            {recipe.summary || "Master this delicious dish with our step-by-step guide and expert culinary tips."}
+                          </p>
+                          <div className="flex items-center justify-between mt-auto pt-2.5 border-t border-border">
+                            <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
+                              <Clock className="w-3 h-3 text-primary" />
+                              <span>{recipe.totalTime || recipe.prepTime || '30m'}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-primary text-primary" />
+                              <span className="text-[9px] font-black text-white">4.9</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+
+                {/* Placeholders */}
+                {recipes.length < 5 && Array.from({ length: 5 - recipes.length }).map((_, i) => (
+                  <div
+                    key={`placeholder-${i}`}
+                    className="bg-card/30 rounded-xl flex flex-col border border-dashed border-border w-full"
+                  >
+                    <div className="aspect-[4/3] w-full bg-white/[0.03] rounded-t-xl" />
+                    <div className="p-3.5 space-y-2">
+                      <div className="h-3 w-3/4 bg-white/5 rounded" />
+                      <div className="h-10 w-full bg-white/5 rounded" />
+                      <div className="flex justify-between pt-2">
+                        <div className="h-2 w-1/4 bg-white/5 rounded" />
+                        <div className="h-2 w-1/4 bg-white/5 rounded" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
           </AnimatePresence>
-        </motion.div>
 
         <AnimatePresence>
           {!isExpanded && (
