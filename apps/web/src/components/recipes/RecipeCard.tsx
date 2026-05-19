@@ -8,7 +8,7 @@ import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Heart, Bookmark, Clock, Star } from "lucide-react";
+import { Heart, Bookmark, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
@@ -85,91 +85,80 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
       toast.error("Something went wrong");
     }
   };
-  
-  return (
-    <Link
-      href={`/recipes/${recipe.slug}`}
-      className="group flex flex-col bg-card/40 backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 hover:border-primary/30 transition-all duration-500 shadow-xl hover:shadow-primary/5 hover:-translate-y-2 h-full"
-    >
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
-          <button
-            onClick={handleSaveToggle}
-            className={cn(
-              "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-              isSaved 
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
-                : "bg-black/40 text-white/90 hover:bg-primary hover:text-primary-foreground"
-            )}
-            title={isSaved ? "Unsave recipe" : "Save recipe"}
-          >
-            <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
-          </button>
-          <button
-            onClick={handleFavoriteToggle}
-            className={cn(
-              "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-              isFavorited 
-                ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" 
-                : "bg-black/40 text-white/90 hover:bg-rose-500 hover:text-white"
-            )}
-            title={isFavorited ? "Remove from favorites" : "Add to favorites"}
-          >
-            <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
-          </button>
-        </div>
-        
-        {recipe.imageUrl ? (
-          <Image
-            src={recipe.imageUrl}
-            alt={recipe.title}
-            fill
-            className="object-cover group-hover:scale-110 transition-transform duration-[1.5s]"
-          />
-        ) : (
-          <div className="w-full h-full bg-white/[0.02] flex items-center justify-center text-muted-foreground/20 italic text-xs">
-            No image available
-          </div>
-        )}
-        
-        <div className="absolute bottom-4 left-4 z-20">
-          <span className="px-3 py-1 rounded-lg bg-primary/90 backdrop-blur-md text-[8px] font-black uppercase tracking-widest text-primary-foreground shadow-lg">
-            {category}
-          </span>
-        </div>
-      </div>
 
-      <div className="p-6 flex-1 flex flex-col">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-primary" />
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              {recipe.totalTime || recipe.prepTime || '30 Min'}
+  const timeText = recipe.totalTime || recipe.prepTime || '30 Min';
+
+  return (
+    <div className="group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border h-full">
+      <Link
+        href={`/recipes/${recipe.slug}`}
+        className="flex flex-col flex-1"
+      >
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
+          <div className="absolute top-2 left-2 z-20">
+            <span className="px-1.5 py-0.5 rounded text-[6px] font-black uppercase tracking-wider text-white bg-primary">
+              {category}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <Star className="w-3 h-3 fill-primary text-primary" />
-            <span className="text-[10px] font-black text-white">4.9</span>
+          <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+            <button
+              onClick={handleSaveToggle}
+              className={cn(
+                "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                isSaved
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                  : "bg-black/40 text-white hover:bg-primary"
+              )}
+              title={isSaved ? "Unsave recipe" : "Save recipe"}
+            >
+              <Bookmark className={cn("w-4.5 h-4.5", isSaved && "fill-current")} />
+            </button>
+            <button
+              onClick={handleFavoriteToggle}
+              className={cn(
+                "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
+                isFavorited
+                  ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
+                  : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
+              )}
+              title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+            >
+              <Heart className={cn("w-4.5 h-4.5", isFavorited && "fill-current")} />
+            </button>
           </div>
+          {recipe.imageUrl ? (
+            <Image
+              src={recipe.imageUrl}
+              alt={recipe.title}
+              fill
+              className="object-cover group-hover/card:scale-105 transition-transform duration-[1.5s]"
+            />
+          ) : (
+            <div className="w-full h-full bg-white/[0.02] flex items-center justify-center text-muted-foreground/20 italic text-xs">
+              No image available
+            </div>
+          )}
         </div>
 
-        <h3 className="text-lg font-black text-white leading-tight mb-3 group-hover:text-primary transition-colors line-clamp-2">
-          {recipe.title}
-        </h3>
-        
-        <p className="text-xs text-muted-foreground leading-relaxed font-medium mb-6 line-clamp-2 flex-1">
-          {recipe.summary || "A delightful harmony of succulent ingredients and expert culinary techniques."}
-        </p>
-
-        <div className="pt-5 border-t border-white/5 flex items-center justify-between">
-          <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] group-hover:text-primary transition-colors">
-            View Details
-          </span>
-          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-            <Clock className="w-4 h-4" />
+        <div className="p-3.5 flex flex-col flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[7px] font-black uppercase tracking-wider text-primary">{category}</span>
+            <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-wider">{timeText}</span>
           </div>
+          <h3 className="text-[12px] font-black text-white leading-tight mb-1 group-hover/card:text-primary transition-colors line-clamp-1">
+            {recipe.title}
+          </h3>
+          <p className="text-[9px] text-muted-foreground font-medium leading-relaxed mb-2 line-clamp-3 h-[42px]">
+            {recipe.summary || "Master this delicious dish with our step-by-step guide."}
+          </p>
+          <button className="flex items-center gap-1 text-[7px] font-black text-white uppercase tracking-wider group/btn mt-auto text-left">
+            <span className="border-b pb-0.5 border-primary">
+              View Recipe
+            </span>
+            <ArrowRight className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform text-primary" />
+          </button>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }

@@ -136,7 +136,10 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response, next: Next
       where.categories = { some: { id: Number(categoryId) } };
     }
     if (search) {
-      where.title = { contains: search as string, mode: 'insensitive' };
+      where.OR = [
+        { title: { contains: search as string, mode: 'insensitive' } },
+        { summary: { contains: search as string, mode: 'insensitive' } }
+      ];
     }
     if (featured === 'true') {
       where.isFeatured = true;
