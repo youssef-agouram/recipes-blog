@@ -57,7 +57,7 @@ router.post('/', authMiddleware, upload.single('image'), (req: Request, res: Res
     const fullPath = path.join(uploadPath, filename);
 
     try {
-      fs.writeFileSync(fullPath, req.file.buffer);
+      fs.writeFileSync(fullPath, req.file.buffer as any);
       const imageUrl = `/uploads/${filename}`;
       return res.json({ imageUrl });
     } catch (err) {

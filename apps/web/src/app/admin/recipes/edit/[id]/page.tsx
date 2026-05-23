@@ -21,8 +21,10 @@ export default function EditRecipePage() {
     try {
       await updateRecipe({ id, body: formData }).unwrap();
       router.push('/admin/recipes');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update recipe:', err);
+      const message = err?.data?.error || err?.message || 'Failed to update recipe. Please try again.';
+      throw { ...err, message };
     }
   };
 
