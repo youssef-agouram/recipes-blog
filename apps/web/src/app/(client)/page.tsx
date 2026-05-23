@@ -1,5 +1,5 @@
 import Link from "next/link";
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 import {
   ArrowRight, Clock, Users, Star, Search, ChevronRight, ChevronLeft, Heart, Play, Mail,
   CheckCircle, ShieldCheck, Zap, Sparkles, X, Coffee, Salad, CookingPot, Cake, Leaf,
@@ -15,45 +15,45 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import DraggableSponsoredCard from "@/components/home/DraggableSponsoredCard";
 
-interface HomePageProps {
-  searchParams: Promise<{ page?: string }>;
-}
+export default async function HomePage() {
 
-export default async function HomePage({ searchParams }: HomePageProps) {
-  const resolvedParams = await searchParams;
+  const [
+    categories,
+    recipesResponse,
+    topRecipesResponse,
+    articles,
+    heroSettings
+  ] = await Promise.all([
+    api.categories.list().catch((err) => {
+      console.error('Error fetching categories:', err);
+      return [];
+    }),
+    api.recipes.list({ limit: 15 }).catch((err) => {
+      console.error('Error fetching recipes:', err);
+      return { data: [] };
+    }),
+    api.recipes.list({ limit: 12, topArticle: true }).catch((err) => {
+      console.error('Error fetching top recipes:', err);
+      return { data: [] };
+    }),
+    api.articles.list({ limit: 12 }).catch((err) => {
+      console.error('Error fetching articles:', err);
+      return [];
+    }),
+    api.settings.getHero().catch((err) => {
+      console.error('Error fetching hero settings:', err);
+      return {
+        title: "Good Food, Good Mood",
+        subtitle: "Explore thousands of handpicked recipes from around the world.",
+        ctaText: "Explore Recipes",
+        imageUrl: null,
+        images: []
+      };
+    })
+  ]);
 
-  const categories = await api.categories.list().catch((err) => {
-    console.error('Error fetching categories:', err);
-    return [];
-  });
-
-  const recipesResponse = await api.recipes.list({ limit: 100 }).catch((err) => {
-    console.error('Error fetching recipes:', err);
-    return { data: [] };
-  });
   const recipes = recipesResponse.data || [];
-
-  const topRecipesResponse = await api.recipes.list({ limit: 12, topArticle: true }).catch((err) => {
-    console.error('Error fetching top recipes:', err);
-    return { data: [] };
-  });
   const topRecipes = topRecipesResponse.data || [];
-
-  const articles = await api.articles.list({ limit: 12 }).catch((err) => {
-    console.error('Error fetching articles:', err);
-    return [];
-  });
-
-  const heroSettings = await api.settings.getHero().catch((err) => {
-    console.error('Error fetching hero settings:', err);
-    return {
-      title: "Good Food, Good Mood",
-      subtitle: "Explore thousands of handpicked recipes from around the world.",
-      ctaText: "Explore Recipes",
-      imageUrl: null,
-      images: []
-    };
-  });
 
   const stats = [
     { label: 'Recipes', value: '15K+', icon: Zap },
@@ -75,11 +75,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       {/* 2. Explore by Category */}
       <section className="container mx-auto px-6 max-w-[1536px] py-2 border-t border-border">
-        <div className="flex items-end justify-between mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 gap-2">
           <div>
-            <h2 className="text-3xl font-black text-white tracking-tighter mb-1 leading-none font-heading">Explore by Category</h2>
+            <h2 className="text-xl sm:text-3xl font-black text-white tracking-tighter leading-none font-heading">Explore by Category</h2>
           </div>
-          <Link href="/categories" className="flex items-center gap-2 text-xs font-black text-primary uppercase tracking-[0.2em] group hover:text-white transition-colors">
+          <Link href="/categories" className="flex items-center gap-2 text-xs font-black text-primary uppercase tracking-[0.2em] group hover:text-white transition-colors shrink-0">
             View all categories
             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
@@ -87,11 +87,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
         <div className="relative group/nav">
           {/* Navigation Arrows */}
-          <button className="absolute -left-6 top-[40%] -translate-y-1/2 z-30 w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all">
+          <button className="hidden md:flex absolute -left-6 top-[40%] -translate-y-1/2 z-30 w-12 h-12 rounded-full border border-white/10 bg-white/5 items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all">
             <ChevronLeft className="w-6 h-6" />
           </button>
 
-          <div className="flex justify-start md:justify-center gap-4 overflow-x-auto pb-1 scrollbar-hide px-4">
+          <div className="flex flex-nowrap justify-start md:justify-center gap-4 overflow-x-auto pb-2 scrollbar-hide px-4">
             {categories.map((cat, i) => {
               const availableIcons: Record<string, any> = {
                 Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
@@ -129,7 +129,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <Link
                   key={cat.id || i}
                   href={href}
-                  className="flex flex-col items-center gap-2.5 group cursor-pointer min-w-[85px]"
+                  className="flex flex-col items-center gap-2.5 group cursor-pointer min-w-[85px] shrink-0"
                 >
                   <div className={cn(
                     "w-12 h-12 rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:scale-110",
@@ -158,7 +158,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             })}
           </div>
 
-          <button className="absolute -right-6 top-[40%] -translate-y-1/2 z-30 w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all">
+          <button className="hidden md:flex absolute -right-6 top-[40%] -translate-y-1/2 z-30 w-12 h-12 rounded-full border border-white/10 bg-white/5 items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all">
             <ChevronRight className="w-6 h-6" />
           </button>
         </div>

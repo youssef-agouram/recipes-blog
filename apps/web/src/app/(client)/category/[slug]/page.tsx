@@ -34,7 +34,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     }
 
     // 2. Fetch recipes for this category
-    const recipesResponse = await api.recipes.list({ categoryId: category.id, limit: 100 }).catch(() => ({ data: [] }));
+    const recipesResponse = await api.recipes.list({ categoryId: category.id, limit: 24 }).catch(() => ({ data: [] }));
     const recipes = recipesResponse.data || [];
 
     // 3. Resolve category icon

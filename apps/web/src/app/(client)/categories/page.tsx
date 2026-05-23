@@ -18,10 +18,6 @@ export const metadata = {
 export default async function CategoriesPage() {
   const categories = await api.categories.list().catch(() => []);
 
-  // Fetch all recipes to count them if category count isn't returned directly
-  const recipesResponse = await api.recipes.list({ limit: 100 }).catch(() => ({ data: [] }));
-  const allRecipes = recipesResponse.data || [];
-
   const iconComponents: Record<string, any> = {
     Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
     Apple, Fish, Croissant, Carrot, Soup, CupSoda,
@@ -77,9 +73,7 @@ export default async function CategoriesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {categories.map((cat) => {
               // Calculate recipe count
-              const recipeCount = cat._count?.recipes ?? allRecipes.filter(r => 
-                r.categories?.some(c => c.id === cat.id)
-              ).length;
+              const recipeCount = cat._count?.recipes || 0;
 
               // Resolve Icon
               const nameLower = cat.name.toLowerCase();

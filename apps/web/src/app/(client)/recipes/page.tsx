@@ -3,7 +3,7 @@ import { RecipesPageContent } from "./RecipesPageContent";
 import { constructMetadata } from "@/lib/seo";
 import { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 interface RecipesPageProps {
   searchParams: Promise<{

@@ -184,7 +184,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                 exit={{ opacity: 0, scale: 0.8, y: "-50%", x: -10 }}
                 whileHover={{ scale: 1.1, opacity: 1 }}
                 onClick={() => scroll('left')}
-                className="absolute -left-4 top-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all shadow-2xl"
+                className="hidden md:flex absolute -left-4 top-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all shadow-2xl"
               >
                 <ChevronLeft className="w-5 h-5" />
               </motion.button>
@@ -426,7 +426,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
               exit={{ opacity: 0, scale: 0.8, y: "-50%", x: 10 }}
               whileHover={{ scale: 1.1, opacity: 1 }}
               onClick={() => scroll('right')}
-              className="absolute -right-4 top-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all shadow-2xl"
+              className="hidden md:flex absolute -right-4 top-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all shadow-2xl"
             >
               <ChevronRight className="w-5 h-5" />
             </motion.button>

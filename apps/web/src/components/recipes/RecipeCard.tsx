@@ -14,9 +14,10 @@ import { useState, useEffect } from "react";
 
 interface RecipeCardProps {
   recipe: Recipe;
+  priority?: boolean;
 }
 
-export function RecipeCard({ recipe }: RecipeCardProps) {
+export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
   const router = useRouter();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [saveRecipe] = useSaveRecipeMutation();
@@ -131,6 +132,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
               src={recipe.imageUrl}
               alt={recipe.title}
               fill
+              priority={priority}
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
               className="object-cover group-hover/card:scale-105 transition-transform duration-[1.5s]"
             />
