@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
+import Image from 'next/image';
+
 export default function DraggableSidebarAd() {
   const [mounted, setMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -29,9 +31,11 @@ export default function DraggableSidebarAd() {
       className="rounded-[24px] overflow-hidden border border-border/50 group shadow-2xl cursor-grab bg-card aspect-[4/3] print:hidden"
     >
       <div className="pointer-events-none w-full h-full absolute inset-0">
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?auto=format&fit=crop&w=600&q=80"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          fill
+          sizes="280px"
+          className="object-cover group-hover:scale-105 transition-transform duration-700"
           alt="Premium Cookware"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20 p-5 flex flex-col justify-between">

@@ -9,10 +9,11 @@ import {
 import { Footer } from '@/components/layout/Footer';
 import { api } from "@/lib/api-client";
 import FeaturedRecipes from "@/components/home/FeaturedRecipes";
-import DraggableSponsoredCard from "@/components/home/DraggableSponsoredCard";
 import TopArticlesSection from "@/components/home/TopArticlesSection";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import DraggableSponsoredCard from "@/components/home/DraggableSponsoredCard";
 
 interface HomePageProps {
   searchParams: Promise<{ page?: string }>;
@@ -203,10 +204,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className="relative bg-gradient-to-r from-card/80 via-card/95 to-card/80 border border-primary/10 hover:border-primary/30 rounded-3xl overflow-hidden flex flex-col lg:flex-row items-stretch shadow-[0_0_50px_rgba(234,179,8,0.03)] hover:shadow-[0_0_50px_rgba(234,179,8,0.08)] transition-all duration-700 group">
           {/* Left Image Section */}
           <div className="lg:w-[26%] relative min-h-[220px] overflow-hidden">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=800&q=80"
               alt="Culinary Masterclass"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[8s]"
+              fill
+              sizes="(max-width: 1024px) 100vw, 26vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-[8s]"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-card/40 to-card"></div>
             <span className="bg-primary text-primary-foreground text-[8px] font-black tracking-[0.25em] px-4 py-2 rounded-full uppercase absolute top-6 left-6 shadow-2xl backdrop-blur-md border border-white/10 animate-pulse">

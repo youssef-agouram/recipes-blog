@@ -115,10 +115,12 @@ export default function LoginPage() {
             {/* Food Image */}
             <div className="mt-8 -mx-10 -mb-10 relative h-[280px]">
               <div className="absolute inset-0 bg-gradient-to-t from-[#0c1021] via-transparent to-transparent z-10" />
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
                 alt="Delicious food"
-                className="w-full h-full object-cover rounded-tr-[80px]"
+                fill
+                sizes="400px"
+                className="object-cover rounded-tr-[80px]"
               />
             </div>
           </div>

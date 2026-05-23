@@ -203,7 +203,7 @@ export function Navbar() {
                 className="absolute inset-0 w-full h-full object-cover" 
               />
             ) : (
-              <img src={activeTopAdUrl} alt="Ad" className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={activeTopAdUrl} alt="Ad" fill sizes="100vw" className="object-cover" unoptimized />
             )}
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all duration-500"></div>
             <div className="absolute inset-y-0 right-4 flex items-center">
@@ -354,10 +354,13 @@ export function Navbar() {
                         >
                           <div className="w-10 h-10 rounded-2xl overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5 group-hover:ring-primary/60">
                             {user?.avatar ? (
-                              <img
+                              <Image
                                 src={user.avatar}
                                 alt="Profile"
+                                width={40}
+                                height={40}
                                 className="w-full h-full object-cover rounded-[14px]"
+                                unoptimized
                               />
                             ) : (
                               <div className="w-full h-full rounded-[14px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
@@ -387,10 +390,13 @@ export function Navbar() {
                               <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-primary/20 p-0.5">
                                   {user?.avatar ? (
-                                    <img
+                                    <Image
                                       src={user.avatar}
                                       alt="Profile"
+                                      width={48}
+                                      height={48}
                                       className="w-full h-full object-cover rounded-[12px]"
+                                      unoptimized
                                     />
                                   ) : (
                                     <div className="w-full h-full rounded-[12px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
@@ -578,11 +584,14 @@ export function Navbar() {
                 <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/5">
                   <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-primary/20 p-0.5">
                     {user?.avatar ? (
-                      <img
-                        src={user.avatar}
-                        alt="Profile"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
+                       <Image
+                         src={user.avatar}
+                         alt="Profile"
+                         width={40}
+                         height={40}
+                         className="w-full h-full object-cover rounded-lg"
+                         unoptimized
+                       />
                     ) : (
                       <div className="w-full h-full rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
                         <User className="w-4 h-4 text-primary" />

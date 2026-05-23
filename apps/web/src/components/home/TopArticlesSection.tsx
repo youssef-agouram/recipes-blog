@@ -36,6 +36,7 @@ import { RootState } from '@/store/store';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface TopArticlesSectionProps {
   items: any[];
@@ -298,10 +299,12 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                               <Heart className={cn("w-4.5 h-4.5", isFavorited && "fill-current")} />
                             </button>
                           </div>
-                          <img
+                          <Image
                             src={item.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80"}
                             alt={item.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]"
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 100vw, (max-width: 1024px) 33vw, 20vw"
+                            className="object-cover group-hover:scale-105 transition-transform duration-[1.5s]"
                           />
                         </div>
 
@@ -413,10 +416,12 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                               <Heart className={cn("w-4.5 h-4.5", isFavorited && "fill-current")} />
                             </button>
                           </div>
-                          <img
+                          <Image
                             src={item.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80"}
                             alt={item.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]"
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 100vw, (max-width: 1024px) 33vw, 20vw"
+                            className="object-cover group-hover:scale-105 transition-transform duration-[1.5s]"
                           />
                         </div>
 

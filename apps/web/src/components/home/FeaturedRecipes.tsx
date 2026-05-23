@@ -18,6 +18,7 @@ import { RootState } from '@/store/store';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface FeaturedRecipesProps {
   recipes: Recipe[];
@@ -247,10 +248,12 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                               <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
                             </button>
                           </div>
-                          <img
+                          <Image
                             src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
                             alt={recipe.title}
-                            className="w-full h-full object-cover group-card:scale-105 transition-transform duration-[1.5s]"
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 100vw, (max-width: 1024px) 33vw, 20vw"
+                            className="object-cover group-hover/card:scale-105 transition-transform duration-[1.5s]"
                           />
                           <div className="absolute bottom-2.5 left-2.5 z-20">
                             <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider text-white ${getCategoryColor(recipe.categories?.[0]?.name)}`}>
@@ -357,10 +360,12 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                               <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
                             </button>
                           </div>
-                          <img
+                          <Image
                             src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
                             alt={recipe.title}
-                            className="w-full h-full object-cover group-card:scale-105 transition-transform duration-[1.5s]"
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 100vw, (max-width: 1024px) 33vw, 20vw"
+                            className="object-cover group-hover/card:scale-105 transition-transform duration-[1.5s]"
                           />
                           <div className="absolute bottom-2.5 left-2.5 z-20">
                             <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider text-white ${getCategoryColor(recipe.categories?.[0]?.name)}`}>

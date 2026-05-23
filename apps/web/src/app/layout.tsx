@@ -8,16 +8,19 @@ const dmSans = DM_Sans({
   variable: "--font-heading",
   subsets: ["latin"],
   weight: ["400", "500", "700", "800", "900"],
+  display: "swap",
 });
 
 const lora = Lora({
   variable: "--font-body",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const workSans = Work_Sans({
   variable: "--font-ui",
   subsets: ["latin"],
+  display: "swap",
 });
 
 import { constructMetadata } from "@/lib/seo";

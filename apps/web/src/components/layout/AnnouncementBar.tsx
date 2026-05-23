@@ -5,6 +5,8 @@ import { useGetSiteSettingsQuery } from '@/store/api/settingsApi';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+import Image from 'next/image';
+
 export function AnnouncementBar() {
   const { data: settings } = useGetSiteSettingsQuery();
   const [isVisible, setIsVisible] = useState(true);
@@ -88,7 +90,7 @@ export function AnnouncementBar() {
             className="absolute inset-0 w-full h-full object-cover" 
           />
         ) : (
-          <img src={activeBottomAdUrl} alt="Ad" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={activeBottomAdUrl} alt="Ad" fill sizes="100vw" className="object-cover" unoptimized />
         )}
       </Link>
     </div>

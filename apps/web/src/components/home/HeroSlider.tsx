@@ -176,10 +176,13 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
               );
             }
             return (
-              <img
+              <Image
                 src={url}
                 alt={`Hero Banner ${currentIndex + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
               />
             );
           })()}

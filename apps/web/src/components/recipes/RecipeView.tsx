@@ -4,9 +4,11 @@ import { Clock, Star, Share2, Bookmark, Printer, Heart, Minus, Plus, Flame, Chec
 import Link from "next/link";
 import Image from "next/image";
 import BlogRenderer from '@/components/BlogRenderer';
-import DraggableSidebarAd from "@/components/recipes/DraggableSidebarAd";
-import CommentsSection from "@/components/recipes/CommentsSection";
 import { Recipe } from "@/lib/types";
+import dynamic from 'next/dynamic';
+
+const DraggableSidebarAd = dynamic(() => import("@/components/recipes/DraggableSidebarAd"), { ssr: false });
+const CommentsSection = dynamic(() => import("@/components/recipes/CommentsSection"), { ssr: false });
 
 import { useState, useEffect } from "react";
 import {
@@ -245,7 +247,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         <div className="flex flex-col lg:flex-row items-start gap-12 mb-16 animate-in fade-in duration-1000">
           <div className="w-full lg:w-[55%] space-y-12">
             <div className="relative aspect-[16/10] rounded-[48px] overflow-hidden shadow-2xl group border border-white/5">
-              <Image src={selectedImage} alt={recipe.title} fill className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
+              <Image src={selectedImage} alt={recipe.title} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute top-8 right-8 flex flex-col gap-3">
                 <button onClick={handleSaveToggle} className={cn("w-14 h-14 rounded-2xl backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all shadow-2xl hover:scale-110 active:scale-95", isSaved ? "bg-primary text-primary-foreground" : "bg-black/40 text-white/90 hover:bg-primary hover:text-primary-foreground")} title={isSaved ? "Unsave recipe" : "Save recipe"}>
@@ -273,7 +275,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 <div id="thumbnail-slider" className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
                   {allImages.map((imgUrl, i) => (
                     <button key={i} id={`thumb-${i}`} onClick={() => setSelectedImage(imgUrl)} className={`relative flex-none w-[160px] aspect-[4/3] rounded-[32px] overflow-hidden border transition-all duration-500 snap-center ${selectedImage === imgUrl ? 'border-primary ring-4 ring-primary/20 scale-95 shadow-2xl' : 'border-white/5 hover:border-primary/50 grayscale hover:grayscale-0 opacity-40 hover:opacity-100'}`}>
-                      <Image src={imgUrl} alt={`${recipe.title} photo ${i + 1}`} fill className="object-cover" />
+                      <Image src={imgUrl} alt={`${recipe.title} photo ${i + 1}`} fill sizes="160px" className="object-cover" />
                     </button>
                   ))}
                 </div>
@@ -493,6 +495,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               src="/cooking_ad_banner_1778463092338.png"
               alt="Ad Banner"
               fill
+              sizes="(max-width: 1536px) 100vw, 1536px"
               className="object-cover group-hover:scale-105 transition-transform duration-[10s]"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent flex flex-col justify-center px-16">

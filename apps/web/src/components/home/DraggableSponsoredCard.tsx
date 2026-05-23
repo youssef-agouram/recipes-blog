@@ -6,6 +6,8 @@ import { X } from 'lucide-react';
 import { useGetSiteSettingsQuery } from '@/store/api/settingsApi';
 import Link from 'next/link';
 
+import Image from 'next/image';
+
 export default function DraggableSponsoredCard() {
   const [mounted, setMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -106,7 +108,7 @@ export default function DraggableSponsoredCard() {
             className="w-full h-full object-cover" 
           />
         ) : (
-          <img src={activePopupUrl} alt="Ad" className="w-full h-full object-cover" />
+          <Image src={activePopupUrl} alt="Ad" fill sizes="280px" className="object-cover" unoptimized />
         )}
       </Link>
       <Link href={targetLink} target="_blank" className="block w-full">
