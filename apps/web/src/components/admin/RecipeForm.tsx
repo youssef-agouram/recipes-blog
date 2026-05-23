@@ -518,7 +518,34 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             <button type="button" onClick={() => setShowImageUrlInput(!showImageUrlInput)} className={`p-1.5 rounded-lg border ${showImageUrlInput ? 'bg-primary/20 border-primary text-primary' : 'bg-card'}`}><Link className="h-3 w-3" /></button>
           </div>
           <div className={`relative w-full aspect-video rounded-2xl border-2 border-dashed bg-card overflow-hidden group transition-all ${errors.imageUrl ? 'border-rose-500/50' : 'border-border'}`}>
-            {imageUrl ? <img src={imageUrl} className="h-full w-full object-cover" /> : <div onClick={() => fileInputRef.current?.click()} className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-secondary/30"><Upload className="h-7 w-7 text-primary" /><span className="text-[10px] font-bold uppercase text-muted-foreground">Upload Image</span></div>}
+            {imageUrl ? (
+              <div className="relative w-full h-full group/img">
+                <img src={imageUrl} className="h-full w-full object-cover animate-fade-in" />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3 py-1.5 rounded-lg bg-white text-black hover:bg-primary hover:text-white transition-all text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-xl hover:scale-105 active:scale-95"
+                  >
+                    <Upload className="w-3 h-3" />
+                    Change
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setValue('imageUrl', '')}
+                    className="px-3 py-1.5 rounded-lg bg-rose-600 text-white hover:bg-rose-500 transition-all text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-xl hover:scale-105 active:scale-95"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div onClick={() => fileInputRef.current?.click()} className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-secondary/30">
+                <Upload className="h-7 w-7 text-primary animate-bounce-slow" />
+                <span className="text-[10px] font-bold uppercase text-muted-foreground">Upload Image</span>
+              </div>
+            )}
             <AnimatePresence>{showImageUrlInput && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute inset-x-0 bottom-0 p-3 bg-card/90 backdrop-blur-md border-t border-border z-20"><input {...register('imageUrl')} placeholder="Paste Image URL..." className="w-full h-9 rounded-lg border border-primary/30 bg-background px-3 text-[10px] font-bold outline-none" autoFocus /></motion.div>}</AnimatePresence>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
           </div>
