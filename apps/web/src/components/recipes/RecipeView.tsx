@@ -262,7 +262,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           </div>
 
           {/* Title & Short Description */}
-          <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
             <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-wider text-primary">
               <Clock className="w-3 h-3" />
               <span>{recipe.totalTime || '30 MIN'}</span>
@@ -275,6 +275,47 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             <p className="text-[9px] xs:text-[10px] text-muted-foreground leading-snug font-medium line-clamp-3">
               {recipe.summary || "Embark on a culinary journey with this masterpiece."}
             </p>
+            {/* Compact action icons — mobile only */}
+            <div className="flex items-center gap-1.5 pt-1">
+              <button
+                onClick={() => window.print()}
+                className="flex-1 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
+                title="Print recipe"
+              >
+                <Printer className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => { toast.info("Sharing link copied!"); navigator.clipboard.writeText(window.location.href); }}
+                className="flex-1 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
+                title="Share recipe"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={handleSaveToggle}
+                className={cn(
+                  "flex-1 h-9 rounded-xl border flex items-center justify-center transition-all active:scale-90",
+                  isSaved
+                    ? "bg-primary/20 border-primary text-primary"
+                    : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-primary/50"
+                )}
+                title={isSaved ? "Unsave recipe" : "Save recipe"}
+              >
+                <Bookmark className={cn("w-3.5 h-3.5", isSaved && "fill-current")} />
+              </button>
+              <button
+                onClick={handleFavoriteToggle}
+                className={cn(
+                  "flex-1 h-9 rounded-xl border flex items-center justify-center transition-all active:scale-90",
+                  isFavorited
+                    ? "bg-rose-500/20 border-rose-500 text-rose-500"
+                    : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-rose-500/50"
+                )}
+                title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+              >
+                <Heart className={cn("w-3.5 h-3.5", isFavorited && "fill-current")} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -428,7 +469,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
             </div>
 
-            <div className="flex w-full items-center gap-2">
+            <div className="hidden md:flex w-full items-center gap-2">
               <button 
                 onClick={() => window.print()}
                 className="flex-1 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
