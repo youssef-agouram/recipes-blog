@@ -319,10 +319,12 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           </div>
         </div>
 
-        {/* Row 1: Hero details */}
-        <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-12 mb-6 md:mb-16 animate-in fade-in duration-1000">
-          <div className="w-full lg:w-[55%]">
-            <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[48px] overflow-hidden shadow-2xl group border border-white/5 mb-12">
+        {/* Unified 2-Column Layout */}
+        <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-12 mb-8 md:mb-16 animate-in fade-in duration-1000">
+          
+          {/* Left Column: Visuals, Stats, Actions, Ingredients, Instructions, Nutrition */}
+          <div className="w-full lg:w-[55%] flex flex-col gap-6 md:gap-8">
+            <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[48px] overflow-hidden shadow-2xl group border border-white/5 mb-4">
               <Image src={selectedImage} alt={recipe.title} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute top-8 right-8 flex flex-col gap-3">
@@ -347,7 +349,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
 
             {allImages.length > 1 && (
-              <div className="relative group/gallery -mx-6 px-6 overflow-hidden mb-4 md:mb-12">
+              <div className="relative group/gallery -mx-6 px-6 overflow-hidden mb-4">
                 <div id="thumbnail-slider" className="flex gap-2.5 sm:gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth touch-pan-x">
                   {allImages.map((imgUrl, i) => (
                     <button key={i} id={`thumb-${i}`} onClick={() => setSelectedImage(imgUrl)} className={`relative flex-none w-[76px] h-[57px] xs:w-[100px] xs:h-[75px] sm:w-[160px] sm:h-[120px] rounded-xl sm:rounded-[24px] overflow-hidden border transition-all duration-300 snap-center ${selectedImage === imgUrl ? 'border-primary ring-2 ring-primary/25 scale-95 shadow-xl animate-pulse-once' : 'border-white/5 opacity-60 hover:opacity-100'}`}>
@@ -383,69 +385,8 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 </section>
               </div>
             )}
-          </div>
 
-          <div className="flex flex-col flex-1 w-full">
-            <div className="hidden md:flex items-center gap-3 mb-8">
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="w-6 h-6 rounded-full border-2 border-background bg-white/10 overflow-hidden">
-                    <Image src={`https://i.pravatar.cc/150?u=${i + 10}`} alt="User" width={24} height={24} />
-                  </div>
-                ))}
-              </div>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Loved by 1.2k people</span>
-            </div>
-
-            <h1 className="hidden md:block text-5xl sm:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter font-heading drop-shadow-2xl mb-8">
-              {recipe.title}
-            </h1>
-
-            <p className="hidden md:block text-[16px] text-muted-foreground leading-relaxed font-medium max-w-xl mb-8">
-              {recipe.summary || "Embark on a culinary journey with this masterpiece. Perfectly balanced flavors and textures that will leave your guests in awe."}
-            </p>
-
-            <section className="prose prose-neutral dark:prose-invert max-w-none pb-4 md:pb-8 border-b border-white/5 mb-4 md:mb-8">
-              <div className="flex items-center gap-3 mb-6 not-prose">
-                <div className="w-1.5 h-6 bg-primary rounded-full" />
-                <h3 className="text-xl font-black text-white tracking-tighter font-heading">About This Recipe</h3>
-              </div>
-              <div className="text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[420px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth">
-                {recipe.content ? (
-                  <BlogRenderer content={recipe.content} />
-                ) : (
-                  <p>Master this delicious dish with our step-by-step guide and expert culinary tips. We've simplified the process to ensure professional results at home.</p>
-                )}
-              </div>
-            </section>
-
-            {recipe.videoUrl && (
-              <div className="block md:hidden pb-4 md:pb-8 border-b border-white/5 mb-4 md:mb-8">
-                <section className="space-y-6">
-                  <div className="flex items-center gap-3 not-prose">
-                    <div className="w-1.5 h-6 bg-rose-500 rounded-full" />
-                    <h3 className="text-xl font-black text-white tracking-tighter font-heading">Watch the Recipe</h3>
-                  </div>
-                  {embedUrl ? (
-                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 shadow-2xl">
-                      <iframe src={embedUrl} className="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                    </div>
-                  ) : isDirectVideo(recipe.videoUrl) ? (
-                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 shadow-2xl bg-black">
-                      <video src={recipe.videoUrl} className="absolute inset-0 w-full h-full" controls />
-                    </div>
-                  ) : (
-                    <a href={recipe.videoUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-6 aspect-video rounded-xl bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><PlayCircle className="w-8 h-8" /></div>
-                      <div className="text-center"><p className="text-base font-black text-white tracking-tight">Watch on External Platform</p><p className="text-xs text-muted-foreground font-medium">Click to view video on source site</p></div>
-                    </a>
-                  )}
-                </section>
-              </div>
-            )}
-
-            <div className="grid grid-cols-3 gap-8 pb-4 md:pb-10 border-b border-white/5 mb-4 md:mb-8">
+            <div className="grid grid-cols-3 gap-8 pb-4 md:pb-10 border-b border-white/5 mb-4 mt-2">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-primary fill-primary" />
@@ -469,7 +410,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
             </div>
 
-            <div className="hidden md:flex w-full items-center gap-2">
+            <div className="hidden md:flex w-full items-center gap-2 mb-4">
               <button 
                 onClick={() => window.print()}
                 className="flex-1 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
@@ -509,14 +450,9 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
               </button>
             </div>
-          </div>
-        </div>
 
-        {/* Row 2: Details and Community Feedback */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:h-[730px] gap-6 md:gap-12 mb-8 md:mb-16 animate-in fade-in duration-1000">
-          <div className="w-full lg:w-[55%] lg:h-full flex flex-col gap-6 md:gap-8 lg:justify-between">
             {/* Ingredients & Instructions Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Ingredients Card */}
               <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl flex flex-col justify-between h-auto lg:h-[450px]">
                 <div className="flex flex-col flex-1 min-h-0">
@@ -561,7 +497,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
 
             {/* Nutrition Info Card */}
-            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl h-auto lg:h-[248px] flex flex-col justify-between flex-none">
+            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl h-auto lg:h-[248px] flex flex-col justify-between">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 text-primary"><Apple className="w-6 h-6" /></div>
                 <div><h3 className="text-xl font-black text-white tracking-tighter font-heading">Nutrition Info</h3><p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">Per Serving Estimation</p></div>
@@ -577,23 +513,85 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
           </div>
 
-          {/* Community Feedback — desktop full card */}
-          <div className="hidden md:flex flex-col flex-1 w-full lg:h-full self-stretch">
-            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl print:hidden flex flex-col flex-1 h-full min-h-[400px]">
-              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar animate-in fade-in duration-700">
-                <CommentsSection recipeId={recipe.id} className="animate-in fade-in duration-700" />
+          {/* Right Column: Title, Summary, About, Video Mobile, Community Feedback */}
+          <div className="flex flex-col flex-1 w-full gap-6 md:gap-8">
+            <div className="hidden md:flex items-center gap-3 mb-2">
+              <div className="flex -space-x-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="w-6 h-6 rounded-full border-2 border-background bg-white/10 overflow-hidden">
+                    <Image src={`https://i.pravatar.cc/150?u=${i + 10}`} alt="User" width={24} height={24} />
+                  </div>
+                ))}
+              </div>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Loved by 1.2k people</span>
+            </div>
+
+            <h1 className="hidden md:block text-5xl sm:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter font-heading drop-shadow-2xl mb-4">
+              {recipe.title}
+            </h1>
+
+            <p className="hidden md:block text-[16px] text-muted-foreground leading-relaxed font-medium max-w-xl mb-4">
+              {recipe.summary || "Embark on a culinary journey with this masterpiece. Perfectly balanced flavors and textures that will leave your guests in awe."}
+            </p>
+
+            <section className="prose prose-neutral dark:prose-invert max-w-none pb-4 md:pb-8 border-b border-white/5 mb-4">
+              <div className="flex items-center gap-3 mb-6 not-prose">
+                <div className="w-1.5 h-6 bg-primary rounded-full" />
+                <h3 className="text-xl font-black text-white tracking-tighter font-heading">About This Recipe</h3>
+              </div>
+              <div className="text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[420px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth">
+                {recipe.content ? (
+                  <BlogRenderer content={recipe.content} />
+                ) : (
+                  <p>Master this delicious dish with our step-by-step guide and expert culinary tips. We've simplified the process to ensure professional results at home.</p>
+                )}
+              </div>
+            </section>
+
+            {recipe.videoUrl && (
+              <div className="block md:hidden pb-4 md:pb-8 border-b border-white/5 mb-4">
+                <section className="space-y-6">
+                  <div className="flex items-center gap-3 not-prose">
+                    <div className="w-1.5 h-6 bg-rose-500 rounded-full" />
+                    <h3 className="text-xl font-black text-white tracking-tighter font-heading">Watch the Recipe</h3>
+                  </div>
+                  {embedUrl ? (
+                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 shadow-2xl">
+                      <iframe src={embedUrl} className="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                    </div>
+                  ) : isDirectVideo(recipe.videoUrl) ? (
+                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 shadow-2xl bg-black">
+                      <video src={recipe.videoUrl} className="absolute inset-0 w-full h-full" controls />
+                    </div>
+                  ) : (
+                    <a href={recipe.videoUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-6 aspect-video rounded-xl bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><PlayCircle className="w-8 h-8" /></div>
+                      <div className="text-center"><p className="text-base font-black text-white tracking-tight">Watch on External Platform</p><p className="text-xs text-muted-foreground font-medium">Click to view video on source site</p></div>
+                    </a>
+                  )}
+                </section>
+              </div>
+            )}
+
+            {/* Community Feedback — desktop full card */}
+            <div className="hidden md:flex flex-col w-full h-[600px]">
+              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl print:hidden flex flex-col flex-1 h-full min-h-[400px]">
+                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar animate-in fade-in duration-700">
+                  <CommentsSection recipeId={recipe.id} className="animate-in fade-in duration-700" />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Community Feedback — mobile compact */}
-          <div className="block md:hidden print:hidden">
-            <div className="bg-card/40 border border-white/5 rounded-2xl p-4 shadow-xl">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-1.5 h-5 bg-primary rounded-full" />
-                <h3 className="text-sm font-black text-white tracking-tight">Community Feedback</h3>
+            {/* Community Feedback — mobile compact */}
+            <div className="block md:hidden print:hidden">
+              <div className="bg-card/40 border border-white/5 rounded-2xl p-4 shadow-xl">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1.5 h-5 bg-primary rounded-full" />
+                  <h3 className="text-sm font-black text-white tracking-tight">Community Feedback</h3>
+                </div>
+                <CommentsSection recipeId={recipe.id} className="animate-in fade-in duration-700" />
               </div>
-              <CommentsSection recipeId={recipe.id} className="animate-in fade-in duration-700" />
             </div>
           </div>
         </div>

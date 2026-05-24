@@ -137,7 +137,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
 
   return (
     <LayoutGroup id="featured-recipes-group">
-      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-0 sm:py-6 border-t border-border">
+      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-8 sm:py-6 border-t border-border">
         <div className="flex items-center justify-between mb-6 gap-2">
           <div>
             <h2 className="text-sm xs:text-base sm:text-3xl font-black text-white tracking-tight leading-none font-heading mb-1">
