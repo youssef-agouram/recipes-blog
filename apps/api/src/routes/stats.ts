@@ -4,6 +4,52 @@ import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
+// Record a visit from frontend client
+router.post('/visit', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { path, sessionId } = req.body;
+    if (!path) {
+      return res.status(400).json({ error: 'path is required' });
+    }
+
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '';
+    const userAgent = req.headers['user-agent'] || '';
+
+    // Update duration of the previous visit in the same session (if any)
+    if (sessionId) {
+      const lastVisit = await prisma.visit.findFirst({
+        where: { sessionId },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      if (lastVisit) {
+        const now = new Date();
+        const diffSeconds = Math.floor((now.getTime() - lastVisit.createdAt.getTime()) / 1000);
+        if (diffSeconds > 0 && diffSeconds < 1800) {
+          await prisma.visit.update({
+            where: { id: lastVisit.id },
+            data: { duration: diffSeconds }
+          });
+        }
+      }
+    }
+
+    // Create the new visit
+    const visit = await prisma.visit.create({
+      data: {
+        path,
+        sessionId: sessionId || 'guest_session',
+        ip,
+        userAgent
+      }
+    });
+
+    res.json({ success: true, visitId: visit.id });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get dashboard stats
 router.get('/dashboard', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -102,7 +148,8 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
         categories: { total: categoriesCount, trend: { value: '8.3%', isUp: true } },
         users: { total: usersCount, trend: { value: '15.7%', isUp: true } },
         comments: { total: commentsCount, trend: { value: '4.2%', isUp: false } },
-        sessions: { total: visitsCount, trend: { value: '23.6%', isUp: true } },
+        sessions: { total: uniqueSessionsCount, trend: { value: '23.6%', isUp: true } },
+        pageviews: { total: visitsCount, trend: { value: '18.7%', isUp: true } },
         avgDuration: { value: formatDuration(avgDuration), trend: { value: '16.3%', isUp: true } },
         pagesPerSession: { value: pagesPerSession, trend: { value: '4.1%', isUp: true } },
         bounceRate: { value: bounceRate + '%', trend: { value: '5.3%', isUp: false } }

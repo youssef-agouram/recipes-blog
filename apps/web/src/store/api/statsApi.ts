@@ -8,6 +8,7 @@ export interface DashboardStats {
     users: { total: number; trend: { value: string; isUp: boolean } };
     comments: { total: number; trend: { value: string; isUp: boolean } };
     sessions?: { total: number; trend: { value: string; isUp: boolean } };
+    pageviews?: { total: number; trend: { value: string; isUp: boolean } };
     avgDuration?: { value: string; trend: { value: string; isUp: boolean } };
     pagesPerSession?: { value: string; trend: { value: string; isUp: boolean } };
     bounceRate?: { value: string; trend: { value: string; isUp: boolean } };

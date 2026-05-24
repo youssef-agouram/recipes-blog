@@ -20,6 +20,29 @@ function TrackRouteChange() {
     // Execute standard pageview tracking
     gtag.pageview(url);
     
+    // Log visit in database for dashboard stats
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    let sessionId = typeof window !== 'undefined' ? window.sessionStorage.getItem('tasty_session_id') : null;
+    if (!sessionId && typeof window !== 'undefined') {
+      sessionId = 'session_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now();
+      window.sessionStorage.setItem('tasty_session_id', sessionId);
+    }
+    
+    if (sessionId) {
+      fetch(`${API_BASE_URL}/stats/visit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          path: url,
+          sessionId: sessionId,
+        }),
+      }).catch(() => {
+        // Silently fail if api server is offline during dev/initialization
+      });
+    }
+    
     // Auto-track search queries if search tracking is enabled
     if (pathname.includes('/search') && searchParams) {
       const q = searchParams.get('q') || searchParams.get('query');

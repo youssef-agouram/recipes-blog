@@ -47,9 +47,9 @@ export default function AdminDashboardPage() {
     },
     { 
       label: 'Total Pageviews', 
-      value: statsData?.summary.sessions?.total.toLocaleString() ?? '0', 
-      trend: '18.7%', 
-      isUp: true, 
+      value: statsData?.summary.pageviews?.total.toLocaleString() ?? '0', 
+      trend: statsData?.summary.pageviews?.trend.value || '0%', 
+      isUp: statsData?.summary.pageviews?.trend.isUp ?? true, 
       color: '#a855f7' 
     },
     { 

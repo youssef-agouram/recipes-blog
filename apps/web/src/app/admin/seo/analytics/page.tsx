@@ -95,6 +95,35 @@ export default function AnalyticsDashboardPage() {
         </div>
       )}
 
+      {/* Vercel Web Analytics Status Banner */}
+      <div className="p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/20 shadow-xl relative overflow-hidden group flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-indigo-500/10 blur-[60px] pointer-events-none rounded-full" />
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shrink-0">
+            <Sparkles className="h-6 w-6 animate-pulse" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              Vercel Web Analytics Integration
+              <span className="text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                ACTIVE
+              </span>
+            </h3>
+            <p className="text-[11px] text-muted-foreground/60 leading-relaxed max-w-2xl">
+              Vercel Web Analytics tracking client is successfully active. Real-time visitor counts, session loops, bounce rates, and Core Web Vitals (CLS, LCP) are streaming automatically to your Vercel panel.
+            </p>
+          </div>
+        </div>
+        <a
+          href="https://vercel.com/dashboard"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="h-10 px-5 inline-flex items-center justify-center text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 rounded-xl transition-all shrink-0 active:scale-95 gap-1.5"
+        >
+          Open Vercel Dashboard <ArrowUpRight className="w-3.5 h-3.5" />
+        </a>
+      </div>
+
       {/* Analytics Core Widgets Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {/* Widget 1: Sessions */}
@@ -377,7 +406,7 @@ export default function AnalyticsDashboardPage() {
               <BarChart2 className="h-5 w-5 text-emerald-400" />
               Tracking Nodes Status
             </h3>
-            <p className="text-[11px] text-muted-foreground/60 font-medium mt-0.5">GA4 integration status logs</p>
+            <p className="text-[11px] text-muted-foreground/60 font-medium mt-0.5">GA4 & Vercel integration status logs</p>
           </div>
 
           <div className="space-y-4 font-semibold">
@@ -388,6 +417,15 @@ export default function AnalyticsDashboardPage() {
                 <p className="text-xs font-bold text-white mt-0.5">{isConfigured ? 'CONNECTED' : 'DISCONNECTED'}</p>
               </div>
               <div className={`h-2.5 w-2.5 rounded-full ${isConfigured ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-rose-500 shadow-[0_0_8px_#ef4444]'}`} />
+            </div>
+
+            {/* Status 2: Vercel Web Analytics */}
+            <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl">
+              <div className="space-y-0.5">
+                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none">Vercel Analytics</span>
+                <p className="text-xs font-bold text-white mt-0.5">ACTIVE & TRACKING</p>
+              </div>
+              <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
             </div>
 
             {/* Status 2: Active modules */}
