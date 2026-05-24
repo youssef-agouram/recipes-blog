@@ -16,7 +16,21 @@ export const authApi = apiService.injectEndpoints({
         body: userData,
       }),
     }),
+    sendOtp: builder.mutation<void, { email: string }>({
+      query: (body) => ({
+        url: '/auth/send-otp',
+        method: 'POST',
+        body,
+      }),
+    }),
+    verifyOtp: builder.mutation<{ token: string; user: any }, { email: string; code: string }>({
+      query: (body) => ({
+        url: '/auth/verify-otp',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { useLoginMutation, useRegisterMutation, useSendOtpMutation, useVerifyOtpMutation } = authApi;

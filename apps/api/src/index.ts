@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Reload trigger: using supabase pooler on port 6543
+// Reload trigger: using supabase direct on port 5432
 import express from 'express';
 import cors from 'cors';
 import recipesRouter from './routes/recipes';

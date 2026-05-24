@@ -1,64 +1,111 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useLoginMutation } from '@/store/api/authApi';
+import { useState, useEffect } from 'react';
+import { useSendOtpMutation, useVerifyOtpMutation } from '@/store/api/authApi';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/store/slices/authSlice';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Eye, EyeOff, BookOpen, Users, ClipboardList, Shield, Info, Mail, Loader2 } from 'lucide-react';
-
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { BookOpen, Users, ClipboardList, Shield, Mail, Loader2, ArrowLeft, Key } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [login, { isLoading, error }] = useLoginMutation();
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  
+  const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation();
+  const [verifyOtp, { isLoading: isVerifyingOtp }] = useVerifyOtpMutation();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: async (values) => {
-      const result = loginSchema.safeParse(values);
-      if (result.success) {
-        return { values: result.data, errors: {} };
-      }
-      return {
-        values: {},
-        errors: result.error.issues.reduce((acc: any, issue) => {
-          const path = issue.path[0] as string;
-          if (!acc[path]) {
-            acc[path] = { type: issue.code, message: issue.message };
-          }
-          return acc;
-        }, {}),
-      };
-    },
-    defaultValues: {
-      email: '',
-      password: '',
+  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [codeError, setCodeError] = useState('');
+  
+  // Timer for resending code
+  const [countdown, setCountdown] = useState(0);
+  
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
     }
-  });
+  }, [countdown]);
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const validateEmail = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) {
+      return 'Email address is required';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      return 'Please enter a valid email address';
+    }
+    if (!trimmed.toLowerCase().endsWith('@gmail.com') && !trimmed.toLowerCase().endsWith('@googlemail.com')) {
+      return 'Only Gmail addresses are allowed';
+    }
+    return '';
+  };
+
+  const handleSendCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const err = validateEmail(email);
+    if (err) {
+      setEmailError(err);
+      return;
+    }
+    setEmailError('');
+
     try {
-      const result = await login(data).unwrap();
+      await sendOtp({ email: email.trim().toLowerCase() }).unwrap();
+      toast.success('Verification code sent to your Gmail');
+      setStep('code');
+      setCountdown(60);
+      setCodeError('');
+    } catch (err: any) {
+      console.error('Failed to send OTP:', err);
+      const errMsg = err?.data?.error || 'Failed to send verification code. Please try again.';
+      setEmailError(errMsg);
+      toast.error(errMsg);
+    }
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!code || code.length !== 6) {
+      setCodeError('Please enter a 6-digit verification code');
+      return;
+    }
+    setCodeError('');
+
+    try {
+      const result = await verifyOtp({
+        email: email.trim().toLowerCase(),
+        code: code.trim(),
+      }).unwrap();
+      
       dispatch(setCredentials(result));
+      toast.success('Successfully logged in!');
       router.push('/');
-    } catch (err) {
-      console.error('Failed to login:', err);
+    } catch (err: any) {
+      console.error('Failed to verify OTP:', err);
+      const errMsg = err?.data?.error || 'Invalid or expired verification code';
+      setCodeError(errMsg);
+      toast.error(errMsg);
+    }
+  };
+
+  const handleResend = async () => {
+    if (countdown > 0) return;
+    try {
+      await sendOtp({ email: email.trim().toLowerCase() }).unwrap();
+      toast.success('A new verification code has been sent');
+      setCountdown(60);
+      setCodeError('');
+    } catch (err: any) {
+      const errMsg = err?.data?.error || 'Failed to resend code';
+      toast.error(errMsg);
     }
   };
 
@@ -70,7 +117,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-[1100px] flex flex-col lg:flex-row rounded-[2rem] overflow-hidden bg-[#0c1021]/80 backdrop-blur-xl border border-white/10 shadow-2xl lg:min-h-[760px]">
+      <div className="w-full max-w-[1100px] flex flex-col lg:flex-row rounded-[2rem] overflow-hidden bg-[#0c1021]/80 backdrop-blur-xl border border-white/10 shadow-2xl lg:min-h-[720px]">
         
         {/* Left Panel */}
         <div className="hidden lg:flex w-full lg:w-[400px] xl:w-[440px] flex-col relative bg-gradient-to-br from-[#0c1021] via-[#0f172a] to-[#0c1021] border-r border-white/5">
@@ -113,7 +160,7 @@ export default function LoginPage() {
             </div>
             
             {/* Food Image */}
-            <div className="mt-8 -mx-10 -mb-10 relative h-[280px]">
+            <div className="mt-8 -mx-10 -mb-10 relative h-[240px]">
               <div className="absolute inset-0 bg-gradient-to-t from-[#0c1021] via-transparent to-transparent z-10" />
               <Image
                 src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
@@ -128,7 +175,7 @@ export default function LoginPage() {
 
         {/* Right Panel */}
         <div className="flex-1 flex flex-col p-6 sm:p-10 lg:p-12 xl:p-16 relative">
-          <div className="max-w-[440px] w-full mx-auto flex flex-col h-full">
+          <div className="max-w-[440px] w-full mx-auto flex flex-col h-full justify-center">
             
             {/* Mobile Header (Shows only on small screens) */}
             <div className="lg:hidden flex flex-col items-center mb-8">
@@ -140,153 +187,139 @@ export default function LoginPage() {
                    Taste<span className="text-primary">ful</span>
                  </span>
                </Link>
-               <h2 className="text-[26px] sm:text-[28px] font-black text-white tracking-tight mb-2 text-center">Log in</h2>
+               <h2 className="text-[26px] sm:text-[28px] font-black text-white tracking-tight mb-2 text-center">
+                 {step === 'email' ? 'Log In / Register' : 'Verify Gmail'}
+               </h2>
                <p className="text-[14px] text-muted-foreground text-center">
-                 Don&apos;t have an account?{' '}
-                 <Link href="/register" className="text-primary font-bold hover:underline">Sign up</Link>
+                 {step === 'email' ? 'Access your account using your Gmail' : `Verification code sent to ${email}`}
                </p>
             </div>
 
             {/* Desktop Header */}
             <div className="hidden lg:block mb-8">
-              <h2 className="text-[28px] font-black text-white tracking-tight mb-2">Log in to your account</h2>
+              <h2 className="text-[28px] font-black text-white tracking-tight mb-2">
+                {step === 'email' ? 'Log In / Register' : 'Verify Gmail'}
+              </h2>
               <p className="text-[15px] text-muted-foreground">
-                Don&apos;t have an account?{' '}
-                <Link href="/register" className="text-primary font-bold hover:underline">Sign up</Link>
+                {step === 'email' ? 'Access your account using your Gmail address' : `A 6-digit code was sent to ${email}`}
               </p>
             </div>
 
-            {/* Social Login */}
-            <div className="space-y-3 mb-8">
-              <button className="w-full flex items-center justify-center gap-3 h-12 rounded-2xl border border-white/10 bg-white/5 text-white text-sm font-semibold hover:bg-white/10 transition-all">
-                <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                Continue with Google
-              </button>
-              <button className="w-full flex items-center justify-center gap-3 h-12 rounded-2xl border border-white/10 bg-white/5 text-white text-sm font-semibold hover:bg-white/10 transition-all">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-                Continue with Apple
-              </button>
-            </div>
-
-            {/* Divider */}
-            <div className="flex items-center gap-4 mb-8">
-              <div className="flex-1 h-px bg-white/10" />
-              <span className="text-xs font-bold text-muted-foreground/40 uppercase tracking-widest">or</span>
-              <div className="flex-1 h-px bg-white/10" />
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* Email */}
-              <div className="space-y-2">
-                <label htmlFor="login-email" className="text-sm font-bold text-white/80">Email address</label>
-                <div className="relative">
-                  <input
-                    {...register('email')}
-                    id="login-email"
-                    type="email"
-                    autoComplete="off"
-                    placeholder="Enter your email"
-                    className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 pr-11 text-sm text-white placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
-                  />
-                  <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/30" />
-                </div>
-                {errors.email && <p className="text-xs text-red-400 font-medium">{errors.email.message}</p>}
-              </div>
-
-              {/* Password */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="login-password" className="text-sm font-bold text-white/80">Password</label>
-                  <Link href="#" className="text-sm font-bold text-primary hover:underline">Forgot password?</Link>
-                </div>
-                <div className="relative">
-                  <input
-                    {...register('password')}
-                    id="login-password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    placeholder="Enter your password"
-                    className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 pr-11 text-sm text-white placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-white transition-colors">
-                    {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
-                  </button>
-                </div>
-                {errors.password && <p className="text-xs text-red-400 font-medium">{errors.password.message}</p>}
-              </div>
-
-              {/* Remember Me */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative flex items-center justify-center">
+            {step === 'email' ? (
+              /* Step 1: Email Form */
+              <form onSubmit={handleSendCode} className="space-y-6">
+                <div className="space-y-2">
+                  <label htmlFor="login-email" className="text-sm font-bold text-white/80">Gmail Address</label>
+                  <div className="relative">
                     <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={() => setRememberMe(!rememberMe)}
-                      className="peer sr-only"
+                      id="login-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (emailError) setEmailError(validateEmail(e.target.value));
+                      }}
+                      placeholder="username@gmail.com"
+                      className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 pr-11 text-sm text-white placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
                     />
-                    <div className="w-5 h-5 rounded-md border-2 border-white/20 peer-checked:bg-primary peer-checked:border-primary group-hover:border-white/40 transition-all flex items-center justify-center">
-                      {rememberMe && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#020617" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
-                    </div>
+                    <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/30" />
                   </div>
-                  <span className="text-sm font-medium text-muted-foreground group-hover:text-white transition-colors">Remember me</span>
-                </label>
-                <div className="flex items-center gap-1.5 text-muted-foreground/60">
-                  <span className="text-[13px] font-medium">Keep me signed in</span>
-                  <Info className="w-4 h-4" />
-                </div>
-              </div>
-
-              {/* Error */}
-              {error && (
-                <div className="flex items-center gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20">
-                  <div className="w-8 h-8 rounded-xl bg-red-500/20 flex items-center justify-center shrink-0">
-                    <span className="text-red-400 text-sm">!</span>
-                  </div>
-                  <p className="text-sm text-red-400 font-medium">
-                    {'data' in error ? (error.data as any).error : 'Invalid email or password. Please try again.'}
+                  {emailError && <p className="text-xs text-red-400 font-medium">{emailError}</p>}
+                  <p className="text-xs text-muted-foreground/40 leading-normal pt-1">
+                    No password required. We will send a secure 6-digit verification code to your Gmail address. If you don&apos;t have an account, we will create one for you.
                   </p>
                 </div>
-              )}
 
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-12 mt-2 bg-primary text-primary-foreground font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
-              >
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Log In'}
-              </button>
-            </form>
-
-            {/* Terms */}
-            <div className="text-center mt-6 space-y-4">
-              <p className="text-[13px] text-muted-foreground/50">
-                By logging in, you agree to our <Link href="#" className="font-semibold text-primary hover:underline">Terms of Service</Link> and <Link href="#" className="font-semibold text-primary hover:underline">Privacy Policy</Link>.
-              </p>
-              
-              <div className="pt-4 border-t border-white/5">
-                <p className="text-sm text-muted-foreground mb-4 font-medium">New to Tasteful?</p>
-                <Link 
-                  href="/register" 
-                  className="inline-flex items-center justify-center w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white text-sm font-bold hover:bg-white/10 transition-all"
+                <button
+                  type="submit"
+                  disabled={isSendingOtp}
+                  className="w-full h-12 mt-2 bg-primary text-primary-foreground font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
                 >
-                  Create an Account
-                </Link>
-              </div>
-            </div>
+                  {isSendingOtp ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Sending Code...</span>
+                    </>
+                  ) : (
+                    <span>Send Verification Code</span>
+                  )}
+                </button>
+              </form>
+            ) : (
+              /* Step 2: Verification Code Form */
+              <form onSubmit={handleVerifyCode} className="space-y-6">
+                <button
+                  type="button"
+                  onClick={() => setStep('email')}
+                  className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-white transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Use a different email address</span>
+                </button>
 
-            <div className="mt-auto pt-8"></div>
+                <div className="space-y-2">
+                  <label htmlFor="otp-code" className="text-sm font-bold text-white/80">Verification Code</label>
+                  <div className="relative">
+                    <input
+                      id="otp-code"
+                      type="text"
+                      maxLength={6}
+                      value={code}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        setCode(val);
+                        if (codeError) setCodeError('');
+                      }}
+                      placeholder="123456"
+                      className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 pr-11 text-center tracking-[0.4em] font-black text-lg text-white placeholder:text-muted-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
+                    />
+                    <Key className="absolute right-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/30" />
+                  </div>
+                  {codeError && <p className="text-xs text-red-400 font-medium">{codeError}</p>}
+                  
+                  {/* Resend Actions */}
+                  <div className="flex items-center justify-between text-xs pt-2">
+                    <span className="text-muted-foreground/50">Didn&apos;t receive a code?</span>
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={countdown > 0}
+                      className="font-bold text-primary hover:underline disabled:text-muted-foreground/45 disabled:no-underline"
+                    >
+                      {countdown > 0 ? `Resend Code (${countdown}s)` : 'Resend Code'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-primary/5 border border-primary/10 p-3 text-xs text-primary/80 leading-normal">
+                  <strong>Dev Mode Help:</strong> Since SMTP is disabled locally, you can view the sent code in the API server terminal console logs!
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isVerifyingOtp}
+                  className="w-full h-12 bg-primary text-primary-foreground font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+                >
+                  {isVerifyingOtp ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    <span>Verify & Log In</span>
+                  )}
+                </button>
+              </form>
+            )}
 
             {/* Security Badge */}
-            <div className="flex items-center justify-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 mx-auto w-full max-w-[360px]">
+            <div className="flex items-center justify-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 mx-auto w-full max-w-[360px] mt-10">
               <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
                 <Shield className="w-6 h-6 text-primary" />
               </div>
               <div className="flex flex-col">
-                <p className="text-[14px] font-bold text-white/90">Your data is safe with us</p>
-                <p className="text-[12px] text-muted-foreground/50 leading-tight">We use industry-standard security to<br className="hidden sm:block"/>protect your information.</p>
+                <p className="text-[14px] font-bold text-white/90">Your account is secure</p>
+                <p className="text-[12px] text-muted-foreground/50 leading-tight">We verify Gmail addresses using secure<br className="hidden sm:block"/>one-time passwords.</p>
               </div>
             </div>
             

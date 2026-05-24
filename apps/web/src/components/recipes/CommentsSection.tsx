@@ -215,15 +215,12 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
             <div>
               <h3 className="text-xl font-black text-white mb-2 tracking-tighter">Sign in to join the conversation</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                We value our community. Please sign in or create an account to share your reviews and thoughts.
+                We value our community. Please sign in with your Gmail account to share your reviews and thoughts.
               </p>
             </div>
-            <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center justify-center gap-4 mt-2">
               <Link href="/login" className="px-10 py-4 bg-primary text-primary-foreground rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all shadow-xl shadow-primary/10">
-                Sign In
-              </Link>
-              <Link href="/register" className="px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all">
-                Create Account
+                Sign In with Gmail
               </Link>
             </div>
           </div>

@@ -484,18 +484,10 @@ export function Navbar() {
                       <Link
                         href="/login"
                         id="navbar-login"
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white/80 hover:text-white bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all"
-                      >
-                        <LogIn className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Login</span>
-                      </Link>
-                      <Link
-                        href="/register"
-                        id="navbar-register"
                         className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-primary/30"
                       >
-                        <UserPlus className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Register</span>
+                        <LogIn className="w-3.5 h-3.5" />
+                        <span>Sign In</span>
                       </Link>
                     </div>
                   )
@@ -552,18 +544,10 @@ export function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-white/80 bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
                 >
                   <LogIn className="w-4 h-4" />
-                  Login
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Register
+                  Sign In
                 </Link>
               </div>
             )}
