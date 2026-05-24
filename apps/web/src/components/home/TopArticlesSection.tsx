@@ -173,14 +173,14 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
   return (
     <LayoutGroup id="top-articles-group">
       <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-6 border-t border-border">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
-          <div className="flex-1">
-            <h2 className="text-xl sm:text-3xl font-black text-white tracking-tighter mb-0.5 leading-none font-heading">{title}</h2>
-            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">{subtitle}</p>
+        <div className="flex items-center justify-between mb-6 gap-2">
+          <div>
+            <h2 className="text-sm xs:text-base sm:text-3xl font-black text-white tracking-tight leading-none font-heading mb-1">{title}</h2>
+            <p className="text-muted-foreground text-[8px] sm:text-[10px] font-medium uppercase tracking-wider">{subtitle}</p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="relative group/search">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="relative group/search hidden sm:block">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
               <input 
                 type="text" 
@@ -193,13 +193,13 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
 
             <button 
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 text-xs font-black text-primary hover:text-white uppercase tracking-[0.2em] group transition-colors"
+              className="flex items-center gap-1.5 text-[9px] sm:text-xs font-black text-primary uppercase tracking-wider sm:tracking-[0.2em] group hover:text-white transition-colors shrink-0"
             >
-              {isExpanded ? 'Show less' : 'View all'}
+              <span>{isExpanded ? 'Show less' : 'View all'}</span>
               {isExpanded ? (
-                <ChevronUp className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
+                <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 group-hover:-translate-y-1 transition-transform" />
               ) : (
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
               )}
             </button>
           </div>
