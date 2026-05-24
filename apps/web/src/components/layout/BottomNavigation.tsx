@@ -31,11 +31,11 @@ export function BottomNavigation() {
       icon: Search,
       active: pathname === '/search',
     },
-    {
-      href: isAuthenticated ? '/admin/recipes/new' : '/login',
+    ...(isAuthenticated && user?.role === 'Administrator' ? [{
+      href: '/admin/recipes/new',
       icon: Plus,
       active: pathname === '/admin/recipes/new',
-    },
+    }] : []),
     {
       href: isAuthenticated ? '/saved' : '/login',
       icon: Bookmark,

@@ -75,13 +75,13 @@ export default async function HomePage() {
 
       {/* 2. Explore by Category */}
       <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-2 border-t border-border">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 gap-2">
+        <div className="flex items-center justify-between mb-4 gap-2">
           <div>
-            <h2 className="text-xl sm:text-3xl font-black text-white tracking-tighter leading-none font-heading">Explore by Category</h2>
+            <h2 className="text-sm xs:text-base sm:text-3xl font-black text-white tracking-tight leading-none font-heading">Explore by Category</h2>
           </div>
-          <Link href="/categories" className="flex items-center gap-2 text-xs font-black text-primary uppercase tracking-[0.2em] group hover:text-white transition-colors shrink-0">
+          <Link href="/categories" className="flex items-center gap-1.5 text-[9px] sm:text-xs font-black text-primary uppercase tracking-wider sm:tracking-[0.2em] group hover:text-white transition-colors shrink-0">
             View all categories
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
@@ -134,28 +134,28 @@ export default async function HomePage() {
                 <Link
                   key={cat.id || i}
                   href={href}
-                  className="flex flex-col items-center gap-2.5 group cursor-pointer min-w-[85px] shrink-0"
+                  className="flex flex-col items-center gap-1.5 sm:gap-2.5 group cursor-pointer min-w-[70px] sm:min-w-[85px] shrink-0"
                 >
                   <div className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:scale-110",
+                    "w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:scale-110",
                     "bg-white/[0.02] border border-white/5 group-hover:bg-white/[0.05] group-hover:border-primary/30"
                   )}>
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <Icon className={cn(
-                      "w-[26px] h-[26px] stroke-[1.5px] transition-transform duration-500 group-hover:scale-110",
+                      "w-5 h-5 sm:w-[26px] sm:h-[26px] stroke-[1.5px] transition-transform duration-500 group-hover:scale-110",
                       "text-primary/70 group-hover:text-primary"
                     )} />
                   </div>
-                  <div className="flex flex-col items-center gap-1.5 text-center">
+                  <div className="flex flex-col items-center gap-0.5 sm:gap-1.5 text-center">
                     <span className={cn(
-                      "text-[11px] font-black uppercase tracking-[0.08em] transition-colors leading-tight text-center max-w-[85px] line-clamp-2",
+                      "text-[9px] sm:text-[11px] font-black uppercase tracking-[0.08em] transition-colors leading-tight text-center max-w-[70px] sm:max-w-[85px] line-clamp-2",
                       "text-white/80 group-hover:text-primary"
                     )}>{cat.name}</span>
                     {isGF && (
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none">GF</span>
+                      <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none">GF</span>
                     )}
                     {isQuick && (
-                      <Zap className="w-3.5 h-3.5 text-primary animate-pulse" />
+                      <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary animate-pulse" />
                     )}
                   </div>
                 </Link>

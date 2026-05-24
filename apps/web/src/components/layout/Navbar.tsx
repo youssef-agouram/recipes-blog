@@ -525,20 +525,7 @@ export function Navbar() {
               ))}
             </nav>
 
-            {/* Mobile Auth Buttons */}
-            {mounted && !isHydrating && !isAuthenticated && settings?.showAuthButtons !== false && (
-              <div className="flex items-center gap-3 pt-4 border-t border-white/5">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
-                  style={{ borderRadius: '18px' }}
-                >
-                  <LogIn className="w-3.5 h-3.5" />
-                  Sign In
-                </Link>
-              </div>
-            )}
+
 
             {/* Mobile Profile if logged in */}
             {mounted && !isHydrating && isAuthenticated && (
