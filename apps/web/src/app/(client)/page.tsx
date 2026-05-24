@@ -66,7 +66,7 @@ export default async function HomePage() {
     <div className="w-full bg-background text-foreground pb-6">
 
       {/* 1. Hero Slider Section */}
-      <section className="relative w-full h-[45vh] min-h-[300px] border-b border-white/5 mb-16 bg-black">
+      <section className="relative w-full h-[25vh] min-h-[180px] sm:h-[45vh] sm:min-h-[300px] border-b border-white/5 mb-8 sm:mb-16 bg-black">
         <HeroSlider
           images={heroSettings.images || []}
           fallbackImage={heroSettings.imageUrl}
