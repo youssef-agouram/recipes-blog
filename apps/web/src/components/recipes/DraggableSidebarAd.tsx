@@ -44,11 +44,11 @@ export default function DraggableSidebarAd() {
       <AnimatePresence>
         {isScrolled && (
           <motion.div
-            initial={{ y: -64, opacity: 0 }}
+            initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -64, opacity: 0 }}
+            exit={{ y: -50, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-16 left-0 right-0 z-50 bg-[#090d1a]/95 backdrop-blur-xl border-b border-primary/20 py-2.5 px-4 flex items-center justify-between gap-3 shadow-lg print:hidden"
+            className="fixed top-0 left-0 right-0 z-[999999] bg-[#090d1a]/95 backdrop-blur-xl border-b border-primary/20 py-2.5 px-4 flex items-center justify-between gap-3 shadow-lg print:hidden"
           >
             <div className="flex items-center gap-2 overflow-hidden flex-1">
               <span className="shrink-0 px-1.5 py-0.5 rounded bg-primary/20 border border-primary/30 text-[7px] font-black uppercase tracking-widest text-primary leading-none">

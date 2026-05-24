@@ -318,32 +318,34 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             )}
 
             {recipe.videoUrl && (
-              <section className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                <div className="flex items-center gap-3 not-prose">
-                  <div className="w-1.5 h-6 bg-rose-500 rounded-full" />
-                  <h3 className="text-xl font-black text-white tracking-tighter font-heading">Watch the Recipe</h3>
-                </div>
-                {embedUrl ? (
-                  <div className="relative aspect-video rounded-xl sm:rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group">
-                    <iframe src={embedUrl} className="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+              <div className="hidden md:block">
+                <section className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                  <div className="flex items-center gap-3 not-prose">
+                    <div className="w-1.5 h-6 bg-rose-500 rounded-full" />
+                    <h3 className="text-xl font-black text-white tracking-tighter font-heading">Watch the Recipe</h3>
                   </div>
-                ) : isDirectVideo(recipe.videoUrl) ? (
-                  <div className="relative aspect-video rounded-xl sm:rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group bg-black">
-                    <video src={recipe.videoUrl} className="absolute inset-0 w-full h-full" controls />
-                  </div>
-                ) : (
-                  <a href={recipe.videoUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-6 aspect-video rounded-xl sm:rounded-[32px] bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><PlayCircle className="w-8 h-8" /></div>
-                    <div className="text-center"><p className="text-base font-black text-white tracking-tight">Watch on External Platform</p><p className="text-xs text-muted-foreground font-medium">Click to view video on source site</p></div>
-                  </a>
-                )}
-              </section>
+                  {embedUrl ? (
+                    <div className="relative aspect-video rounded-xl sm:rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group">
+                      <iframe src={embedUrl} className="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                    </div>
+                  ) : isDirectVideo(recipe.videoUrl) ? (
+                    <div className="relative aspect-video rounded-xl sm:rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group bg-black">
+                      <video src={recipe.videoUrl} className="absolute inset-0 w-full h-full" controls />
+                    </div>
+                  ) : (
+                    <a href={recipe.videoUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-6 aspect-video rounded-xl sm:rounded-[32px] bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><PlayCircle className="w-8 h-8" /></div>
+                      <div className="text-center"><p className="text-base font-black text-white tracking-tight">Watch on External Platform</p><p className="text-xs text-muted-foreground font-medium">Click to view video on source site</p></div>
+                    </a>
+                  )}
+                </section>
+              </div>
             )}
           </div>
 
           <div className="flex flex-col flex-1 w-full space-y-8">
-            <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map(i => (
                   <div key={i} className="w-6 h-6 rounded-full border-2 border-background bg-white/10 overflow-hidden">
@@ -376,6 +378,32 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
             </section>
 
+            {recipe.videoUrl && (
+              <div className="block md:hidden pb-8 border-b border-white/5">
+                <section className="space-y-6">
+                  <div className="flex items-center gap-3 not-prose">
+                    <div className="w-1.5 h-6 bg-rose-500 rounded-full" />
+                    <h3 className="text-xl font-black text-white tracking-tighter font-heading">Watch the Recipe</h3>
+                  </div>
+                  {embedUrl ? (
+                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 shadow-2xl">
+                      <iframe src={embedUrl} className="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                    </div>
+                  ) : isDirectVideo(recipe.videoUrl) ? (
+                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 shadow-2xl bg-black">
+                      <video src={recipe.videoUrl} className="absolute inset-0 w-full h-full" controls />
+                    </div>
+                  ) : (
+                    <a href={recipe.videoUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-6 aspect-video rounded-xl bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><PlayCircle className="w-8 h-8" /></div>
+                      <div className="text-center"><p className="text-base font-black text-white tracking-tight">Watch on External Platform</p><p className="text-xs text-muted-foreground font-medium">Click to view video on source site</p></div>
+                    </a>
+                  )}
+                </section>
+              </div>
+            )}
+
             <div className="grid grid-cols-3 gap-8 pb-10 border-b border-white/5">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
@@ -400,46 +428,45 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex w-full items-center gap-2">
               <button 
                 onClick={() => window.print()}
-                className="flex-1 min-w-[160px] bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all shadow-2xl shadow-primary/20 active:scale-95 flex items-center justify-center gap-3"
+                className="flex-1 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
+                title="Print recipe"
               >
-                <Printer className="w-4 h-4" /> Print Recipe
+                <Printer className="w-5 h-5" />
               </button>
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => { toast.info("Sharing link copied!"); navigator.clipboard.writeText(window.location.href); }}
-                  className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
-                  title="Share recipe"
-                >
-                  <Share2 className="w-5 h-5" />
-                </button>
-                <button 
-                  onClick={handleSaveToggle}
-                  className={cn(
-                    "w-14 h-14 rounded-2xl border flex items-center justify-center transition-all active:scale-90",
-                    isSaved
-                      ? "bg-primary/20 border-primary text-primary"
-                      : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-primary/50"
-                  )}
-                  title={isSaved ? "Unsave recipe" : "Save recipe"}
-                >
-                  <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
-                </button>
-                <button 
-                  onClick={handleFavoriteToggle}
-                  className={cn(
-                    "w-14 h-14 rounded-2xl border flex items-center justify-center transition-all active:scale-90",
-                    isFavorited
-                      ? "bg-rose-500/20 border-rose-500 text-rose-500"
-                      : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-rose-500/50"
-                  )}
-                  title={isFavorited ? "Remove from favorites" : "Add to favorites"}
-                >
-                  <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
-                </button>
-              </div>
+              <button 
+                onClick={() => { toast.info("Sharing link copied!"); navigator.clipboard.writeText(window.location.href); }}
+                className="flex-1 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
+                title="Share recipe"
+              >
+                <Share2 className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={handleSaveToggle}
+                className={cn(
+                  "flex-1 h-14 rounded-2xl border flex items-center justify-center transition-all active:scale-90",
+                  isSaved
+                    ? "bg-primary/20 border-primary text-primary"
+                    : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-primary/50"
+                )}
+                title={isSaved ? "Unsave recipe" : "Save recipe"}
+              >
+                <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
+              </button>
+              <button 
+                onClick={handleFavoriteToggle}
+                className={cn(
+                  "flex-1 h-14 rounded-2xl border flex items-center justify-center transition-all active:scale-90",
+                  isFavorited
+                    ? "bg-rose-500/20 border-rose-500 text-rose-500"
+                    : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-rose-500/50"
+                )}
+                title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+              >
+                <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
+              </button>
             </div>
           </div>
         </div>
