@@ -424,7 +424,19 @@ router.post('/health/scan', authMiddleware, async (_req: Request, res: Response,
   try {
     // 1. Analyze Database Entries for SEO Auditing
     const recipes = await prisma.recipe.findMany({
-      include: { seo: true }
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        imageUrl: true,
+        seo: {
+          select: {
+            metaDescription: true,
+            seoTitle: true,
+            focusKeyword: true,
+          }
+        }
+      }
     });
 
     let duplicateMetaCount = 0;
@@ -718,8 +730,20 @@ router.get('/backlinks', async (_req: Request, res: Response, next: NextFunction
 router.get('/warnings', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const redirects = await prisma.redirect.findMany({ where: { active: true } });
-    const recipes = await prisma.recipe.findMany();
-    const articles = await prisma.article.findMany();
+    const recipes = await prisma.recipe.findMany({
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        instructions: true,
+      }
+    });
+    const articles = await prisma.article.findMany({
+      select: {
+        id: true,
+        content: true,
+      }
+    });
     const perfLogs = await prisma.performanceReport.findMany({ orderBy: { detectionDate: 'desc' } });
 
     const warningsList: any[] = [];
@@ -827,7 +851,14 @@ router.get('/ai/recommendations', async (_req: Request, res: Response, next: Nex
 
     if (savedRecs.length === 0) {
       // Analyze database recipes and save recommendations
-      const recipes = await prisma.recipe.findMany();
+      const recipes = await prisma.recipe.findMany({
+        select: {
+          id: true,
+          title: true,
+          instructions: true,
+          imageUrl: true,
+        }
+      });
       
       const newRecommendations = [];
       

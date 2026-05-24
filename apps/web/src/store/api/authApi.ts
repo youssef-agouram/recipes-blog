@@ -30,7 +30,28 @@ export const authApi = apiService.injectEndpoints({
         body,
       }),
     }),
+    checkEmail: builder.mutation<{ exists: boolean; token?: string; user?: any }, { email: string }>({
+      query: (body) => ({
+        url: '/auth/check-email',
+        method: 'POST',
+        body,
+      }),
+    }),
+    registerPasswordless: builder.mutation<{ token: string; user: any }, any>({
+      query: (body) => ({
+        url: '/auth/register-passwordless',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useSendOtpMutation, useVerifyOtpMutation } = authApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useSendOtpMutation,
+  useVerifyOtpMutation,
+  useCheckEmailMutation,
+  useRegisterPasswordlessMutation,
+} = authApi;

@@ -46,6 +46,7 @@ model Recipe {
   @@index([isFeatured])
   @@index([isTopArticle])
   @@index([status])
+  @@index([createdAt])
 }
 
 model Comment {
@@ -298,6 +299,7 @@ model Article {
 
   @@index([slug])
   @@index([isTopArticle])
+  @@index([createdAt])
 }
 
 model SiteSettings {

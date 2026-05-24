@@ -7,7 +7,7 @@ import {
   ArrowLeft, Coffee, Salad, CookingPot, Cake, Leaf, 
   WheatOff, Timer, CupSoda, Soup, Utensils, Pizza, 
   Sandwich, Apple, Fish, Croissant, Carrot, Flame, 
-  Heart, Sparkles, BookOpen, Star, Clock
+  Heart, Sparkles, BookOpen, Star, Clock, Tag, LayoutGrid
 } from "lucide-react";
 
 interface CategoryPageProps {
@@ -41,7 +41,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     const availableIcons: Record<string, any> = {
       Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
       Apple, Fish, Croissant, Carrot, Soup, CupSoda,
-      Flame, Star, Heart, Clock, Salad, CookingPot
+      Flame, Star, Heart, Clock, Salad, CookingPot,
+      Tag, LayoutGrid, WheatOff, Timer
     };
 
     const fallbackIconMap: Record<string, any> = {
@@ -61,8 +62,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
     const nameLower = category.name.toLowerCase();
     let CategoryIcon = CookingPot;
-    if (category.icon && availableIcons[category.icon]) {
-      CategoryIcon = availableIcons[category.icon];
+    const matchedIconKey = category.icon ? Object.keys(availableIcons).find(
+      key => key.toLowerCase() === category.icon?.toLowerCase()
+    ) : null;
+
+    if (matchedIconKey && availableIcons[matchedIconKey]) {
+      CategoryIcon = availableIcons[matchedIconKey];
     } else if (fallbackIconMap[nameLower]) {
       CategoryIcon = fallbackIconMap[nameLower];
     }
@@ -117,7 +122,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <div className="relative overflow-hidden bg-gradient-to-b from-card/30 via-card/10 to-transparent border-b border-white/5 py-16">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(234,179,8,0.03),transparent_60%)]"></div>
           
-          <div className="container mx-auto px-6 max-w-[1536px]">
+          <div className="container mx-auto px-3 sm:px-6 max-w-[1536px]">
             <Link 
               href="/" 
               className="inline-flex items-center text-[10px] font-black uppercase tracking-[0.25em] text-primary hover:text-white mb-8 transition-colors group"
@@ -149,7 +154,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
 
         {/* Main Section */}
-        <div className="container mx-auto px-6 max-w-[1536px] pt-12">
+        <div className="container mx-auto px-3 sm:px-6 max-w-[1536px] pt-12">
           {/* Sidebar and Grid layout */}
           <div className="flex flex-col lg:flex-row gap-12">
             
@@ -200,8 +205,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                       .map((cat) => {
                         const nameLower = cat.name.toLowerCase();
                         let Icon = CookingPot;
-                        if (cat.icon && availableIcons[cat.icon]) {
-                          Icon = availableIcons[cat.icon];
+                        const matchedIconKey = cat.icon ? Object.keys(availableIcons).find(
+                          key => key.toLowerCase() === cat.icon?.toLowerCase()
+                        ) : null;
+
+                        if (matchedIconKey && availableIcons[matchedIconKey]) {
+                          Icon = availableIcons[matchedIconKey];
                         } else if (fallbackIconMap[nameLower]) {
                           Icon = fallbackIconMap[nameLower];
                         }

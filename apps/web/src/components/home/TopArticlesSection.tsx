@@ -172,10 +172,10 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
 
   return (
     <LayoutGroup id="top-articles-group">
-      <section className="container mx-auto px-6 max-w-[1536px] py-6 border-t border-border">
+      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-6 border-t border-border">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
           <div className="flex-1">
-            <h2 className="text-2xl font-black text-white tracking-tighter mb-0.5 leading-none">{title}</h2>
+            <h2 className="text-xl sm:text-3xl font-black text-white tracking-tighter mb-0.5 leading-none font-heading">{title}</h2>
             <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">{subtitle}</p>
           </div>
 

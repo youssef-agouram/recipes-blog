@@ -238,7 +238,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           <ChevronRight className="w-3 h-3 opacity-20" />
           <Link href="/recipes" className="hover:text-primary transition-colors">Recipes</Link>
           <ChevronRight className="w-3 h-3 opacity-20" />
-          <Link href={`/category/${recipe.categories?.[0]?.id || 1}`} className="hover:text-primary transition-colors">{recipe.categories?.[0]?.name || 'Category'}</Link>
+          <Link href={recipe.categories?.[0]?.slug ? `/category/${recipe.categories[0].slug}` : '/categories'} className="hover:text-primary transition-colors">{recipe.categories?.[0]?.name || 'Category'}</Link>
           <ChevronRight className="w-3 h-3 opacity-20" />
           <span className="text-white truncate max-w-[200px]">{recipe.title}</span>
         </div>
@@ -246,7 +246,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         {/* Row 1: Hero details */}
         <div className="flex flex-col lg:flex-row items-start gap-12 mb-16 animate-in fade-in duration-1000">
           <div className="w-full lg:w-[55%] space-y-12">
-            <div className="relative aspect-[16/10] rounded-[48px] overflow-hidden shadow-2xl group border border-white/5">
+            <div className="relative aspect-[16/10] rounded-2xl sm:rounded-[48px] overflow-hidden shadow-2xl group border border-white/5">
               <Image src={selectedImage} alt={recipe.title} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute top-8 right-8 flex flex-col gap-3">
@@ -258,7 +258,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 </button>
               </div>
               <div className="absolute bottom-8 left-8 flex items-center gap-4">
-                <span className="px-6 py-2.5 rounded-2xl bg-primary text-[10px] font-black uppercase tracking-[0.2em] text-primary-foreground shadow-2xl shadow-primary/20">{recipe.categories?.[0]?.name || 'Recipe'}</span>
+                <Link href={recipe.categories?.[0]?.slug ? `/category/${recipe.categories[0].slug}` : '/categories'} className="px-6 py-2.5 rounded-2xl bg-primary text-[10px] font-black uppercase tracking-[0.2em] text-primary-foreground shadow-2xl shadow-primary/20 hover:bg-white hover:text-black transition-colors">{recipe.categories?.[0]?.name || 'Recipe'}</Link>
                 <div className="px-5 py-2.5 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/90 flex items-center gap-2.5 shadow-2xl">
                   <PlayCircle className="w-4 h-4 text-primary" /> Watch Video
                 </div>
@@ -274,7 +274,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               <div className="relative group/gallery px-4">
                 <div id="thumbnail-slider" className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
                   {allImages.map((imgUrl, i) => (
-                    <button key={i} id={`thumb-${i}`} onClick={() => setSelectedImage(imgUrl)} className={`relative flex-none w-[160px] aspect-[4/3] rounded-[32px] overflow-hidden border transition-all duration-500 snap-center ${selectedImage === imgUrl ? 'border-primary ring-4 ring-primary/20 scale-95 shadow-2xl' : 'border-white/5 hover:border-primary/50 grayscale hover:grayscale-0 opacity-40 hover:opacity-100'}`}>
+                    <button key={i} id={`thumb-${i}`} onClick={() => setSelectedImage(imgUrl)} className={`relative flex-none w-[160px] aspect-[4/3] rounded-xl sm:rounded-[32px] overflow-hidden border transition-all duration-500 snap-center ${selectedImage === imgUrl ? 'border-primary ring-4 ring-primary/20 scale-95 shadow-2xl' : 'border-white/5 hover:border-primary/50 grayscale hover:grayscale-0 opacity-40 hover:opacity-100'}`}>
                       <Image src={imgUrl} alt={`${recipe.title} photo ${i + 1}`} fill sizes="160px" className="object-cover" />
                     </button>
                   ))}
@@ -289,15 +289,15 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                   <h3 className="text-xl font-black text-white tracking-tighter font-heading">Watch the Recipe</h3>
                 </div>
                 {embedUrl ? (
-                  <div className="relative aspect-video rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group">
+                  <div className="relative aspect-video rounded-xl sm:rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group">
                     <iframe src={embedUrl} className="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                   </div>
                 ) : isDirectVideo(recipe.videoUrl) ? (
-                  <div className="relative aspect-video rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group bg-black">
+                  <div className="relative aspect-video rounded-xl sm:rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group bg-black">
                     <video src={recipe.videoUrl} className="absolute inset-0 w-full h-full" controls />
                   </div>
                 ) : (
-                  <a href={recipe.videoUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-6 aspect-video rounded-[32px] bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative">
+                  <a href={recipe.videoUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-6 aspect-video rounded-xl sm:rounded-[32px] bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><PlayCircle className="w-8 h-8" /></div>
                     <div className="text-center"><p className="text-base font-black text-white tracking-tight">Watch on External Platform</p><p className="text-xs text-muted-foreground font-medium">Click to view video on source site</p></div>
@@ -415,7 +415,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             {/* Ingredients & Instructions Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-none">
               {/* Ingredients Card */}
-              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl flex flex-col justify-between h-[450px]">
+              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl flex flex-col justify-between h-[450px]">
                 <div className="flex flex-col flex-1 min-h-0">
                   <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
                     <div><h3 className="text-2xl font-black text-white tracking-tighter font-heading">Ingredients</h3><p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">For {servings} Servings</p></div>
@@ -436,11 +436,11 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                     </ul>
                   </div>
                 </div>
-                <button className="w-full mt-6 py-4 rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-[0.25em] text-white transition-all group">Add All To Cart <ChevronRight className="inline w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform" /></button>
+                <button className="w-full mt-6 py-4 rounded-xl sm:rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-[0.25em] text-white transition-all group">Add All To Cart <ChevronRight className="inline w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform" /></button>
               </div>
 
               {/* Cooking Instructions Card */}
-              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl relative overflow-hidden h-[450px] flex flex-col justify-between">
+              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl relative overflow-hidden h-[450px] flex flex-col justify-between">
                 <div className="flex flex-col flex-1 min-h-0">
                   <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none"><PlayCircle className="w-20 h-20 text-white" /></div>
                   <div className="flex items-center gap-3 mb-10"><div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg"><CheckCircle2 className="w-5 h-5" /></div><h3 className="text-xl font-black text-white tracking-tighter font-heading">Instructions</h3></div>
@@ -459,14 +459,14 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
 
             {/* Nutrition Info Card */}
-            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl h-[248px] flex flex-col justify-between flex-none">
+            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl h-[248px] flex flex-col justify-between flex-none">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 text-primary"><Apple className="w-6 h-6" /></div>
                 <div><h3 className="text-xl font-black text-white tracking-tighter font-heading">Nutrition Info</h3><p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">Per Serving Estimation</p></div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                 {[ { label: 'Calories', value: `${recipe.nutrition?.calories || '0'}`, color: 'text-orange-400' }, { label: 'Protein', value: `${recipe.nutrition?.protein ? recipe.nutrition.protein + 'g' : '0g'}`, color: 'text-blue-400' }, { label: 'Carbs', value: `${recipe.nutrition?.carbohydrates ? recipe.nutrition.carbohydrates + 'g' : '0g'}`, color: 'text-amber-400' }, { label: 'Fat', value: `${recipe.nutrition?.fat ? recipe.nutrition.fat + 'g' : '0g'}`, color: 'text-red-400' }, { label: 'Fiber', value: `${recipe.nutrition?.fiber ? recipe.nutrition.fiber + 'g' : '0g'}`, color: 'text-emerald-400' } ].map(nut => (
-                  <div key={nut.label} className="p-4 rounded-3xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center">
+                  <div key={nut.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center">
                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>
                     <span className={`text-xl font-black ${nut.color}`}>{nut.value}</span>
                   </div>
@@ -477,7 +477,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
 
           <div className="flex flex-col flex-1 w-full lg:h-full self-stretch">
             {/* Community Feedback (Comments) Card */}
-            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl print:hidden flex flex-col flex-1 h-full min-h-[400px]">
+            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl print:hidden flex flex-col flex-1 h-full min-h-[400px]">
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar animate-in fade-in duration-700">
                 <CommentsSection recipeId={recipe.id} className="animate-in fade-in duration-700" />
               </div>
@@ -490,7 +490,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         </div>
 
         <section className="mt-24 print:hidden">
-          <div className="relative w-full h-[240px] sm:h-[300px] rounded-[56px] overflow-hidden border border-white/5 group shadow-2xl">
+          <div className="relative w-full h-[240px] sm:h-[300px] rounded-2xl sm:rounded-[40px] lg:rounded-[56px] overflow-hidden border border-white/5 group shadow-2xl">
             <Image
               src="/cooking_ad_banner_1778463092338.png"
               alt="Ad Banner"

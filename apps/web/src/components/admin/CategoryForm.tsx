@@ -13,7 +13,8 @@ import {
   ArrowLeft, Save, Lightbulb, Check,
   Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
   Apple, Fish, Croissant, Carrot, Soup, CupSoda,
-  Flame, Star, Heart, Clock, Tag, LayoutGrid, EyeOff 
+  Flame, Star, Heart, Clock, Tag, LayoutGrid, EyeOff,
+  CookingPot, Salad, WheatOff, Timer
 } from 'lucide-react';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -62,6 +63,10 @@ const ICONS = [
   { id: 'Clock', icon: Clock },
   { id: 'Tag', icon: Tag },
   { id: 'LayoutGrid', icon: LayoutGrid },
+  { id: 'CookingPot', icon: CookingPot },
+  { id: 'Salad', icon: Salad },
+  { id: 'WheatOff', icon: WheatOff },
+  { id: 'Timer', icon: Timer },
 ];
 
 export function CategoryForm({ initialData, onSubmit, isLoading }: CategoryFormProps) {

@@ -56,12 +56,12 @@ export function AnalyticsTracker() {
       {gaId && (
         <>
           <Script
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
           />
           <Script
             id="google-analytics-ga4"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
               __html: `
                 window.dataLayer = window.dataLayer || [];
@@ -83,7 +83,7 @@ export function AnalyticsTracker() {
       {gtmId && (
         <Script
           id="google-tag-manager-gtm"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -100,7 +100,7 @@ export function AnalyticsTracker() {
       {settings?.customScriptsCode && (
         <Script
           id="custom-scripts-code"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: settings.customScriptsCode,
           }}

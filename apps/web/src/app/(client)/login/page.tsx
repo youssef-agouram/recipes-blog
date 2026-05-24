@@ -1,26 +1,34 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSendOtpMutation, useVerifyOtpMutation } from '@/store/api/authApi';
+import { 
+  useSendOtpMutation, 
+  useCheckEmailMutation, 
+  useRegisterPasswordlessMutation 
+} from '@/store/api/authApi';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/store/slices/authSlice';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen, Users, ClipboardList, Shield, Mail, Loader2, ArrowLeft, Key } from 'lucide-react';
+import { BookOpen, Users, ClipboardList, Shield, Mail, Loader2, ArrowLeft, Key, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
   const router = useRouter();
   
+  const [checkEmail, { isLoading: isCheckingEmail }] = useCheckEmailMutation();
   const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation();
-  const [verifyOtp, { isLoading: isVerifyingOtp }] = useVerifyOtpMutation();
+  const [registerPasswordless, { isLoading: isRegistering }] = useRegisterPasswordlessMutation();
 
-  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [step, setStep] = useState<'email' | 'register'>('email');
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [code, setCode] = useState('');
+
   const [emailError, setEmailError] = useState('');
+  const [nameError, setNameError] = useState('');
   const [codeError, setCodeError] = useState('');
   
   // Timer for resending code
@@ -48,7 +56,7 @@ export default function LoginPage() {
     return '';
   };
 
-  const handleSendCode = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const err = validateEmail(email);
     if (err) {
@@ -58,39 +66,55 @@ export default function LoginPage() {
     setEmailError('');
 
     try {
-      await sendOtp({ email: email.trim().toLowerCase() }).unwrap();
-      toast.success('Verification code sent to your Gmail');
-      setStep('code');
-      setCountdown(60);
-      setCodeError('');
+      const emailVal = email.trim().toLowerCase();
+      const checkRes = await checkEmail({ email: emailVal }).unwrap();
+      
+      if (checkRes.exists) {
+        // User exists -> logged in directly by the backend!
+        dispatch(setCredentials({ token: checkRes.token!, user: checkRes.user! }));
+        toast.success('Successfully logged in!');
+        router.push('/');
+      } else {
+        // User does not exist -> OTP has been sent by the backend automatically
+        toast.success('Verification code sent to your Gmail');
+        setStep('register');
+        setCountdown(60);
+        setCodeError('');
+        setNameError('');
+      }
     } catch (err: any) {
-      console.error('Failed to send OTP:', err);
-      const errMsg = err?.data?.error || 'Failed to send verification code. Please try again.';
+      console.error('Failed logging in:', err);
+      const errMsg = err?.data?.error || 'Failed to sign in. Please try again.';
       setEmailError(errMsg);
       toast.error(errMsg);
     }
   };
 
-  const handleVerifyCode = async (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let valid = true;
+
     if (!code || code.length !== 6) {
       setCodeError('Please enter a 6-digit verification code');
-      return;
+      valid = false;
+    } else {
+      setCodeError('');
     }
-    setCodeError('');
+
+    if (!valid) return;
 
     try {
-      const result = await verifyOtp({
+      const result = await registerPasswordless({
         email: email.trim().toLowerCase(),
         code: code.trim(),
       }).unwrap();
-      
+
       dispatch(setCredentials(result));
-      toast.success('Successfully logged in!');
+      toast.success('Account successfully created!');
       router.push('/');
     } catch (err: any) {
-      console.error('Failed to verify OTP:', err);
-      const errMsg = err?.data?.error || 'Invalid or expired verification code';
+      console.error('Failed to register:', err);
+      const errMsg = err?.data?.error || 'Failed to register. Please check your verification code.';
       setCodeError(errMsg);
       toast.error(errMsg);
     }
@@ -188,26 +212,30 @@ export default function LoginPage() {
                  </span>
                </Link>
                <h2 className="text-[26px] sm:text-[28px] font-black text-white tracking-tight mb-2 text-center">
-                 {step === 'email' ? 'Log In / Register' : 'Verify Gmail'}
+                 {step === 'email' ? 'Sign In / Register' : 'Verify & Register'}
                </h2>
                <p className="text-[14px] text-muted-foreground text-center">
-                 {step === 'email' ? 'Access your account using your Gmail' : `Verification code sent to ${email}`}
+                 {step === 'email' 
+                   ? 'Access your account using your Gmail' 
+                   : `Verification code sent to ${email}`}
                </p>
             </div>
 
             {/* Desktop Header */}
             <div className="hidden lg:block mb-8">
               <h2 className="text-[28px] font-black text-white tracking-tight mb-2">
-                {step === 'email' ? 'Log In / Register' : 'Verify Gmail'}
+                {step === 'email' ? 'Sign In / Register' : 'Verify & Register'}
               </h2>
               <p className="text-[15px] text-muted-foreground">
-                {step === 'email' ? 'Access your account using your Gmail address' : `A 6-digit code was sent to ${email}`}
+                {step === 'email' 
+                  ? 'Access your account using your Gmail address' 
+                  : `Create your account. A 6-digit code was sent to ${email}`}
               </p>
             </div>
 
-            {step === 'email' ? (
+            {step === 'email' && (
               /* Step 1: Email Form */
-              <form onSubmit={handleSendCode} className="space-y-6">
+              <form onSubmit={handleEmailSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <label htmlFor="login-email" className="text-sm font-bold text-white/80">Gmail Address</label>
                   <div className="relative">
@@ -226,28 +254,30 @@ export default function LoginPage() {
                   </div>
                   {emailError && <p className="text-xs text-red-400 font-medium">{emailError}</p>}
                   <p className="text-xs text-muted-foreground/40 leading-normal pt-1">
-                    No password required. We will send a secure 6-digit verification code to your Gmail address. If you don&apos;t have an account, we will create one for you.
+                    First time registering? We will verify your Gmail with a 6-digit OTP code. If you are already registered, you will sign in instantly.
                   </p>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isSendingOtp}
+                  disabled={isCheckingEmail || isSendingOtp}
                   className="w-full h-12 mt-2 bg-primary text-primary-foreground font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
                 >
-                  {isSendingOtp ? (
+                  {isCheckingEmail || isSendingOtp ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Sending Code...</span>
+                      <span>Processing...</span>
                     </>
                   ) : (
-                    <span>Send Verification Code</span>
+                    <span>Continue</span>
                   )}
                 </button>
               </form>
-            ) : (
-              /* Step 2: Verification Code Form */
-              <form onSubmit={handleVerifyCode} className="space-y-6">
+            )}
+
+            {step === 'register' && (
+              /* Step 2 (New Users): Register with OTP code */
+              <form onSubmit={handleRegisterSubmit} className="space-y-4">
                 <button
                   type="button"
                   onClick={() => setStep('email')}
@@ -257,8 +287,9 @@ export default function LoginPage() {
                   <span>Use a different email address</span>
                 </button>
 
-                <div className="space-y-2">
-                  <label htmlFor="otp-code" className="text-sm font-bold text-white/80">Verification Code</label>
+                {/* Verification Code Input */}
+                <div className="space-y-1.5">
+                  <label htmlFor="otp-code" className="text-xs font-bold text-white/80">6-Digit Verification Code</label>
                   <div className="relative">
                     <input
                       id="otp-code"
@@ -271,14 +302,14 @@ export default function LoginPage() {
                         if (codeError) setCodeError('');
                       }}
                       placeholder="123456"
-                      className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 pr-11 text-center tracking-[0.4em] font-black text-lg text-white placeholder:text-muted-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
+                      className="w-full h-11 bg-white/5 border border-white/10 rounded-2xl px-4 pr-11 text-center tracking-[0.4em] font-black text-base text-white placeholder:text-muted-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
                     />
-                    <Key className="absolute right-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/30" />
+                    <Key className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30" />
                   </div>
                   {codeError && <p className="text-xs text-red-400 font-medium">{codeError}</p>}
                   
-                  {/* Resend Actions */}
-                  <div className="flex items-center justify-between text-xs pt-2">
+                  {/* Resend actions */}
+                  <div className="flex items-center justify-between text-xs pt-1">
                     <span className="text-muted-foreground/50">Didn&apos;t receive a code?</span>
                     <button
                       type="button"
@@ -286,27 +317,23 @@ export default function LoginPage() {
                       disabled={countdown > 0}
                       className="font-bold text-primary hover:underline disabled:text-muted-foreground/45 disabled:no-underline"
                     >
-                      {countdown > 0 ? `Resend Code (${countdown}s)` : 'Resend Code'}
+                      {countdown > 0 ? `Resend (${countdown}s)` : 'Resend Code'}
                     </button>
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-primary/5 border border-primary/10 p-3 text-xs text-primary/80 leading-normal">
-                  <strong>Dev Mode Help:</strong> Since SMTP is disabled locally, you can view the sent code in the API server terminal console logs!
-                </div>
-
                 <button
                   type="submit"
-                  disabled={isVerifyingOtp}
-                  className="w-full h-12 bg-primary text-primary-foreground font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+                  disabled={isRegistering}
+                  className="w-full h-12 mt-4 bg-primary text-primary-foreground font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
                 >
-                  {isVerifyingOtp ? (
+                  {isRegistering ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Verifying...</span>
+                      <span>Creating Account...</span>
                     </>
                   ) : (
-                    <span>Verify & Log In</span>
+                    <span>Register & Log In</span>
                   )}
                 </button>
               </form>
@@ -330,7 +357,7 @@ export default function LoginPage() {
       
       {/* Footer */}
       <div className="fixed bottom-6 w-full text-center text-[12px] font-medium text-muted-foreground/40 z-0">
-        © 2024 Tasteful. All rights reserved.
+        © 2026 Tasteful. All rights reserved.
       </div>
     </div>
   );

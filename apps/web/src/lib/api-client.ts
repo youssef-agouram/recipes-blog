@@ -4,6 +4,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const isServer = typeof window === 'undefined';
+  const isGet = !options?.method || options.method.toUpperCase() === 'GET';
   
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -12,6 +14,7 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
       ...(token ? { "Authorization": `Bearer ${token}` } : {}),
       ...options?.headers,
     },
+    ...(isServer && isGet ? { next: { revalidate: 60 } } : {}),
   });
 
   if (!response.ok) {

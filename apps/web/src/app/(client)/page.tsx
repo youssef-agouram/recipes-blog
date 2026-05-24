@@ -74,7 +74,7 @@ export default async function HomePage() {
       </section>
 
       {/* 2. Explore by Category */}
-      <section className="container mx-auto px-6 max-w-[1536px] py-2 border-t border-border">
+      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-2 border-t border-border">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 gap-2">
           <div>
             <h2 className="text-xl sm:text-3xl font-black text-white tracking-tighter leading-none font-heading">Explore by Category</h2>
@@ -91,12 +91,13 @@ export default async function HomePage() {
             <ChevronLeft className="w-6 h-6" />
           </button>
 
-          <div className="flex flex-nowrap justify-start md:justify-center gap-4 overflow-x-auto pb-2 scrollbar-hide px-4">
+          <div className="flex flex-nowrap justify-start md:justify-center gap-4 overflow-x-auto pb-2 scrollbar-hide px-0">
             {categories.map((cat, i) => {
               const availableIcons: Record<string, any> = {
                 Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
                 Apple, Fish, Croissant, Carrot, Soup, CupSoda,
-                Flame, Star, Heart, Clock, Tag, LayoutGrid
+                Flame, Star, Heart, Clock, Tag, LayoutGrid,
+                CookingPot, Salad, WheatOff, Timer
               };
 
               const fallbackIconMap: Record<string, any> = {
@@ -115,8 +116,12 @@ export default async function HomePage() {
               const nameLower = cat.name.toLowerCase();
 
               let Icon = CookingPot;
-              if (cat.icon && availableIcons[cat.icon]) {
-                Icon = availableIcons[cat.icon];
+              const matchedIconKey = cat.icon ? Object.keys(availableIcons).find(
+                key => key.toLowerCase() === cat.icon?.toLowerCase()
+              ) : null;
+
+              if (matchedIconKey && availableIcons[matchedIconKey]) {
+                Icon = availableIcons[matchedIconKey];
               } else if (fallbackIconMap[nameLower]) {
                 Icon = fallbackIconMap[nameLower];
               }
@@ -143,7 +148,7 @@ export default async function HomePage() {
                   </div>
                   <div className="flex flex-col items-center gap-1.5 text-center">
                     <span className={cn(
-                      "text-[11px] font-black uppercase tracking-[0.08em] transition-colors leading-none",
+                      "text-[11px] font-black uppercase tracking-[0.08em] transition-colors leading-tight text-center max-w-[85px] line-clamp-2",
                       "text-white/80 group-hover:text-primary"
                     )}>{cat.name}</span>
                     {isGF && (
@@ -173,8 +178,8 @@ export default async function HomePage() {
       />
 
       {/* 5. Why Choose Tasteful? */}
-      <section className="container mx-auto px-6 max-w-[1536px] py-6 border-t border-border">
-        <h2 className="text-2xl font-black text-white tracking-tighter mb-6 leading-none">Why Choose Tasteful?</h2>
+      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-6 border-t border-border">
+        <h2 className="text-xl sm:text-3xl font-black text-white tracking-tighter mb-6 leading-none font-heading">Why Choose Tasteful?</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
           {[
@@ -200,8 +205,8 @@ export default async function HomePage() {
       </section>
 
       {/* 6. Professional Ad Banner Section */}
-      <section className="container mx-auto px-6 max-w-[1536px] pb-8 pt-4">
-        <div className="relative bg-gradient-to-r from-card/80 via-card/95 to-card/80 border border-primary/10 hover:border-primary/30 rounded-3xl overflow-hidden flex flex-col lg:flex-row items-stretch shadow-[0_0_50px_rgba(234,179,8,0.03)] hover:shadow-[0_0_50px_rgba(234,179,8,0.08)] transition-all duration-700 group">
+      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] pb-8 pt-4">
+        <div className="relative bg-gradient-to-r from-card/80 via-card/95 to-card/80 border border-primary/10 hover:border-primary/30 rounded-2xl sm:rounded-[32px] overflow-hidden flex flex-col lg:flex-row items-stretch shadow-[0_0_50px_rgba(234,179,8,0.03)] hover:shadow-[0_0_50px_rgba(234,179,8,0.08)] transition-all duration-700 group">
           {/* Left Image Section */}
           <div className="lg:w-[26%] relative min-h-[220px] overflow-hidden">
             <Image
@@ -218,7 +223,7 @@ export default async function HomePage() {
           </div>
 
           {/* Middle Content Section */}
-          <div className="flex-1 p-8 lg:p-12 flex flex-col justify-center">
+          <div className="flex-1 p-5 sm:p-8 lg:p-12 flex flex-col justify-center">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-black uppercase tracking-[0.25em] text-primary mb-4 w-fit">
               <Sparkles className="w-3 h-3 text-primary animate-pulse" /> SPONSORED PROMOTION
             </span>
@@ -243,7 +248,7 @@ export default async function HomePage() {
           </div>
 
           {/* Right Benefits Section */}
-          <div className="lg:w-[32%] bg-white/[0.01] p-8 lg:p-12 flex flex-col justify-center gap-8 border-t lg:border-t-0 lg:border-l border-white/5">
+          <div className="lg:w-[32%] bg-white/[0.01] p-5 sm:p-8 lg:p-12 flex flex-col justify-center gap-5 sm:gap-8 border-t lg:border-t-0 lg:border-l border-white/5">
             {[
               { title: '150+ HD Video Lessons', desc: 'Watch on any device, anytime', icon: Play },
               { title: 'Michelin Pro Secrets', desc: 'Expert techniques made simple', icon: Sparkles },

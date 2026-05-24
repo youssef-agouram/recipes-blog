@@ -38,6 +38,7 @@ export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showTopAd, setShowTopAd] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -136,8 +137,6 @@ export function Navbar() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [showTopAd, setShowTopAd] = useState(false);
 
   useEffect(() => {
     if (settings?.adSettings?.showTopBarAd && settings?.adSettings?.topBarAdUrl) {
@@ -147,19 +146,19 @@ export function Navbar() {
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const shouldShow = currentScrollY > 200;
       
-      if (currentScrollY > 200) {
-        setShowTopAd(true);
-      } else {
-        setShowTopAd(false);
-      }
-      
-      setLastScrollY(currentScrollY);
+      setShowTopAd((prev) => {
+        if (prev !== shouldShow) {
+          return shouldShow;
+        }
+        return prev;
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, settings]);
+  }, [settings]);
 
   const handleLogout = () => {
     dispatch(logout());

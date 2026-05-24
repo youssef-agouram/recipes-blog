@@ -145,7 +145,7 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
 
   return (
     <div className="relative w-full h-full group overflow-hidden">
-      <AnimatePresence initial={false} custom={direction} mode="popLayout">
+      <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
           key={currentIndex}
           custom={direction}

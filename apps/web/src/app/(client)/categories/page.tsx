@@ -5,7 +5,8 @@ import {
   ArrowLeft, Coffee, Salad, CookingPot, Cake, Leaf, 
   WheatOff, Timer, CupSoda, Soup, Utensils, Pizza, 
   Sandwich, Apple, Fish, Croissant, Carrot, Flame, 
-  Heart, Sparkles, BookOpen, Star, Clock, ChevronRight
+  Heart, Sparkles, BookOpen, Star, Clock, ChevronRight,
+  Tag, LayoutGrid
 } from "lucide-react";
 
 export const revalidate = 60; // Revalidate every minute
@@ -21,7 +22,8 @@ export default async function CategoriesPage() {
   const iconComponents: Record<string, any> = {
     Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
     Apple, Fish, Croissant, Carrot, Soup, CupSoda,
-    Flame, Star, Heart, Clock, Salad, CookingPot
+    Flame, Star, Heart, Clock, Salad, CookingPot,
+    Tag, LayoutGrid, WheatOff, Timer
   };
 
   const fallbackIconMap: Record<string, any> = {
@@ -44,7 +46,7 @@ export default async function CategoriesPage() {
       {/* Header Banner */}
       <div className="relative overflow-hidden bg-gradient-to-b from-card/30 via-card/10 to-transparent border-b border-white/5 py-20">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(242,158,31,0.04),transparent_60%)]"></div>
-        <div className="container mx-auto px-6 max-w-[1536px] relative z-10">
+        <div className="container mx-auto px-3 sm:px-6 max-w-[1536px] relative z-10">
           <Link 
             href="/" 
             className="inline-flex items-center text-[10px] font-black uppercase tracking-[0.25em] text-primary hover:text-white mb-8 transition-colors group"
@@ -68,7 +70,7 @@ export default async function CategoriesPage() {
       </div>
 
       {/* Categories Grid */}
-      <div className="container mx-auto px-6 max-w-[1536px] mt-16">
+      <div className="container mx-auto px-3 sm:px-6 max-w-[1536px] mt-16">
         {categories.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {categories.map((cat) => {
@@ -78,8 +80,12 @@ export default async function CategoriesPage() {
               // Resolve Icon
               const nameLower = cat.name.toLowerCase();
               let CategoryIcon = CookingPot;
-              if (cat.icon && iconComponents[cat.icon]) {
-                CategoryIcon = iconComponents[cat.icon];
+              const matchedIconKey = cat.icon ? Object.keys(iconComponents).find(
+                key => key.toLowerCase() === cat.icon?.toLowerCase()
+              ) : null;
+
+              if (matchedIconKey && iconComponents[matchedIconKey]) {
+                CategoryIcon = iconComponents[matchedIconKey];
               } else if (fallbackIconMap[nameLower]) {
                 CategoryIcon = fallbackIconMap[nameLower];
               }
