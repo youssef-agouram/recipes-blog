@@ -243,10 +243,45 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           <span className="text-white truncate max-w-[200px]">{recipe.title}</span>
         </div>
 
+        {/* Mobile Header: Title & Description beside Main Image */}
+        <div className="flex md:hidden items-start gap-4 mb-6">
+          {/* Main Image Container */}
+          <div className="relative w-[38%] aspect-square xs:aspect-[4/3] rounded-2xl overflow-hidden border border-white/5 shrink-0 shadow-lg">
+            <Image 
+              src={selectedImage} 
+              alt={recipe.title} 
+              fill 
+              sizes="150px"
+              className="object-cover" 
+              priority 
+            />
+            {/* Simple Category Badge overlay */}
+            <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[6px] xs:text-[7px] font-black uppercase tracking-wider text-white">
+              {recipe.categories?.[0]?.name || 'Recipe'}
+            </span>
+          </div>
+
+          {/* Title & Short Description */}
+          <div className="flex-1 min-w-0 space-y-1.5">
+            <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-wider text-primary">
+              <Clock className="w-3 h-3" />
+              <span>{recipe.totalTime || '30 MIN'}</span>
+              <span>•</span>
+              <span className="capitalize">{recipe.difficulty || 'Easy'}</span>
+            </div>
+            <h1 className="text-base xs:text-lg font-black text-white leading-tight tracking-tight font-heading line-clamp-3">
+              {recipe.title}
+            </h1>
+            <p className="text-[9px] xs:text-[10px] text-muted-foreground leading-snug font-medium line-clamp-3">
+              {recipe.summary || "Embark on a culinary journey with this masterpiece."}
+            </p>
+          </div>
+        </div>
+
         {/* Row 1: Hero details */}
         <div className="flex flex-col lg:flex-row items-start gap-12 mb-16 animate-in fade-in duration-1000">
           <div className="w-full lg:w-[55%] space-y-12">
-            <div className="relative aspect-[16/10] rounded-2xl sm:rounded-[48px] overflow-hidden shadow-2xl group border border-white/5">
+            <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[48px] overflow-hidden shadow-2xl group border border-white/5">
               <Image src={selectedImage} alt={recipe.title} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute top-8 right-8 flex flex-col gap-3">
@@ -271,10 +306,10 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
 
             {allImages.length > 1 && (
-              <div className="relative group/gallery px-4">
-                <div id="thumbnail-slider" className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
+              <div className="relative group/gallery -mx-6 px-6 overflow-hidden">
+                <div id="thumbnail-slider" className="flex gap-2.5 sm:gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/15 scrollbar-track-transparent snap-x snap-mandatory scroll-smooth touch-pan-x">
                   {allImages.map((imgUrl, i) => (
-                    <button key={i} id={`thumb-${i}`} onClick={() => setSelectedImage(imgUrl)} className={`relative flex-none w-[160px] aspect-[4/3] rounded-xl sm:rounded-[32px] overflow-hidden border transition-all duration-500 snap-center ${selectedImage === imgUrl ? 'border-primary ring-4 ring-primary/20 scale-95 shadow-2xl' : 'border-white/5 hover:border-primary/50 grayscale hover:grayscale-0 opacity-40 hover:opacity-100'}`}>
+                    <button key={i} id={`thumb-${i}`} onClick={() => setSelectedImage(imgUrl)} className={`relative flex-none w-[76px] h-[57px] xs:w-[100px] xs:h-[75px] sm:w-[160px] sm:h-[120px] rounded-xl sm:rounded-[24px] overflow-hidden border transition-all duration-300 snap-center ${selectedImage === imgUrl ? 'border-primary ring-2 ring-primary/25 scale-95 shadow-xl animate-pulse-once' : 'border-white/5 opacity-60 hover:opacity-100'}`}>
                       <Image src={imgUrl} alt={`${recipe.title} photo ${i + 1}`} fill sizes="160px" className="object-cover" />
                     </button>
                   ))}
@@ -319,11 +354,11 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Loved by 1.2k people</span>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter font-heading drop-shadow-2xl">
+            <h1 className="hidden md:block text-5xl sm:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter font-heading drop-shadow-2xl">
               {recipe.title}
             </h1>
 
-            <p className="text-[16px] text-muted-foreground leading-relaxed font-medium max-w-xl">
+            <p className="hidden md:block text-[16px] text-muted-foreground leading-relaxed font-medium max-w-xl">
               {recipe.summary || "Embark on a culinary journey with this masterpiece. Perfectly balanced flavors and textures that will leave your guests in awe."}
             </p>
 
