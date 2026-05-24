@@ -313,7 +313,7 @@ export function Navbar() {
             {mounted && !isHydrating && isAuthenticated && (
               <>
                 {/* Submit Recipe */}
-                {user?.role === 'Administrator' && (
+                {(user?.role === 'Administrator' || user?.role === 'Editor') && (
                   <Link
                     href="/admin/recipes/new"
                     id="navbar-submit-recipe"
@@ -530,7 +530,7 @@ export function Navbar() {
             {/* Mobile Profile if logged in */}
             {mounted && !isHydrating && isAuthenticated && (
               <div className="pt-4 border-t border-white/5">
-                {user?.role === 'Administrator' && (
+                {(user?.role === 'Administrator' || user?.role === 'Editor') && (
                   <Link
                     href="/admin/recipes/new"
                     onClick={() => setMobileMenuOpen(false)}

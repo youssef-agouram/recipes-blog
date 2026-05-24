@@ -84,9 +84,14 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       console.error('Failed logging in:', err);
+      const status = err?.status;
       const errMsg = err?.data?.error || 'Failed to sign in. Please try again.';
-      setEmailError(errMsg);
-      toast.error(errMsg);
+      if (status === 403) {
+        setEmailError('This is an admin account. Please use the admin login page.');
+      } else {
+        setEmailError(errMsg);
+        toast.error(errMsg);
+      }
     }
   };
 
@@ -252,7 +257,18 @@ export default function LoginPage() {
                     />
                     <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/30" />
                   </div>
-                  {emailError && <p className="text-xs text-red-400 font-medium">{emailError}</p>}
+                  {emailError && (
+                    emailError.includes('admin account') ? (
+                      <p className="text-xs text-amber-400 font-medium">
+                        This is an admin account.{' '}
+                        <Link href="/admin/login" className="underline text-primary hover:text-white transition-colors">
+                          Go to Admin Login →
+                        </Link>
+                      </p>
+                    ) : (
+                      <p className="text-xs text-red-400 font-medium">{emailError}</p>
+                    )
+                  )}
                   <p className="text-xs text-muted-foreground/40 leading-normal pt-1">
                     First time registering? We will verify your Gmail with a 6-digit OTP code. If you are already registered, you will sign in instantly.
                   </p>

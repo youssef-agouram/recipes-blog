@@ -31,7 +31,7 @@ export function BottomNavigation() {
       icon: Search,
       active: pathname === '/search',
     },
-    ...(isAuthenticated && user?.role === 'Administrator' ? [{
+    ...(isAuthenticated && (user?.role === 'Administrator' || user?.role === 'Editor') ? [{
       href: '/admin/recipes/new',
       icon: Plus,
       active: pathname === '/admin/recipes/new',
@@ -43,7 +43,7 @@ export function BottomNavigation() {
       badge: totalSaved > 0, // Show red dot if user has saved items
     },
     {
-      href: isAuthenticated ? (user?.role === 'Administrator' ? '/admin' : '/settings') : '/login',
+      href: isAuthenticated ? ((user?.role === 'Administrator' || user?.role === 'Editor') ? '/admin' : '/settings') : '/login',
       icon: isAuthenticated ? User : LogIn,
       active: pathname.startsWith('/admin') || pathname === '/settings' || pathname === '/login',
       isProfile: isAuthenticated,

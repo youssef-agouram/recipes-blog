@@ -539,7 +539,6 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                     </ul>
                   </div>
                 </div>
-                <button className="w-full mt-6 py-4 rounded-xl sm:rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-[0.25em] text-white transition-all group">Add All To Cart <ChevronRight className="inline w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform" /></button>
               </div>
 
               {/* Cooking Instructions Card */}

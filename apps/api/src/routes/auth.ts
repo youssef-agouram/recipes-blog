@@ -204,6 +204,13 @@ router.post('/check-email', async (req: Request, res: Response, next: NextFuncti
     const user = await prisma.user.findUnique({ where: { email: emailKey } });
 
     if (user) {
+      // Block admin/editor accounts from passwordless login
+      if (user.role === 'Admin' || user.role === 'Editor') {
+        return res.status(403).json({
+          error: 'Admin accounts require a password. Please use the admin login page.',
+        });
+      }
+
       // User exists -> Log them in directly! Return JWT and user info.
       const token = jwt.sign({ userId: user.id }, getJwtSecret(), { expiresIn: '1d' });
       return res.json({

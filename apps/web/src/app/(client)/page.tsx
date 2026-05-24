@@ -63,10 +63,10 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className="w-full bg-background text-foreground pb-6">
+    <div className="w-full bg-background text-foreground pb-0 sm:pb-6">
 
       {/* 1. Hero Slider Section */}
-      <section className="relative w-full h-[25vh] min-h-[180px] sm:h-[45vh] sm:min-h-[300px] border-b border-white/5 mb-3 sm:mb-16 bg-black">
+      <section className="relative w-full h-[25vh] min-h-[180px] sm:h-[45vh] sm:min-h-[300px] border-b border-white/5 mb-0 sm:mb-16 bg-black">
         <HeroSlider
           images={heroSettings.images || []}
           fallbackImage={heroSettings.imageUrl}
@@ -74,7 +74,7 @@ export default async function HomePage() {
       </section>
 
       {/* 2. Explore by Category */}
-      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-2 sm:py-4 border-t border-border">
+      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-0 sm:py-4 border-t border-border">
         <div className="flex items-center justify-between mb-4 gap-2">
           <div>
             <h2 className="text-sm xs:text-base sm:text-3xl font-black text-white tracking-tight leading-none font-heading">Explore by Category</h2>
@@ -178,7 +178,7 @@ export default async function HomePage() {
       />
 
       {/* 5. Why Choose Tasteful? */}
-      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-3 sm:py-6 border-t border-border">
+      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-0 sm:py-6 border-t border-border">
         <h2 className="text-xl sm:text-3xl font-black text-white tracking-tighter mb-6 leading-none font-heading">Why Choose Tasteful?</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
@@ -205,7 +205,7 @@ export default async function HomePage() {
       </section>
 
       {/* 6. Professional Ad Banner Section */}
-      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] pb-4 sm:pb-8 pt-2 sm:pt-4">
+      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] pb-0 sm:pb-8 pt-0 sm:pt-4">
         <div className="relative bg-gradient-to-r from-card/80 via-card/95 to-card/80 border border-primary/10 hover:border-primary/30 rounded-2xl sm:rounded-[32px] overflow-hidden flex flex-col lg:flex-row items-stretch shadow-[0_0_50px_rgba(234,179,8,0.03)] hover:shadow-[0_0_50px_rgba(234,179,8,0.08)] transition-all duration-700 group">
           {/* Left Image Section */}
           <div className="lg:w-[26%] relative min-h-[220px] overflow-hidden">
