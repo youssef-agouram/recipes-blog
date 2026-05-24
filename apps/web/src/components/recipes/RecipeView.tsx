@@ -233,7 +233,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
       <article className="container mx-auto px-6 max-w-[1536px] pt-4">
 
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
+        <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-4 md:mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <Link href="/" className="hover:text-primary transition-colors">Home</Link>
           <ChevronRight className="w-3 h-3 opacity-20" />
           <Link href="/recipes" className="hover:text-primary transition-colors">Recipes</Link>
@@ -244,9 +244,9 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         </div>
 
         {/* Mobile Header: Title & Description beside Main Image */}
-        <div className="flex md:hidden items-start gap-4 mb-6">
+        <div className="flex md:hidden items-start gap-4 mb-4 md:mb-6">
           {/* Main Image Container */}
-          <div className="relative w-[38%] aspect-square xs:aspect-[4/3] rounded-2xl overflow-hidden border border-white/5 shrink-0 shadow-lg">
+          <div className="relative w-[46%] aspect-square xs:aspect-[4/3] rounded-2xl overflow-hidden border border-white/5 shrink-0 shadow-lg">
             <Image 
               src={selectedImage} 
               alt={recipe.title} 
@@ -279,9 +279,9 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         </div>
 
         {/* Row 1: Hero details */}
-        <div className="flex flex-col lg:flex-row items-start gap-12 mb-16 animate-in fade-in duration-1000">
-          <div className="w-full lg:w-[55%] space-y-12">
-            <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[48px] overflow-hidden shadow-2xl group border border-white/5">
+        <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-12 mb-6 md:mb-16 animate-in fade-in duration-1000">
+          <div className="w-full lg:w-[55%]">
+            <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[48px] overflow-hidden shadow-2xl group border border-white/5 mb-12">
               <Image src={selectedImage} alt={recipe.title} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute top-8 right-8 flex flex-col gap-3">
@@ -306,8 +306,8 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
 
             {allImages.length > 1 && (
-              <div className="relative group/gallery -mx-6 px-6 overflow-hidden">
-                <div id="thumbnail-slider" className="flex gap-2.5 sm:gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/15 scrollbar-track-transparent snap-x snap-mandatory scroll-smooth touch-pan-x">
+              <div className="relative group/gallery -mx-6 px-6 overflow-hidden mb-4 md:mb-12">
+                <div id="thumbnail-slider" className="flex gap-2.5 sm:gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth touch-pan-x">
                   {allImages.map((imgUrl, i) => (
                     <button key={i} id={`thumb-${i}`} onClick={() => setSelectedImage(imgUrl)} className={`relative flex-none w-[76px] h-[57px] xs:w-[100px] xs:h-[75px] sm:w-[160px] sm:h-[120px] rounded-xl sm:rounded-[24px] overflow-hidden border transition-all duration-300 snap-center ${selectedImage === imgUrl ? 'border-primary ring-2 ring-primary/25 scale-95 shadow-xl animate-pulse-once' : 'border-white/5 opacity-60 hover:opacity-100'}`}>
                       <Image src={imgUrl} alt={`${recipe.title} photo ${i + 1}`} fill sizes="160px" className="object-cover" />
@@ -344,8 +344,8 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             )}
           </div>
 
-          <div className="flex flex-col flex-1 w-full space-y-8">
-            <div className="hidden md:flex items-center gap-3">
+          <div className="flex flex-col flex-1 w-full">
+            <div className="hidden md:flex items-center gap-3 mb-8">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map(i => (
                   <div key={i} className="w-6 h-6 rounded-full border-2 border-background bg-white/10 overflow-hidden">
@@ -356,15 +356,15 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Loved by 1.2k people</span>
             </div>
 
-            <h1 className="hidden md:block text-5xl sm:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter font-heading drop-shadow-2xl">
+            <h1 className="hidden md:block text-5xl sm:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter font-heading drop-shadow-2xl mb-8">
               {recipe.title}
             </h1>
 
-            <p className="hidden md:block text-[16px] text-muted-foreground leading-relaxed font-medium max-w-xl">
+            <p className="hidden md:block text-[16px] text-muted-foreground leading-relaxed font-medium max-w-xl mb-8">
               {recipe.summary || "Embark on a culinary journey with this masterpiece. Perfectly balanced flavors and textures that will leave your guests in awe."}
             </p>
 
-            <section className="prose prose-neutral dark:prose-invert max-w-none pb-8 border-b border-white/5">
+            <section className="prose prose-neutral dark:prose-invert max-w-none pb-4 md:pb-8 border-b border-white/5 mb-4 md:mb-8">
               <div className="flex items-center gap-3 mb-6 not-prose">
                 <div className="w-1.5 h-6 bg-primary rounded-full" />
                 <h3 className="text-xl font-black text-white tracking-tighter font-heading">About This Recipe</h3>
@@ -379,7 +379,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </section>
 
             {recipe.videoUrl && (
-              <div className="block md:hidden pb-8 border-b border-white/5">
+              <div className="block md:hidden pb-4 md:pb-8 border-b border-white/5 mb-4 md:mb-8">
                 <section className="space-y-6">
                   <div className="flex items-center gap-3 not-prose">
                     <div className="w-1.5 h-6 bg-rose-500 rounded-full" />
@@ -404,7 +404,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-8 pb-10 border-b border-white/5">
+            <div className="grid grid-cols-3 gap-8 pb-4 md:pb-10 border-b border-white/5 mb-4 md:mb-8">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-primary fill-primary" />
