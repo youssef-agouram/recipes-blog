@@ -11,14 +11,17 @@ export async function RelatedRecipes({ categoryId, currentRecipeId }: RelatedRec
   
   const related = recipes
     .filter(r => r.id !== currentRecipeId)
-    .slice(0, 3);
+    .slice(0, 2);
 
   if (related.length === 0) return null;
 
   return (
-    <section className="mt-20 pt-20 border-t border-border/40">
-      <h3 className="text-2xl font-bold tracking-tight mb-8">You Might Also Like</h3>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="mt-8 md:mt-20 pt-6 md:pt-20 border-t border-border/40 print:hidden">
+      <div className="flex items-center gap-2 mb-4 md:mb-8">
+        <div className="w-1.5 h-5 md:h-6 bg-primary rounded-full" />
+        <h3 className="text-sm md:text-2xl font-black text-white tracking-tight">You Might Also Like</h3>
+      </div>
+      <div className="grid grid-cols-2 gap-3 md:gap-6">
         {related.map((recipe) => (
           <RecipeCard key={recipe.id} recipe={recipe} />
         ))}

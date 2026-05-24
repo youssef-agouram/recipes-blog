@@ -104,15 +104,15 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
   };
 
   return (
-    <section className={className || "mt-16 pt-16 border-t border-white/5 animate-in fade-in slide-in-from-bottom-4 duration-700"}>
-      <div className="flex items-center justify-between mb-10">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-            <MessageSquare className="w-6 h-6" />
+    <section className={className || "animate-in fade-in slide-in-from-bottom-4 duration-700"}>
+      <div className="flex items-center justify-between mb-4 md:mb-10">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+            <MessageSquare className="w-4 h-4 md:w-6 md:h-6" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tighter leading-none">Community Feedback</h2>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+            <h2 className="text-base md:text-2xl font-black text-white tracking-tighter leading-none">Community Feedback</h2>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
               {comments.length} Discussion Threads
             </p>
           </div>
@@ -128,13 +128,13 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
         </div>
       </div>
 
-      {/* Main Comment Form */}
+      {/* Comment Form or slim sign-in prompt */}
       {isAuthenticated ? (
-        <form onSubmit={(e) => handleSubmit(e)} className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 mb-12 shadow-2xl relative overflow-hidden group">
+        <form onSubmit={(e) => handleSubmit(e)} className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[32px] p-4 md:p-8 mb-6 md:mb-12 shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32 rounded-full group-hover:bg-primary/10 transition-colors" />
           
-          <div className="flex items-center gap-4 mb-8 relative">
-             <div className="w-12 h-12 rounded-xl overflow-hidden border border-white/10 shrink-0">
+          <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-8 relative">
+             <div className="w-9 h-9 md:w-12 md:h-12 rounded-xl overflow-hidden border border-white/10 shrink-0">
                <Image 
                 src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'U'}&background=random`} 
                 alt={user?.name || 'User'} 
@@ -144,14 +144,14 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
                />
              </div>
              <div>
-               <h3 className="text-sm font-black text-white">Posting as {user?.name}</h3>
-               <p className="text-[10px] text-muted-foreground font-medium">Your comment will be public after approval.</p>
+               <h3 className="text-xs md:text-sm font-black text-white">Posting as {user?.name}</h3>
+               <p className="text-[9px] text-muted-foreground font-medium">Your comment will be public after approval.</p>
              </div>
           </div>
           
-          <div className="flex flex-col gap-6 relative">
-            <div className="flex items-center gap-4">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Your Rating:</span>
+          <div className="flex flex-col gap-4 md:gap-6 relative">
+            <div className="flex items-center gap-3 md:gap-4">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Your Rating:</span>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -163,7 +163,7 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
                     className="transition-transform active:scale-90"
                   >
                     <Star 
-                      className={`w-6 h-6 transition-all ${
+                      className={`w-5 h-5 md:w-6 md:h-6 transition-all ${
                         star <= (hoverRating || rating) 
                           ? 'fill-primary text-primary drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] scale-110' 
                           : 'text-white/10'
@@ -178,9 +178,9 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Share your thoughts about this recipe... Did you make any changes?"
+                placeholder="Share your thoughts about this recipe..."
                 required
-                className="w-full bg-background/50 border border-white/5 rounded-[24px] px-6 py-5 text-sm text-white placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/50 min-h-[120px] transition-all"
+                className="w-full bg-background/50 border border-white/5 rounded-2xl px-4 md:px-6 py-3 md:py-5 text-sm text-white placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/50 min-h-[90px] md:min-h-[120px] transition-all"
               />
             </div>
 
@@ -188,7 +188,7 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
               <button 
                 type="submit"
                 disabled={submitting}
-                className="bg-primary text-primary-foreground px-8 py-3.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-white hover:text-black transition-all shadow-xl shadow-primary/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary text-primary-foreground px-6 md:px-8 py-3 md:py-3.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:bg-white hover:text-black transition-all shadow-xl shadow-primary/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
@@ -206,24 +206,18 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
           </div>
         </form>
       ) : (
-        <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-12 mb-12 shadow-2xl text-center relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32 rounded-full" />
-          <div className="relative flex flex-col items-center gap-6">
-            <div className="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-primary mb-2">
-              <Lock className="w-8 h-8" />
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-white mb-2 tracking-tighter">Sign in to join the conversation</h3>
-              <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                We value our community. Please sign in with your Gmail account to share your reviews and thoughts.
-              </p>
-            </div>
-            <div className="flex items-center justify-center gap-4 mt-2">
-              <Link href="/login" className="px-10 py-4 bg-primary text-primary-foreground rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all shadow-xl shadow-primary/10">
-                Sign In with Gmail
-              </Link>
-            </div>
+        /* Slim sign-in bar — not blocking */
+        <div className="flex items-center justify-between gap-3 bg-white/[0.03] border border-white/8 rounded-xl px-4 py-3 mb-5">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Lock className="w-3.5 h-3.5 shrink-0" />
+            <span className="text-[11px] font-medium">Sign in to leave a comment</span>
           </div>
+          <Link
+            href="/login"
+            className="shrink-0 px-4 py-1.5 bg-primary text-primary-foreground rounded-lg font-black text-[9px] uppercase tracking-[0.15em] hover:bg-white hover:text-black transition-all active:scale-95"
+          >
+            Sign In
+          </Link>
         </div>
       )}
 

@@ -513,12 +513,12 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         </div>
 
         {/* Row 2: Details and Community Feedback */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:h-[730px] gap-12 mb-16 animate-in fade-in duration-1000">
-          <div className="w-full lg:w-[55%] lg:h-full flex flex-col justify-between">
+        <div className="flex flex-col lg:flex-row items-stretch lg:h-[730px] gap-6 md:gap-12 mb-8 md:mb-16 animate-in fade-in duration-1000">
+          <div className="w-full lg:w-[55%] lg:h-full flex flex-col gap-6 md:gap-8 lg:justify-between">
             {/* Ingredients & Instructions Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-none">
               {/* Ingredients Card */}
-              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl flex flex-col justify-between h-[450px]">
+              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl flex flex-col justify-between h-auto lg:h-[450px]">
                 <div className="flex flex-col flex-1 min-h-0">
                   <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
                     <div><h3 className="text-2xl font-black text-white tracking-tighter font-heading">Ingredients</h3><p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">For {servings} Servings</p></div>
@@ -528,7 +528,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                       <button onClick={() => setServings(prev => prev + 1)} className="w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Plus className="w-4 h-4" /></button>
                     </div>
                   </div>
-                  <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="flex-1 lg:overflow-y-auto pr-2 custom-scrollbar">
                     <ul className="space-y-4">
                       {ingredientItems.length > 0 ? ingredientItems.map((ing: any, idx: number) => (
                         <li key={idx} className="flex items-start gap-4 group cursor-pointer">
@@ -543,11 +543,11 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
 
               {/* Cooking Instructions Card */}
-              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl relative overflow-hidden h-[450px] flex flex-col justify-between">
+              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl relative overflow-hidden h-auto lg:h-[450px] flex flex-col justify-between">
                 <div className="flex flex-col flex-1 min-h-0">
                   <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none"><PlayCircle className="w-20 h-20 text-white" /></div>
                   <div className="flex items-center gap-3 mb-10"><div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg"><CheckCircle2 className="w-5 h-5" /></div><h3 className="text-xl font-black text-white tracking-tighter font-heading">Instructions</h3></div>
-                  <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="flex-1 lg:overflow-y-auto pr-2 custom-scrollbar">
                     <div className="space-y-8 pb-4">
                       {instructionItems.length > 0 ? instructionItems.map((s: any, idx: number) => (
                         <div key={idx} className="flex gap-4 group/step">
@@ -562,7 +562,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
 
             {/* Nutrition Info Card */}
-            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl h-[248px] flex flex-col justify-between flex-none">
+            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl h-auto lg:h-[248px] flex flex-col justify-between flex-none">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 text-primary"><Apple className="w-6 h-6" /></div>
                 <div><h3 className="text-xl font-black text-white tracking-tighter font-heading">Nutrition Info</h3><p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">Per Serving Estimation</p></div>
@@ -578,12 +578,23 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
           </div>
 
-          <div className="flex flex-col flex-1 w-full lg:h-full self-stretch">
-            {/* Community Feedback (Comments) Card */}
+          {/* Community Feedback — desktop full card */}
+          <div className="hidden md:flex flex-col flex-1 w-full lg:h-full self-stretch">
             <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl print:hidden flex flex-col flex-1 h-full min-h-[400px]">
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar animate-in fade-in duration-700">
                 <CommentsSection recipeId={recipe.id} className="animate-in fade-in duration-700" />
               </div>
+            </div>
+          </div>
+
+          {/* Community Feedback — mobile compact */}
+          <div className="block md:hidden print:hidden">
+            <div className="bg-card/40 border border-white/5 rounded-2xl p-4 shadow-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1.5 h-5 bg-primary rounded-full" />
+                <h3 className="text-sm font-black text-white tracking-tight">Community Feedback</h3>
+              </div>
+              <CommentsSection recipeId={recipe.id} className="animate-in fade-in duration-700" />
             </div>
           </div>
         </div>
