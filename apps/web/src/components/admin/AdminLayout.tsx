@@ -61,11 +61,34 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    dispatch(apiService.util.resetApiState());
-    // Hard redirect to login to clear all memory state
-    window.location.href = '/admin/login';
+  const handleLogout = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // 1. Clear local/session storage FIRST
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (err) {
+      // Silent fail
+    }
+
+    // 2. Dispatch Redux logout
+    try {
+      dispatch(logout());
+      dispatch(apiService.util.resetApiState());
+    } catch (err) {
+      // Silent fail
+    }
+
+    // 3. Force full page reload after a micro-delay
+    setTimeout(() => {
+      window.location.href = '/admin/login';
+    }, 50);
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,7 +191,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         {/* Logout Button */}
         <div className="mt-auto px-4 pb-8">
           <button
-            onClick={handleLogout}
+            onMouseDown={handleLogout}
             className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-[14px] font-bold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-300"
           >
             <LogOut className="h-5 w-5" />

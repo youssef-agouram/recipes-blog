@@ -40,7 +40,13 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       if (typeof window !== 'undefined') {
-        localStorage.clear();
+        try {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.clear();
+        } catch (e) {
+          console.error('Failed to clear storage:', e);
+        }
       }
     },
     hydrateFromStorage: (state) => {

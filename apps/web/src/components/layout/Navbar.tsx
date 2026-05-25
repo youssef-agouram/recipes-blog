@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { logout } from '@/store/slices/authSlice';
 import { useGetSiteSettingsQuery } from '@/store/api/settingsApi';
-import { useGetSavedRecipesQuery, useGetFavoritedRecipesQuery } from '@/store/api/recipeApi';
+import { useGetSavedRecipesQuery, useGetFavoritedRecipesQuery, useSearchRecipesQuery } from '@/store/api/recipeApi';
 import { useGetSavedArticlesQuery, useGetFavoritedArticlesQuery } from '@/store/api/articleApi';
 import { apiService } from '@/store/api/apiService';
 import { cn } from '@/lib/utils';
@@ -42,10 +43,28 @@ export function Navbar() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
+  const profileDropdownMobileRef = useRef<HTMLDivElement>(null);
 
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const [topAdIndex, setTopAdIndex] = useState(0);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: searchSuggestionsData, isFetching: isSearching } = useSearchRecipesQuery(
+    { search: debouncedSearchQuery, limit: 5 },
+    { skip: !debouncedSearchQuery.trim() }
+  );
+
+  const suggestions = searchSuggestionsData?.data || [];
 
   const topBarUrls = (() => {
     const rawVal = settings?.adSettings?.topBarAdUrls || settings?.adSettings?.topBarAdUrl;
@@ -121,6 +140,12 @@ export function Navbar() {
       ) {
         setProfileDropdownOpen(false);
       }
+      if (
+        profileDropdownMobileRef.current &&
+        !profileDropdownMobileRef.current.contains(event.target as Node)
+      ) {
+        setProfileDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -160,12 +185,35 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [settings]);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    dispatch(apiService.util.resetApiState());
-    setProfileDropdownOpen(false);
-    // Hard redirect to home to clear all memory state
-    window.location.href = '/';
+  const handleLogout = (e?: React.MouseEvent) => {
+    // Prevent any event bubbling that could interfere
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // 1. Clear local/session storage FIRST
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (err) {
+      // Silent fail
+    }
+
+    // 2. Dispatch Redux logout
+    try {
+      dispatch(logout());
+      dispatch(apiService.util.resetApiState());
+    } catch (err) {
+      // Silent fail
+    }
+
+    // 3. Force full page reload after a micro-delay to ensure storage is flushed
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 50);
   };
 
   const SocialIcon = ({ name, icon: Icon }: { name: string; icon: any }) => (
@@ -250,7 +298,8 @@ export function Navbar() {
 
       {/* 2. Main Navbar */}
       <header className={`w-full bg-background/95 z-50 backdrop-blur-xl border-b border-border ${settings?.stickyNavbar !== false ? 'sticky top-0' : ''}`}>
-        <div className="container mx-auto px-4 sm:px-6 max-w-[1536px] h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
+        {/* Desktop Header */}
+        <div className="hidden lg:flex container mx-auto px-4 sm:px-6 max-w-[1536px] h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-1.5 sm:gap-3 group shrink-0">
             <div className="relative w-8.5 h-8.5 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl group-hover:scale-105 transition-transform ring-2 ring-primary/20 group-hover:ring-primary/40 flex items-center justify-center">
@@ -309,6 +358,83 @@ export function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
+            {/* Search Bar - Desktop */}
+            <div className="hidden lg:flex items-center relative mr-1">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (searchQuery.trim()) {
+                    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                    setSearchFocused(false);
+                  }
+                }}
+                className="relative flex items-center bg-white/5 border border-border hover:border-white/10 rounded-2xl px-3.5 py-2 w-44 focus-within:w-60 focus-within:bg-white/10 focus-within:border-primary/50 transition-all duration-300 group"
+              >
+                <Search className="w-4 h-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors mr-2 shrink-0" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                  placeholder="Search recipes..."
+                  className="bg-transparent border-0 outline-none text-[11px] text-white placeholder:text-muted-foreground/45 w-full font-bold uppercase tracking-wider"
+                />
+              </form>
+
+              {/* Suggestions Dropdown */}
+              {searchFocused && searchQuery.trim() && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100] w-60 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="p-2 flex flex-col gap-1">
+                    {isSearching && (
+                      <div className="p-3 text-xs text-muted-foreground flex items-center gap-2">
+                        <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Searching...</span>
+                      </div>
+                    )}
+                    
+                    {!isSearching && suggestions.length === 0 && (
+                      <div className="p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        No recipes found
+                      </div>
+                    )}
+
+                    {!isSearching && suggestions.map((recipe: any) => (
+                      <button
+                        key={recipe.id}
+                        onMouseDown={() => {
+                          router.push(`/recipes/${recipe.slug}`);
+                          setSearchQuery('');
+                          setSearchFocused(false);
+                        }}
+                        className="w-full text-left flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/5 transition-all text-xs text-white group"
+                      >
+                        <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-white/5 relative">
+                          {recipe.imageUrl ? (
+                            <Image
+                              src={recipe.imageUrl}
+                              alt={recipe.title}
+                              width={32}
+                              height={32}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            <ChefHat className="w-4 h-4 text-primary absolute inset-0 m-auto" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold truncate text-[11px] leading-snug group-hover:text-primary transition-colors">{recipe.title}</p>
+                          <p className="text-[9px] text-muted-foreground truncate leading-normal">
+                            {recipe.summary || 'Delicious recipe'}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             {/* Auth Area */}
             {mounted && !isHydrating && isAuthenticated && (
               <>
@@ -452,7 +578,7 @@ export function Navbar() {
                         <div className="p-2 border-t border-white/5">
                           <button
                             id="navbar-logout"
-                            onClick={handleLogout}
+                            onMouseDown={handleLogout}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all group"
                           >
                             <LogOut className="w-4 h-4" />
@@ -481,12 +607,18 @@ export function Navbar() {
                 </Link>
               </div>
             )}
+          </div>
+        </div>
 
+        {/* Mobile Header */}
+        <div className="flex lg:hidden container mx-auto px-4 h-16 items-center justify-between gap-2 relative">
+          {/* Left: Menu Icon + Logo */}
+          <div className="flex items-center gap-3">
             {/* Mobile Menu Toggle */}
             <button
               id="navbar-mobile-toggle"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden w-8.5 h-8.5 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/5 text-muted-foreground hover:text-white hover:bg-white/10 transition-all border border-border ml-1"
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-muted-foreground hover:text-white transition-all border border-border"
             >
               {mobileMenuOpen ? (
                 <X className="w-4.5 h-4.5" />
@@ -494,7 +626,197 @@ export function Navbar() {
                 <Menu className="w-4.5 h-4.5" />
               )}
             </button>
+
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 group shrink-0">
+              <div className="relative w-8.5 h-8.5 rounded-xl overflow-hidden ring-2 ring-primary/20 flex items-center justify-center bg-card">
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt={`${brandName} Logo`}
+                    width={34}
+                    height={34}
+                    className="w-full h-full object-cover"
+                    priority
+                  />
+                ) : (
+                  <ChefHat className="w-4.5 h-4.5 text-primary" />
+                )}
+              </div>
+              <div className="flex flex-col leading-[1.1]">
+                {brandName ? (
+                  <span className="font-black text-sm tracking-tighter text-white font-heading">
+                    {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
+                  </span>
+                ) : (
+                  <div className="h-4 w-16 bg-white/5 animate-pulse rounded" />
+                )}
+              </div>
+            </Link>
           </div>
+
+          {/* Right: Search Icon + User Badge */}
+          <div className="flex items-center gap-3">
+            {/* Search Icon */}
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-muted-foreground hover:text-white transition-all border border-border"
+            >
+              <Search className="w-4.5 h-4.5" />
+            </button>
+
+            {/* User Badge */}
+            {mounted && !isHydrating && isAuthenticated && (
+              <div className="relative" ref={profileDropdownMobileRef}>
+                <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5"
+                >
+                  {user?.avatar ? (
+                    <Image
+                      src={user.avatar}
+                      alt="Profile"
+                      width={36}
+                      height={36}
+                      className="w-full h-full object-cover rounded-lg"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                      <User className="w-4.5 h-4.5 text-primary" />
+                    </div>
+                  )}
+                </button>
+                {/* Dropdown Menu on Mobile */}
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="p-3.5 border-b border-white/5 bg-gradient-to-r from-primary/5 to-transparent">
+                      <span className="text-xs font-bold text-white block truncate">{user?.name || 'User'}</span>
+                      <span className="text-[10px] text-muted-foreground/60 block truncate">{user?.email}</span>
+                    </div>
+                    <div className="p-1">
+                      <Link
+                        href="/favorites"
+                        onClick={() => { setProfileDropdownOpen(false); setMobileMenuOpen(false); }}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <Heart className="w-3.5 h-3.5 text-rose-400" /> Favorites
+                      </Link>
+                      <Link
+                        href="/saved"
+                        onClick={() => { setProfileDropdownOpen(false); setMobileMenuOpen(false); }}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <Bookmark className="w-3.5 h-3.5 text-primary" /> Saved
+                      </Link>
+                      <Link
+                        href="/settings"
+                        onClick={() => { setProfileDropdownOpen(false); setMobileMenuOpen(false); }}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <Settings className="w-3.5 h-3.5" /> Settings
+                      </Link>
+                    </div>
+                    <div className="p-1 border-t border-white/5">
+                      <button
+                        onMouseDown={handleLogout}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-all text-left"
+                      >
+                        <LogOut className="w-3.5 h-3.5" /> Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Search Overlay */}
+          {searchOpen && (
+            <div className="absolute inset-x-0 top-0 bg-[#020617] z-50 flex flex-col px-4 py-3 animate-in fade-in duration-200 border-b border-white/10 shadow-2xl">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (searchQuery.trim()) {
+                    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                    setSearchOpen(false);
+                  }
+                }}
+                className="flex items-center gap-2 w-full"
+              >
+                <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search recipes..."
+                  className="flex-1 bg-transparent border-0 outline-none text-sm text-white placeholder:text-muted-foreground/40 py-1.5"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchOpen(false);
+                    setSearchQuery('');
+                  }}
+                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white px-2 py-1"
+                >
+                  Cancel
+                </button>
+              </form>
+
+              {/* Suggestions List - Mobile */}
+              {searchQuery.trim() && (
+                <div className="mt-2 flex flex-col gap-1 border-t border-white/5 pt-2 max-h-[300px] overflow-y-auto">
+                  {isSearching && (
+                    <div className="p-2 text-xs text-muted-foreground flex items-center gap-2">
+                      <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider">Searching...</span>
+                    </div>
+                  )}
+
+                  {!isSearching && suggestions.length === 0 && (
+                    <div className="p-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      No recipes found
+                    </div>
+                  )}
+
+                  {!isSearching && suggestions.map((recipe: any) => (
+                    <button
+                      key={recipe.id}
+                      onMouseDown={() => {
+                        router.push(`/recipes/${recipe.slug}`);
+                        setSearchQuery('');
+                        setSearchOpen(false);
+                      }}
+                      className="w-full text-left flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/5 transition-all text-xs text-white group"
+                    >
+                      <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-white/5 relative">
+                        {recipe.imageUrl ? (
+                          <Image
+                            src={recipe.imageUrl}
+                            alt={recipe.title}
+                            width={32}
+                            height={32}
+                            className="w-full h-full object-cover"
+                            unoptimized
+                          />
+                        ) : (
+                          <ChefHat className="w-4 h-4 text-primary absolute inset-0 m-auto" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold truncate text-[11px] leading-snug group-hover:text-primary transition-colors">{recipe.title}</p>
+                        <p className="text-[9px] text-muted-foreground truncate leading-normal">
+                          {recipe.summary || 'Delicious recipe'}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu */}
@@ -566,7 +888,7 @@ export function Navbar() {
                     </span>
                   </div>
                   <button
-                    onClick={handleLogout}
+                    onMouseDown={handleLogout}
                     className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-all"
                   >
                     <LogOut className="w-4 h-4" />

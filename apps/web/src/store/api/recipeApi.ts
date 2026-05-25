@@ -10,6 +10,13 @@ export const recipeApi = apiService.injectEndpoints({
       }),
       providesTags: ['Recipe'],
     }),
+    searchRecipes: builder.query<PaginatedResponse<Recipe>, { search: string; limit?: number }>({
+      query: (params) => ({
+        url: '/recipes',
+        params,
+      }),
+      providesTags: ['Recipe'],
+    }),
     getRecipeStats: builder.query<{ total: number; published: number; draft: number; trash: number }, void>({
       query: () => '/recipes/stats',
       providesTags: ['Recipe'],
@@ -113,6 +120,7 @@ export const recipeApi = apiService.injectEndpoints({
 
 export const {
   useGetAdminRecipesQuery,
+  useSearchRecipesQuery,
   useGetRecipeStatsQuery,
   useGetFeaturedRecipesQuery,
   useDeleteRecipeMutation,

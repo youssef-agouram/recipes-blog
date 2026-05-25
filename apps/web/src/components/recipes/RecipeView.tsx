@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Star, Share2, Bookmark, Printer, Heart, Minus, Plus, Flame, CheckCircle2, ChevronRight, PlayCircle, Apple } from "lucide-react";
+import { Clock, Star, Share2, Bookmark, Printer, Heart, Minus, Plus, Flame, CheckCircle2, ChevronRight, PlayCircle, Apple, ShoppingBag, ClipboardList, Activity, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import BlogRenderer from '@/components/BlogRenderer';
@@ -124,6 +124,32 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
   const embedUrl = getEmbedUrl(recipe.videoUrl);
   const [selectedImage, setSelectedImage] = useState(recipe.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80");
   const [servings, setServings] = useState(recipe.servings || 4);
+  const [openCookingGuide, setOpenCookingGuide] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const [openSections, setOpenSections] = useState({
+    ingredients: false,
+    instructions: false,
+    nutrition: false,
+  });
+
+  const toggleSection = (section: 'ingredients' | 'instructions' | 'nutrition') => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const handleCookingGuideClick = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+    setOpenCookingGuide(true);
+    setTimeout(() => {
+      document.getElementById('cooking-guide-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
 
   const ingredientItems = Array.isArray(recipe.ingredientsJson)
     ? recipe.ingredientsJson
@@ -247,13 +273,13 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         <div className="flex md:hidden items-start gap-4 mb-4 md:mb-6">
           {/* Main Image Container */}
           <div className="relative w-[46%] aspect-square xs:aspect-[4/3] rounded-2xl overflow-hidden border border-white/5 shrink-0 shadow-lg">
-            <Image 
-              src={selectedImage} 
-              alt={recipe.title} 
-              fill 
+            <Image
+              src={selectedImage}
+              alt={recipe.title}
+              fill
               sizes="150px"
-              className="object-cover" 
-              priority 
+              className="object-cover"
+              priority
             />
             {/* Simple Category Badge overlay */}
             <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[6px] xs:text-[7px] font-black uppercase tracking-wider text-white">
@@ -262,7 +288,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           </div>
 
           {/* Title & Short Description */}
-          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+          <div className="flex-1 min-w-0 flex flex-col gap-0.5">
             <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-wider text-primary">
               <Clock className="w-3 h-3" />
               <span>{recipe.totalTime || '30 MIN'}</span>
@@ -276,7 +302,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               {recipe.summary || "Embark on a culinary journey with this masterpiece."}
             </p>
             {/* Compact action icons — mobile only */}
-            <div className="flex items-center gap-1.5 pt-1">
+            <div className="flex items-center gap-1.5 pt-0">
               <button
                 onClick={() => window.print()}
                 className="flex-1 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
@@ -316,14 +342,22 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 <Heart className={cn("w-3.5 h-3.5", isFavorited && "fill-current")} />
               </button>
             </div>
+
+            <button
+              onClick={handleCookingGuideClick}
+              className="mt-0 w-full h-6 rounded-lg bg-primary text-primary-foreground text-[8px] font-black uppercase tracking-widest flex items-center justify-center gap-1 shadow-lg shadow-primary/20 active:scale-95 transition-all hover:bg-primary/95"
+            >
+              <CheckCircle2 className="w-2.5 h-2.5" />
+              Cooking Guide
+            </button>
           </div>
         </div>
 
         {/* Unified 2-Column Layout */}
-        <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-12 mb-8 md:mb-16 animate-in fade-in duration-1000">
-          
+        <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-12 mb-8 md:mb-16 animate-in fade-in duration-1000">
+
           {/* Left Column: Visuals, Stats, Actions, Ingredients, Instructions, Nutrition */}
-          <div className="w-full lg:w-[55%] flex flex-col gap-6 md:gap-8">
+          <div className="w-full lg:w-[55%] flex flex-col gap-4 md:gap-8">
             <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[48px] overflow-hidden shadow-2xl group border border-white/5 mb-4">
               <Image src={selectedImage} alt={recipe.title} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -386,46 +420,24 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-8 pb-4 md:pb-10 border-b border-white/5 mb-4 mt-2">
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-primary fill-primary" />
-                  <span className="text-lg font-black text-white">5.0</span>
-                </div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">New Recipe</span>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <Flame className="w-4 h-4 text-primary" />
-                  <span className="text-lg font-black text-white">{recipe.nutrition?.calories || 0}</span>
-                </div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Calories</span>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary" />
-                  <span className="text-lg font-black text-white capitalize">{recipe.difficulty || 'Easy'}</span>
-                </div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Difficulty</span>
-              </div>
-            </div>
+
 
             <div className="hidden md:flex w-full items-center gap-2 mb-4">
-              <button 
+              <button
                 onClick={() => window.print()}
                 className="flex-1 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
                 title="Print recipe"
               >
                 <Printer className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 onClick={() => { toast.info("Sharing link copied!"); navigator.clipboard.writeText(window.location.href); }}
                 className="flex-1 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
                 title="Share recipe"
               >
                 <Share2 className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 onClick={handleSaveToggle}
                 className={cn(
                   "flex-1 h-14 rounded-2xl border flex items-center justify-center transition-all active:scale-90",
@@ -437,7 +449,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               >
                 <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
               </button>
-              <button 
+              <button
                 onClick={handleFavoriteToggle}
                 className={cn(
                   "flex-1 h-14 rounded-2xl border flex items-center justify-center transition-all active:scale-90",
@@ -451,20 +463,43 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </button>
             </div>
 
-            {/* Ingredients & Instructions Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Ingredients Card */}
-              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl flex flex-col justify-between h-auto lg:h-[450px]">
-                <div className="flex flex-col flex-1 min-h-0">
-                  <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
-                    <div><h3 className="text-2xl font-black text-white tracking-tighter font-heading">Ingredients</h3><p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">For {servings} Servings</p></div>
-                    <div className="flex items-center gap-3 bg-background/50 border border-white/5 rounded-2xl p-1.5">
-                      <button onClick={() => setServings(prev => Math.max(1, prev - 1))} className="w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Minus className="w-4 h-4" /></button>
-                      <span className="text-sm font-black text-white w-6 text-center">{servings}</span>
-                      <button onClick={() => setServings(prev => prev + 1)} className="w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Plus className="w-4 h-4" /></button>
+            {/* Cooking Guide Button — desktop only */}
+            <button
+              onClick={handleCookingGuideClick}
+              className="hidden md:flex w-full h-12 rounded-2xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-all hover:bg-primary/95 mb-6"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Cooking Guide
+            </button>
+
+            {/* Unified Accordion Card */}
+            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] shadow-2xl overflow-hidden divide-y divide-white/5">
+              
+              {/* Ingredients Section */}
+              <div className="flex flex-col">
+                <button
+                  onClick={() => toggleSection('ingredients')}
+                  className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <ShoppingBag className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Ingredients</h3>
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">For {servings} Servings</p>
                     </div>
                   </div>
-                  <div className="flex-1 lg:overflow-y-auto pr-2 custom-scrollbar">
+                  <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.ingredients && "rotate-180")} />
+                </button>
+
+                {openSections.ingredients && (
+                  <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-3 bg-background/50 border border-white/5 rounded-2xl p-1.5 w-fit mb-6">
+                      <button onClick={() => setServings(prev => Math.max(1, prev - 1))} className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Minus className="w-3.5 h-3.5" /></button>
+                      <span className="text-sm font-black text-white w-6 text-center">{servings}</span>
+                      <button onClick={() => setServings(prev => prev + 1)} className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Plus className="w-3.5 h-3.5" /></button>
+                    </div>
                     <ul className="space-y-4">
                       {ingredientItems.length > 0 ? ingredientItems.map((ing: any, idx: number) => (
                         <li key={idx} className="flex items-start gap-4 group cursor-pointer">
@@ -474,47 +509,83 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                       )) : <p className="text-[11px] text-muted-foreground italic">No ingredients listed yet.</p>}
                     </ul>
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* Cooking Instructions Card */}
-              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl relative overflow-hidden h-auto lg:h-[450px] flex flex-col justify-between">
-                <div className="flex flex-col flex-1 min-h-0">
-                  <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none"><PlayCircle className="w-20 h-20 text-white" /></div>
-                  <div className="flex items-center gap-3 mb-10"><div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg"><CheckCircle2 className="w-5 h-5" /></div><h3 className="text-xl font-black text-white tracking-tighter font-heading">Instructions</h3></div>
-                  <div className="flex-1 lg:overflow-y-auto pr-2 custom-scrollbar">
-                    <div className="space-y-8 pb-4">
+              {/* Instructions Section */}
+              <div id="instructions" className="flex flex-col scroll-mt-20">
+                <button
+                  onClick={() => toggleSection('instructions')}
+                  className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                      <ClipboardList className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Instructions</h3>
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Step by Step Guide</p>
+                    </div>
+                  </div>
+                  <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.instructions && "rotate-180")} />
+                </button>
+
+                {openSections.instructions && (
+                  <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="space-y-6">
                       {instructionItems.length > 0 ? instructionItems.map((s: any, idx: number) => (
                         <div key={idx} className="flex gap-4 group/step">
-                          <div className="flex flex-col items-center"><div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">{idx + 1}</div>{idx < instructionItems.length - 1 && <div className="flex-1 w-px bg-white/5 my-2" />}</div>
-                          <div className="flex-1 pt-0.5"><p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">{s.text}</p></div>
+                          <div className="flex flex-col items-center animate-in fade-in duration-300">
+                            <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">{idx + 1}</div>
+                            {idx < instructionItems.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
+                          </div>
+                          <div className="flex-1 pt-0.5">
+                            <p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">{s.text}</p>
+                          </div>
                         </div>
                       )) : <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
-            </div>
 
-            {/* Nutrition Info Card */}
-            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl h-auto lg:h-[248px] flex flex-col justify-between">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 text-primary"><Apple className="w-6 h-6" /></div>
-                <div><h3 className="text-xl font-black text-white tracking-tighter font-heading">Nutrition Info</h3><p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">Per Serving Estimation</p></div>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                {[ { label: 'Calories', value: `${recipe.nutrition?.calories || '0'}`, color: 'text-orange-400' }, { label: 'Protein', value: `${recipe.nutrition?.protein ? recipe.nutrition.protein + 'g' : '0g'}`, color: 'text-blue-400' }, { label: 'Carbs', value: `${recipe.nutrition?.carbohydrates ? recipe.nutrition.carbohydrates + 'g' : '0g'}`, color: 'text-amber-400' }, { label: 'Fat', value: `${recipe.nutrition?.fat ? recipe.nutrition.fat + 'g' : '0g'}`, color: 'text-red-400' }, { label: 'Fiber', value: `${recipe.nutrition?.fiber ? recipe.nutrition.fiber + 'g' : '0g'}`, color: 'text-emerald-400' } ].map(nut => (
-                  <div key={nut.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center">
-                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>
-                    <span className={`text-xl font-black ${nut.color}`}>{nut.value}</span>
+              {/* Nutrition Info Section */}
+              <div className="flex flex-col">
+                <button
+                  onClick={() => toggleSection('nutrition')}
+                  className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
+                      <Activity className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Nutrition Information</h3>
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Per Serving Estimation</p>
+                    </div>
                   </div>
-                ))}
+                  <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.nutrition && "rotate-180")} />
+                </button>
+
+                {openSections.nutrition && (
+                  <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                      {[{ label: 'Calories', value: `${recipe.nutrition?.calories || '0'}`, color: 'text-orange-400' }, { label: 'Protein', value: `${recipe.nutrition?.protein ? recipe.nutrition.protein + 'g' : '0g'}`, color: 'text-blue-400' }, { label: 'Carbs', value: `${recipe.nutrition?.carbohydrates ? recipe.nutrition.carbohydrates + 'g' : '0g'}`, color: 'text-amber-400' }, { label: 'Fat', value: `${recipe.nutrition?.fat ? recipe.nutrition.fat + 'g' : '0g'}`, color: 'text-red-400' }, { label: 'Fiber', value: `${recipe.nutrition?.fiber ? recipe.nutrition.fiber + 'g' : '0g'}`, color: 'text-emerald-400' }].map(nut => (
+                        <div key={nut.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center animate-in fade-in duration-300">
+                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>
+                          <span className={`text-xl font-black ${nut.color}`}>{nut.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
+
             </div>
           </div>
 
           {/* Right Column: Title, Summary, About, Video Mobile, Community Feedback */}
-          <div className="flex flex-col flex-1 w-full gap-6 md:gap-8">
+          <div className="flex flex-col flex-1 w-full gap-4 md:gap-8">
             <div className="hidden md:flex items-center gap-3 mb-2">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map(i => (
@@ -534,18 +605,26 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               {recipe.summary || "Embark on a culinary journey with this masterpiece. Perfectly balanced flavors and textures that will leave your guests in awe."}
             </p>
 
-            <section className="prose prose-neutral dark:prose-invert max-w-none pb-4 md:pb-8 border-b border-white/5 mb-4">
-              <div className="flex items-center gap-3 mb-6 not-prose">
-                <div className="w-1.5 h-6 bg-primary rounded-full" />
-                <h3 className="text-xl font-black text-white tracking-tighter font-heading">About This Recipe</h3>
-              </div>
-              <div className="text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[420px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth">
-                {recipe.content ? (
-                  <BlogRenderer content={recipe.content} />
-                ) : (
-                  <p>Master this delicious dish with our step-by-step guide and expert culinary tips. We've simplified the process to ensure professional results at home.</p>
-                )}
-              </div>
+            <section id="cooking-guide-section" className="max-w-none pb-4 border-b border-white/5 mb-4 scroll-mt-20">
+              <button
+                onClick={() => setOpenCookingGuide(!openCookingGuide)}
+                className="w-full flex items-center justify-between py-2 text-left not-prose group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-primary rounded-full" />
+                  <h3 className="text-xl font-black text-white tracking-tighter font-heading group-hover:text-primary transition-colors">Cooking Guide</h3>
+                </div>
+                <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openCookingGuide && "rotate-180")} />
+              </button>
+              {openCookingGuide && (
+                <div className="prose prose-neutral dark:prose-invert text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[420px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth animate-in fade-in slide-in-from-top-2 duration-300 mt-4">
+                  {recipe.content ? (
+                    <BlogRenderer content={recipe.content} />
+                  ) : (
+                    <p>Master this delicious dish with our step-by-step guide and expert culinary tips. We've simplified the process to ensure professional results at home.</p>
+                  )}
+                </div>
+              )}
             </section>
 
             {recipe.videoUrl && (
@@ -623,6 +702,47 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
 
       </article>
       <DraggableSidebarAd />
+
+      {/* Sleek Custom Sign In / Register Prompt Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setShowAuthModal(false)}
+          />
+          <div className="relative w-full max-w-md bg-card/90 backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col items-center text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-6">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+            
+            <h3 className="text-2xl font-black text-white tracking-tight font-heading mb-3">
+              Unlock Cooking Guide
+            </h3>
+            
+            <p className="text-sm text-muted-foreground leading-relaxed mb-8">
+              Sign up or log in to unlock the full step-by-step Cooking Guide, adjust ingredients servings, and explore expert kitchen tips.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
+              <button 
+                onClick={() => setShowAuthModal(false)}
+                className="flex-1 h-12 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  setShowAuthModal(false);
+                  router.push(`/login?redirect=/recipes/${recipe.slug}`);
+                }}
+                className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95"
+              >
+                Sign In / Register
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

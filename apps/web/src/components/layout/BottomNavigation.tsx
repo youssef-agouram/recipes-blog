@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { Home, Heart, Bookmark, User, Search, Plus, LogIn } from 'lucide-react';
+import { Home, Heart, Bookmark, User, Search, Plus, LogIn, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function BottomNavigation() {
@@ -27,9 +27,9 @@ export function BottomNavigation() {
       active: pathname === '/',
     },
     {
-      href: '/search',
-      icon: Search,
-      active: pathname === '/search',
+      href: '/categories',
+      icon: LayoutGrid,
+      active: pathname === '/categories',
     },
     ...(isAuthenticated && (user?.role === 'Administrator' || user?.role === 'Editor') ? [{
       href: '/admin/recipes/new',
