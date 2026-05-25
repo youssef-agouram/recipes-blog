@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Star, Share2, Bookmark, Printer, Heart, Minus, Plus, Flame, CheckCircle2, ChevronRight, PlayCircle, Apple, ShoppingBag, ClipboardList, Activity, ChevronDown } from "lucide-react";
+import { Clock, Star, Share2, Bookmark, Printer, Heart, Minus, Plus, Flame, CheckCircle2, ChevronRight, PlayCircle, Apple, ShoppingBag, ClipboardList, Activity, ChevronDown, Lock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import BlogRenderer from '@/components/BlogRenderer';
@@ -741,23 +741,23 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
             onClick={() => setShowAuthModal(false)}
           />
-          <div className="relative w-full max-w-md bg-card/90 backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-6">
-              <CheckCircle2 className="w-8 h-8" />
+          <div className="relative w-full max-w-sm bg-card/95 backdrop-blur-2xl border border-white/10 rounded-[28px] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mb-4 shadow-inner">
+              <Lock className="w-5 h-5" />
             </div>
             
-            <h3 className="text-2xl font-black text-white tracking-tight font-heading mb-3">
+            <h3 className="text-xl font-black text-white tracking-tight font-heading mb-2">
               Unlock Cooking Guide
             </h3>
             
-            <p className="text-sm text-muted-foreground leading-relaxed mb-8">
-              Sign up or log in to unlock the full step-by-step Cooking Guide, adjust ingredients servings, and explore expert kitchen tips.
+            <p className="text-xs text-muted-foreground leading-relaxed mb-6 px-2">
+              Sign in to unlock the step-by-step cooking guide.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <div className="grid grid-cols-2 gap-3 w-full">
               <button 
                 onClick={() => setShowAuthModal(false)}
-                className="flex-1 h-12 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
+                className="h-11 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all active:scale-95"
               >
                 Cancel
               </button>
@@ -766,9 +766,9 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                   setShowAuthModal(false);
                   router.push(`/login?redirect=/recipes/${recipe.slug}`);
                 }}
-                className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95"
+                className="h-11 rounded-xl bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest hover:bg-primary/95 transition-all shadow-lg shadow-primary/20 active:scale-95"
               >
-                Sign In / Register
+                Sign In
               </button>
             </div>
           </div>
