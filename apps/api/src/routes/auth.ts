@@ -205,7 +205,7 @@ router.post('/check-email', async (req: Request, res: Response, next: NextFuncti
 
     if (user) {
       // Block admin/editor accounts from passwordless login
-      if (user.role === 'Admin' || user.role === 'Editor') {
+      if (user.role === 'Admin' || user.role === 'Administrator' || user.role === 'Editor') {
         return res.status(403).json({
           error: 'Admin accounts require a password. Please use the admin login page.',
         });

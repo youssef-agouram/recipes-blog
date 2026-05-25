@@ -143,6 +143,10 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
   const handleCookingGuideClick = () => {
     if (!isAuthenticated) {
       setShowAuthModal(true);
+      setOpenCookingGuide(true);
+      setTimeout(() => {
+        document.getElementById('cooking-guide-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
       return;
     }
     setOpenCookingGuide(true);
@@ -256,7 +260,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           scrollbar-color: rgba(245, 158, 11, 0.4) rgba(245, 158, 11, 0.05);
         }
       ` }} />
-      <article className="container mx-auto px-6 max-w-[1536px] pt-4">
+      <article className="container mx-auto px-2 md:px-6 max-w-[1536px] pt-4">
 
         {/* Breadcrumbs */}
         <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-4 md:mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
@@ -302,7 +306,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               {recipe.summary || "Embark on a culinary journey with this masterpiece."}
             </p>
             {/* Compact action icons — mobile only */}
-            <div className="flex items-center gap-1.5 pt-0">
+            <div className="flex items-center gap-1.5 pt-2 pb-2">
               <button
                 onClick={() => window.print()}
                 className="flex-1 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
@@ -345,9 +349,9 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
 
             <button
               onClick={handleCookingGuideClick}
-              className="mt-0 w-full h-6 rounded-lg bg-primary text-primary-foreground text-[8px] font-black uppercase tracking-widest flex items-center justify-center gap-1 shadow-lg shadow-primary/20 active:scale-95 transition-all hover:bg-primary/95"
+              className="mt-1 w-full py-2 rounded-xl bg-primary text-primary-foreground text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-lg shadow-primary/20 active:scale-95 transition-all hover:bg-primary/95"
             >
-              <CheckCircle2 className="w-2.5 h-2.5" />
+              <CheckCircle2 className="w-3 h-3" />
               Cooking Guide
             </button>
           </div>
@@ -605,9 +609,14 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               {recipe.summary || "Embark on a culinary journey with this masterpiece. Perfectly balanced flavors and textures that will leave your guests in awe."}
             </p>
 
-            <section id="cooking-guide-section" className="max-w-none pb-4 border-b border-white/5 mb-4 scroll-mt-20">
+             <section id="cooking-guide-section" className="max-w-none pb-4 border-b border-white/5 mb-4 scroll-mt-20">
               <button
-                onClick={() => setOpenCookingGuide(!openCookingGuide)}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    setShowAuthModal(true);
+                  }
+                  setOpenCookingGuide(!openCookingGuide);
+                }}
                 className="w-full flex items-center justify-between py-2 text-left not-prose group"
               >
                 <div className="flex items-center gap-3">
@@ -616,7 +625,29 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 </div>
                 <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openCookingGuide && "rotate-180")} />
               </button>
-              {openCookingGuide && (
+
+              {!isAuthenticated && openCookingGuide && (
+                <div className="relative mt-4 rounded-2xl overflow-hidden border border-white/5 bg-white/[0.01] p-6 text-center backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#05060b]/80" />
+                  <div className="relative z-10 flex flex-col items-center py-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-4">
+                      <Star className="w-6 h-6 animate-pulse" />
+                    </div>
+                    <h4 className="text-sm font-bold text-white mb-2">Step-by-Step Cooking Guide is Locked</h4>
+                    <p className="text-xs text-muted-foreground max-w-sm mb-4">
+                      Sign in or create a free account to unlock our exclusive cooking guide, chef tips, and ingredients scaler.
+                    </p>
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="px-6 py-2.5 rounded-xl bg-primary text-[11px] font-black uppercase tracking-widest text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95"
+                    >
+                      Unlock Guide
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {isAuthenticated && openCookingGuide && (
                 <div className="prose prose-neutral dark:prose-invert text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[420px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth animate-in fade-in slide-in-from-top-2 duration-300 mt-4">
                   {recipe.content ? (
                     <BlogRenderer content={recipe.content} />
