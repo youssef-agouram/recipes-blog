@@ -125,15 +125,15 @@ export default function CategoriesSlider({ categories }: CategoriesSliderProps) 
     }
   }, [shouldAnimate]);
 
-  // Auto-slide effect every 3 seconds
+  // Auto-slide effect every 3 seconds (disabled on mobile)
   useEffect(() => {
-    if (!isMounted || N <= 1) return;
+    if (!isMounted || N <= 1 || isMobile) return;
     const interval = setInterval(() => {
       setShouldAnimate(true);
       setActiveIndex((prev) => (prev + 1) % extendedCategories.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [N, activeIndex, isMounted]);
+  }, [N, activeIndex, isMounted, isMobile]);
 
   const handleDragEnd = (event: any, info: any) => {
     const swipeThreshold = 15;
