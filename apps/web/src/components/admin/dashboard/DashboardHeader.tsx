@@ -5,9 +5,10 @@ import { Calendar, Download, ChevronDown } from 'lucide-react';
 
 interface DashboardHeaderProps {
   userName?: string;
+  activeUsers?: number;
 }
 
-export const DashboardHeader = ({ userName = 'Admin' }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ userName = 'Admin', activeUsers = 126 }: DashboardHeaderProps) => {
   const today = new Date();
   const weekAgo = new Date(today);
   weekAgo.setDate(today.getDate() - 6);
@@ -22,7 +23,13 @@ export const DashboardHeader = ({ userName = 'Admin' }: DashboardHeaderProps) =>
         <div className="flex items-center gap-3">
           <div className="w-1 h-8 rounded-full bg-gradient-to-b from-[#5850ec] to-[#a855f7]" />
           <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">Analytics Dashboard</h1>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-2xl font-black text-white tracking-tight">Analytics Dashboard</h1>
+              <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2.5 py-0.5 text-[11px] font-bold text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{activeUsers} online</span>
+              </div>
+            </div>
             <p className="text-slate-400 text-xs mt-0.5">
               Welcome back, {userName}! Here&apos;s what&apos;s happening with your website.
             </p>

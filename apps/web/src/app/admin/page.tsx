@@ -122,6 +122,7 @@ export default function AdminDashboardPage() {
       {/* ───── Header ───── */}
       <DashboardHeader
         userName={user?.name || 'Admin'}
+        activeUsers={126}
       />
 
       {/* ───── KPI Cards Row ───── */}
