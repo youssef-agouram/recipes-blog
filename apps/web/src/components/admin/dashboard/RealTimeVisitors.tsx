@@ -37,16 +37,16 @@ export const RealTimeVisitors = () => {
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-3xl font-black text-white">126</span>
           </div>
-          <p className="text-xs text-slate-500">Active Users</p>
+          <p className="text-xs text-slate-400">Active Users</p>
         </div>
 
         {/* Top Active Pages */}
         <div className="flex-1">
-          <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider mb-2">Top Active Pages</p>
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Top Active Pages</p>
           <div className="space-y-1.5">
             {topPages.map((page) => (
               <div key={page.path} className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-400 font-medium truncate max-w-[160px]">{page.path}</span>
+                <span className="text-[11px] text-slate-300 font-medium truncate max-w-[160px]">{page.path}</span>
                 <span className="text-[11px] font-bold text-white">{page.users}</span>
               </div>
             ))}

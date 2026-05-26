@@ -49,11 +49,11 @@ export const TrafficOverviewChart = () => {
       <div className="flex items-center gap-5 mb-4">
         <div className="flex items-center gap-2">
           <div className="w-3 h-1 rounded-full bg-[#5850ec]" />
-          <span className="text-[11px] text-slate-500 font-medium">Visitors</span>
+          <span className="text-[11px] text-slate-300 font-medium">Visitors</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-1 rounded-full bg-[#22d3ee]" />
-          <span className="text-[11px] text-slate-500 font-medium">Page Views</span>
+          <span className="text-[11px] text-slate-300 font-medium">Page Views</span>
         </div>
       </div>
 
@@ -73,12 +73,12 @@ export const TrafficOverviewChart = () => {
             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
             <XAxis
               dataKey="name"
-              tick={{ fill: '#64748b', fontSize: 11 }}
+              tick={{ fill: '#94a3b8', fontSize: 11 }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: '#64748b', fontSize: 11 }}
+              tick={{ fill: '#94a3b8', fontSize: 11 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v}

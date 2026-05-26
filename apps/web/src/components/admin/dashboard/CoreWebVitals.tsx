@@ -68,7 +68,7 @@ export const CoreWebVitals = () => {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-[10px] text-slate-500 font-semibold uppercase">Page Speed</span>
+            <span className="text-[10px] text-slate-400 font-semibold uppercase">Page Speed</span>
             <span className="text-3xl font-black text-white leading-none mt-1">{score}</span>
           </div>
         </div>
@@ -77,9 +77,9 @@ export const CoreWebVitals = () => {
         <div className="flex-1 grid grid-cols-3 gap-3">
           {vitals.map((vital) => (
             <div key={vital.label} className={`rounded-xl border p-3 text-center ${statusBg(vital.status)}`}>
-              <p className="text-[10px] font-semibold text-slate-500 uppercase mb-1">{vital.label}</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1">{vital.label}</p>
               <p className="text-xl font-black text-white">
-                {vital.value}<span className="text-xs text-slate-500 font-medium">{vital.unit}</span>
+                {vital.value}<span className="text-xs text-slate-400 font-medium">{vital.unit}</span>
               </p>
               <p className={`text-[10px] font-bold mt-1 ${statusColor(vital.status)}`}>{vital.status}</p>
             </div>

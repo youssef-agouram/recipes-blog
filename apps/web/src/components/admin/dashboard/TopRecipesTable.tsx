@@ -32,12 +32,12 @@ export const TopRecipesTable = () => {
 
       {/* Table Header */}
       <div className="grid grid-cols-[24px_1fr_80px_70px_80px_70px] gap-2 mb-3 px-2">
-        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">#</span>
-        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Recipe</span>
-        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider text-right">Views</span>
-        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider text-right">Avg. Time</span>
-        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider text-right">Favorites</span>
-        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider text-right">Comments</span>
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">#</span>
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Recipe</span>
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-right">Views</span>
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-right">Avg. Time</span>
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-right">Favorites</span>
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-right">Comments</span>
       </div>
 
       {/* Table Body */}
@@ -47,7 +47,7 @@ export const TopRecipesTable = () => {
             key={recipe.id}
             className="grid grid-cols-[24px_1fr_80px_70px_80px_70px] gap-2 items-center px-2 py-2.5 rounded-xl hover:bg-white/[0.03] transition-colors group"
           >
-            <span className="text-xs font-bold text-slate-600">{index + 1}</span>
+            <span className="text-xs font-bold text-slate-400">{index + 1}</span>
             
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-9 h-9 rounded-lg overflow-hidden bg-slate-800 shrink-0 relative">
@@ -62,14 +62,14 @@ export const TopRecipesTable = () => {
                 <p className="text-xs font-semibold text-white truncate group-hover:text-[#5850ec] transition-colors">
                   {recipe.title}
                 </p>
-                <p className="text-[10px] text-slate-600">{recipe.category}</p>
+                <p className="text-[10px] text-slate-400">{recipe.category}</p>
               </div>
             </div>
 
-            <span className="text-xs font-semibold text-slate-300 text-right">{recipe.views}</span>
-            <span className="text-xs text-slate-500 text-right">{recipe.avgTime}</span>
-            <span className="text-xs text-slate-500 text-right">{recipe.favorites}</span>
-            <span className="text-xs text-slate-500 text-right">{recipe.comments}</span>
+            <span className="text-xs font-semibold text-slate-200 text-right">{recipe.views}</span>
+            <span className="text-xs text-slate-300 text-right">{recipe.avgTime}</span>
+            <span className="text-xs text-slate-300 text-right">{recipe.favorites}</span>
+            <span className="text-xs text-slate-300 text-right">{recipe.comments}</span>
           </div>
         ))}
       </div>

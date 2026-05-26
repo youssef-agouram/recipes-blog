@@ -36,7 +36,7 @@ export const AdSenseOverviewCard = () => {
       <div className="grid grid-cols-4 gap-3 mb-5">
         {metrics.map((metric) => (
           <div key={metric.label} className="text-center">
-            <p className="text-[9px] font-semibold text-slate-600 uppercase tracking-wider mb-1">{metric.label}</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1">{metric.label}</p>
             <p className="text-base font-black text-white">{metric.value}</p>
             <div className="flex items-center justify-center gap-1 mt-1">
               <TrendingUp className={`w-3 h-3 ${metric.trendUp ? 'text-emerald-400' : 'text-rose-400'}`} />
@@ -60,7 +60,7 @@ export const AdSenseOverviewCard = () => {
             </defs>
             <XAxis
               dataKey="date"
-              tick={{ fill: '#475569', fontSize: 10 }}
+              tick={{ fill: '#94a3b8', fontSize: 10 }}
               axisLine={false}
               tickLine={false}
             />

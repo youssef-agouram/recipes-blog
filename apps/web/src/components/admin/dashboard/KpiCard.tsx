@@ -36,14 +36,14 @@ export const KpiCard = ({
           </div>
         </div>
         
-        <p className="text-slate-500 text-[11px] font-semibold uppercase tracking-wider mb-1">{label}</p>
+        <p className="text-slate-300 text-[11px] font-semibold uppercase tracking-wider mb-1">{label}</p>
         <h3 className="text-2xl font-black text-white mb-1.5">{value}</h3>
         
         <div className="flex items-center gap-1.5">
           <span className={`text-[11px] font-bold ${trendUp ? 'text-emerald-400' : 'text-rose-400'}`}>
             {trendUp ? '↑' : '↓'} {trend}
           </span>
-          <span className="text-slate-600 text-[10px]">{trendLabel}</span>
+          <span className="text-slate-400 text-[10px]">{trendLabel}</span>
         </div>
       </div>
     </div>

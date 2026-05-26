@@ -20,7 +20,7 @@ export const MiniStat = ({ label, value, trend, trendUp, icon: Icon, color }: Mi
           <Icon className={`w-4 h-4 ${color.replace('bg-', 'text-')}`} />
         </div>
         <div>
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{label}</p>
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{label}</p>
           <div className="flex items-center gap-2">
             <span className="text-sm font-black text-white">{value}</span>
             {trend && (

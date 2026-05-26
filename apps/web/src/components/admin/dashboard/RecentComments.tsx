@@ -49,14 +49,14 @@ export const RecentComments = ({ comments = [] }: { comments?: any[] }) => {
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center mb-1">
                 <h4 className="text-white text-sm font-bold">{comment.user?.name || 'Guest'}</h4>
-                <span className="text-slate-500 text-[10px] font-medium">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                <span className="text-slate-400 text-[10px] font-medium">{new Date(comment.createdAt).toLocaleDateString()}</span>
               </div>
               <p className="text-slate-400 text-xs line-clamp-2">{comment.text}</p>
             </div>
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 self-center" />
           </div>
         ))}
-        {comments.length === 0 && <p className="text-slate-500 text-xs italic text-center py-10">No recent comments</p>}
+        {comments.length === 0 && <p className="text-slate-400 text-xs italic text-center py-10">No recent comments</p>}
       </div>
     </div>
   );

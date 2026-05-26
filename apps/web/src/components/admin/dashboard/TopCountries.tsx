@@ -70,7 +70,7 @@ export const TopCountries = () => {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-white">{country.value.toLocaleString()}</span>
-              <span className="text-[10px] text-slate-600">({country.percentage})</span>
+              <span className="text-[10px] text-slate-400">({country.percentage})</span>
             </div>
           </div>
         ))}

@@ -72,12 +72,12 @@ export const DeviceAnalyticsChart = () => {
               <div key={item.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                  <Icon className="w-4 h-4 text-slate-500" />
-                  <span className="text-xs text-slate-400 font-medium">{item.name}</span>
+                  <Icon className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs text-slate-300 font-medium">{item.name}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold text-white">{item.percentage}</span>
-                  <span className="text-[10px] text-slate-600">{item.value.toLocaleString()}</span>
+                  <span className="text-[10px] text-slate-400">{item.value.toLocaleString()}</span>
                 </div>
               </div>
             );

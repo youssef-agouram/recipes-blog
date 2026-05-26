@@ -64,21 +64,21 @@ export const TrafficSourcesChart = () => {
           {/* Center label */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-xl font-black text-white">{total.toLocaleString()}</span>
-            <span className="text-[10px] text-slate-500 font-medium">Total</span>
+            <span className="text-[10px] text-slate-400 font-medium">Total</span>
           </div>
         </div>
-
+ 
         {/* Legend */}
         <div className="flex-1 space-y-2.5">
           {data.map((item) => (
             <div key={item.name} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="text-xs text-slate-400 font-medium">{item.name}</span>
+                <span className="text-xs text-slate-300 font-medium">{item.name}</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-xs font-bold text-white">{item.percentage}</span>
-                <span className="text-[10px] text-slate-600">({item.value.toLocaleString()})</span>
+                <span className="text-[10px] text-slate-400">({item.value.toLocaleString()})</span>
               </div>
             </div>
           ))}

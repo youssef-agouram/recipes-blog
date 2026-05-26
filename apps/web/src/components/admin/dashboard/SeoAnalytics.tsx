@@ -33,7 +33,7 @@ export const SeoAnalytics = () => {
       <div className="grid grid-cols-4 gap-3 mb-5">
         {seoMetrics.map((metric) => (
           <div key={metric.label} className="text-center">
-            <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider mb-1">{metric.label}</p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">{metric.label}</p>
             <p className="text-lg font-black text-white">{metric.value}</p>
             <div className="flex items-center justify-center gap-1 mt-1">
               {metric.trendUp ? (
@@ -53,17 +53,17 @@ export const SeoAnalytics = () => {
       <div className="border-t border-white/5 mb-4" />
 
       {/* Top Keywords Label */}
-      <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">Top Keywords</p>
+      <p className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-3">Top Keywords</p>
 
       {/* Keywords Table */}
       <div className="flex-1">
         {/* Header */}
         <div className="grid grid-cols-[1fr_60px_90px_55px_65px] gap-2 mb-2 px-1">
-          <span className="text-[9px] font-semibold text-slate-600 uppercase tracking-wider">Keyword</span>
-          <span className="text-[9px] font-semibold text-slate-600 uppercase tracking-wider text-right">Clicks</span>
-          <span className="text-[9px] font-semibold text-slate-600 uppercase tracking-wider text-right">Impressions</span>
-          <span className="text-[9px] font-semibold text-slate-600 uppercase tracking-wider text-right">CTR</span>
-          <span className="text-[9px] font-semibold text-slate-600 uppercase tracking-wider text-right">Position</span>
+          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Keyword</span>
+          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider text-right">Clicks</span>
+          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider text-right">Impressions</span>
+          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider text-right">CTR</span>
+          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider text-right">Position</span>
         </div>
 
         {/* Rows */}
@@ -75,9 +75,9 @@ export const SeoAnalytics = () => {
             >
               <span className="text-xs text-slate-300 font-medium truncate">{kw.keyword}</span>
               <span className="text-xs font-semibold text-white text-right">{kw.clicks.toLocaleString()}</span>
-              <span className="text-xs text-slate-500 text-right">{kw.impressions.toLocaleString()}</span>
-              <span className="text-xs text-slate-500 text-right">{kw.ctr}</span>
-              <span className="text-xs text-slate-500 text-right">{kw.position}</span>
+              <span className="text-xs text-slate-300 text-right">{kw.impressions.toLocaleString()}</span>
+              <span className="text-xs text-slate-300 text-right">{kw.ctr}</span>
+              <span className="text-xs text-slate-300 text-right">{kw.position}</span>
             </div>
           ))}
         </div>

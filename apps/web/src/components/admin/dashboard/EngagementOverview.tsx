@@ -24,7 +24,7 @@ export const EngagementOverview = () => {
               <div className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center`}>
                 <Icon className="w-5 h-5" style={{ color: item.color }} />
               </div>
-              <p className="text-[9px] font-semibold text-slate-600 uppercase tracking-wider text-center leading-tight">
+              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider text-center leading-tight">
                 {item.label}
               </p>
               <p className="text-lg font-black text-white">{item.value}</p>
