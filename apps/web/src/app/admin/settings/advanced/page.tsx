@@ -16,10 +16,15 @@ import {
   useUpdateSiteSettingsMutation,
   useTestCloudinarySettingsMutation
 } from '@/store/api/settingsApi';
+import {
+  useGetAnalyticsSettingsQuery,
+  useUpdateAnalyticsSettingsMutation
+} from '@/store/api/seoApi';
 
 export default function AdvancedSettingsPage() {
   const [activeTab, setActiveTab] = useState('cloudinary');
 
+  // Cloudinary Settings Hooks & State
   const { data: settings, isLoading: isLoadingSettings } = useGetSiteSettingsQuery();
   const [updateSettings, { isLoading: isUpdating }] = useUpdateSiteSettingsMutation();
   const [testCloudinary, { isLoading: isTesting }] = useTestCloudinarySettingsMutation();
@@ -31,6 +36,16 @@ export default function AdvancedSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
+  // Google Analytics Settings Hooks & State
+  const { data: analyticsSettings, isLoading: isLoadingAnalytics } = useGetAnalyticsSettingsQuery();
+  const [updateAnalytics, { isLoading: isUpdatingAnalytics }] = useUpdateAnalyticsSettingsMutation();
+
+  const [ga4Id, setGa4Id] = useState('');
+  const [gtmId, setGtmId] = useState('');
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+  const [debugMode, setDebugMode] = useState(false);
+  const [customScriptsCode, setCustomScriptsCode] = useState('');
+
   useEffect(() => {
     if (settings) {
       setCloudinaryCloudName(settings.cloudinaryCloudName || '');
@@ -39,14 +54,35 @@ export default function AdvancedSettingsPage() {
     }
   }, [settings]);
 
+  useEffect(() => {
+    if (analyticsSettings) {
+      setGa4Id(analyticsSettings.ga4Id || analyticsSettings.googleAnalyticsId || '');
+      setGtmId(analyticsSettings.gtmId || '');
+      setAnalyticsEnabled(analyticsSettings.analyticsEnabled ?? true);
+      setDebugMode(analyticsSettings.debugMode ?? false);
+      setCustomScriptsCode(analyticsSettings.customScriptsCode || '');
+    }
+  }, [analyticsSettings]);
+
   const handleSave = async () => {
     try {
-      await updateSettings({
-        ...settings,
-        cloudinaryCloudName,
-        cloudinaryApiKey,
-        cloudinaryApiSecret
-      }).unwrap();
+      if (activeTab === 'cloudinary') {
+        await updateSettings({
+          ...settings,
+          cloudinaryCloudName,
+          cloudinaryApiKey,
+          cloudinaryApiSecret
+        }).unwrap();
+      } else if (activeTab === 'analytics') {
+        await updateAnalytics({
+          googleAnalyticsId: ga4Id,
+          ga4Id,
+          gtmId,
+          analyticsEnabled,
+          debugMode,
+          customScriptsCode
+        }).unwrap();
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -75,14 +111,10 @@ export default function AdvancedSettingsPage() {
 
   const tabs = [
     { id: 'cloudinary', label: 'Cloudinary Settings', icon: ImageIcon, sub: 'Cloud media storage' },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, sub: 'Tracking codes' },
     { id: 'performance', label: 'Performance', icon: Zap, sub: 'Optimize speed' },
     { id: 'security', label: 'Security', icon: Shield, sub: 'Site protection' },
-    { id: 'seo', label: 'SEO Settings', icon: Search, sub: 'Advanced SEO' },
-    { id: 'code', label: 'Code Injection', icon: Code, sub: 'Custom scripts' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, sub: 'Tracking codes' },
-    { id: '404', label: '404 Page', icon: FileQuestion, sub: 'Error handling' },
     { id: 'maintenance', label: 'Maintenance', icon: Power, sub: 'Mode toggle' },
-    { id: 'import', label: 'Import / Export', icon: RefreshCw, sub: 'Data portability' },
   ];
 
   const [toggles, setToggles] = useState({
@@ -101,7 +133,7 @@ export default function AdvancedSettingsPage() {
     setToggles(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }));
   };
 
-  if (isLoadingSettings) {
+  if (isLoadingSettings || isLoadingAnalytics) {
     return <div className="p-10 text-center text-muted-foreground animate-pulse">Loading settings...</div>;
   }
 
@@ -124,14 +156,16 @@ export default function AdvancedSettingsPage() {
               <span>Changes Saved!</span>
             </div>
           )}
-          <button 
-            onClick={handleSave}
-            disabled={isUpdating}
-            className="flex items-center gap-2 px-8 py-2.5 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-[#5850ec]/40 active:scale-95 disabled:opacity-50"
-          >
-            {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            <span>{isUpdating ? 'Saving...' : 'Save Changes'}</span>
-          </button>
+          {['cloudinary', 'analytics'].includes(activeTab) && (
+            <button 
+              onClick={handleSave}
+              disabled={isUpdating || isUpdatingAnalytics}
+              className="flex items-center gap-2 px-8 py-2.5 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-[#5850ec]/40 active:scale-95 disabled:opacity-50"
+            >
+              {(isUpdating || isUpdatingAnalytics) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span>{(isUpdating || isUpdatingAnalytics) ? 'Saving...' : 'Save Changes'}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -245,6 +279,108 @@ export default function AdvancedSettingsPage() {
                            <span>{testResult.message}</span>
                          </div>
                        )}
+                    </div>
+                 </div>
+              </section>
+           )}
+
+           {/* Analytics Settings Section */}
+           {activeTab === 'analytics' && (
+              <section className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-8 transition-all duration-500 hover:border-white/10 w-full animate-in fade-in duration-300">
+                 <div className="flex items-center justify-between border-b border-white/5 pb-6">
+                    <div className="flex items-center gap-4">
+                       <div className="w-12 h-12 rounded-2xl bg-[#5850ec]/10 flex items-center justify-center border border-[#5850ec]/20">
+                          <BarChart3 className="w-6 h-6 text-[#5850ec]" />
+                       </div>
+                       <div>
+                          <h2 className="text-xl font-bold text-white mb-0.5">Google Analytics (GA4)</h2>
+                          <p className="text-[12px] text-muted-foreground/40 leading-tight italic">Configure global website tracking codes and analytics engines.</p>
+                       </div>
+                    </div>
+                    
+                    {/* Master Switch Toggle */}
+                    <button 
+                      type="button"
+                      onClick={() => setAnalyticsEnabled(!analyticsEnabled)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        analyticsEnabled 
+                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+                          : 'bg-white/5 border-white/10 text-slate-400'
+                      }`}
+                    >
+                      {analyticsEnabled ? (
+                        <>
+                          <Check className="h-4 w-4 text-emerald-400" />
+                          Analytics Active
+                        </>
+                      ) : (
+                        <>
+                          <Power className="h-4 w-4 text-slate-500" />
+                          Analytics Suspended
+                        </>
+                      )}
+                    </button>
+                 </div>
+
+                 <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       <div className="space-y-2">
+                          <label className="text-sm font-bold text-white/90">GA4 Measurement ID</label>
+                          <input 
+                            type="text" 
+                            value={ga4Id} 
+                            onChange={(e) => setGa4Id(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec]" 
+                            placeholder="e.g. G-R2BCX12345"
+                          />
+                          <p className="text-[10px] text-muted-foreground/40">The primary measurement identifier for Google Analytics 4 tracking.</p>
+                       </div>
+
+                       <div className="space-y-2">
+                          <label className="text-sm font-bold text-white/90">Google Tag Manager ID (Optional)</label>
+                          <input 
+                            type="text" 
+                            value={gtmId} 
+                            onChange={(e) => setGtmId(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec]" 
+                            placeholder="e.g. GTM-XXXXXXX"
+                          />
+                          <p className="text-[10px] text-muted-foreground/40">Provide to boot Tag Manager tags concurrently alongside Google Analytics.</p>
+                       </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl">
+                       <div className="space-y-1">
+                          <p className="text-xs font-bold text-white flex items-center gap-2">
+                             Enable GA4 Debug Mode
+                          </p>
+                          <p className="text-[10px] text-muted-foreground/50 leading-relaxed">
+                             Sends pageviews and custom interaction events with debug directives, visible instantly inside GA4's Realtime DebugView.
+                          </p>
+                       </div>
+                       <button 
+                         type="button"
+                         onClick={() => setDebugMode(!debugMode)}
+                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                           debugMode ? 'bg-[#5850ec]' : 'bg-white/10'
+                         }`}
+                       >
+                         <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                           debugMode ? 'translate-x-5' : 'translate-x-0'
+                         }`} />
+                       </button>
+                    </div>
+
+                    <div className="space-y-3 pt-4 border-t border-white/5">
+                       <label className="text-xs font-black text-white/60 uppercase tracking-widest">Custom Tracking/Verification Scripts</label>
+                       <textarea 
+                         rows={4}
+                         value={customScriptsCode}
+                         onChange={(e) => setCustomScriptsCode(e.target.value)}
+                         placeholder="e.g. <!-- Custom scripts here -->"
+                         className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-[12px] font-mono text-indigo-400 focus:outline-none focus:ring-1 focus:ring-[#5850ec] resize-none leading-relaxed"
+                       />
+                       <p className="text-[10px] text-muted-foreground/40">Inject auxiliary HTML scripts (like Pinterest pixel or custom verification tags) directly into the head element.</p>
                     </div>
                  </div>
               </section>
@@ -412,95 +548,20 @@ export default function AdvancedSettingsPage() {
               </div>
            )}
 
-           {/* Code Injection */}
-           {activeTab === 'code' && (
-              <section className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-8 w-full animate-in fade-in duration-300">
-                 <div>
-                    <h2 className="text-xl font-bold text-white mb-1">Code Injection</h2>
-                    <p className="text-sm text-muted-foreground/60">Add custom code to the header or footer of your website.</p>
-                 </div>
-
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                       <label className="text-xs font-black text-white/60 uppercase tracking-widest">Header Code</label>
-                       <textarea 
-                         rows={8}
-                         className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-[12px] font-mono text-blue-400 focus:outline-none focus:ring-1 focus:ring-[#5850ec] resize-none leading-relaxed"
-                         placeholder="<!-- Google Tag Manager -->"
-                       />
-                    </div>
-                    <div className="space-y-3">
-                       <label className="text-xs font-black text-white/60 uppercase tracking-widest">Footer Code</label>
-                       <textarea 
-                         rows={8}
-                         className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-[12px] font-mono text-emerald-400 focus:outline-none focus:ring-1 focus:ring-[#5850ec] resize-none leading-relaxed"
-                         placeholder="<!-- Facebook Pixel Code -->"
-                       />
-                    </div>
-                 </div>
-              </section>
-           )}
-
-           {/* Import / Export Settings */}
-           {activeTab === 'import' && (
-              <section className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 shadow-2xl w-full animate-in fade-in duration-300">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-4">
-                       <div className="flex items-center gap-3">
-                          <Download className="w-5 h-5 text-[#5850ec]" />
-                          <h3 className="text-lg font-bold text-white">Export Settings</h3>
-                       </div>
-                       <p className="text-sm text-muted-foreground/60 leading-relaxed">
-                          Download a backup of all your website settings in JSON format.
-                       </p>
-                       <button className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all">
-                          <Download className="w-4 h-4" />
-                          <span>Export Settings</span>
-                       </button>
-                    </div>
-
-                    <div className="space-y-4">
-                       <div className="flex items-center gap-3">
-                          <Upload className="w-5 h-5 text-emerald-500" />
-                          <h3 className="text-lg font-bold text-white">Import Settings</h3>
-                       </div>
-                       <p className="text-sm text-muted-foreground/60 leading-relaxed">
-                          Upload a settings file in JSON format to restore configuration.
-                       </p>
-                       <button className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all">
-                          <Upload className="w-4 h-4" />
-                          <span>Import Settings</span>
-                       </button>
-                    </div>
-                 </div>
-              </section>
-           )}
-
-           {/* Placeholders for SEO, Analytics, 404, Maintenance */}
-           {['seo', 'analytics', '404', 'maintenance'].includes(activeTab) && (
+           {/* Placeholder for Maintenance */}
+           {activeTab === 'maintenance' && (
               <section className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-10 shadow-2xl flex flex-col items-center justify-center text-center space-y-4 w-full min-h-[300px] animate-in fade-in duration-300">
                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
                     <Wrench className="w-8 h-8 text-muted-foreground/40" />
                  </div>
                  <div>
                     <h3 className="text-lg font-bold text-white uppercase tracking-wider">
-                       {activeTab === 'seo' ? 'Advanced SEO Settings' : 
-                        activeTab === 'analytics' ? 'Analytics Integration' : 
-                        activeTab === '404' ? 'Custom 404 Pages' : 'Maintenance Window'}
+                       Maintenance Window
                     </h3>
                     <p className="text-sm text-muted-foreground/40 max-w-md mx-auto mt-2 leading-relaxed">
-                       {activeTab === 'seo' ? 'Advanced search engine optimization rules and sitemap controls are managed under the dedicated SEO Dashboard.' : 
-                        activeTab === 'analytics' ? 'Google Analytics 4, Tag Manager and custom event tracking properties are fully configured in the General Settings.' : 
-                        activeTab === '404' ? 'Custom HTTP 404 response pages and templates are managed via code structure. Redirection rules can be defined under SEO redirects.' : 
-                        'Maintenance mode configurations and landing templates can be configured inside the main site controls.'}
+                       Maintenance mode configurations and landing templates can be configured inside the main site controls.
                     </p>
                  </div>
-                 {activeTab === 'seo' && (
-                    <Link href="/admin/seo" className="flex items-center gap-2 px-5 py-2.5 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all">
-                       <span>Go to SEO Dashboard</span>
-                       <ExternalLink className="w-3.5 h-3.5" />
-                    </Link>
-                 )}
               </section>
            )}
 
