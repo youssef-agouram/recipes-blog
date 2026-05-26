@@ -14,6 +14,7 @@ import { HeroSlider } from "@/components/home/HeroSlider";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import DraggableSponsoredCard from "@/components/home/DraggableSponsoredCard";
+import CategoriesSlider from "@/components/home/CategoriesSlider";
 
 export default async function HomePage() {
 
@@ -74,8 +75,8 @@ export default async function HomePage() {
       </section>
 
       {/* 2. Explore by Category */}
-      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-8 sm:py-4 border-t border-border">
-        <div className="flex items-center justify-between mb-4 gap-2">
+      <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-4 sm:py-6 border-t border-border">
+        <div className="flex items-center justify-between mb-2 sm:mb-4 gap-2">
           <div>
             <h2 className="text-sm xs:text-base sm:text-3xl font-black text-white tracking-tight leading-none font-heading">Explore by Category</h2>
           </div>
@@ -85,88 +86,7 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="relative group/nav">
-          {/* Navigation Arrows */}
-          <button className="hidden md:flex absolute -left-6 top-[40%] -translate-y-1/2 z-30 w-12 h-12 rounded-full border border-white/10 bg-white/5 items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all">
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-
-          <div className="flex flex-nowrap justify-start md:justify-center gap-4 overflow-x-auto pb-2 scrollbar-hide px-0">
-            {categories.map((cat, i) => {
-              const availableIcons: Record<string, any> = {
-                Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
-                Apple, Fish, Croissant, Carrot, Soup, CupSoda,
-                Flame, Star, Heart, Clock, Tag, LayoutGrid,
-                CookingPot, Salad, WheatOff, Timer
-              };
-
-              const fallbackIconMap: Record<string, any> = {
-                'breakfast': Coffee,
-                'lunch': Utensils,
-                'dinner': CookingPot,
-                'desserts': Cake,
-                'vegan': Leaf,
-                'gluten free': WheatOff,
-                'quick & easy': Timer,
-                'drinks': CupSoda,
-                'salads': Salad,
-                'soup': Soup,
-              };
-
-              const nameLower = cat.name.toLowerCase();
-
-              let Icon = CookingPot;
-              const matchedIconKey = cat.icon ? Object.keys(availableIcons).find(
-                key => key.toLowerCase() === cat.icon?.toLowerCase()
-              ) : null;
-
-              if (matchedIconKey && availableIcons[matchedIconKey]) {
-                Icon = availableIcons[matchedIconKey];
-              } else if (fallbackIconMap[nameLower]) {
-                Icon = fallbackIconMap[nameLower];
-              }
-
-              const isGF = nameLower.includes('gluten free');
-              const isQuick = nameLower.includes('quick');
-              const href = `/category/${cat.slug}`;
-
-              return (
-                <Link
-                  key={cat.id || i}
-                  href={href}
-                  className="flex flex-col items-center gap-1.5 sm:gap-2.5 group cursor-pointer min-w-[70px] sm:min-w-[85px] shrink-0"
-                >
-                  <div className={cn(
-                    "w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:scale-110",
-                    "bg-white/[0.02] border border-white/5 group-hover:bg-white/[0.05] group-hover:border-primary/30"
-                  )}>
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <Icon className={cn(
-                      "w-5 h-5 sm:w-[26px] sm:h-[26px] stroke-[1.5px] transition-transform duration-500 group-hover:scale-110",
-                      "text-primary/70 group-hover:text-primary"
-                    )} />
-                  </div>
-                  <div className="flex flex-col items-center gap-0.5 sm:gap-1.5 text-center">
-                    <span className={cn(
-                      "text-[9px] sm:text-[11px] font-black uppercase tracking-[0.08em] transition-colors leading-tight text-center max-w-[70px] sm:max-w-[85px] line-clamp-2",
-                      "text-white/80 group-hover:text-primary"
-                    )}>{cat.name}</span>
-                    {isGF && (
-                      <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none">GF</span>
-                    )}
-                    {isQuick && (
-                      <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary animate-pulse" />
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-
-          <button className="hidden md:flex absolute -right-6 top-[40%] -translate-y-1/2 z-30 w-12 h-12 rounded-full border border-white/10 bg-white/5 items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all">
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        </div>
+        <CategoriesSlider categories={categories} />
       </section>
 
       <FeaturedRecipes recipes={recipes} />
