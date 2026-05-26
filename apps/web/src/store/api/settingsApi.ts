@@ -26,6 +26,13 @@ export const settingsApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['Settings'],
     }),
+    testCloudinarySettings: builder.mutation<any, { cloudName: string; apiKey: string; apiSecret: string }>({
+      query: (body) => ({
+        url: '/uploads/test-cloudinary',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
@@ -34,4 +41,5 @@ export const {
   useUpdateHeroSettingsMutation,
   useGetSiteSettingsQuery,
   useUpdateSiteSettingsMutation,
+  useTestCloudinarySettingsMutation,
 } = settingsApi;

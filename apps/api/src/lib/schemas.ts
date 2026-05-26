@@ -109,6 +109,9 @@ export const SiteSettingsSchema = z.object({
   aboutText: z.string().nullable().optional(),
   commentSettings: z.any().optional(),
   adSettings: z.any().optional(),
+  cloudinaryCloudName: z.string().nullable().optional(),
+  cloudinaryApiKey: z.string().nullable().optional(),
+  cloudinaryApiSecret: z.string().nullable().optional(),
 });
 
 export const SeoSettingsSchema = z.object({

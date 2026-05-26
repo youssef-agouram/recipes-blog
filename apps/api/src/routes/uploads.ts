@@ -4,14 +4,39 @@ import path from 'path';
 import fs from 'fs';
 import { v2 as cloudinary } from 'cloudinary';
 import { authMiddleware } from '../middleware/auth';
+import prisma from '../lib/prisma';
 
 const router = Router();
 
-// Configure Cloudinary
+// Configure initial/fallback Cloudinary values
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dpwkmt5kr',
   api_key: process.env.CLOUDINARY_API_KEY || '588574244871288',
   api_secret: process.env.CLOUDINARY_API_SECRET || 'iIBcQz592b1VO0rCkiDndG8FoLM'
+});
+
+// POST /uploads/test-cloudinary
+router.post('/test-cloudinary', authMiddleware, async (req: Request, res: Response) => {
+  const { cloudName, apiKey, apiSecret } = req.body;
+  if (!cloudName || !apiKey || !apiSecret) {
+    return res.status(400).json({ error: 'All fields (Cloud Name, API Key, API Secret) are required' });
+  }
+
+  try {
+    // Configure temporary instance
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret
+    });
+
+    // Test ping
+    await cloudinary.api.ping();
+    return res.json({ success: true, message: 'Cloudinary connection test successful!' });
+  } catch (err: any) {
+    console.error('Cloudinary connection test failed:', err);
+    return res.status(400).json({ error: err.message || 'Connection test failed' });
+  }
 });
 
 // Helper function to upload to Cloudinary via streams
@@ -55,6 +80,18 @@ router.post('/', authMiddleware, upload.single('image'), async (req: Request, re
   }
 
   try {
+    // Configure Cloudinary dynamically from DB settings or fallback to process.env
+    const settings = await prisma.siteSettings.findFirst();
+    const cloudName = settings?.cloudinaryCloudName || process.env.CLOUDINARY_CLOUD_NAME || 'dpwkmt5kr';
+    const apiKey = settings?.cloudinaryApiKey || process.env.CLOUDINARY_API_KEY || '588574244871288';
+    const apiSecret = settings?.cloudinaryApiSecret || process.env.CLOUDINARY_API_SECRET || 'iIBcQz592b1VO0rCkiDndG8FoLM';
+
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret
+    });
+
     // Attempt Cloudinary Upload
     const result = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
     return res.json({ imageUrl: result.secure_url });

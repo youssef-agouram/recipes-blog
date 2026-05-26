@@ -326,6 +326,9 @@ model SiteSettings {
   aboutText       String?
   commentSettings Json?   @default("{\"autoApprove\": false, \"allowGuest\": true, \"showRatings\": true, \"notifications\": true}")
   adSettings      Json?   @default("{}")
+  cloudinaryCloudName String?
+  cloudinaryApiKey    String?
+  cloudinaryApiSecret String?
 }
 
 model HeroSettings {
