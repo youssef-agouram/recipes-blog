@@ -25,9 +25,10 @@ const liveData = [
   { time: '14:45', users: 126 },
 ];
 
-export const RealTimeVisitors = ({ activeUsers }: { activeUsers?: { total: number; pages: { path: string; users: number }[] } }) => {
-  const displayTotal = activeUsers?.total ?? 126;
-  const displayPages = activeUsers?.pages ?? topPages;
+export const RealTimeVisitors = ({ activeUsers }: { activeUsers?: { total: number; pages: { path: string; users: number }[]; chartData?: { time: string; users: number }[] } }) => {
+  const displayTotal = activeUsers?.total ?? 0;
+  const displayPages = activeUsers?.pages && activeUsers.pages.length > 0 ? activeUsers.pages : [{ path: 'No active users', users: 0 }];
+  const displayChartData = activeUsers?.chartData && activeUsers.chartData.length > 0 ? activeUsers.chartData : liveData;
 
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full flex flex-col">
@@ -60,7 +61,7 @@ export const RealTimeVisitors = ({ activeUsers }: { activeUsers?: { total: numbe
       {/* Mini Bar Chart */}
       <div className="flex-1 h-[80px] mt-auto">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={liveData}>
+          <BarChart data={displayChartData}>
             <XAxis dataKey="time" hide />
             <Tooltip
               content={({ active, payload }) => {

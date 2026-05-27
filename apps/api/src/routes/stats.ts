@@ -317,6 +317,12 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       { name: 'Canada', value: 4321, percentage: '5.0%', color: '#f59e0b' },
     ];
 
+    let finalActiveUsers = {
+      total: activeUsersCount || 1,
+      pages: activePagesGroup.length > 0 ? activePagesGroup.map(ap => ({ path: ap.path, users: ap._count.path })) : [{ path: '/', users: 1 }],
+      chartData: [] as { time: string; users: number }[]
+    };
+
     let finalSummary = {
       recipes: { total: recipesCount, trend: { value: '12.5%', isUp: true } },
       categories: { total: categoriesCount, trend: { value: '8.3%', isUp: true } },
@@ -336,7 +342,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
         const client = new BetaAnalyticsDataClient({ credentials });
         const property = `properties/${analyticsConfig.ga4PropertyId}`;
 
-        const [sourcesReport, countriesReport, recipesReport, overallReport, dailyReport, devicesReport] = await Promise.all([
+        const [sourcesReport, countriesReport, recipesReport, overallReport, dailyReport, devicesReport, realtimeReport, realtimeMinutesReport] = await Promise.all([
           client.runReport({
             property,
             dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
@@ -396,6 +402,18 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
             dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
             dimensions: [{ name: 'deviceCategory' }],
             metrics: [{ name: 'activeUsers' }]
+          }),
+          client.runRealtimeReport({
+            property,
+            dimensions: [{ name: 'unifiedScreenName' }],
+            metrics: [{ name: 'activeUsers' }],
+            limit: 5
+          }),
+          client.runRealtimeReport({
+            property,
+            dimensions: [{ name: 'minutesAgo' }],
+            metrics: [{ name: 'activeUsers' }],
+            limit: 30
           })
         ]);
 
@@ -568,6 +586,65 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
             return { name, value };
           });
         }
+
+        let gaActiveUsersTotal = 0;
+        let gaActivePages: { path: string; users: number }[] = [];
+        let gaRealtimeChartData: { time: string; users: number }[] = [];
+
+        if (realtimeReport && realtimeReport[0]?.rows) {
+          gaActivePages = realtimeReport[0].rows.map(row => {
+            const rawName = row.dimensionValues?.[0]?.value || '/';
+            let displayName = rawName.split(' | ')[0] || rawName;
+            if (displayName.length > 30) {
+              displayName = displayName.substring(0, 30) + '...';
+            }
+            const users = parseInt(row.metricValues?.[0]?.value || '0') || 0;
+            gaActiveUsersTotal += users;
+            return {
+              path: displayName,
+              users
+            };
+          });
+        }
+
+        if (realtimeMinutesReport && realtimeMinutesReport[0]?.rows) {
+          const minutesMap = new Map<number, number>();
+          realtimeMinutesReport[0].rows.forEach(row => {
+            const minutesAgo = parseInt(row.dimensionValues?.[0]?.value || '0') || 0;
+            const users = parseInt(row.metricValues?.[0]?.value || '0') || 0;
+            minutesMap.set(minutesAgo, users);
+          });
+
+          for (let i = 9; i >= 0; i--) {
+            const minAgo = i * 3;
+            let usersSum = 0;
+            for (let offset = 0; offset < 3; offset++) {
+              usersSum += minutesMap.get(minAgo + offset) || 0;
+            }
+            const timeLabel = minAgo === 0 ? 'Now' : `-${minAgo}m`;
+            gaRealtimeChartData.push({
+              time: timeLabel,
+              users: usersSum
+            });
+          }
+        }
+
+        if (gaRealtimeChartData.length === 0) {
+          for (let i = 9; i >= 0; i--) {
+            const minAgo = i * 3;
+            const timeLabel = minAgo === 0 ? 'Now' : `-${minAgo}m`;
+            gaRealtimeChartData.push({
+              time: timeLabel,
+              users: 0
+            });
+          }
+        }
+
+        finalActiveUsers = {
+          total: gaActiveUsersTotal,
+          pages: gaActivePages.length > 0 ? gaActivePages : [{ path: 'No active pages', users: 0 }],
+          chartData: gaRealtimeChartData
+        };
       } catch (err) {
         console.error('Failed to run GA4 reporting query:', err);
       }
@@ -586,10 +663,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       deviceData,
       referrerData,
       countryData,
-      activeUsers: {
-        total: activeUsersCount || 1,
-        pages: activePagesGroup.length > 0 ? activePagesGroup.map(ap => ({ path: ap.path, users: ap._count.path })) : [{ path: '/', users: 1 }]
-      }
+      activeUsers: finalActiveUsers
     });
   } catch (error) {
     next(error);
