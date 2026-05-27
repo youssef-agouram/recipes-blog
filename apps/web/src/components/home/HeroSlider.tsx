@@ -72,6 +72,11 @@ function YouTubePlayer({ videoId, onEnded }: { videoId: string, onEnded: () => v
 export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const displayImages = images.length > 0 
     ? images 
@@ -107,6 +112,31 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
       return next;
     });
   };
+
+  if (!mounted) {
+    const firstUrl = displayImages[0];
+    const isVideo = firstUrl?.match(/\.(mp4|webm|ogg)(\?.*)?$/i) || firstUrl?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+    const imageUrl = isVideo 
+      ? (fallbackImage || "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1920&q=80")
+      : firstUrl;
+
+    return (
+      <div className="relative w-full h-full overflow-hidden">
+        <div className="absolute inset-0 select-none pointer-events-none">
+          <Image
+            src={imageUrl}
+            alt="Hero Banner LCP"
+            fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+        </div>
+      </div>
+    );
+  }
 
   const variants = {
     enter: (direction: number) => ({
@@ -197,6 +227,7 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
                 alt={`Hero Banner ${currentIndex + 1}`}
                 fill
                 priority
+                fetchPriority="high"
                 sizes="100vw"
                 className="object-cover"
               />

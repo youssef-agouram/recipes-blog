@@ -37,15 +37,15 @@ export default async function HomePage() {
       console.error('Error fetching categories:', err);
       return [];
     }),
-    api.recipes.list({ limit: 15 }).catch((err) => {
+    api.recipes.list({ limit: 10 }).catch((err) => {
       console.error('Error fetching recipes:', err);
       return { data: [] };
     }),
-    api.recipes.list({ limit: 12, topArticle: true }).catch((err) => {
+    api.recipes.list({ limit: 6, topArticle: true }).catch((err) => {
       console.error('Error fetching top recipes:', err);
       return { data: [] };
     }),
-    api.articles.list({ limit: 12 }).catch((err) => {
+    api.articles.list({ limit: 6 }).catch((err) => {
       console.error('Error fetching articles:', err);
       return [];
     }),
