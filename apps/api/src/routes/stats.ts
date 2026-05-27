@@ -70,7 +70,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       prisma.recipe.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
-        select: { id: true, title: true, imageUrl: true, views: true }
+        select: { id: true, title: true, slug: true, imageUrl: true, views: true }
       }),
       prisma.visit.groupBy({
         by: ['sessionId'],
