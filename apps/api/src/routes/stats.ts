@@ -161,7 +161,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       return d.toISOString().split('T')[0];
     }).reverse();
 
-    const overviewData = await Promise.all(last7Days.map(async (date) => {
+    let overviewData = await Promise.all(last7Days.map(async (date) => {
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(date);
@@ -293,7 +293,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
     });
 
     const totalUA = allVisitsWithUA.length || 1;
-    const deviceData = [
+    let deviceData = [
       { name: 'Mobile', value: mobileCount },
       { name: 'Desktop', value: desktopCount },
       { name: 'Tablet', value: tabletCount },
@@ -317,13 +317,26 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       { name: 'Canada', value: 4321, percentage: '5.0%', color: '#f59e0b' },
     ];
 
+    let finalSummary = {
+      recipes: { total: recipesCount, trend: { value: '12.5%', isUp: true } },
+      categories: { total: categoriesCount, trend: { value: '8.3%', isUp: true } },
+      users: { total: usersCount, trend: { value: '15.7%', isUp: true } },
+      comments: { total: commentsCount, trend: { value: '4.2%', isUp: false } },
+      sessions: { total: uniqueSessionsCount, trend: { value: '23.6%', isUp: true } },
+      pageviews: { total: visitsCount, trend: { value: '18.7%', isUp: true } },
+      uniqueVisitors: { total: uniqueIpsCount, trend: { value: '14.3%', isUp: true } },
+      avgDuration: { value: formatDuration(avgDuration), trend: { value: '16.3%', isUp: true } },
+      pagesPerSession: { value: pagesPerSession, trend: { value: '4.1%', isUp: true } },
+      bounceRate: { value: bounceRate + '%', trend: { value: '5.3%', isUp: false } }
+    };
+
     if (analyticsConfig?.ga4PropertyId && analyticsConfig?.ga4ServiceAccount && analyticsConfig?.analyticsEnabled) {
       try {
         const credentials = JSON.parse(analyticsConfig.ga4ServiceAccount);
         const client = new BetaAnalyticsDataClient({ credentials });
         const property = `properties/${analyticsConfig.ga4PropertyId}`;
 
-        const [sourcesReport, countriesReport, recipesReport] = await Promise.all([
+        const [sourcesReport, countriesReport, recipesReport, overallReport, dailyReport, devicesReport] = await Promise.all([
           client.runReport({
             property,
             dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
@@ -353,6 +366,36 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
               }
             },
             limit: 10
+          }),
+          client.runReport({
+            property,
+            dateRanges: [
+              { startDate: '6daysAgo', endDate: 'today' },
+              { startDate: '13daysAgo', endDate: '7daysAgo' }
+            ],
+            metrics: [
+              { name: 'activeUsers' },
+              { name: 'screenPageViews' },
+              { name: 'sessions' },
+              { name: 'bounceRate' },
+              { name: 'averageSessionDuration' }
+            ]
+          }),
+          client.runReport({
+            property,
+            dateRanges: [{ startDate: '6daysAgo', endDate: 'today' }],
+            dimensions: [{ name: 'date' }],
+            metrics: [
+              { name: 'activeUsers' },
+              { name: 'screenPageViews' }
+            ],
+            orderBys: [{ dimension: { dimensionName: 'date' } }]
+          }),
+          client.runReport({
+            property,
+            dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+            dimensions: [{ name: 'deviceCategory' }],
+            metrics: [{ name: 'activeUsers' }]
           })
         ]);
 
@@ -447,24 +490,91 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
             }
           }
         }
+
+        if (overallReport && overallReport[0]?.rows && overallReport[0].rows.length >= 2) {
+          const current = overallReport[0].rows[0];
+          const previous = overallReport[0].rows[1];
+
+          const curUsers = parseInt(current.metricValues?.[0]?.value || '0') || 0;
+          const prevUsers = parseInt(previous.metricValues?.[0]?.value || '0') || 0;
+
+          const curViews = parseInt(current.metricValues?.[1]?.value || '0') || 0;
+          const prevViews = parseInt(previous.metricValues?.[1]?.value || '0') || 0;
+
+          const curSessions = parseInt(current.metricValues?.[2]?.value || '0') || 0;
+          const prevSessions = parseInt(previous.metricValues?.[2]?.value || '0') || 0;
+
+          const curBounce = parseFloat(current.metricValues?.[3]?.value || '0') || 0;
+          const prevBounce = parseFloat(previous.metricValues?.[3]?.value || '0') || 0;
+
+          const curDuration = Math.round(parseFloat(current.metricValues?.[4]?.value || '0')) || 0;
+          const prevDuration = Math.round(parseFloat(previous.metricValues?.[4]?.value || '0')) || 0;
+
+          const calcTrend = (cur: number, prev: number, invert = false) => {
+            if (!prev) return { value: '0%', isUp: true };
+            const pct = ((cur - prev) / prev) * 100;
+            const value = `${Math.abs(pct).toFixed(1)}%`;
+            const isUp = invert ? pct < 0 : pct > 0;
+            return { value, isUp };
+          };
+
+          const formatGaDuration = (seconds: number) => {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+          };
+
+          finalSummary = {
+            recipes: { total: recipesCount, trend: { value: '12.5%', isUp: true } },
+            categories: { total: categoriesCount, trend: { value: '8.3%', isUp: true } },
+            users: { total: usersCount, trend: { value: '15.7%', isUp: true } },
+            comments: { total: commentsCount, trend: { value: '4.2%', isUp: false } },
+            sessions: { total: curSessions, trend: calcTrend(curSessions, prevSessions) },
+            pageviews: { total: curViews, trend: calcTrend(curViews, prevViews) },
+            uniqueVisitors: { total: curUsers, trend: calcTrend(curUsers, prevUsers) },
+            avgDuration: { value: formatGaDuration(curDuration), trend: calcTrend(curDuration, prevDuration) },
+            pagesPerSession: { value: curSessions ? (curViews / curSessions).toFixed(2) : '0', trend: { value: '0%', isUp: true } },
+            bounceRate: { value: (curBounce < 1 ? curBounce * 100 : curBounce).toFixed(1) + '%', trend: calcTrend(curBounce, prevBounce, true) }
+          };
+        }
+
+        if (dailyReport && dailyReport[0]?.rows && dailyReport[0].rows.length > 0) {
+          overviewData = dailyReport[0].rows.map(row => {
+            const rawDate = row.dimensionValues?.[0]?.value || ''; // YYYYMMDD
+            const year = parseInt(rawDate.slice(0, 4));
+            const month = parseInt(rawDate.slice(4, 6)) - 1;
+            const day = parseInt(rawDate.slice(6, 8));
+            const dateObj = new Date(year, month, day);
+            const name = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            const visitors = parseInt(row.metricValues?.[0]?.value || '0') || 0;
+            const pageViews = parseInt(row.metricValues?.[1]?.value || '0') || 0;
+
+            return {
+              name,
+              visitors,
+              pageViews,
+              sessions: visitors,
+              pageviews: pageViews
+            };
+          });
+        }
+
+        if (devicesReport && devicesReport[0]?.rows) {
+          deviceData = devicesReport[0].rows.map(row => {
+            const rawCategory = row.dimensionValues?.[0]?.value || 'desktop';
+            const name = rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1);
+            const value = parseInt(row.metricValues?.[0]?.value || '0') || 0;
+            return { name, value };
+          });
+        }
       } catch (err) {
         console.error('Failed to run GA4 reporting query:', err);
       }
     }
 
     res.json({
-      summary: {
-        recipes: { total: recipesCount, trend: { value: '12.5%', isUp: true } },
-        categories: { total: categoriesCount, trend: { value: '8.3%', isUp: true } },
-        users: { total: usersCount, trend: { value: '15.7%', isUp: true } },
-        comments: { total: commentsCount, trend: { value: '4.2%', isUp: false } },
-        sessions: { total: uniqueSessionsCount, trend: { value: '23.6%', isUp: true } },
-        pageviews: { total: visitsCount, trend: { value: '18.7%', isUp: true } },
-        uniqueVisitors: { total: uniqueIpsCount, trend: { value: '14.3%', isUp: true } },
-        avgDuration: { value: formatDuration(avgDuration), trend: { value: '16.3%', isUp: true } },
-        pagesPerSession: { value: pagesPerSession, trend: { value: '4.1%', isUp: true } },
-        bounceRate: { value: bounceRate + '%', trend: { value: '5.3%', isUp: false } }
-      },
+      summary: finalSummary,
       status: {
         published: publishedCount,
         draft: draftCount,
