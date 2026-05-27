@@ -1,6 +1,21 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  poweredByHeader: false,
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      'recharts',
+      'date-fns',
+      '@reduxjs/toolkit',
+      'radix-ui',
+      '@tiptap/react',
+      '@tiptap/starter-kit',
+      '@tiptap/core',
+    ],
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 604800,

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Lora, Work_Sans } from "next/font/google";
+import { DM_Sans, Lora } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { Toaster } from "sonner";
@@ -13,12 +13,6 @@ const dmSans = DM_Sans({
 
 const lora = Lora({
   variable: "--font-body",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const workSans = Work_Sans({
-  variable: "--font-ui",
   subsets: ["latin"],
   display: "swap",
 });
@@ -40,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${lora.variable} ${workSans.variable} dark`}>
+    <html lang="en" className={`${dmSans.variable} ${lora.variable} dark`}>
       <body className="antialiased font-body flex min-h-screen flex-col">
         <ReduxProvider>
           {children}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { LazyMotion, domAnimation, m, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
@@ -145,15 +145,31 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
 
   return (
     <div className="relative w-full h-full group overflow-hidden">
+      {/* Static Background Layer for LCP Optimization */}
+      {displayImages[0] && !displayImages[0].match(/\.(mp4|webm|ogg)(\?.*)?$/i) && !displayImages[0].match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i) && (
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          <Image
+            src={displayImages[0]}
+            alt="Hero Banner LCP Placeholder"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+        </div>
+      )}
+
+      <LazyMotion features={domAnimation}>
       <AnimatePresence initial={false} custom={direction} mode="wait">
-        <motion.div
+        <m.div
           key={currentIndex}
           custom={direction}
           variants={variants}
           initial="enter"
           animate="center"
           exit="exit"
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 w-full h-full z-10"
         >
           {(() => {
             const url = displayImages[currentIndex];
@@ -188,8 +204,9 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
           })()}
           {/* Elegant Dark Overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
-        </motion.div>
+        </m.div>
       </AnimatePresence>
+      </LazyMotion>
 
       {/* Navigation Controls */}
       {displayImages.length > 1 && (
@@ -230,13 +247,13 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
       {/* Progress Bar for Auto-play */}
       {displayImages.length > 1 && (
         <div className="absolute bottom-0 left-0 h-1 bg-primary/30 z-20 w-full">
-          <motion.div
+          <LazyMotion features={domAnimation}><m.div
             key={currentIndex}
             initial={{ width: 0 }}
             animate={{ width: '100%' }}
             transition={{ duration: 5, ease: "linear" }}
             className="h-full bg-primary"
-          />
+          /></LazyMotion>
         </div>
       )}
     </div>

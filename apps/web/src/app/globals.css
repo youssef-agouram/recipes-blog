@@ -10,7 +10,7 @@
 @theme inline {
     --font-heading: var(--font-heading);
     --font-body: var(--font-body);
-    --font-ui: var(--font-ui);
+    --font-ui: var(--font-heading);
 
     /* Sidebar */
     --color-sidebar-ring: var(--sidebar-ring);

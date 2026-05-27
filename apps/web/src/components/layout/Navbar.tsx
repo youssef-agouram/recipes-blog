@@ -436,176 +436,182 @@ export function Navbar() {
               )}
             </div>
             {/* Auth Area */}
-            {mounted && !isHydrating && isAuthenticated && (
+            {(!mounted || isHydrating) ? (
+              <div className="hidden sm:flex h-[36px] w-[88px] bg-white/5 animate-pulse rounded-[18px] ml-1 pl-4 border-l border-border" />
+            ) : (
               <>
-                {/* Submit Recipe */}
-                {(user?.role === 'Administrator' || user?.role === 'Editor') && (
-                  <Link
-                    href="/admin/recipes/new"
-                    id="navbar-submit-recipe"
-                    className="hidden md:flex items-center gap-2.5 bg-primary text-primary-foreground px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-2xl hover:-translate-y-0.5 hover:shadow-primary/30"
-                  >
-                    <Plus className="w-4 h-4 stroke-[3px]" />
-                    Submit Recipe
-                  </Link>
-                )}
+                {isAuthenticated && (
+                  <>
+                    {/* Submit Recipe */}
+                    {(user?.role === 'Administrator' || user?.role === 'Editor') && (
+                      <Link
+                        href="/admin/recipes/new"
+                        id="navbar-submit-recipe"
+                        className="hidden md:flex items-center gap-2.5 bg-primary text-primary-foreground px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-2xl hover:-translate-y-0.5 hover:shadow-primary/30"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3px]" />
+                        Submit Recipe
+                      </Link>
+                    )}
 
-                <div className="flex items-center gap-2 sm:gap-3 ml-0.5 sm:ml-1 pl-3 sm:pl-4 border-l border-border">
-                  {/* Notifications */}
-                  <button
-                    id="navbar-notifications"
-                    className="relative w-8.5 h-8.5 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/5 text-muted-foreground hover:text-white transition-all group border border-border hover:border-white/10"
-                  >
-                    <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5 group-hover:animate-swing" />
-                    <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-primary rounded-full border-[2px] sm:border-[3px] border-background animate-pulse" />
-                  </button>
+                    <div className="flex items-center gap-2 sm:gap-3 ml-0.5 sm:ml-1 pl-3 sm:pl-4 border-l border-border">
+                      {/* Notifications */}
+                      <button
+                        id="navbar-notifications"
+                        className="relative w-8.5 h-8.5 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/5 text-muted-foreground hover:text-white transition-all group border border-border hover:border-white/10"
+                      >
+                        <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5 group-hover:animate-swing" />
+                        <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-primary rounded-full border-[2px] sm:border-[3px] border-background animate-pulse" />
+                      </button>
 
-                  {/* Profile Dropdown */}
-                  <div className="relative" ref={profileDropdownRef}>
-                    <button
-                      id="navbar-profile-toggle"
-                      onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                      className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer"
-                    >
-                      <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5 group-hover:ring-primary/60">
-                        {user?.avatar ? (
-                          <Image
-                            src={user.avatar}
-                            alt="Profile"
-                            width={40}
-                            height={40}
-                            className="w-full h-full object-cover rounded-[10px] sm:rounded-[14px]"
-                            unoptimized
+                      {/* Profile Dropdown */}
+                      <div className="relative" ref={profileDropdownRef}>
+                        <button
+                          id="navbar-profile-toggle"
+                          onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                          className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer"
+                        >
+                          <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5 group-hover:ring-primary/60">
+                            {user?.avatar ? (
+                              <Image
+                                src={user.avatar}
+                                alt="Profile"
+                                width={40}
+                                height={40}
+                                className="w-full h-full object-cover rounded-[10px] sm:rounded-[14px]"
+                                unoptimized
+                              />
+                            ) : (
+                              <div className="w-full h-full rounded-[10px] sm:rounded-[14px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                                <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-primary" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="hidden md:flex flex-col items-start">
+                            <span className="text-xs font-bold text-white leading-tight">
+                              {user?.name || 'User'}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground/60 leading-tight">
+                              {user?.role || 'Member'}
+                            </span>
+                          </div>
+                          <ChevronDown
+                            className={`hidden md:block w-3.5 h-3.5 text-muted-foreground/50 transition-transform duration-300 ${profileDropdownOpen ? 'rotate-180' : ''
+                              }`}
                           />
-                        ) : (
-                          <div className="w-full h-full rounded-[10px] sm:rounded-[14px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                            <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-primary" />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {profileDropdownOpen && (
+                          <div className="absolute right-0 top-full mt-3 w-64 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl shadow-black/50 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                            {/* User Info Header */}
+                            <div className="p-5 border-b border-white/5 bg-gradient-to-r from-primary/5 to-transparent">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-primary/20 p-0.5">
+                                  {user?.avatar ? (
+                                    <Image
+                                      src={user.avatar}
+                                      alt="Profile"
+                                      width={48}
+                                      height={48}
+                                      className="w-full h-full object-cover rounded-[12px]"
+                                      unoptimized
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full rounded-[12px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                                      <User className="w-5 h-5 text-primary" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-bold text-white">
+                                    {user?.name || 'User'}
+                                  </span>
+                                  <span className="text-[11px] text-muted-foreground/60">
+                                    {user?.email || 'user@example.com'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                             {/* Menu Items */}
+                             <div className="p-2">
+                               {[
+                                 { icon: BookOpen, label: 'My Recipes', href: '/my-recipes' },
+                                 { 
+                                   icon: Heart, 
+                                   label: 'Favorites', 
+                                   href: '/favorites',
+                                   count: totalFavorited,
+                                   color: 'text-rose-400'
+                                 },
+                                 { 
+                                   icon: Bookmark, 
+                                   label: 'Saved', 
+                                   href: '/saved',
+                                   count: totalSaved,
+                                   color: 'text-primary'
+                                 },
+                                 { icon: Settings, label: 'Settings', href: '/settings' },
+                               ].map((item) => (
+                                 <Link
+                                   key={item.label}
+                                   href={item.href}
+                                   onClick={() => setProfileDropdownOpen(false)}
+                                   className="flex items-center justify-between px-4 py-3 rounded-xl text-muted-foreground hover:text-white hover:bg-white/5 transition-all group"
+                                 >
+                                   <div className="flex items-center gap-3">
+                                     <item.icon className={cn("w-4 h-4 transition-colors", item.color || "group-hover:text-primary")} />
+                                     <span className="text-[13px] font-semibold">
+                                       {item.label}
+                                     </span>
+                                   </div>
+                                   {item.count !== undefined && (
+                                     <span className={cn(
+                                       "text-[10px] font-black px-2 py-0.5 rounded-lg bg-white/5",
+                                       item.count > 0 ? "text-white" : "text-white/20"
+                                     )}>
+                                       {item.count}
+                                     </span>
+                                   )}
+                                 </Link>
+                               ))}
+                             </div>
+
+                            {/* Logout */}
+                            <div className="p-2 border-t border-white/5">
+                              <button
+                                id="navbar-logout"
+                                onMouseDown={handleLogout}
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all group"
+                              >
+                                <LogOut className="w-4 h-4" />
+                                <span className="text-[13px] font-semibold">
+                                  Sign Out
+                                </span>
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
-                      <div className="hidden md:flex flex-col items-start">
-                        <span className="text-xs font-bold text-white leading-tight">
-                          {user?.name || 'User'}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground/60 leading-tight">
-                          {user?.role || 'Member'}
-                        </span>
-                      </div>
-                      <ChevronDown
-                        className={`hidden md:block w-3.5 h-3.5 text-muted-foreground/50 transition-transform duration-300 ${profileDropdownOpen ? 'rotate-180' : ''
-                          }`}
-                      />
-                    </button>
+                    </div>
+                  </>
+                )}
 
-                    {/* Dropdown Menu */}
-                    {profileDropdownOpen && (
-                      <div className="absolute right-0 top-full mt-3 w-64 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl shadow-black/50 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
-                        {/* User Info Header */}
-                        <div className="p-5 border-b border-white/5 bg-gradient-to-r from-primary/5 to-transparent">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-primary/20 p-0.5">
-                              {user?.avatar ? (
-                                <Image
-                                  src={user.avatar}
-                                  alt="Profile"
-                                  width={48}
-                                  height={48}
-                                  className="w-full h-full object-cover rounded-[12px]"
-                                  unoptimized
-                                />
-                              ) : (
-                                <div className="w-full h-full rounded-[12px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                                  <User className="w-5 h-5 text-primary" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-sm font-bold text-white">
-                                {user?.name || 'User'}
-                              </span>
-                              <span className="text-[11px] text-muted-foreground/60">
-                                {user?.email || 'user@example.com'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                         {/* Menu Items */}
-                         <div className="p-2">
-                           {[
-                             { icon: BookOpen, label: 'My Recipes', href: '/my-recipes' },
-                             { 
-                               icon: Heart, 
-                               label: 'Favorites', 
-                               href: '/favorites',
-                               count: totalFavorited,
-                               color: 'text-rose-400'
-                             },
-                             { 
-                               icon: Bookmark, 
-                               label: 'Saved', 
-                               href: '/saved',
-                               count: totalSaved,
-                               color: 'text-primary'
-                             },
-                             { icon: Settings, label: 'Settings', href: '/settings' },
-                           ].map((item) => (
-                             <Link
-                               key={item.label}
-                               href={item.href}
-                               onClick={() => setProfileDropdownOpen(false)}
-                               className="flex items-center justify-between px-4 py-3 rounded-xl text-muted-foreground hover:text-white hover:bg-white/5 transition-all group"
-                             >
-                               <div className="flex items-center gap-3">
-                                 <item.icon className={cn("w-4 h-4 transition-colors", item.color || "group-hover:text-primary")} />
-                                 <span className="text-[13px] font-semibold">
-                                   {item.label}
-                                 </span>
-                               </div>
-                               {item.count !== undefined && (
-                                 <span className={cn(
-                                   "text-[10px] font-black px-2 py-0.5 rounded-lg bg-white/5",
-                                   item.count > 0 ? "text-white" : "text-white/20"
-                                 )}>
-                                   {item.count}
-                                 </span>
-                               )}
-                             </Link>
-                           ))}
-                         </div>
-
-                        {/* Logout */}
-                        <div className="p-2 border-t border-white/5">
-                          <button
-                            id="navbar-logout"
-                            onMouseDown={handleLogout}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all group"
-                          >
-                            <LogOut className="w-4 h-4" />
-                            <span className="text-[13px] font-semibold">
-                              Sign Out
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                {!isAuthenticated && settings?.showAuthButtons !== false && (
+                  <div className="hidden sm:flex items-center gap-3 ml-1 pl-4 border-l border-border">
+                    <Link
+                      href="/login"
+                      id="navbar-login"
+                      className="flex items-center gap-1.5 px-4.5 py-2 text-[10px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-primary/30"
+                      style={{ borderRadius: '18px' }}
+                    >
+                      <LogIn className="w-3 h-3" />
+                      <span>Sign In</span>
+                    </Link>
                   </div>
-                </div>
+                )}
               </>
-            )}
-
-            {mounted && !isHydrating && !isAuthenticated && settings?.showAuthButtons !== false && (
-              <div className="hidden sm:flex items-center gap-3 ml-1 pl-4 border-l border-border">
-                <Link
-                  href="/login"
-                  id="navbar-login"
-                  className="flex items-center gap-1.5 px-4.5 py-2 text-[10px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-primary/30"
-                  style={{ borderRadius: '18px' }}
-                >
-                  <LogIn className="w-3 h-3" />
-                  <span>Sign In</span>
-                </Link>
-              </div>
             )}
           </div>
         </div>

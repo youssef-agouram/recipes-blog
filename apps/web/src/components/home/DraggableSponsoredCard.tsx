@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { LazyMotion, domAnimation, m } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { useGetSiteSettingsQuery } from '@/store/api/settingsApi';
@@ -63,7 +63,8 @@ export default function DraggableSponsoredCard() {
   const isVideo = activePopupUrl.match(/\.(mp4|webm|ogg)(\?.*)?$/i);
 
   return (
-    <motion.div
+    <LazyMotion features={domAnimation}>
+    <m.div
       drag
       dragMomentum={false}
       whileDrag={{ scale: 1.05, cursor: 'grabbing' }}
@@ -116,6 +117,7 @@ export default function DraggableSponsoredCard() {
           Visit Link
         </button>
       </Link>
-    </motion.div>
+    </m.div>
+    </LazyMotion>
   );
 }

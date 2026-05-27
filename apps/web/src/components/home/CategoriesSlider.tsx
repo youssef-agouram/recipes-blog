@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { LazyMotion, domAnimation, m } from 'framer-motion';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -86,34 +86,31 @@ export default function CategoriesSlider({ categories }: CategoriesSliderProps) 
   const [centerOffset, setCenterOffset] = useState(initialValues.centerOffset);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Handle responsive behavior & client-side activation
+  // Handle responsive behavior & client-side activation using ResizeObserver
   useEffect(() => {
     setIsMounted(true);
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      const cardW = mobile ? 95 : 120;
-      if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const containerWidth = entry.contentRect.width;
+        const mobile = window.innerWidth < 768;
+        setIsMobile(mobile);
+        const cardW = mobile ? 95 : 120;
         setCenterOffset((containerWidth / 2) - (cardW / 2));
       }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
     };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const cardWidth = isMobile ? 95 : 120;
   const gap = 12;
   const step = cardWidth + gap;
-
-  // Sync centerOffset when container or active status mounts
-  useEffect(() => {
-    if (isMounted && containerRef.current) {
-      const containerWidth = containerRef.current.offsetWidth;
-      setCenterOffset((containerWidth / 2) - (cardWidth / 2));
-    }
-  }, [categories, cardWidth, isMounted]);
 
   // Reset animation flag on next render frame
   useEffect(() => {
@@ -219,7 +216,8 @@ export default function CategoriesSlider({ categories }: CategoriesSliderProps) 
 
       {/* Slider Viewport */}
       <div className="w-full flex justify-start">
-        <motion.div
+        <LazyMotion features={domAnimation}>
+        <m.div
           drag="x"
           dragConstraints={{
             left: centerOffset - ((extendedCategories.length - 1) * step),
@@ -253,7 +251,7 @@ export default function CategoriesSlider({ categories }: CategoriesSliderProps) 
             const zIndex = 10 - absDiff;
 
             return (
-              <motion.div
+              <m.div
                 key={`${cat.slug}-${index}`}
                 animate={{
                   scale,
@@ -305,10 +303,11 @@ export default function CategoriesSlider({ categories }: CategoriesSliderProps) 
                     </span>
                   </div>
                 </Link>
-              </motion.div>
+              </m.div>
             );
           })}
-        </motion.div>
+        </m.div>
+        </LazyMotion>
       </div>
 
       {/* Right Navigation Arrow */}

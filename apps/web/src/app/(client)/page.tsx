@@ -1,20 +1,28 @@
 import Link from "next/link";
 export const revalidate = 60;
+import dynamic from "next/dynamic";
 import {
   ArrowRight, Clock, Users, Star, Search, ChevronRight, ChevronLeft, Heart, Play, Mail,
   CheckCircle, ShieldCheck, Zap, Sparkles, X, Coffee, Salad, CookingPot, Cake, Leaf,
   WheatOff, Timer, CupSoda, Soup, Waves, Utensils,
   Pizza, Sandwich, Apple, Fish, Croissant, Carrot, Flame, Tag, LayoutGrid
 } from "lucide-react";
-import { Footer } from '@/components/layout/Footer';
 import { api } from "@/lib/api-client";
-import FeaturedRecipes from "@/components/home/FeaturedRecipes";
-import TopArticlesSection from "@/components/home/TopArticlesSection";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import DraggableSponsoredCard from "@/components/home/DraggableSponsoredCard";
-import CategoriesSlider from "@/components/home/CategoriesSlider";
+
+// Dynamic imports for below-the-fold heavy components
+const FeaturedRecipes = dynamic(() => import("@/components/home/FeaturedRecipes"), {
+  loading: () => <div className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-8"><div className="h-96 bg-card/10 rounded-[32px] animate-pulse" /></div>,
+});
+const TopArticlesSection = dynamic(() => import("@/components/home/TopArticlesSection"), {
+  loading: () => <div className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-8"><div className="h-96 bg-card/10 rounded-[32px] animate-pulse" /></div>,
+});
+const CategoriesSlider = dynamic(() => import("@/components/home/CategoriesSlider"), {
+  loading: () => <div className="h-24 bg-card/10 rounded-2xl animate-pulse" />,
+});
+const DraggableSponsoredCard = dynamic(() => import("@/components/home/DraggableSponsoredCard"));
 
 export default async function HomePage() {
 

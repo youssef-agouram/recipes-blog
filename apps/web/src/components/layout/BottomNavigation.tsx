@@ -8,15 +8,18 @@ import { RootState } from '@/store/store';
 import { Home, Heart, Bookmark, User, Search, Plus, LogIn, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+import { useGetSavedRecipesQuery } from '@/store/api/recipeApi';
+import { useGetSavedArticlesQuery } from '@/store/api/articleApi';
+
 export function BottomNavigation() {
   const pathname = usePathname();
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
 
-  // Read saved recipes from Redux to show red badge
-  const { data: savedRecipes } = useSelector((state: any) => state.api?.queries?.['getSavedRecipes(undefined)'] || {});
-  const { data: savedArticles } = useSelector((state: any) => state.api?.queries?.['getSavedArticles(undefined)'] || {});
+  // Read saved recipes and articles using standard RTK Query hooks
+  const { data: savedRecipes } = useGetSavedRecipesQuery(undefined, { skip: !isAuthenticated });
+  const { data: savedArticles } = useGetSavedArticlesQuery(undefined, { skip: !isAuthenticated });
   const totalSaved = (savedRecipes?.length || 0) + (savedArticles?.length || 0);
 
   // Tabs configured to match the user's reference image

@@ -1,9 +1,9 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Clock, Star, Heart, Bookmark, ChevronUp, Search } from 'lucide-react';
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { LazyMotion, domAnimation, m, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Recipe } from '@/lib/types';
 import {
   useSaveRecipeMutation,
@@ -42,7 +42,25 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
   const [searchQuery, setSearchQuery] = useState('');
   const [localSaved, setLocalSaved] = useState<Record<number, boolean>>({});
   const [localFavorited, setLocalFavorited] = useState<Record<number, boolean>>({});
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const scrollRef = useRef<HTMLDivElement>(null);
+  const containerWidthRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        containerWidthRef.current = entry.contentRect.width;
+      }
+    });
+    observer.observe(scrollRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleSaveToggle = async (e: React.MouseEvent, recipe: Recipe) => {
     e.preventDefault();
@@ -118,9 +136,9 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+      const width = containerWidthRef.current || scrollRef.current.clientWidth || 300;
+      const delta = direction === 'left' ? -width : width;
+      scrollRef.current.scrollBy({ left: delta, behavior: 'smooth' });
     }
   };
 
@@ -136,6 +154,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
 
 
   return (
+    <LazyMotion features={domAnimation}>
     <LayoutGroup id="featured-recipes-group">
       <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-8 sm:py-6 border-t border-border">
         <div className="flex items-center justify-between mb-6 gap-2">
@@ -177,7 +196,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
         <div className="relative group">
           <AnimatePresence>
             {!isExpanded && (
-              <motion.button
+              <m.button
                 initial={{ opacity: 0, scale: 0.8, y: "-50%", x: -10 }}
                 animate={{ opacity: 0.9, scale: 1, y: "-50%", x: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: "-50%", x: -10 }}
@@ -186,13 +205,13 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                 className="hidden md:flex absolute -left-4 top-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all shadow-2xl"
               >
                 <ChevronLeft className="w-5 h-5" />
-              </motion.button>
+              </m.button>
             )}
           </AnimatePresence>
 
           <AnimatePresence mode="wait">
             {!isExpanded ? (
-              <motion.div
+              <m.div
                 key="carousel"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -206,11 +225,11 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                   const isSavedFromStore = savedRecipes?.some(r => r.id === recipe.id) ?? false;
                   const isFavoritedFromStore = favoritedRecipes?.some(r => r.id === recipe.id) ?? false;
 
-                  const isSaved = localSaved[recipe.id] ?? isSavedFromStore ?? recipe.isSaved;
-                  const isFavorited = localFavorited[recipe.id] ?? isFavoritedFromStore ?? recipe.isFavorited;
+                  const isSaved = mounted ? (localSaved[recipe.id] ?? isSavedFromStore ?? recipe.isSaved) : (recipe.isSaved ?? false);
+                  const isFavorited = mounted ? (localFavorited[recipe.id] ?? isFavoritedFromStore ?? recipe.isFavorited) : (recipe.isFavorited ?? false);
 
                   return (
-                    <motion.div
+                    <m.div
                       key={recipe.id}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -225,6 +244,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                         <div className="relative aspect-[4/3] w-full overflow-hidden">
                           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
                             <button
+                              suppressHydrationWarning
                               onClick={(e) => handleSaveToggle(e, recipe)}
                               className={cn(
                                 "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
@@ -236,6 +256,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                               <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
                             </button>
                             <button
+                              suppressHydrationWarning
                               onClick={(e) => handleFavoriteToggle(e, recipe)}
                               className={cn(
                                 "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
@@ -280,7 +301,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                           </div>
                         </div>
                       </Link>
-                    </motion.div>
+                    </m.div>
                   );
                 })}
 
@@ -301,9 +322,9 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                     </div>
                   </div>
                 ))}
-              </motion.div>
+              </m.div>
             ) : (
-              <motion.div
+              <m.div
                 key="grid"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -318,11 +339,11 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                   const isSavedFromStore = savedRecipes?.some(r => r.id === recipe.id) ?? false;
                   const isFavoritedFromStore = favoritedRecipes?.some(r => r.id === recipe.id) ?? false;
 
-                  const isSaved = localSaved[recipe.id] ?? isSavedFromStore ?? recipe.isSaved;
-                  const isFavorited = localFavorited[recipe.id] ?? isFavoritedFromStore ?? recipe.isFavorited;
+                  const isSaved = mounted ? (localSaved[recipe.id] ?? isSavedFromStore ?? recipe.isSaved) : (recipe.isSaved ?? false);
+                  const isFavorited = mounted ? (localFavorited[recipe.id] ?? isFavoritedFromStore ?? recipe.isFavorited) : (recipe.isFavorited ?? false);
 
                   return (
-                    <motion.div
+                    <m.div
                       key={recipe.id}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -337,6 +358,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                         <div className="relative aspect-[4/3] w-full overflow-hidden">
                           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
                             <button
+                              suppressHydrationWarning
                               onClick={(e) => handleSaveToggle(e, recipe)}
                               className={cn(
                                 "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
@@ -348,6 +370,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                               <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
                             </button>
                             <button
+                              suppressHydrationWarning
                               onClick={(e) => handleFavoriteToggle(e, recipe)}
                               className={cn(
                                 "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
@@ -392,7 +415,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                           </div>
                         </div>
                       </Link>
-                    </motion.div>
+                    </m.div>
                   );
                 })}
 
@@ -413,13 +436,13 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                     </div>
                   </div>
                 ))}
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
 
         <AnimatePresence>
           {!isExpanded && (
-            <motion.button
+            <m.button
               initial={{ opacity: 0, scale: 0.8, y: "-50%", x: 10 }}
               animate={{ opacity: 0.9, scale: 1, y: "-50%", x: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: "-50%", x: 10 }}
@@ -428,11 +451,12 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
               className="hidden md:flex absolute -right-4 top-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all shadow-2xl"
             >
               <ChevronRight className="w-5 h-5" />
-            </motion.button>
+            </m.button>
           )}
         </AnimatePresence>
       </div>
     </section>
   </LayoutGroup>
+    </LazyMotion>
   );
 }

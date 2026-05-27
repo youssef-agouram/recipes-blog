@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   ChevronLeft, 
@@ -13,7 +13,7 @@ import {
   ArrowRight, 
   Search 
 } from 'lucide-react';
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { LazyMotion, domAnimation, m, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Recipe } from '@/lib/types';
 import { 
   useSaveRecipeMutation, 
@@ -66,7 +66,32 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
   const [searchQuery, setSearchQuery] = useState('');
   const [localSaved, setLocalSaved] = useState<Record<string, boolean>>({});
   const [localFavorited, setLocalFavorited] = useState<Record<string, boolean>>({});
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const getStableDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
+  };
   const scrollRef = useRef<HTMLDivElement>(null);
+  const containerWidthRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        containerWidthRef.current = entry.contentRect.width;
+      }
+    });
+    observer.observe(scrollRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleSaveToggle = async (e: React.MouseEvent, item: any, isRecipe: boolean) => {
     e.preventDefault();
@@ -164,13 +189,14 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+      const width = containerWidthRef.current || scrollRef.current.clientWidth || 300;
+      const delta = direction === 'left' ? -width : width;
+      scrollRef.current.scrollBy({ left: delta, behavior: 'smooth' });
     }
   };
 
   return (
+    <LazyMotion features={domAnimation}>
     <LayoutGroup id="top-articles-group">
       <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-8 sm:py-6 border-t border-border">
         <div className="flex items-center justify-between mb-6 gap-2">
@@ -208,7 +234,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
         <div className="relative group">
           <AnimatePresence>
             {!isExpanded && (
-              <motion.button
+              <m.button
                 initial={{ opacity: 0, scale: 0.8, y: "-50%", x: -10 }}
                 animate={{ opacity: 0.9, scale: 1, y: "-50%", x: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: "-50%", x: -10 }}
@@ -217,13 +243,13 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                 className="hidden md:flex absolute -left-4 top-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all shadow-2xl"
               >
                 <ChevronLeft className="w-5 h-5" />
-              </motion.button>
+              </m.button>
             )}
           </AnimatePresence>
 
           <AnimatePresence mode="wait">
             {!isExpanded ? (
-              <motion.div
+              <m.div
                 key="carousel"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -237,7 +263,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                   const isRecipe = 'prepTime' in item || 'totalTime' in item;
                   const url = isRecipe ? `/recipes/${item.slug}` : `/blog/${item.slug}`;
                   const category = isRecipe ? (item.categories?.[0]?.name || 'Recipe') : (item.category || 'Article');
-                  const date = new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                  const date = getStableDate(item.createdAt);
 
                   const key = `${isRecipe ? 'recipe' : 'article'}-${item.id}`;
                   
@@ -253,11 +279,11 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                     isFavoritedFromStore = favoritedArticles?.some((a: any) => a.id === item.id) ?? false;
                   }
 
-                  const isSaved = localSaved[key] ?? isSavedFromStore ?? item.isSaved;
-                  const isFavorited = localFavorited[key] ?? isFavoritedFromStore ?? item.isFavorited;
+                  const isSaved = mounted ? (localSaved[key] ?? isSavedFromStore ?? item.isSaved) : (item.isSaved ?? false);
+                  const isFavorited = mounted ? (localFavorited[key] ?? isFavoritedFromStore ?? item.isFavorited) : (item.isFavorited ?? false);
 
                   return (
-                    <motion.div
+                    <m.div
                       key={item.id || idx}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -277,6 +303,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                           </div>
                           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
                             <button
+                              suppressHydrationWarning
                               onClick={(e) => handleSaveToggle(e, item, isRecipe)}
                               className={cn(
                                 "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
@@ -288,6 +315,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                               <Bookmark className={cn("w-4.5 h-4.5", isSaved && "fill-current")} />
                             </button>
                             <button
+                              suppressHydrationWarning
                               onClick={(e) => handleFavoriteToggle(e, item, isRecipe)}
                               className={cn(
                                 "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
@@ -327,7 +355,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                           </button>
                         </div>
                       </Link>
-                    </motion.div>
+                    </m.div>
                   );
                 })}
 
@@ -337,9 +365,9 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                     className="animate-pulse bg-card rounded-xl h-[260px] border border-border min-w-[280px] md:min-w-[calc(20%-13px)]"
                   />
                 ))}
-              </motion.div>
+              </m.div>
             ) : (
-              <motion.div
+              <m.div
                 key="grid"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -354,7 +382,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                   const isRecipe = 'prepTime' in item || 'totalTime' in item;
                   const url = isRecipe ? `/recipes/${item.slug}` : `/blog/${item.slug}`;
                   const category = isRecipe ? (item.categories?.[0]?.name || 'Recipe') : (item.category || 'Article');
-                  const date = new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                  const date = getStableDate(item.createdAt);
 
                   const key = `${isRecipe ? 'recipe' : 'article'}-${item.id}`;
                   
@@ -370,11 +398,11 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                     isFavoritedFromStore = favoritedArticles?.some((a: any) => a.id === item.id) ?? false;
                   }
 
-                  const isSaved = localSaved[key] ?? isSavedFromStore ?? item.isSaved;
-                  const isFavorited = localFavorited[key] ?? isFavoritedFromStore ?? item.isFavorited;
+                  const isSaved = mounted ? (localSaved[key] ?? isSavedFromStore ?? item.isSaved) : (item.isSaved ?? false);
+                  const isFavorited = mounted ? (localFavorited[key] ?? isFavoritedFromStore ?? item.isFavorited) : (item.isFavorited ?? false);
 
                   return (
-                    <motion.div
+                    <m.div
                       key={item.id || idx}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -394,6 +422,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                           </div>
                           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
                             <button
+                              suppressHydrationWarning
                               onClick={(e) => handleSaveToggle(e, item, isRecipe)}
                               className={cn(
                                 "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
@@ -405,6 +434,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                               <Bookmark className={cn("w-4.5 h-4.5", isSaved && "fill-current")} />
                             </button>
                             <button
+                              suppressHydrationWarning
                               onClick={(e) => handleFavoriteToggle(e, item, isRecipe)}
                               className={cn(
                                 "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
@@ -444,7 +474,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                           </button>
                         </div>
                       </Link>
-                    </motion.div>
+                    </m.div>
                   );
                 })}
 
@@ -454,13 +484,13 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                     className="animate-pulse bg-card rounded-xl h-[260px] border border-border w-full"
                   />
                 ))}
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
 
         <AnimatePresence>
           {!isExpanded && (
-            <motion.button
+            <m.button
               initial={{ opacity: 0, scale: 0.8, y: "-50%", x: 10 }}
               animate={{ opacity: 0.9, scale: 1, y: "-50%", x: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: "-50%", x: 10 }}
@@ -469,11 +499,12 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
               className="hidden md:flex absolute -right-4 top-1/2 z-30 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all shadow-2xl"
             >
               <ChevronRight className="w-5 h-5" />
-            </motion.button>
+            </m.button>
           )}
         </AnimatePresence>
       </div>
     </section>
   </LayoutGroup>
+    </LazyMotion>
   );
 }
