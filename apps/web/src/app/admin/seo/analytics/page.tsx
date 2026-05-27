@@ -43,7 +43,7 @@ const topRecipePages = [
 
 export default function AnalyticsDashboardPage() {
   const { data: settings } = useGetAnalyticsSettingsQuery();
-  const { data: statsData, isLoading } = useGetDashboardStatsQuery();
+  const { data: statsData, isLoading } = useGetDashboardStatsQuery(undefined, { pollingInterval: 60000 });
   const [activeTab, setActiveTab] = useState<'overview' | 'pageviews' | 'sessions'>('overview');
 
   const isConfigured = !!(settings?.ga4Id || settings?.googleAnalyticsId || process.env.NEXT_PUBLIC_GA_ID);

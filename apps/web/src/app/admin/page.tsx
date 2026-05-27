@@ -29,7 +29,7 @@ import { AdSenseOverviewCard } from '@/components/admin/dashboard/AdSenseOvervie
 
 export default function AdminDashboardPage() {
   const user = useSelector((state: RootState) => state.auth.user);
-  const { data: statsData, isLoading } = useGetDashboardStatsQuery();
+  const { data: statsData, isLoading } = useGetDashboardStatsQuery(undefined, { pollingInterval: 60000 });
 
   if (isLoading) {
     return (
