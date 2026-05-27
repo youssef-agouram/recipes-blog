@@ -6,6 +6,8 @@ import authReducer from './slices/authSlice';
 // Import injected endpoints to ensure they are registered
 import './api/recipeApi';
 import './api/categoryApi';
+import './api/userApi';
+import './api/articleApi';
 
 export const store = configureStore({
   reducer: {

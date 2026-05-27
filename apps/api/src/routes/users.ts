@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
+import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -61,14 +62,41 @@ router.patch('/:id/role', async (req: Request, res: Response, next: NextFunction
 });
 
 // PUT /users/:id
-router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { name, email, status } = req.body;
+    const targetUserId = parseInt(id as string);
+
+    // 1. Get current requesting user to check permissions
+    const requestingUser = await prisma.user.findUnique({
+      where: { id: req.userId },
+    });
+
+    if (!requestingUser) {
+      return res.status(404).json({ error: 'Requesting user not found' });
+    }
+
+    // 2. A user can only update their own profile, UNLESS they are an Administrator
+    if (req.userId !== targetUserId && requestingUser.role !== 'Administrator') {
+      return res.status(403).json({ error: 'Forbidden: You cannot modify other users' });
+    }
+
+    const { name, email, status, avatar } = req.body;
+
+    // 3. Build update body
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (avatar !== undefined) updateData.avatar = avatar;
+
+    // Only administrators can change the status
+    if (requestingUser.role === 'Administrator') {
+      if (status !== undefined) updateData.status = status;
+    }
 
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id as string) },
-      data: { name, email, status },
+      where: { id: targetUserId },
+      data: updateData,
     });
 
     const { password, ...userWithoutPassword } = updatedUser;

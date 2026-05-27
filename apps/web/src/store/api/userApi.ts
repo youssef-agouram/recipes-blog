@@ -36,7 +36,7 @@ export const userApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['User'],
     }),
-    updateUserDetails: builder.mutation<User, { id: number; name: string; email: string; status: string }>({
+    updateUserDetails: builder.mutation<User, { id: number; name?: string; email?: string; status?: string; avatar?: string | null }>({
       query: ({ id, ...body }) => ({
         url: `/users/${id}`,
         method: 'PUT',

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
@@ -47,6 +47,12 @@ export function Navbar() {
 
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setProfileDropdownOpen(false);
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   const [topAdIndex, setTopAdIndex] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -537,7 +543,6 @@ export function Navbar() {
                              {/* Menu Items */}
                              <div className="p-2">
                                {[
-                                 { icon: BookOpen, label: 'My Recipes', href: '/my-recipes' },
                                  { 
                                    icon: Heart, 
                                    label: 'Favorites', 
