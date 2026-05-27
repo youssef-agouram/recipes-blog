@@ -8,17 +8,33 @@ export const metadata = {
   description: "Explore our collection of expert culinary guides, cooking techniques, kitchen tips, and lifestyle stories.",
 };
 
+const DEFAULT_META = {
+  total: 0,
+  page: 1,
+  limit: 6,
+  totalPages: 0
+};
+
 export default async function BlogPage() {
   try {
-    const articles = await api.articles.list().catch(() => []);
+    const response = await api.articles.list({ page: 1, limit: 6 }).catch(() => ({ data: [], meta: DEFAULT_META }));
+    const categories = await api.articles.getCategories().catch(() => []);
     
     return (
-      <BlogPageContent initialArticles={articles} />
+      <BlogPageContent 
+        initialArticles={response?.data || []} 
+        initialMeta={response?.meta || DEFAULT_META}
+        categories={categories}
+      />
     );
   } catch (error) {
     console.error("Error fetching articles:", error);
     return (
-      <BlogPageContent initialArticles={[]} />
+      <BlogPageContent 
+        initialArticles={[]} 
+        initialMeta={DEFAULT_META}
+        categories={[]}
+      />
     );
   }
 }

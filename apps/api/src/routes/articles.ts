@@ -10,33 +10,81 @@ const router = Router();
 router.get('/', optionalAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.userId;
-    const { limit = 10, isTopArticle } = req.query;
+    const { limit = 10, page, isTopArticle, category, search } = req.query;
     const where: any = {};
     
     if (isTopArticle === 'true') {
       where.isTopArticle = true;
     }
+    if (category && category !== 'All') {
+      where.category = category as string;
+    }
+    if (search) {
+      where.OR = [
+        { title: { contains: search as string, mode: 'insensitive' } },
+        { summary: { contains: search as string, mode: 'insensitive' } }
+      ];
+    }
 
-    const articles = await prisma.article.findMany({
-      where,
-      take: Number(limit),
-      include: {
-        ...(userId ? { 
-          savedArticles: { where: { userId } },
-          favoriteArticles: { where: { userId } }
-        } : {})
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    if (page) {
+      const pageNum = Number(page);
+      const limitNum = Number(limit);
+      const skip = (pageNum - 1) * limitNum;
 
-    const processed = articles.map(a => {
-      const isSaved = userId ? a.savedArticles.length > 0 : false;
-      const isFavorited = userId ? a.favoriteArticles.length > 0 : false;
-      const { savedArticles, favoriteArticles, ...rest } = a;
-      return { ...rest, isSaved, isFavorited };
-    });
+      const [articles, total] = await Promise.all([
+        prisma.article.findMany({
+          where,
+          skip,
+          take: limitNum,
+          include: {
+            ...(userId ? { 
+              savedArticles: { where: { userId } },
+              favoriteArticles: { where: { userId } }
+            } : {})
+          },
+          orderBy: { createdAt: 'desc' },
+        }),
+        prisma.article.count({ where }),
+      ]);
 
-    res.json(processed);
+      const processed = articles.map(a => {
+        const isSaved = userId ? a.savedArticles.length > 0 : false;
+        const isFavorited = userId ? a.favoriteArticles.length > 0 : false;
+        const { savedArticles, favoriteArticles, ...rest } = a;
+        return { ...rest, isSaved, isFavorited };
+      });
+
+      res.json({
+        data: processed,
+        meta: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages: Math.ceil(total / limitNum),
+        },
+      });
+    } else {
+      const articles = await prisma.article.findMany({
+        where,
+        ...(limit ? { take: Number(limit) } : {}),
+        include: {
+          ...(userId ? { 
+            savedArticles: { where: { userId } },
+            favoriteArticles: { where: { userId } }
+          } : {})
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      const processed = articles.map(a => {
+        const isSaved = userId ? a.savedArticles.length > 0 : false;
+        const isFavorited = userId ? a.favoriteArticles.length > 0 : false;
+        const { savedArticles, favoriteArticles, ...rest } = a;
+        return { ...rest, isSaved, isFavorited };
+      });
+
+      res.json(processed);
+    }
   } catch (error) {
     next(error);
   }
@@ -87,6 +135,25 @@ router.get('/favorited', authMiddleware, async (req: AuthRequest, res: Response,
     next(error);
   }
 });
+
+
+// Client: Get all distinct article categories
+router.get('/categories', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const articles = await prisma.article.findMany({
+      select: { category: true },
+      distinct: ['category'],
+      where: { category: { not: null } }
+    });
+    const categories = articles
+      .map(a => a.category)
+      .filter((cat): cat is string => typeof cat === 'string' && cat.trim() !== '');
+    res.json(categories);
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 
 // Get article by slug

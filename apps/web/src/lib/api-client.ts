@@ -45,10 +45,16 @@ export const api = {
     list: () => fetcher<Category[]>("/categories"),
   },
   articles: {
-    list: (params?: { limit?: number }) => {
-      const query = params?.limit ? `?limit=${params.limit}` : "";
-      return fetcher<any[]>(`/articles${query}`);
+    list: (params?: { page?: number; limit?: number; category?: string; search?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.append("page", params.page.toString());
+      if (params?.limit) searchParams.append("limit", params.limit.toString());
+      if (params?.category) searchParams.append("category", params.category);
+      if (params?.search) searchParams.append("search", params.search);
+      const query = searchParams.toString() ? `?${searchParams.toString()}` : "";
+      return fetcher<any>(`/articles${query}`);
     },
+    getCategories: () => fetcher<string[]>("/articles/categories"),
     getBySlug: (slug: string) => fetcher<any>(`/articles/${slug}`),
   },
   settings: {

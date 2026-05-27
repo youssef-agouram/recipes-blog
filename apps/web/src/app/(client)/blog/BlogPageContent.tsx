@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, Calendar, Clock, ArrowRight, BookOpen, Sparkles, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api-client";
 
 interface Article {
   id: number;
@@ -19,32 +20,147 @@ interface Article {
   updatedAt: string;
 }
 
-interface BlogPageContentProps {
-  initialArticles: Article[];
+interface PaginatedMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
-export default function BlogPageContent({ initialArticles }: BlogPageContentProps) {
+interface BlogPageContentProps {
+  initialArticles: Article[];
+  initialMeta: PaginatedMeta;
+  categories: string[];
+}
+
+function LocalArticleCardSkeleton() {
+  return (
+    <div className="flex flex-col bg-card/25 rounded-2xl overflow-hidden border border-white/5 h-full animate-pulse">
+      {/* Image skeleton */}
+      <div className="relative aspect-[16/10] w-full bg-white/5" />
+      {/* Content skeleton */}
+      <div className="p-5 flex flex-col flex-1">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="h-3 w-16 bg-white/10 rounded" />
+          <div className="h-3 w-16 bg-white/10 rounded" />
+        </div>
+        <div className="h-4 w-full bg-white/10 rounded mb-2" />
+        <div className="h-4 w-2/3 bg-white/10 rounded mb-4" />
+        <div className="h-3 w-full bg-white/5 rounded mb-2" />
+        <div className="h-3 w-5/6 bg-white/5 rounded mb-4" />
+        <div className="h-3 w-16 bg-white/10 rounded mt-auto" />
+      </div>
+    </div>
+  );
+}
+
+export default function BlogPageContent({ initialArticles, initialMeta, categories }: BlogPageContentProps) {
+  const [articles, setArticles] = useState<Article[]>(initialArticles);
+  const [page, setPage] = useState(initialMeta.page);
+  const [totalPages, setTotalPages] = useState(initialMeta.totalPages);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // Dynamically extract categories from articles list
-  const categories = ["All", ...Array.from(new Set(initialArticles.map(a => a.category).filter(Boolean))) as string[]];
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const isMounted = useRef(false);
 
-  // Filter articles based on search query and category
-  const filteredArticles = initialArticles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (article.summary || "").toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCategory = selectedCategory === "All" || article.category === selectedCategory;
+  // Combine "All" with pre-fetched categories
+  const categoriesList = ["All", ...categories];
 
-    return matchesSearch && matchesCategory;
-  });
+  // Debounce search query changes
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Fetch initial/reset pages when category or search query changes
+  const fetchFilteredArticles = useCallback(async (cat: string, search: string) => {
+    setLoading(true);
+    try {
+      const response = await api.articles.list({
+        page: 1,
+        limit: 6,
+        category: cat === "All" ? undefined : cat,
+        search: search || undefined
+      });
+      setArticles(response?.data || []);
+      setPage(1);
+      setTotalPages(response?.meta?.totalPages || 0);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+    fetchFilteredArticles(selectedCategory, debouncedSearch);
+  }, [selectedCategory, debouncedSearch, fetchFilteredArticles]);
+
+  // Load more pages for infinite scrolling
+  const loadMoreArticles = useCallback(async () => {
+    if (loading || page >= totalPages) return;
+    setLoading(true);
+    try {
+      const nextPage = page + 1;
+      const response = await api.articles.list({
+        page: nextPage,
+        limit: 6,
+        category: selectedCategory === "All" ? undefined : selectedCategory,
+        search: debouncedSearch || undefined
+      });
+      
+      setArticles(prev => {
+        const existingIds = new Set(prev.map(a => a.id));
+        const newItems = (response?.data || []).filter((a: Article) => !existingIds.has(a.id));
+        return [...prev, ...newItems];
+      });
+      setPage(nextPage);
+      setTotalPages(response?.meta?.totalPages || 0);
+    } catch (error) {
+      console.error("Error loading more articles:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, totalPages, loading, selectedCategory, debouncedSearch]);
+
+  // Setup intersection observer for infinite scroll
+  useEffect(() => {
+    if (page >= totalPages) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !loading) {
+        loadMoreArticles();
+      }
+    }, {
+      rootMargin: "200px"
+    });
+
+    const currentLoader = loaderRef.current;
+    if (currentLoader) {
+      observer.observe(currentLoader);
+    }
+
+    return () => {
+      if (currentLoader) {
+        observer.unobserve(currentLoader);
+      }
+    };
+  }, [loadMoreArticles, page, totalPages, loading]);
 
   // Find the top/featured article for the hero banner
-  const featuredArticle = filteredArticles.find(a => a.isTopArticle) || filteredArticles[0];
+  const featuredArticle = articles.find(a => a.isTopArticle) || articles[0];
   const regularArticles = featuredArticle 
-    ? filteredArticles.filter(a => a.id !== featuredArticle.id)
-    : filteredArticles;
+    ? articles.filter(a => a.id !== featuredArticle.id)
+    : articles;
 
   return (
     <div className="w-full bg-background text-foreground pb-24 min-h-screen">
@@ -85,7 +201,7 @@ export default function BlogPageContent({ initialArticles }: BlogPageContentProp
             <Filter className="w-3.5 h-3.5" />
             <span className="text-[10px] font-black uppercase tracking-widest">Filter:</span>
           </div>
-          {categories.map((cat) => (
+          {categoriesList.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
@@ -149,13 +265,19 @@ export default function BlogPageContent({ initialArticles }: BlogPageContentProp
         )}
 
         {/* Regular Articles Grid */}
-        {filteredArticles.length > 0 ? (
+        {articles.length === 0 && loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <LocalArticleCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : articles.length > 0 ? (
           <div>
             <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-6">
               {searchQuery || selectedCategory !== "All" ? "Filter Results" : "Latest Articles"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {(searchQuery || selectedCategory !== "All" ? filteredArticles : regularArticles).map((article) => (
+              {(searchQuery !== "" || selectedCategory !== "All" ? articles : regularArticles).map((article) => (
                 <div
                   key={article.id}
                   className="group/card flex flex-col bg-card/25 rounded-2xl overflow-hidden border border-white/5 hover:border-white/10 hover:shadow-2xl transition-all duration-500 h-full"
@@ -212,6 +334,17 @@ export default function BlogPageContent({ initialArticles }: BlogPageContentProp
                 </div>
               ))}
             </div>
+
+            {/* Infinite Scroll Sensor & Skeletons while Loading More */}
+            {page < totalPages && (
+              <div ref={loaderRef} className="w-full flex justify-center mt-12 py-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <LocalArticleCardSkeleton key={i} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-20 bg-card/10 rounded-[32px] border border-white/5 p-6">
