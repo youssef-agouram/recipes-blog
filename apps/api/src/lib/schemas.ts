@@ -132,6 +132,8 @@ export const AnalyticsSettingsSchema = z.object({
   customScriptsCode: z.string().nullable().optional().or(z.literal("")),
   ga4Id: z.string().nullable().optional().or(z.literal("")),
   gtmId: z.string().nullable().optional().or(z.literal("")),
+  ga4PropertyId: z.string().nullable().optional().or(z.literal("")),
+  ga4ServiceAccount: z.string().nullable().optional().or(z.literal("")),
   analyticsEnabled: z.boolean().default(true),
   debugMode: z.boolean().default(false),
   trackingSettings: z.any().optional(),

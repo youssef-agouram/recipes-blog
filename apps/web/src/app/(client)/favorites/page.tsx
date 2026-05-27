@@ -4,6 +4,7 @@ import { useGetFavoritedRecipesQuery } from "@/store/api/recipeApi";
 import { useGetFavoritedArticlesQuery } from "@/store/api/articleApi";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 import { ArticleCard } from "@/components/articles/ArticleCard";
+import { ArticleCardSkeleton } from "@/components/articles/ArticleCardSkeleton";
 import { Heart, ChefHat, ArrowLeft, Newspaper, Utensils, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -76,7 +77,11 @@ export default function FavoritesPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="aspect-[4/3] bg-white/5 rounded-[32px] animate-pulse border border-white/10" />
+            activeTab === 'articles' ? (
+              <ArticleCardSkeleton key={i} />
+            ) : (
+              <div key={i} className="aspect-[4/3] bg-white/5 rounded-[32px] animate-pulse border border-white/10" />
+            )
           ))}
         </div>
       ) : activeTab === 'recipes' ? (

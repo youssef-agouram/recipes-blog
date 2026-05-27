@@ -10,7 +10,22 @@ const data = [
   { name: 'Tablet', value: 3633, percentage: '4.3%', color: '#f59e0b', icon: Tablet },
 ];
 
-export const DeviceAnalyticsChart = () => {
+export const DeviceAnalyticsChart = ({ devices }: { devices?: { name: string; value: number }[] }) => {
+  const chartData = React.useMemo(() => {
+    if (!devices || devices.length === 0 || devices.every(d => d.value === 0)) return data;
+    
+    const total = devices.reduce((sum, item) => sum + item.value, 0) || 1;
+    
+    return [
+      { name: 'Mobile', value: devices.find(d => d.name === 'Mobile')?.value || 0, color: '#5850ec', icon: Smartphone },
+      { name: 'Desktop', value: devices.find(d => d.name === 'Desktop')?.value || 0, color: '#22d3ee', icon: Monitor },
+      { name: 'Tablet', value: devices.find(d => d.name === 'Tablet')?.value || 0, color: '#f59e0b', icon: Tablet },
+    ].map(item => ({
+      ...item,
+      percentage: `${((item.value / total) * 100).toFixed(1)}%`
+    }));
+  }, [devices]);
+
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full">
       <div className="flex items-center justify-between mb-5">
@@ -27,7 +42,7 @@ export const DeviceAnalyticsChart = () => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={48}
@@ -36,7 +51,7 @@ export const DeviceAnalyticsChart = () => {
                 dataKey="value"
                 stroke="none"
               >
-                {data.map((entry, index) => (
+                {chartData.map((entry, index) => (
                   <Cell key={index} fill={entry.color} />
                 ))}
               </Pie>
@@ -66,7 +81,7 @@ export const DeviceAnalyticsChart = () => {
 
         {/* Legend */}
         <div className="flex-1 space-y-4">
-          {data.map((item) => {
+          {chartData.map((item) => {
             const Icon = item.icon;
             return (
               <div key={item.name} className="flex items-center justify-between">

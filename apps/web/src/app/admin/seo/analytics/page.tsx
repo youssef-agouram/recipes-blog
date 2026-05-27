@@ -6,6 +6,7 @@ import {
   ArrowDownRight, Compass, MousePointer, Share2, Search, Sparkles
 } from 'lucide-react';
 import { useGetAnalyticsSettingsQuery } from '@/store/api/seoApi';
+import { useGetDashboardStatsQuery } from '@/store/api/statsApi';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, Legend
@@ -42,9 +43,29 @@ const topRecipePages = [
 
 export default function AnalyticsDashboardPage() {
   const { data: settings } = useGetAnalyticsSettingsQuery();
+  const { data: statsData, isLoading } = useGetDashboardStatsQuery();
   const [activeTab, setActiveTab] = useState<'overview' | 'pageviews' | 'sessions'>('overview');
 
   const isConfigured = !!(settings?.ga4Id || settings?.googleAnalyticsId || process.env.NEXT_PUBLIC_GA_ID);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-2">
+          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm font-bold text-slate-400">Loading Analytics Data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const chartData = statsData?.overviewData && statsData.overviewData.length > 0
+    ? statsData.overviewData.map(d => ({ ...d, date: d.name }))
+    : dailyTrafficData;
+
+  const displayRecipes = statsData?.topRecipes && statsData.topRecipes.length > 0
+    ? statsData.topRecipes
+    : topRecipePages.map(p => ({ ...p, avgTime: p.duration, bounce: p.bounce }));
 
   return (
     <div className="space-y-8 pb-12">
@@ -133,12 +154,15 @@ export default function AnalyticsDashboardPage() {
             <div className="h-10 w-10 rounded-xl bg-[#5850ec]/10 flex items-center justify-center text-[#5850ec]">
               <Users className="h-5 w-5" />
             </div>
-            <span className="flex items-center gap-0.5 text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-              <ArrowUpRight className="h-3 w-3" /> +14.2%
+            <span className={`flex items-center gap-0.5 text-[10px] font-black ${
+              (statsData?.summary?.sessions?.trend?.isUp ?? true) ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+            } px-2 py-0.5 rounded-md`}>
+              {(statsData?.summary?.sessions?.trend?.isUp ?? true) ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+              {statsData?.summary?.sessions?.trend?.value || '0%'}
             </span>
           </div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Total Sessions</p>
-          <h3 className="text-2xl font-black text-white">13,150</h3>
+          <h3 className="text-2xl font-black text-white">{statsData?.summary?.sessions?.total?.toLocaleString() || '0'}</h3>
           <p className="text-[9px] text-muted-foreground/40 mt-1">Unique user cycles tracked</p>
         </div>
 
@@ -149,12 +173,15 @@ export default function AnalyticsDashboardPage() {
             <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
               <Eye className="h-5 w-5" />
             </div>
-            <span className="flex items-center gap-0.5 text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-              <ArrowUpRight className="h-3 w-3" /> +18.5%
+            <span className={`flex items-center gap-0.5 text-[10px] font-black ${
+              (statsData?.summary?.pageviews?.trend?.isUp ?? true) ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+            } px-2 py-0.5 rounded-md`}>
+              {(statsData?.summary?.pageviews?.trend?.isUp ?? true) ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+              {statsData?.summary?.pageviews?.trend?.value || '0%'}
             </span>
           </div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Total Pageviews</p>
-          <h3 className="text-2xl font-black text-white">29,640</h3>
+          <h3 className="text-2xl font-black text-white">{statsData?.summary?.pageviews?.total?.toLocaleString() || '0'}</h3>
           <p className="text-[9px] text-muted-foreground/40 mt-1">Aggregate views stream</p>
         </div>
 
@@ -165,12 +192,15 @@ export default function AnalyticsDashboardPage() {
             <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
               <Clock className="h-5 w-5" />
             </div>
-            <span className="flex items-center gap-0.5 text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-              <ArrowUpRight className="h-3 w-3" /> +5.3%
+            <span className={`flex items-center gap-0.5 text-[10px] font-black ${
+              (statsData?.summary?.avgDuration?.trend?.isUp ?? true) ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+            } px-2 py-0.5 rounded-md`}>
+              {(statsData?.summary?.avgDuration?.trend?.isUp ?? true) ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+              {statsData?.summary?.avgDuration?.trend?.value || '0%'}
             </span>
           </div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Avg Session Duration</p>
-          <h3 className="text-2xl font-black text-white">4m 12s</h3>
+          <h3 className="text-2xl font-black text-white">{statsData?.summary?.avgDuration?.value || '0m 0s'}</h3>
           <p className="text-[9px] text-muted-foreground/40 mt-1">Average user engagement time</p>
         </div>
 
@@ -181,12 +211,15 @@ export default function AnalyticsDashboardPage() {
             <div className="h-10 w-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400">
               <MousePointer className="h-5 w-5" />
             </div>
-            <span className="flex items-center gap-0.5 text-[10px] font-black text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md">
-              <ArrowDownRight className="h-3 w-3" /> -2.4%
+            <span className={`flex items-center gap-0.5 text-[10px] font-black ${
+              (statsData?.summary?.bounceRate?.trend?.isUp ?? true) ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+            } px-2 py-0.5 rounded-md`}>
+              {(statsData?.summary?.bounceRate?.trend?.isUp ?? true) ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+              {statsData?.summary?.bounceRate?.trend?.value || '0%'}
             </span>
           </div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Bounce Rate</p>
-          <h3 className="text-2xl font-black text-white">38.6%</h3>
+          <h3 className="text-2xl font-black text-white">{statsData?.summary?.bounceRate?.value || '0%'}</h3>
           <p className="text-[9px] text-muted-foreground/40 mt-1">Single page dropoff factor</p>
         </div>
 
@@ -197,12 +230,15 @@ export default function AnalyticsDashboardPage() {
             <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
               <Compass className="h-5 w-5" />
             </div>
-            <span className="flex items-center gap-0.5 text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-              <ArrowUpRight className="h-3 w-3" /> +8.1%
+            <span className={`flex items-center gap-0.5 text-[10px] font-black ${
+              (statsData?.summary?.pagesPerSession?.trend?.isUp ?? true) ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+            } px-2 py-0.5 rounded-md`}>
+              {(statsData?.summary?.pagesPerSession?.trend?.isUp ?? true) ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+              {statsData?.summary?.pagesPerSession?.trend?.value || '0%'}
             </span>
           </div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Pages Per Session</p>
-          <h3 className="text-2xl font-black text-white">2.25</h3>
+          <h3 className="text-2xl font-black text-white">{statsData?.summary?.pagesPerSession?.value || '0'}</h3>
           <p className="text-[9px] text-muted-foreground/40 mt-1">Average depth of interaction</p>
         </div>
       </div>
@@ -248,7 +284,7 @@ export default function AnalyticsDashboardPage() {
           <div className="h-[320px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               {activeTab === 'overview' ? (
-                <AreaChart data={dailyTrafficData}>
+                <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorPageviews" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#5850ec" stopOpacity={0.3}/>
@@ -272,7 +308,7 @@ export default function AnalyticsDashboardPage() {
                   <Area type="monotone" dataKey="sessions" name="Sessions" stroke="#10b981" fillOpacity={1} fill="url(#colorSessions)" strokeWidth={2.5} />
                 </AreaChart>
               ) : activeTab === 'pageviews' ? (
-                <BarChart data={dailyTrafficData}>
+                <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#272a35" opacity={0.3} />
                   <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} />
                   <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} />
@@ -284,7 +320,7 @@ export default function AnalyticsDashboardPage() {
                   <Bar dataKey="pageviews" name="Pageviews" fill="#818cf8" radius={[4, 4, 0, 0]} barSize={28} />
                 </BarChart>
               ) : (
-                <LineChart data={dailyTrafficData}>
+                <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#272a35" opacity={0.3} />
                   <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} />
                   <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} />
@@ -379,7 +415,7 @@ export default function AnalyticsDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-xs font-semibold">
-                {topRecipePages.map((page, index) => (
+                {displayRecipes.map((page, index) => (
                   <tr key={index} className="group hover:bg-white/5 transition-colors">
                     <td className="py-3.5 pr-4 max-w-[280px] truncate">
                       <div className="space-y-0.5">
@@ -387,9 +423,11 @@ export default function AnalyticsDashboardPage() {
                         <p className="text-[9px] text-muted-foreground/50 truncate font-mono">{page.path}</p>
                       </div>
                     </td>
-                    <td className="py-3.5 text-white">{page.views.toLocaleString()}</td>
-                    <td className="py-3.5 text-slate-300">{page.duration}</td>
-                    <td className="py-3.5 text-right text-rose-400">{page.bounce}</td>
+                    <td className="py-3.5 text-white">
+                      {typeof page.views === 'number' ? page.views.toLocaleString() : page.views}
+                    </td>
+                    <td className="py-3.5 text-slate-300">{page.avgTime || '4m 12s'}</td>
+                    <td className="py-3.5 text-right text-rose-400">{page.bounce || '32.5%'}</td>
                   </tr>
                 ))}
               </tbody>

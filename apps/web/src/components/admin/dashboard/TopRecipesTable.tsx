@@ -23,7 +23,9 @@ const mockRecipes: TopRecipeItem[] = [
   { id: 5, title: 'Fluffy Pancakes', category: 'Breakfast', views: '5,321', avgTime: '2m 34s', favorites: '543', comments: 25, imageUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=80&h=80&fit=crop' },
 ];
 
-export const TopRecipesTable = () => {
+export const TopRecipesTable = ({ recipes }: { recipes?: any[] }) => {
+  const displayRecipes = recipes && recipes.length > 0 ? recipes : mockRecipes;
+
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-5">
@@ -42,7 +44,7 @@ export const TopRecipesTable = () => {
 
       {/* Table Body */}
       <div className="flex-1 space-y-1">
-        {mockRecipes.map((recipe, index) => (
+        {displayRecipes.map((recipe, index) => (
           <div
             key={recipe.id}
             className="grid grid-cols-[24px_1fr_80px_70px_80px_70px] gap-2 items-center px-2 py-2.5 rounded-xl hover:bg-white/[0.03] transition-colors group"

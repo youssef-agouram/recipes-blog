@@ -17,6 +17,7 @@ import {
   useUpdateHeroSettingsMutation
 } from '@/store/api/settingsApi';
 import { useUploadImageMutation } from '@/store/api/recipeApi';
+import { toast } from 'sonner';
 
 export default function SiteIdentityPage() {
   const [activeSection, setActiveSection] = useState('navbar');
@@ -190,31 +191,34 @@ export default function SiteIdentityPage() {
 
   const handleSave = async () => {
     try {
-      const serializedMenuItems = formData.menuItems.map(({ id, ...rest }: any) => rest);
+      const serializedMenuItems = (formData.menuItems || []).map(({ id, ...rest }: any) => rest);
       
       const serializeAdList = (list: any[]) => {
+        if (!Array.isArray(list)) return [];
         return list
-          .filter(item => item.url.trim() !== '')
+          .filter(item => item?.url?.trim() !== '')
           .map(item => ({
-            url: item.url.trim(),
-            enabled: item.enabled !== false,
-            clickUrl: item.clickUrl ? item.clickUrl.trim() : ''
+            url: item?.url?.trim() || '',
+            enabled: item?.enabled !== false,
+            clickUrl: item?.clickUrl ? item.clickUrl.trim() : ''
           }));
       };
 
+      const adSettings = formData.adSettings || {};
+
       const finalAdSettings = {
-        showTopBarAd: formData.adSettings.showTopBarAd,
-        showBottomBarAd: formData.adSettings.showBottomBarAd,
-        showPopupAd: formData.adSettings.showPopupAd,
-        topBarAdLink: formData.adSettings.topBarAdLink.trim(),
-        bottomBarVideoLink: formData.adSettings.bottomBarVideoLink.trim(),
-        popupAdLink: formData.adSettings.popupAdLink.trim(),
-        topBarAdUrls: serializeAdList(formData.adSettings.topBarAdUrls),
-        bottomBarVideoUrls: serializeAdList(formData.adSettings.bottomBarVideoUrls),
-        popupAdImageUrls: serializeAdList(formData.adSettings.popupAdImageUrls),
-        topBarAdUrl: serializeAdList(formData.adSettings.topBarAdUrls).find(item => item.enabled)?.url || '',
-        bottomBarVideoUrl: serializeAdList(formData.adSettings.bottomBarVideoUrls).find(item => item.enabled)?.url || '',
-        popupAdImageUrl: serializeAdList(formData.adSettings.popupAdImageUrls).find(item => item.enabled)?.url || '',
+        showTopBarAd: !!adSettings.showTopBarAd,
+        showBottomBarAd: !!adSettings.showBottomBarAd,
+        showPopupAd: !!adSettings.showPopupAd,
+        topBarAdLink: adSettings.topBarAdLink?.trim() || '',
+        bottomBarVideoLink: adSettings.bottomBarVideoLink?.trim() || '',
+        popupAdLink: adSettings.popupAdLink?.trim() || '',
+        topBarAdUrls: serializeAdList(adSettings.topBarAdUrls),
+        bottomBarVideoUrls: serializeAdList(adSettings.bottomBarVideoUrls),
+        popupAdImageUrls: serializeAdList(adSettings.popupAdImageUrls),
+        topBarAdUrl: serializeAdList(adSettings.topBarAdUrls).find(item => item.enabled)?.url || '',
+        bottomBarVideoUrl: serializeAdList(adSettings.bottomBarVideoUrls).find(item => item.enabled)?.url || '',
+        popupAdImageUrl: serializeAdList(adSettings.popupAdImageUrls).find(item => item.enabled)?.url || '',
       };
 
       const siteSettingsPayload = {
@@ -223,14 +227,14 @@ export default function SiteIdentityPage() {
         adSettings: finalAdSettings
       };
 
-      const heroImagesArray = heroFormData.images
-        .map((item: any) => item.url.trim())
+      const heroImagesArray = (heroFormData.images || [])
+        .map((item: any) => item?.url?.trim() || '')
         .filter((url: string) => url !== '');
 
       const heroSettingsPayload = {
-        title: heroFormData.title,
-        subtitle: heroFormData.subtitle,
-        ctaText: heroFormData.ctaText,
+        title: heroFormData.title || '',
+        subtitle: heroFormData.subtitle || '',
+        ctaText: heroFormData.ctaText || '',
         imageUrl: heroImagesArray[0] || '',
         images: heroImagesArray
       };
@@ -239,8 +243,12 @@ export default function SiteIdentityPage() {
         updateSettings(siteSettingsPayload).unwrap(),
         updateHeroSettings(heroSettingsPayload).unwrap()
       ]);
-    } catch (err) {
-      console.error('Failed to save settings:', err);
+      
+      toast.success('Settings saved successfully!');
+    } catch (err: any) {
+      console.error('Failed to save settings:', err?.message || err);
+      console.error(err?.stack);
+      toast.error('Error saving settings: ' + (err?.message || JSON.stringify(err)));
     }
   };
 
@@ -476,15 +484,17 @@ export default function SiteIdentityPage() {
             <span className="text-white/60 text-[10px]">Site Identity</span>
           </div>
         </div>
-        <button 
-          onClick={handleSave}
-          disabled={isUpdating || isUpdatingHero}
-          className="flex items-center gap-2 px-8 py-2.5 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-[#5850ec]/40 active:scale-95 disabled:opacity-50"
-        >
-          {(isUpdating || isUpdatingHero) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          <span>{(isUpdating || isUpdatingHero) ? 'Saving...' : 'Save Changes'}</span>
-        </button>
       </div>
+      
+      {/* Floating Save Button */}
+      <button 
+        onClick={handleSave}
+        disabled={isUpdating || isUpdatingHero}
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-3 px-8 py-4 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-sm font-bold rounded-full transition-all shadow-[0_8px_30px_rgba(88,80,236,0.4)] hover:shadow-[0_12px_40px_rgba(88,80,236,0.6)] hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:hover:translate-y-0"
+      >
+        {(isUpdating || isUpdatingHero) ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+        <span>{(isUpdating || isUpdatingHero) ? 'Saving...' : 'Save Changes'}</span>
+      </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Sidebar Navigation */}
@@ -768,21 +778,27 @@ export default function SiteIdentityPage() {
                             />
                             
                             <div className="flex items-center justify-between gap-4">
-                              <button 
-                                onClick={() => {
-                                  const input = document.createElement('input');
-                                  input.type = 'file';
-                                  input.accept = 'image/*';
-                                  input.onchange = async (e: any) => {
-                                    const file = e.target.files?.[0];
-                                    if (!file) return;
-                                    const data = new FormData();
-                                    data.append('image', file);
+                              <input 
+                                type="file" 
+                                id={`hero-upload-${img.id}`} 
+                                className="hidden" 
+                                accept="image/*,video/mp4,video/webm"
+                                onChange={async (e: any) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const data = new FormData();
+                                  data.append('image', file);
+                                  try {
                                     const res = await uploadImage(data).unwrap();
                                     updateHeroImage(img.id, res.imageUrl);
-                                  };
-                                  input.click();
+                                  } catch (err: any) {
+                                    console.error('Upload failed:', err);
+                                    alert('Upload failed: ' + (err.message || JSON.stringify(err)));
+                                  }
                                 }}
+                              />
+                              <button 
+                                onClick={() => document.getElementById(`hero-upload-${img.id}`)?.click()}
                                 className="px-4 py-1.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold rounded-lg border border-white/10 transition-all"
                               >
                                 Upload Image

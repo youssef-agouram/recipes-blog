@@ -25,7 +25,10 @@ const liveData = [
   { time: '14:45', users: 126 },
 ];
 
-export const RealTimeVisitors = () => {
+export const RealTimeVisitors = ({ activeUsers }: { activeUsers?: { total: number; pages: { path: string; users: number }[] } }) => {
+  const displayTotal = activeUsers?.total ?? 126;
+  const displayPages = activeUsers?.pages ?? topPages;
+
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full flex flex-col">
       <h3 className="text-sm font-bold text-white mb-4">Real-Time Visitors</h3>
@@ -35,7 +38,7 @@ export const RealTimeVisitors = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-3xl font-black text-white">126</span>
+            <span className="text-3xl font-black text-white">{displayTotal}</span>
           </div>
           <p className="text-xs text-slate-400">Active Users</p>
         </div>
@@ -44,7 +47,7 @@ export const RealTimeVisitors = () => {
         <div className="flex-1">
           <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Top Active Pages</p>
           <div className="space-y-1.5">
-            {topPages.map((page) => (
+            {displayPages.map((page) => (
               <div key={page.path} className="flex items-center justify-between">
                 <span className="text-[11px] text-slate-300 font-medium truncate max-w-[160px]">{page.path}</span>
                 <span className="text-[11px] font-bold text-white">{page.users}</span>

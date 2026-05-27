@@ -34,7 +34,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const TrafficOverviewChart = () => {
+export const TrafficOverviewChart = ({ data }: { data?: any[] }) => {
+  const chartData = data && data.length > 0 ? data : trafficData;
+
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full">
       <div className="flex items-center justify-between mb-6">
@@ -59,7 +61,7 @@ export const TrafficOverviewChart = () => {
 
       <div className="h-[260px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={trafficData}>
+          <AreaChart data={chartData}>
             <defs>
               <linearGradient id="gradVisitors" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#5850ec" stopOpacity={0.3} />

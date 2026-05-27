@@ -111,6 +111,8 @@ export default function BlogPageContent({ initialArticles }: BlogPageContentProp
                   src={featuredArticle.imageUrl || "https://images.unsplash.com/photo-1490818387583-1baba5e6382b?auto=format&fit=crop&w=1200&q=80"}
                   alt={featuredArticle.title}
                   fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 60vw"
                   className="object-cover group-hover/featured:scale-[1.02] transition-transform duration-[1.5s]"
                 />
                 <span className="absolute top-4 left-4 px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-[8px] font-black uppercase tracking-[0.2em] shadow-xl">
@@ -165,6 +167,8 @@ export default function BlogPageContent({ initialArticles }: BlogPageContentProp
                           src={article.imageUrl}
                           alt={article.title}
                           fill
+                          loading="lazy"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover group-hover/card:scale-105 transition-transform duration-[1.5s]"
                         />
                       ) : (

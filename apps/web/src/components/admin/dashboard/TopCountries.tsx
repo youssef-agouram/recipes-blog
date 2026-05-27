@@ -44,7 +44,9 @@ const WorldMapSVG = () => (
   </svg>
 );
 
-export const TopCountries = () => {
+export const TopCountries = ({ countries: dynamicCountries }: { countries?: { name: string; value: number; percentage: string; color: string }[] }) => {
+  const displayCountries = dynamicCountries && dynamicCountries.length > 0 ? dynamicCountries : countries;
+
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-5">
@@ -62,7 +64,7 @@ export const TopCountries = () => {
 
       {/* Country List */}
       <div className="flex-1 space-y-3">
-        {countries.map((country) => (
+        {displayCountries.map((country) => (
           <div key={country.name} className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: country.color }} />

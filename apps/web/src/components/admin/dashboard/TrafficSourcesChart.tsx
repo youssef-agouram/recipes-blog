@@ -15,7 +15,10 @@ const data = [
 
 const total = data.reduce((sum, d) => sum + d.value, 0);
 
-export const TrafficSourcesChart = () => {
+export const TrafficSourcesChart = ({ sources }: { sources?: { name: string; value: number; percentage: string; color: string }[] }) => {
+  const chartData = sources && sources.length > 0 ? sources : data;
+  const total = chartData.reduce((sum, d) => sum + d.value, 0);
+
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full">
       <div className="flex items-center justify-between mb-5">
@@ -32,7 +35,7 @@ export const TrafficSourcesChart = () => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={55}
@@ -41,7 +44,7 @@ export const TrafficSourcesChart = () => {
                 dataKey="value"
                 stroke="none"
               >
-                {data.map((entry, index) => (
+                {chartData.map((entry, index) => (
                   <Cell key={index} fill={entry.color} />
                 ))}
               </Pie>
@@ -70,7 +73,7 @@ export const TrafficSourcesChart = () => {
  
         {/* Legend */}
         <div className="flex-1 space-y-2.5">
-          {data.map((item) => (
+          {chartData.map((item) => (
             <div key={item.name} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />

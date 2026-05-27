@@ -9,6 +9,7 @@ export interface DashboardStats {
     comments: { total: number; trend: { value: string; isUp: boolean } };
     sessions?: { total: number; trend: { value: string; isUp: boolean } };
     pageviews?: { total: number; trend: { value: string; isUp: boolean } };
+    uniqueVisitors?: { total: number; trend: { value: string; isUp: boolean } };
     avgDuration?: { value: string; trend: { value: string; isUp: boolean } };
     pagesPerSession?: { value: string; trend: { value: string; isUp: boolean } };
     bounceRate?: { value: string; trend: { value: string; isUp: boolean } };
@@ -19,8 +20,15 @@ export interface DashboardStats {
     pending: number;
   };
   recentComments: Comment[];
-  topRecipes: Partial<Recipe>[];
+  topRecipes: any[];
   overviewData: any[];
+  deviceData?: { name: string; value: number }[];
+  referrerData?: { name: string; value: number; percentage: string; color: string }[];
+  countryData?: { name: string; value: number; percentage: string; color: string }[];
+  activeUsers?: {
+    total: number;
+    pages: { path: string; users: number }[];
+  };
 }
 
 export const statsApi = apiService.injectEndpoints({

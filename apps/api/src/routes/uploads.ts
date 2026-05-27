@@ -96,46 +96,12 @@ router.post('/', authMiddleware, upload.single('image'), async (req: Request, re
     const result = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
     return res.json({ imageUrl: result.secure_url });
   } catch (err) {
-    console.error('Cloudinary upload failed, falling back to local/base64:', err);
+    console.error('Cloudinary upload failed, falling back to base64:', err);
 
-    // Detect Vercel production/preview environment
-    const isVercel = process.env.VERCEL || process.env.NODE_ENV === 'production';
-
-    if (isVercel) {
-      // In production fallback, convert the file directly to base64 Data URL
-      const base64Data = req.file.buffer.toString('base64');
-      const imageUrl = `data:${req.file.mimetype};base64,${base64Data}`;
-      return res.json({ imageUrl });
-    } else {
-      // In local development fallback, attempt to save the file locally
-      const uploadPath = path.resolve(__dirname, '../../../web/public/uploads');
-      
-      if (!fs.existsSync(uploadPath)) {
-        try {
-          fs.mkdirSync(uploadPath, { recursive: true });
-        } catch (mkdirErr) {
-          console.error('Failed to create local upload directory:', mkdirErr);
-          const base64Data = req.file.buffer.toString('base64');
-          const imageUrl = `data:${req.file.mimetype};base64,${base64Data}`;
-          return res.json({ imageUrl });
-        }
-      }
-
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      const filename = uniqueSuffix + path.extname(req.file.originalname);
-      const fullPath = path.join(uploadPath, filename);
-
-      try {
-        fs.writeFileSync(fullPath, req.file.buffer);
-        const imageUrl = `/uploads/${filename}`;
-        return res.json({ imageUrl });
-      } catch (writeErr) {
-        console.error('Failed to save file to local disk:', writeErr);
-        const base64Data = req.file.buffer.toString('base64');
-        const imageUrl = `data:${req.file.mimetype};base64,${base64Data}`;
-        return res.json({ imageUrl });
-      }
-    }
+    // Fall back to base64 data URI to avoid filesystem sync issues in dev and Vercel limitations
+    const base64Data = req.file.buffer.toString('base64');
+    const imageUrl = `data:${req.file.mimetype};base64,${base64Data}`;
+    return res.json({ imageUrl });
   }
 });
 

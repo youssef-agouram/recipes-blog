@@ -6,7 +6,7 @@ import Script from 'next/script';
 import { useGetAnalyticsSettingsQuery } from '@/store/api/seoApi';
 import * as gtag from '@/lib/gtag';
 
-function TrackRouteChange() {
+function TrackRouteChange({ gaId }: { gaId: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -18,7 +18,7 @@ function TrackRouteChange() {
     const url = query ? `${pathname}?${query}` : pathname;
     
     // Execute standard pageview tracking
-    gtag.pageview(url);
+    gtag.pageview(url, undefined, gaId);
     
     // Log visit in database for dashboard stats
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -50,7 +50,7 @@ function TrackRouteChange() {
         gtag.trackSearch(q, 1); // Track search queries automatically
       }
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, gaId]);
 
   return null;
 }
@@ -64,6 +64,12 @@ export function AnalyticsTracker() {
   const isEnabled = settings?.analyticsEnabled ?? true;
   const isDebug = settings?.debugMode ?? false;
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && gaId) {
+      (window as any).gtagId = gaId;
+    }
+  }, [gaId]);
+
   if (isLoading || !isEnabled || (!gaId && !gtmId)) {
     return null;
   }
@@ -72,7 +78,7 @@ export function AnalyticsTracker() {
     <>
       {/* Route change pageview tracking within Suspense boundary */}
       <Suspense fallback={null}>
-        <TrackRouteChange />
+        <TrackRouteChange gaId={gaId} />
       </Suspense>
 
       {/* Google Analytics 4 (GA4) Tag Script */}

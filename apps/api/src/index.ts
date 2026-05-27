@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Reload trigger: using supabase pooled on port 6543 with pgbouncer
+// Reload trigger: switched to local database on port 5432
 import express from 'express';
 import cors from 'cors';
 import recipesRouter from './routes/recipes';

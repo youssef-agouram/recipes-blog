@@ -244,6 +244,8 @@ model AnalyticsSettings {
   customScriptsCode String?  @default("")
   ga4Id             String?  @default("")
   gtmId             String?  @default("")
+  ga4PropertyId     String?  @default("")
+  ga4ServiceAccount String?  @default("")
   analyticsEnabled  Boolean  @default(true)
   debugMode         Boolean  @default(false)
   trackingSettings  Json?    @default("{\"pageTracking\": true, \"recipeTracking\": true, \"searchTracking\": true}")

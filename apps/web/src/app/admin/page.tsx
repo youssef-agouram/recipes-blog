@@ -47,9 +47,9 @@ export default function AdminDashboardPage() {
   const kpiCards = [
     {
       label: 'Total Visitors',
-      value: '85,746',
-      trend: '12.5%',
-      trendUp: true,
+      value: statsData?.summary?.sessions?.total?.toLocaleString() || '0',
+      trend: statsData?.summary?.sessions?.trend?.value || '0%',
+      trendUp: statsData?.summary?.sessions?.trend?.isUp ?? true,
       trendLabel: 'from last 7 days',
       icon: Users,
       iconColor: 'text-blue-400',
@@ -57,9 +57,9 @@ export default function AdminDashboardPage() {
     },
     {
       label: 'Page Views',
-      value: '212,092',
-      trend: '18.6%',
-      trendUp: true,
+      value: statsData?.summary?.pageviews?.total?.toLocaleString() || '0',
+      trend: statsData?.summary?.pageviews?.trend?.value || '0%',
+      trendUp: statsData?.summary?.pageviews?.trend?.isUp ?? true,
       trendLabel: 'from last 7 days',
       icon: Eye,
       iconColor: 'text-purple-400',
@@ -67,9 +67,9 @@ export default function AdminDashboardPage() {
     },
     {
       label: 'Unique Visitors',
-      value: '65,981',
-      trend: '14.3%',
-      trendUp: true,
+      value: statsData?.summary?.uniqueVisitors?.total?.toLocaleString() || '0',
+      trend: statsData?.summary?.uniqueVisitors?.trend?.value || '0%',
+      trendUp: statsData?.summary?.uniqueVisitors?.trend?.isUp ?? true,
       trendLabel: 'from last 7 days',
       icon: Globe,
       iconColor: 'text-emerald-400',
@@ -77,9 +77,9 @@ export default function AdminDashboardPage() {
     },
     {
       label: 'Bounce Rate',
-      value: '41.23%',
-      trend: '4.5%',
-      trendUp: false,
+      value: statsData?.summary?.bounceRate?.value || '0%',
+      trend: statsData?.summary?.bounceRate?.trend?.value || '0%',
+      trendUp: statsData?.summary?.bounceRate?.trend?.isUp ?? false,
       trendLabel: 'from last 7 days',
       icon: TrendingDown,
       iconColor: 'text-rose-400',
@@ -87,9 +87,9 @@ export default function AdminDashboardPage() {
     },
     {
       label: 'Avg. Session Duration',
-      value: '3m 24s',
-      trend: '8.7%',
-      trendUp: true,
+      value: statsData?.summary?.avgDuration?.value || '0m 0s',
+      trend: statsData?.summary?.avgDuration?.trend?.value || '0%',
+      trendUp: statsData?.summary?.avgDuration?.trend?.isUp ?? true,
       trendLabel: 'from last 7 days',
       icon: Clock,
       iconColor: 'text-amber-400',
@@ -122,7 +122,7 @@ export default function AdminDashboardPage() {
       {/* ───── Header ───── */}
       <DashboardHeader
         userName={user?.name || 'Admin'}
-        activeUsers={126}
+        activeUsers={statsData?.activeUsers?.total || 1}
       />
 
       {/* ───── KPI Cards Row ───── */}
@@ -135,23 +135,23 @@ export default function AdminDashboardPage() {
       {/* ───── Row 2: Traffic Overview + Sources + Devices ───── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <div className="lg:col-span-5">
-          <TrafficOverviewChart />
+          <TrafficOverviewChart data={statsData?.overviewData} />
         </div>
         <div className="lg:col-span-4">
-          <TrafficSourcesChart />
+          <TrafficSourcesChart sources={statsData?.referrerData} />
         </div>
         <div className="lg:col-span-3">
-          <DeviceAnalyticsChart />
+          <DeviceAnalyticsChart devices={statsData?.deviceData} />
         </div>
       </div>
 
       {/* ───── Row 3: Top Recipes + Countries + SEO Analytics ───── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <div className="lg:col-span-4">
-          <TopRecipesTable />
+          <TopRecipesTable recipes={statsData?.topRecipes} />
         </div>
         <div className="lg:col-span-4">
-          <TopCountries />
+          <TopCountries countries={statsData?.countryData} />
         </div>
         <div className="lg:col-span-4">
           <SeoAnalytics />
@@ -167,7 +167,7 @@ export default function AdminDashboardPage() {
           <CoreWebVitals />
         </div>
         <div className="lg:col-span-3">
-          <RealTimeVisitors />
+          <RealTimeVisitors activeUsers={statsData?.activeUsers} />
         </div>
         <div className="lg:col-span-3">
           <AdSenseOverviewCard />

@@ -58,6 +58,8 @@ router.get('/analytics', async (_req: Request, res: Response, next: NextFunction
       customScriptsCode: "",
       ga4Id: "",
       gtmId: "",
+      ga4PropertyId: "",
+      ga4ServiceAccount: "",
       analyticsEnabled: true,
       debugMode: false,
       trackingSettings: { pageTracking: true, recipeTracking: true, searchTracking: true }
@@ -78,6 +80,8 @@ router.put('/analytics', authMiddleware, async (req: Request, res: Response, nex
         customScriptsCode: data.customScriptsCode,
         ga4Id: data.ga4Id,
         gtmId: data.gtmId,
+        ga4PropertyId: data.ga4PropertyId,
+        ga4ServiceAccount: data.ga4ServiceAccount,
         analyticsEnabled: data.analyticsEnabled,
         debugMode: data.debugMode,
         trackingSettings: data.trackingSettings ?? { pageTracking: true, recipeTracking: true, searchTracking: true }
@@ -88,6 +92,8 @@ router.put('/analytics', authMiddleware, async (req: Request, res: Response, nex
         customScriptsCode: data.customScriptsCode,
         ga4Id: data.ga4Id,
         gtmId: data.gtmId,
+        ga4PropertyId: data.ga4PropertyId,
+        ga4ServiceAccount: data.ga4ServiceAccount,
         analyticsEnabled: data.analyticsEnabled,
         debugMode: data.debugMode,
         trackingSettings: data.trackingSettings ?? { pageTracking: true, recipeTracking: true, searchTracking: true }

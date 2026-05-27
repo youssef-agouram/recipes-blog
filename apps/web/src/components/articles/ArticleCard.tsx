@@ -124,6 +124,8 @@ export function ArticleCard({ article }: ArticleCardProps) {
           src={article.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80"}
           alt={article.title}
           fill
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]"
         />
       </div>

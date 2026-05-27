@@ -6,17 +6,20 @@
 export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID || '';
 
 // Log page views
-export const pageview = (url: string, title?: string) => {
+export const pageview = (url: string, title?: string, trackingId?: string) => {
   if (typeof window === 'undefined' || !(window as any).gtag) return;
   
+  const id = trackingId || (window as any).gtagId || GA_TRACKING_ID;
+  if (!id) return;
+  
   try {
-    (window as any).gtag('config', GA_TRACKING_ID, {
+    (window as any).gtag('config', id, {
       page_path: url,
       page_title: title || document.title,
     });
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[GA4 pageview] ${url} | Title: ${title || document.title}`);
+      console.log(`[GA4 pageview] ${url} | Stream: ${id} | Title: ${title || document.title}`);
     }
   } catch (err) {
     console.error('Error tracking pageview:', err);

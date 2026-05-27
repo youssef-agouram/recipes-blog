@@ -42,6 +42,8 @@ export default function AdvancedSettingsPage() {
 
   const [ga4Id, setGa4Id] = useState('');
   const [gtmId, setGtmId] = useState('');
+  const [ga4PropertyId, setGa4PropertyId] = useState('');
+  const [ga4ServiceAccount, setGa4ServiceAccount] = useState('');
   const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
   const [debugMode, setDebugMode] = useState(false);
   const [customScriptsCode, setCustomScriptsCode] = useState('');
@@ -58,6 +60,8 @@ export default function AdvancedSettingsPage() {
     if (analyticsSettings) {
       setGa4Id(analyticsSettings.ga4Id || analyticsSettings.googleAnalyticsId || '');
       setGtmId(analyticsSettings.gtmId || '');
+      setGa4PropertyId(analyticsSettings.ga4PropertyId || '');
+      setGa4ServiceAccount(analyticsSettings.ga4ServiceAccount || '');
       setAnalyticsEnabled(analyticsSettings.analyticsEnabled ?? true);
       setDebugMode(analyticsSettings.debugMode ?? false);
       setCustomScriptsCode(analyticsSettings.customScriptsCode || '');
@@ -78,6 +82,8 @@ export default function AdvancedSettingsPage() {
           googleAnalyticsId: ga4Id,
           ga4Id,
           gtmId,
+          ga4PropertyId,
+          ga4ServiceAccount,
           analyticsEnabled,
           debugMode,
           customScriptsCode
@@ -347,6 +353,32 @@ export default function AdvancedSettingsPage() {
                           />
                           <p className="text-[10px] text-muted-foreground/40">Provide to boot Tag Manager tags concurrently alongside Google Analytics.</p>
                        </div>
+
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                        <div className="space-y-2">
+                           <label className="text-sm font-bold text-white/90">GA4 Property ID (For Dashboard API)</label>
+                           <input 
+                             type="text" 
+                             value={ga4PropertyId} 
+                             onChange={(e) => setGa4PropertyId(e.target.value)}
+                             className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec]" 
+                             placeholder="e.g. 312345678"
+                           />
+                           <p className="text-[10px] text-muted-foreground/40">The numeric property identifier to query the GA4 Reporting API.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                           <label className="text-sm font-bold text-white/90">Google Cloud Service Account JSON Key</label>
+                           <textarea 
+                             rows={3}
+                             value={ga4ServiceAccount} 
+                             onChange={(e) => setGa4ServiceAccount(e.target.value)}
+                             className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-[11px] text-indigo-300 font-mono focus:outline-none focus:ring-1 focus:ring-[#5850ec] resize-none" 
+                             placeholder='e.g. { "type": "service_account", ... }'
+                           />
+                           <p className="text-[10px] text-muted-foreground/40">Provide the JSON credentials file content for authenticated Google Analytics Data API queries.</p>
+                        </div>
+                     </div>
                     </div>
 
                     <div className="flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl">
