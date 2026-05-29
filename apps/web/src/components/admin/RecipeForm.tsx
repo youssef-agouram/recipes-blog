@@ -585,6 +585,61 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
         {/* Left Column */}
         <div className="space-y-8">
+          {/* Categories, Difficulty, Times/Servings, and Nutrition Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Categories & Difficulty Card */}
+            <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Categories (Optional)</label>
+                  <div className="relative">
+                    <select className="w-full h-11 appearance-none rounded-xl border border-border bg-background px-4 text-sm font-bold outline-none" value={selectedCategoryIds[0] || ''} onChange={(e) => { const val = Number(e.target.value); if (val) setValue('categoryIds', [val]); }}>
+                      <option value="" disabled>Select category</option>
+                      {categories?.map((cat) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Difficulty</label>
+                  <div className="flex items-center gap-2">
+                    {['easy', 'medium', 'hard'].map((level) => (
+                      <button key={level} type="button" onClick={() => setValue('difficulty', level as any)} className={`flex-1 h-9 rounded-lg border text-[11px] font-bold transition-all ${difficulty === level ? 'bg-primary/10 border-primary text-primary' : 'bg-background border-border text-muted-foreground'}`}>{level.toUpperCase()}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Time & Servings Card */}
+            <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Prep Time</label><input {...register('prepTime')} placeholder="20m" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
+                <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Cook Time</label><input {...register('cookTime')} placeholder="30m" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
+                <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase text-amber-500">Total Time</label><input {...register('totalTime')} placeholder="50m" className="w-full h-9 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 text-xs font-bold text-amber-500 outline-none" /></div>
+                <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Servings</label><input {...register('servings', { valueAsNumber: true })} type="number" placeholder="4" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
+              </div>
+            </div>
+
+            {/* Nutrition Info Card */}
+            <div className="p-6 rounded-2xl bg-card border border-border space-y-6 md:col-span-2 lg:col-span-1">
+              <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2"><Apple className="h-3 w-3 text-primary" /> Nutrition Info (Optional)</h3>
+              <div className="space-y-3">
+                {nutritionList.map((nut, index) => (
+                  <div key={index} className="flex items-center gap-3 group">
+                    <input value={nut.label} onChange={(e) => updateNutrition(index, 'label', e.target.value)} className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight w-20 bg-transparent border-none outline-none focus:text-primary transition-colors" />
+                    <div className="relative flex-1">
+                      <input value={nut.value} onChange={(e) => updateNutrition(index, 'value', e.target.value)} placeholder="0" className="w-full h-8 rounded-lg border border-border bg-background px-3 pr-10 text-[10px] font-black text-right outline-none focus:border-primary/30 transition-all" />
+                      <input value={nut.unit} onChange={(e) => updateNutrition(index, 'unit', e.target.value)} className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-muted-foreground uppercase w-8 bg-transparent border-none outline-none text-right" />
+                    </div>
+                    {index >= 5 && <button type="button" onClick={() => removeNutrition(index)} className="opacity-0 group-hover:opacity-100 text-rose-500 transition-all"><Trash2 className="h-3 w-3" /></button>}
+                  </div>
+                ))}
+                <button type="button" onClick={addNutrition} className="w-full py-2 rounded-xl border-2 border-dashed border-border bg-secondary/20 text-[10px] font-bold text-muted-foreground hover:border-primary/50 hover:text-primary transition-all flex items-center justify-center gap-2"><Plus className="h-3 w-3" /> Add New Nutrition</button>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-4">
             <label className="text-sm font-semibold flex items-center gap-1.5"><List className="h-4 w-4 text-primary" /> Cooking Instructions (Optional)</label>
             <div className="space-y-3">
@@ -600,49 +655,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
               <button type="button" onClick={addStep} className="w-full py-3 rounded-xl border-2 border-dashed border-border bg-card/50 text-sm font-bold text-muted-foreground hover:border-primary/50 transition-all flex items-center justify-center gap-2"><Plus className="h-4 w-4" /> Add Next Step</button>
             </div>
           </div>
-          <div className="space-y-4">
-            <label className="text-sm font-semibold flex items-center gap-1.5"><Lightbulb className="h-4 w-4 text-amber-500" /> About Recipe</label>
-            <Controller name="content" control={control} render={({ field }) => <InstructionsEditor initialContent={field.value} onChange={field.onChange} />} />
-          </div>
-        </div>
 
-        {/* Right Column (Sidebar) */}
-        <div className="space-y-8">
-          {/* Categories & Difficulty */}
-          <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Categories (Optional)</label>
-                <div className="relative">
-                  <select className="w-full h-11 appearance-none rounded-xl border border-border bg-background px-4 text-sm font-bold outline-none" value={selectedCategoryIds[0] || ''} onChange={(e) => { const val = Number(e.target.value); if (val) setValue('categoryIds', [val]); }}>
-                    <option value="" disabled>Select category</option>
-                    {categories?.map((cat) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Difficulty</label>
-                <div className="flex items-center gap-2">
-                  {['easy', 'medium', 'hard'].map((level) => (
-                    <button key={level} type="button" onClick={() => setValue('difficulty', level as any)} className={`flex-1 h-9 rounded-lg border text-[11px] font-bold transition-all ${difficulty === level ? 'bg-primary/10 border-primary text-primary' : 'bg-background border-border text-muted-foreground'}`}>{level.toUpperCase()}</button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Time & Servings */}
-          <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Prep Time</label><input {...register('prepTime')} placeholder="20m" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
-              <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Cook Time</label><input {...register('cookTime')} placeholder="30m" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
-              <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase text-amber-500">Total Time</label><input {...register('totalTime')} placeholder="50m" className="w-full h-9 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 text-xs font-bold text-amber-500 outline-none" /></div>
-              <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Servings</label><input {...register('servings', { valueAsNumber: true })} type="number" placeholder="4" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
-            </div>
-          </div>
-
-          {/* Ingredients */}
           <div className="space-y-4">
             <label className="text-sm font-semibold">Ingredients (Optional)</label>
             <div className="rounded-2xl border border-border bg-card overflow-hidden">
@@ -661,25 +674,15 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             </div>
           </div>
 
-          {/* Dynamic Nutrition */}
-          <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
-            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2"><Apple className="h-3 w-3 text-primary" /> Nutrition Info (Optional)</h3>
-            <div className="space-y-3">
-              {nutritionList.map((nut, index) => (
-                <div key={index} className="flex items-center gap-3 group">
-                  <input value={nut.label} onChange={(e) => updateNutrition(index, 'label', e.target.value)} className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight w-20 bg-transparent border-none outline-none focus:text-primary transition-colors" />
-                  <div className="relative flex-1">
-                    <input value={nut.value} onChange={(e) => updateNutrition(index, 'value', e.target.value)} placeholder="0" className="w-full h-8 rounded-lg border border-border bg-background px-3 pr-10 text-[10px] font-black text-right outline-none focus:border-primary/30 transition-all" />
-                    <input value={nut.unit} onChange={(e) => updateNutrition(index, 'unit', e.target.value)} className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-muted-foreground uppercase w-8 bg-transparent border-none outline-none text-right" />
-                  </div>
-                  {index >= 5 && <button type="button" onClick={() => removeNutrition(index)} className="opacity-0 group-hover:opacity-100 text-rose-500 transition-all"><Trash2 className="h-3 w-3" /></button>}
-                </div>
-              ))}
-              <button type="button" onClick={addNutrition} className="w-full py-2 rounded-xl border-2 border-dashed border-border bg-secondary/20 text-[10px] font-bold text-muted-foreground hover:border-primary/50 hover:text-primary transition-all flex items-center justify-center gap-2"><Plus className="h-3 w-3" /> Add New Nutrition</button>
-            </div>
+          <div className="space-y-4">
+            <label className="text-sm font-semibold flex items-center gap-1.5"><Lightbulb className="h-4 w-4 text-amber-500" /> About Recipe</label>
+            <Controller name="content" control={control} render={({ field }) => <InstructionsEditor initialContent={field.value} onChange={field.onChange} />} />
           </div>
+        </div>
 
-          {/* Publish Settings */}
+        {/* Right Column (Sidebar) */}
+        <div className="space-y-6">
+
           <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Publish</h3>
             <div className="space-y-4">
@@ -714,653 +717,252 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* ─── Search Engine Optimization (SEO) & Live Previews ─── */}
-      <div className="p-8 rounded-3xl bg-card border border-border/80 relative overflow-hidden group shadow-2xl backdrop-blur-xl bg-gradient-to-br from-card to-background/40">
-        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-primary via-indigo-500 to-primary/20 opacity-80" />
-        
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div className="space-y-1">
-            <h2 className="text-lg font-bold flex items-center gap-2 tracking-tight">
-              <Globe className="h-5 w-5 text-primary animate-pulse" /> 
-              Advanced Search Engine Optimization (SEO)
-            </h2>
-            <p className="text-xs font-semibold text-muted-foreground">
-              Supercharge your recipe search discoverability using structured schemas, scores, and mockups.
-            </p>
-          </div>
-          
-          {/* Sub-Tabs Selector */}
-          <div className="flex flex-wrap items-center gap-1 bg-background/50 p-1 rounded-xl border border-border/40">
-            <button
-              type="button"
-              onClick={() => setActiveSeoTab('basic')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeSeoTab === 'basic' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              Basic Inputs
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSeoTab('scoring')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeSeoTab === 'scoring' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              Real-Time Scoring
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSeoTab('social')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeSeoTab === 'social' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              Social Previews
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSeoTab('linking')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeSeoTab === 'linking' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              Internal Linking
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSeoTab('faq')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeSeoTab === 'faq' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              FAQ Schema
-            </button>
-          </div>
-        </div>
+          {/* ─── Advanced Search Engine Optimization (SEO) — Right Sidebar ─── */}
+          <div className="rounded-3xl bg-card border border-border/80 relative overflow-hidden shadow-2xl backdrop-blur-xl bg-gradient-to-br from-card to-background/40">
+            <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-primary via-indigo-500 to-primary/20 opacity-80" />
 
-        {/* ─── TAB: BASIC SEO INPUTS ─── */}
-        {activeSeoTab === 'basic' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            <div className="space-y-6">
-              {/* AI SEO Assist Toolbar */}
-              <div className="p-5 rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-950/20 via-purple-950/10 to-[#0b0c16]/50 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
-                    <Sparkles className="h-4 w-4 text-indigo-400 animate-pulse" />
-                    AI SEO Co-Pilot Actions
-                  </h4>
-                  {isGeneratingAi && <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-400" />}
-                </div>
-
-                {!initialData?.id ? (
-                  <p className="text-[10px] font-semibold text-slate-400 leading-normal">
-                    💡 Please save this recipe as a draft or publish it first to unlock the real-time AI metadata generators.
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2 text-[10px] font-black uppercase tracking-wider">
-                    <button
-                      type="button"
-                      disabled={isGeneratingAi}
-                      onClick={() => handleAiAction('title')}
-                      className="px-3 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
-                    >
-                      Generate title
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isGeneratingAi}
-                      onClick={() => handleAiAction('meta')}
-                      className="px-3 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
-                    >
-                      Generate description
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isGeneratingAi}
-                      onClick={() => handleAiAction('keywords')}
-                      className="px-3 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
-                    >
-                      Suggest keywords
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isGeneratingAi}
-                      onClick={() => handleAiAction('readability')}
-                      className="px-3 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
-                    >
-                      Improve readability
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* AI Generated Suggestions Banner */}
-              {aiSuggestions && (
-                <div className="p-5 rounded-2xl border border-emerald-500/20 bg-emerald-950/10 space-y-3 relative">
-                  <button 
-                    type="button" 
-                    onClick={() => setAiSuggestions(null)} 
-                    className="absolute top-3 right-3 text-slate-400 hover:text-white"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                  
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400">
-                    AI Suggested Output ({aiSuggestions.action})
-                  </span>
-
-                  <pre className="p-3.5 rounded-xl bg-black/40 text-[11px] font-semibold text-slate-200 font-mono whitespace-pre-wrap leading-relaxed border border-white/5">
-                    {aiSuggestions.output}
-                  </pre>
-
-                  {/* Apply actions */}
-                  {aiSuggestions.action !== 'readability' && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        // Apply first suggestion automatically
-                        if (aiSuggestions.action === 'title') {
-                          const suggestedTitle = aiSuggestions.output.split('\n')[0].replace(/\[Suggested SEO Title \d\]\s*/g, '');
-                          setValue('seo.seoTitle', suggestedTitle);
-                          showToast('success', 'Applied AI Title Suggestion!');
-                        } else if (aiSuggestions.action === 'meta') {
-                          setValue('seo.metaDescription', aiSuggestions.output);
-                          showToast('success', 'Applied AI Meta Description!');
-                        } else if (aiSuggestions.action === 'keywords') {
-                          const firstKw = aiSuggestions.output.split(',')[0].trim();
-                          setValue('seo.focusKeyword', firstKw);
-                          showToast('success', 'Applied Focus Keyword suggestion!');
-                        }
-                        setAiSuggestions(null);
-                      }}
-                      className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
-                    >
-                      Apply suggestion
-                    </button>
-                  )}
-                </div>
-              )}
-              {/* Focus Keyword */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                  <Key className="h-3.5 w-3.5 text-primary" /> Focus Keyword
-                </label>
-                <input
-                  {...register('seo.focusKeyword')}
-                  placeholder="e.g. chocolate chip cookies"
-                  className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-                <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1 mt-1">
-                  <Sparkles className="h-3 w-3 text-primary animate-pulse" /> Aligning with focus terms guarantees search crawl relevance.
+            <div className="p-6 space-y-6">
+              <div className="space-y-1">
+                <h2 className="text-sm font-bold flex items-center gap-2 tracking-tight">
+                  <Globe className="h-4 w-4 text-primary animate-pulse" />
+                  Advanced SEO
+                </h2>
+                <p className="text-[10px] font-semibold text-muted-foreground">
+                  Supercharge your recipe's search discoverability.
                 </p>
               </div>
 
-              {/* SEO Title */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    SEO Title
-                  </label>
-                  <span className={`text-[10px] font-black uppercase tracking-tight ${seo?.seoTitle && seo.seoTitle.length >= 50 && seo.seoTitle.length <= 60 ? 'text-emerald-400' : 'text-amber-500'}`}>
-                    {seo?.seoTitle?.length || 0} / 60 Chars
-                  </span>
-                </div>
-                <input
-                  {...register('seo.seoTitle')}
-                  placeholder={title || 'Recipe SEO title...'}
-                  className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-                {/* Title progress bar */}
-                <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all duration-300 ${seo?.seoTitle && seo.seoTitle.length >= 50 && seo.seoTitle.length <= 60 ? 'bg-emerald-500' : 'bg-primary'}`} 
-                    style={{ width: `${Math.min(((seo?.seoTitle?.length || 0) / 60) * 100, 100)}%` }}
-                  />
-                </div>
+              <div className="flex flex-wrap items-center gap-1 bg-background/50 p-1 rounded-xl border border-border/40">
+                <button type="button" onClick={() => setActiveSeoTab('basic')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'basic' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>Basic</button>
+                <button type="button" onClick={() => setActiveSeoTab('scoring')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'scoring' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>Scoring</button>
+                <button type="button" onClick={() => setActiveSeoTab('social')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'social' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>Social</button>
+                <button type="button" onClick={() => setActiveSeoTab('linking')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'linking' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>Linking</button>
+                <button type="button" onClick={() => setActiveSeoTab('faq')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'faq' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>FAQ</button>
               </div>
 
-              {/* Meta Description */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Meta Description
-                  </label>
-                  <span className={`text-[10px] font-black uppercase tracking-tight ${seo?.metaDescription && seo.metaDescription.length >= 120 && seo.metaDescription.length <= 160 ? 'text-emerald-400' : 'text-amber-500'}`}>
-                    {seo?.metaDescription?.length || 0} / 160 Chars
-                  </span>
-                </div>
-                <textarea
-                  {...register('seo.metaDescription')}
-                  placeholder="Provide a concise meta description summarizing the recipe details..."
-                  rows={3}
-                  className="w-full rounded-xl border border-border bg-background p-4 text-xs font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none animate-none"
-                />
-                {/* Description progress bar */}
-                <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all duration-300 ${seo?.metaDescription && seo.metaDescription.length >= 120 && seo.metaDescription.length <= 160 ? 'bg-emerald-500' : 'bg-primary'}`} 
-                    style={{ width: `${Math.min(((seo?.metaDescription?.length || 0) / 160) * 100, 100)}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Custom Slug Overwrite */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Recipe Slug
-                  </label>
-                  <input
-                    {...register('slug')}
-                    onChange={(e) => {
-                      setIsSlugManuallyEdited(true);
-                      setValue('slug', e.target.value);
-                    }}
-                    placeholder="recipe-slug-url"
-                    className="w-full h-11 rounded-xl border border-border bg-background px-4 text-xs font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  />
-                </div>
-
-                {/* Robots Meta tag selection */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Robots Crawl Meta
-                  </label>
-                  <div className="relative">
-                    <select
-                      {...register('seo.robotsMeta')}
-                      className="w-full h-11 appearance-none rounded-xl border border-border bg-background px-4 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                    >
-                      <option value="index, follow">Index, Follow (Default)</option>
-                      <option value="noindex, follow">Noindex, Follow</option>
-                      <option value="index, nofollow">Index, Nofollow</option>
-                      <option value="noindex, nofollow">Noindex, Nofollow</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              {activeSeoTab === 'basic' && (
+                <div className="space-y-5">
+                  <div className="p-4 rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-950/20 via-purple-950/10 to-[#0b0c16]/50 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-[10px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
+                        <Sparkles className="h-3.5 w-3.5 text-indigo-400 animate-pulse" />
+                        AI SEO Co-Pilot
+                      </h4>
+                      {isGeneratingAi && <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-400" />}
+                    </div>
+                    {!initialData?.id ? (
+                      <p className="text-[10px] font-semibold text-slate-400 leading-normal">💡 Save this recipe first to unlock AI metadata generators.</p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-1.5 text-[9px] font-black uppercase tracking-wider">
+                        <button type="button" disabled={isGeneratingAi} onClick={() => handleAiAction('title')} className="px-2 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95">Generate title</button>
+                        <button type="button" disabled={isGeneratingAi} onClick={() => handleAiAction('meta')} className="px-2 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95">Generate desc</button>
+                        <button type="button" disabled={isGeneratingAi} onClick={() => handleAiAction('keywords')} className="px-2 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95">Keywords</button>
+                        <button type="button" disabled={isGeneratingAi} onClick={() => handleAiAction('readability')} className="px-2 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95">Readability</button>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Simulated Live Google preview */}
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                  <Eye className="h-4 w-4 text-primary" /> Live Google Listing Preview
-                </label>
-                
-                <div className="flex items-center gap-1.5 bg-background/60 border border-border/40 p-1 rounded-lg">
-                  <button
-                    type="button"
-                    onClick={() => setPreviewMode('desktop')}
-                    className={`p-1 rounded ${previewMode === 'desktop' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
-                  >
-                    <Monitor className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewMode('mobile')}
-                    className={`p-1 rounded ${previewMode === 'mobile' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
-                  >
-                    <Smartphone className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              {previewMode === 'mobile' ? (
-                /* Mobile Google snippet mockup */
-                <div className="p-5 rounded-2xl bg-black/60 border border-border/80 flex flex-col space-y-2 shadow-2xl relative max-w-sm mx-auto">
-                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-semibold truncate">
-                    <Globe className="h-3 w-3 shrink-0 text-emerald-400" />
-                    <span>tastyrecipes.com</span>
-                    <span>&rsaquo;</span>
-                    <span className="text-zinc-500 truncate">recipes &rsaquo; {slug || 'chocolate-cookies'}</span>
-                  </div>
-                  <h3 className="text-base font-bold text-indigo-400 leading-tight hover:underline cursor-pointer">
-                    {seo?.seoTitle || title || 'Please enter an SEO title...'}
-                  </h3>
-                  <p className="text-[11px] text-zinc-300 leading-relaxed font-medium">
-                    {seo?.metaDescription || 'Add a meta description to summarize your gourmet recipe steps here, making it look delicious in search engines!'}
-                  </p>
-                </div>
-              ) : (
-                /* Desktop Google snippet mockup */
-                <div className="p-6 rounded-2xl bg-black/60 border border-border/80 flex flex-col space-y-2 shadow-2xl relative w-full">
-                  <div className="flex items-center gap-1 text-[11px] text-zinc-400">
-                    <span className="truncate">https://tastyrecipes.com/recipes/{slug || 'chocolate-cookies'}</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-indigo-400 leading-snug hover:underline cursor-pointer">
-                    {seo?.seoTitle || title || 'Please enter an SEO title...'}
-                  </h3>
-                  <p className="text-[12px] text-zinc-300 leading-relaxed font-normal">
-                    {seo?.metaDescription || 'Add a meta description to summarize your gourmet recipe steps here, making it look delicious in search engines!'}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ─── TAB: REAL-TIME SCORING & AUDITS ─── */}
-        {activeSeoTab === 'scoring' && (
-          <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8 items-start">
-            {/* Animated Score Circles side-by-side */}
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-black/40 border border-border/60 backdrop-blur-md relative group">
-                <div className="relative w-24 h-24 flex items-center justify-center">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle className="text-muted/20" strokeWidth="6" stroke="currentColor" fill="transparent" r="30" cx="42" cy="42" />
-                    <circle 
-                      className="transition-all duration-1000 ease-out text-emerald-400" 
-                      strokeWidth="6" 
-                      strokeDasharray="188.4 188.4" 
-                      style={{ strokeDashoffset: 188.4 - (seoAnalysis.score / 100) * 188.4 }} 
-                      strokeLinecap="round" 
-                      fill="transparent" 
-                      r="30" cx="42" cy="42" 
-                    />
-                  </svg>
-                  <span className="absolute text-lg font-black text-foreground">{seoAnalysis.score}</span>
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-3">SEO Score</span>
-              </div>
-
-              <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-black/40 border border-border/60 backdrop-blur-md relative group">
-                <div className="relative w-24 h-24 flex items-center justify-center">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle className="text-muted/20" strokeWidth="6" stroke="currentColor" fill="transparent" r="30" cx="42" cy="42" />
-                    <circle 
-                      className="transition-all duration-1000 ease-out text-primary" 
-                      strokeWidth="6" 
-                      strokeDasharray="188.4 188.4" 
-                      style={{ strokeDashoffset: 188.4 - (readabilityAnalysis.score / 100) * 188.4 }} 
-                      strokeLinecap="round" 
-                      fill="transparent" 
-                      r="30" cx="42" cy="42" 
-                    />
-                  </svg>
-                  <span className="absolute text-lg font-black text-foreground">{readabilityAnalysis.score}</span>
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-3">Readability Score</span>
-              </div>
-            </div>
-
-            {/* Checklist recommendations */}
-            <div className="space-y-6 bg-black/35 p-6 rounded-2xl border border-border/60">
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3 flex items-center gap-1.5">
-                  <Sparkles className="h-4 w-4 animate-pulse" /> Gourmet SEO Recommendations Checklist
-                </h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {Object.entries(seoAnalysis.checks).map(([key, check]: any) => (
-                    <div key={key} className="flex items-start gap-2 bg-background/40 p-3 rounded-xl border border-border/40">
-                      {check.status === 'pass' ? (
-                        <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                      ) : check.status === 'warning' ? (
-                        <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                      ) : (
-                        <X className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+                  {aiSuggestions && (
+                    <div className="p-4 rounded-2xl border border-emerald-500/20 bg-emerald-950/10 space-y-3 relative">
+                      <button type="button" onClick={() => setAiSuggestions(null)} className="absolute top-3 right-3 text-slate-400 hover:text-white"><X className="h-3.5 w-3.5" /></button>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400">AI Output ({aiSuggestions.action})</span>
+                      <pre className="p-3 rounded-xl bg-black/40 text-[10px] font-semibold text-slate-200 font-mono whitespace-pre-wrap leading-relaxed border border-white/5">{aiSuggestions.output}</pre>
+                      {aiSuggestions.action !== 'readability' && (
+                        <button type="button" onClick={() => {
+                          if (aiSuggestions.action === 'title') { setValue('seo.seoTitle', aiSuggestions.output.split('\n')[0].replace(/\[Suggested SEO Title \d\]\s*/g, '')); showToast('success', 'Applied AI Title!'); }
+                          else if (aiSuggestions.action === 'meta') { setValue('seo.metaDescription', aiSuggestions.output); showToast('success', 'Applied Meta Description!'); }
+                          else if (aiSuggestions.action === 'keywords') { setValue('seo.focusKeyword', aiSuggestions.output.split(',')[0].trim()); showToast('success', 'Applied Focus Keyword!'); }
+                          setAiSuggestions(null);
+                        }} className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5 active:scale-95">Apply suggestion</button>
                       )}
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wide block text-zinc-300">{key.replace(/([A-Z])/g, ' $1')}</span>
-                        <p className="text-[10px] font-semibold text-muted-foreground leading-normal">{check.message}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5"><Key className="h-3 w-3 text-primary" /> Focus Keyword</label>
+                    <input {...register('seo.focusKeyword')} placeholder="e.g. chocolate chip cookies" className="w-full h-10 rounded-xl border border-border bg-background px-4 text-xs font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+                    <p className="text-[9px] font-bold text-muted-foreground flex items-center gap-1"><Sparkles className="h-2.5 w-2.5 text-primary animate-pulse" /> Aligning with focus terms improves crawl relevance.</p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">SEO Title</label>
+                      <span className={`text-[9px] font-black uppercase ${seo?.seoTitle && seo.seoTitle.length >= 50 && seo.seoTitle.length <= 60 ? 'text-emerald-400' : 'text-amber-500'}`}>{seo?.seoTitle?.length || 0}/60</span>
+                    </div>
+                    <input {...register('seo.seoTitle')} placeholder={title || 'Recipe SEO title...'} className="w-full h-10 rounded-xl border border-border bg-background px-4 text-xs font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+                    <div className="h-1 w-full bg-secondary/50 rounded-full overflow-hidden"><div className={`h-full transition-all duration-300 ${seo?.seoTitle && seo.seoTitle.length >= 50 && seo.seoTitle.length <= 60 ? 'bg-emerald-500' : 'bg-primary'}`} style={{ width: `${Math.min(((seo?.seoTitle?.length || 0) / 60) * 100, 100)}%` }} /></div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Meta Description</label>
+                      <span className={`text-[9px] font-black uppercase ${seo?.metaDescription && seo.metaDescription.length >= 120 && seo.metaDescription.length <= 160 ? 'text-emerald-400' : 'text-amber-500'}`}>{seo?.metaDescription?.length || 0}/160</span>
+                    </div>
+                    <textarea {...register('seo.metaDescription')} placeholder="Concise meta description..." rows={3} className="w-full rounded-xl border border-border bg-background p-3 text-[10px] font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none" />
+                    <div className="h-1 w-full bg-secondary/50 rounded-full overflow-hidden"><div className={`h-full transition-all duration-300 ${seo?.metaDescription && seo.metaDescription.length >= 120 && seo.metaDescription.length <= 160 ? 'bg-emerald-500' : 'bg-primary'}`} style={{ width: `${Math.min(((seo?.metaDescription?.length || 0) / 160) * 100, 100)}%` }} /></div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Recipe Slug</label>
+                    <input {...register('slug')} onChange={(e) => { setIsSlugManuallyEdited(true); setValue('slug', e.target.value); }} placeholder="recipe-slug-url" className="w-full h-10 rounded-xl border border-border bg-background px-4 text-[10px] font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Robots Meta</label>
+                    <div className="relative">
+                      <select {...register('seo.robotsMeta')} className="w-full h-10 appearance-none rounded-xl border border-border bg-background px-4 text-[10px] font-bold outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                        <option value="index, follow">Index, Follow (Default)</option>
+                        <option value="noindex, follow">Noindex, Follow</option>
+                        <option value="index, nofollow">Index, Nofollow</option>
+                        <option value="noindex, nofollow">Noindex, Nofollow</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5"><Eye className="h-3 w-3 text-primary" /> Google Preview</label>
+                      <div className="flex items-center gap-1 bg-background/60 border border-border/40 p-0.5 rounded-lg">
+                        <button type="button" onClick={() => setPreviewMode('desktop')} className={`p-1 rounded ${previewMode === 'desktop' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}><Monitor className="h-3 w-3" /></button>
+                        <button type="button" onClick={() => setPreviewMode('mobile')} className={`p-1 rounded ${previewMode === 'mobile' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}><Smartphone className="h-3 w-3" /></button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t border-border/40 pt-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">Readability Metrics Overview</h4>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">Avg Sentence</span>
-                    <span className="text-sm font-black text-foreground">{readabilityAnalysis.details.avgSentenceWords} words</span>
-                  </div>
-                  <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">Avg Paragraph</span>
-                    <span className="text-sm font-black text-foreground">{readabilityAnalysis.details.avgParagraphWords} words</span>
-                  </div>
-                  <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">Passive Voice</span>
-                    <span className="text-sm font-black text-foreground">{readabilityAnalysis.details.passiveSentencesPercent}%</span>
-                  </div>
-                  <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">Keyword Density</span>
-                    <span className="text-sm font-black text-foreground">{Math.round(readabilityAnalysis.keywordDensity * 100) / 100}%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ─── TAB: SOCIAL PREVIEW SIMULATOR ─── */}
-        {activeSeoTab === 'social' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            <div className="space-y-6">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Social Media Selector</label>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSocialPlatform('opengraph')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${socialPlatform === 'opengraph' ? 'bg-primary border-primary text-primary-foreground' : 'border-border/60 text-muted-foreground hover:text-foreground'}`}
-                >
-                  Meta Tags Preview
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSocialPlatform('facebook')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${socialPlatform === 'facebook' ? 'bg-[#1877F2] border-[#1877F2] text-white shadow-lg' : 'border-border/60 text-muted-foreground hover:text-foreground'}`}
-                >
-                  Facebook Preview
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSocialPlatform('twitter')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${socialPlatform === 'twitter' ? 'bg-white border-white text-black shadow-lg' : 'border-border/60 text-muted-foreground hover:text-foreground'}`}
-                >
-                  Twitter / X Card
-                </button>
-              </div>
-
-              {/* Dynamic open graph inputs */}
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">OG Social Share Image URL</label>
-                  <input
-                    {...register('seo.ogImage')}
-                    placeholder="Paste direct share image link..."
-                    className="w-full h-11 rounded-xl border border-border bg-background px-4 text-xs font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Canonical URL Override</label>
-                  <input
-                    {...register('seo.canonicalUrl')}
-                    placeholder="https://tastyrecipes.com/recipes/..."
-                    className="w-full h-11 rounded-xl border border-border bg-background px-4 text-xs font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Previews containers */}
-            <div className="space-y-4">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                <Eye className="h-4 w-4 text-primary" /> Live Mockup Display
-              </label>
-
-              {socialPlatform === 'facebook' && (
-                /* Simulated Facebook Card */
-                <div className="rounded-xl overflow-hidden bg-[#242526] border border-[#3E4042] max-w-sm mx-auto shadow-2xl">
-                  <div className="h-48 w-full bg-zinc-800 relative flex items-center justify-center overflow-hidden">
-                    {seo?.ogImage || imageUrl ? (
-                      <img src={seo?.ogImage || imageUrl} alt="Facebook Shared Card" className="w-full h-full object-cover" />
-                    ) : (
-                      <ImagePlus className="h-10 w-10 text-muted/30" />
-                    )}
-                  </div>
-                  <div className="p-4 space-y-1">
-                    <span className="text-[10px] font-bold text-[#B0B3B8] uppercase tracking-wider">TASTYRECIPES.COM</span>
-                    <h4 className="text-sm font-bold text-white leading-snug">{seo?.seoTitle || title || 'Gourmet Culinary Recipe'}</h4>
-                    <p className="text-[11px] text-[#E4E6EB] line-clamp-2 leading-relaxed">
-                      {seo?.metaDescription || 'Click to view the ingredients, full video instructions, and details for this recipe.'}
-                    </p>
+                    <div className="p-4 rounded-xl bg-black/60 border border-border/80 space-y-1.5 shadow-lg">
+                      <div className="flex items-center gap-1 text-[9px] text-zinc-400 truncate"><Globe className="h-2.5 w-2.5 shrink-0 text-emerald-400" /><span>tastyrecipes.com › recipes › {slug || 'recipe-slug'}</span></div>
+                      <h3 className={`font-bold text-indigo-400 leading-tight ${previewMode === 'mobile' ? 'text-xs' : 'text-sm'}`}>{seo?.seoTitle || title || 'Enter SEO title...'}</h3>
+                      <p className="text-[10px] text-zinc-300 leading-relaxed line-clamp-2">{seo?.metaDescription || 'Add a meta description to summarize your recipe...'}</p>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {socialPlatform === 'twitter' && (
-                /* Simulated Twitter Card */
-                <div className="rounded-2xl overflow-hidden bg-black border border-zinc-800 max-w-sm mx-auto shadow-2xl">
-                  <div className="h-44 w-full bg-zinc-900 relative flex items-center justify-center overflow-hidden">
-                    {seo?.ogImage || imageUrl ? (
-                      <img src={seo?.ogImage || imageUrl} alt="Twitter Shared Card" className="w-full h-full object-cover" />
-                    ) : (
-                      <ImagePlus className="h-10 w-10 text-muted/30" />
-                    )}
+              {activeSeoTab === 'scoring' && (
+                <div className="space-y-5">
+                  <div className="flex items-center gap-4 justify-center">
+                    <div className="flex flex-col items-center p-4 rounded-2xl bg-black/40 border border-border/60 flex-1">
+                      <div className="relative w-20 h-20 flex items-center justify-center">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle className="text-muted/20" strokeWidth="6" stroke="currentColor" fill="transparent" r="30" cx="40" cy="40" />
+                          <circle className="transition-all duration-1000 ease-out text-emerald-400" strokeWidth="6" strokeDasharray="188.4 188.4" style={{ strokeDashoffset: 188.4 - (seoAnalysis.score / 100) * 188.4 }} strokeLinecap="round" fill="transparent" r="30" cx="40" cy="40" />
+                        </svg>
+                        <span className="absolute text-base font-black text-foreground">{seoAnalysis.score}</span>
+                      </div>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mt-2">SEO Score</span>
+                    </div>
+                    <div className="flex flex-col items-center p-4 rounded-2xl bg-black/40 border border-border/60 flex-1">
+                      <div className="relative w-20 h-20 flex items-center justify-center">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle className="text-muted/20" strokeWidth="6" stroke="currentColor" fill="transparent" r="30" cx="40" cy="40" />
+                          <circle className="transition-all duration-1000 ease-out text-primary" strokeWidth="6" strokeDasharray="188.4 188.4" style={{ strokeDashoffset: 188.4 - (readabilityAnalysis.score / 100) * 188.4 }} strokeLinecap="round" fill="transparent" r="30" cx="40" cy="40" />
+                        </svg>
+                        <span className="absolute text-base font-black text-foreground">{readabilityAnalysis.score}</span>
+                      </div>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mt-2">Readability</span>
+                    </div>
                   </div>
-                  <div className="p-3 bg-zinc-950/80 border-t border-zinc-900 space-y-0.5">
-                    <span className="text-[10px] font-bold text-zinc-500">tastyrecipes.com</span>
-                    <h4 className="text-xs font-bold text-zinc-200 line-clamp-1">{seo?.seoTitle || title || 'Gourmet Culinary Recipe'}</h4>
-                    <p className="text-[10px] text-zinc-400 line-clamp-2 leading-normal">
-                      {seo?.metaDescription || 'Click to view the ingredients, full video instructions, and details for this recipe.'}
-                    </p>
+                  <div className="space-y-2 bg-black/35 p-4 rounded-2xl border border-border/60">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5"><Sparkles className="h-3 w-3 animate-pulse" /> SEO Checklist</h4>
+                    <div className="space-y-2">
+                      {Object.entries(seoAnalysis.checks).map(([key, check]: any) => (
+                        <div key={key} className="flex items-start gap-2 bg-background/40 p-2.5 rounded-xl border border-border/40">
+                          {check.status === 'pass' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" /> : check.status === 'warning' ? <AlertCircle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" /> : <X className="h-3.5 w-3.5 text-rose-500 shrink-0 mt-0.5" />}
+                          <div><span className="text-[9px] font-bold uppercase tracking-wide block text-zinc-300">{key.replace(/([A-Z])/g, ' $1')}</span><p className="text-[9px] font-semibold text-muted-foreground">{check.message}</p></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center"><span className="text-[9px] font-bold text-muted-foreground uppercase block">Avg Sentence</span><span className="text-sm font-black">{readabilityAnalysis.details.avgSentenceWords}w</span></div>
+                    <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center"><span className="text-[9px] font-bold text-muted-foreground uppercase block">Avg Paragraph</span><span className="text-sm font-black">{readabilityAnalysis.details.avgParagraphWords}w</span></div>
+                    <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center"><span className="text-[9px] font-bold text-muted-foreground uppercase block">Passive Voice</span><span className="text-sm font-black">{readabilityAnalysis.details.passiveSentencesPercent}%</span></div>
+                    <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center"><span className="text-[9px] font-bold text-muted-foreground uppercase block">Keyword Density</span><span className="text-sm font-black">{Math.round(readabilityAnalysis.keywordDensity * 100) / 100}%</span></div>
                   </div>
                 </div>
               )}
 
-              {socialPlatform === 'opengraph' && (
-                /* Standard OpenGraph metadata preview */
-                <div className="p-5 rounded-2xl bg-black/40 border border-border/80 space-y-4">
-                  <div className="space-y-1">
-                    <span className="text-[8px] font-black text-primary uppercase tracking-widest block">meta property="og:title"</span>
-                    <span className="text-xs font-bold text-zinc-300 block bg-secondary/35 p-2 rounded-lg border border-border/40">{seo?.seoTitle || title || 'Not configured'}</span>
+              {activeSeoTab === 'social' && (
+                <div className="space-y-5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button type="button" onClick={() => setSocialPlatform('opengraph')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${socialPlatform === 'opengraph' ? 'bg-primary border-primary text-primary-foreground' : 'border-border/60 text-muted-foreground'}`}>Meta Tags</button>
+                    <button type="button" onClick={() => setSocialPlatform('facebook')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${socialPlatform === 'facebook' ? 'bg-[#1877F2] border-[#1877F2] text-white' : 'border-border/60 text-muted-foreground'}`}>Facebook</button>
+                    <button type="button" onClick={() => setSocialPlatform('twitter')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${socialPlatform === 'twitter' ? 'bg-white border-white text-black' : 'border-border/60 text-muted-foreground'}`}>Twitter/X</button>
                   </div>
-                  <div className="space-y-1">
-                    <span className="text-[8px] font-black text-primary uppercase tracking-widest block">meta property="og:description"</span>
-                    <span className="text-xs font-bold text-zinc-300 block bg-secondary/35 p-2 rounded-lg border border-border/40">{seo?.metaDescription || 'Not configured'}</span>
+                  <div className="space-y-3">
+                    <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">OG Image URL</label><input {...register('seo.ogImage')} placeholder="Paste share image link..." className="w-full h-10 rounded-xl border border-border bg-background px-3 text-[10px] font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" /></div>
+                    <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Canonical URL</label><input {...register('seo.canonicalUrl')} placeholder="https://tastyrecipes.com/..." className="w-full h-10 rounded-xl border border-border bg-background px-3 text-[10px] font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" /></div>
                   </div>
-                  <div className="space-y-1">
-                    <span className="text-[8px] font-black text-primary uppercase tracking-widest block">meta property="og:image"</span>
-                    <span className="text-xs font-mono text-zinc-400 block truncate bg-secondary/35 p-2 rounded-lg border border-border/40">{seo?.ogImage || imageUrl || 'Not configured'}</span>
-                  </div>
+                  {socialPlatform === 'facebook' && (
+                    <div className="rounded-xl overflow-hidden bg-[#242526] border border-[#3E4042] shadow-2xl">
+                      <div className="h-36 w-full bg-zinc-800 relative flex items-center justify-center overflow-hidden">{seo?.ogImage || imageUrl ? <img src={seo?.ogImage || imageUrl} alt="Facebook Card" className="w-full h-full object-cover" /> : <ImagePlus className="h-8 w-8 text-muted/30" />}</div>
+                      <div className="p-3 space-y-0.5"><span className="text-[9px] font-bold text-[#B0B3B8] uppercase">TASTYRECIPES.COM</span><h4 className="text-xs font-bold text-white leading-snug">{seo?.seoTitle || title || 'Recipe Title'}</h4><p className="text-[10px] text-[#E4E6EB] line-clamp-2">{seo?.metaDescription || 'Recipe description...'}</p></div>
+                    </div>
+                  )}
+                  {socialPlatform === 'twitter' && (
+                    <div className="rounded-2xl overflow-hidden bg-black border border-zinc-800 shadow-2xl">
+                      <div className="h-32 w-full bg-zinc-900 relative flex items-center justify-center overflow-hidden">{seo?.ogImage || imageUrl ? <img src={seo?.ogImage || imageUrl} alt="Twitter Card" className="w-full h-full object-cover" /> : <ImagePlus className="h-8 w-8 text-muted/30" />}</div>
+                      <div className="p-3 bg-zinc-950/80 border-t border-zinc-900 space-y-0.5"><span className="text-[9px] font-bold text-zinc-500">tastyrecipes.com</span><h4 className="text-[11px] font-bold text-zinc-200 line-clamp-1">{seo?.seoTitle || title || 'Recipe Title'}</h4><p className="text-[10px] text-zinc-400 line-clamp-2">{seo?.metaDescription || 'Recipe description...'}</p></div>
+                    </div>
+                  )}
+                  {socialPlatform === 'opengraph' && (
+                    <div className="p-4 rounded-2xl bg-black/40 border border-border/80 space-y-3">
+                      <div className="space-y-0.5"><span className="text-[8px] font-black text-primary uppercase tracking-widest block">og:title</span><span className="text-[10px] font-bold text-zinc-300 block bg-secondary/35 p-2 rounded-lg border border-border/40">{seo?.seoTitle || title || 'Not configured'}</span></div>
+                      <div className="space-y-0.5"><span className="text-[8px] font-black text-primary uppercase tracking-widest block">og:description</span><span className="text-[10px] font-bold text-zinc-300 block bg-secondary/35 p-2 rounded-lg border border-border/40">{seo?.metaDescription || 'Not configured'}</span></div>
+                      <div className="space-y-0.5"><span className="text-[8px] font-black text-primary uppercase tracking-widest block">og:image</span><span className="text-[10px] font-mono text-zinc-400 block truncate bg-secondary/35 p-2 rounded-lg border border-border/40">{seo?.ogImage || imageUrl || 'Not configured'}</span></div>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          </div>
-        )}
 
-        {/* ─── TAB: INTERNAL LINKING OPPORTUNITIES ─── */}
-        {activeSeoTab === 'linking' && (
-          <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
-                <Link className="h-4 w-4" /> Real-Time Internal Linking Suggestions
-              </h3>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase bg-secondary/35 px-2.5 py-1 rounded-full border border-border/40">
-                Matches active database records
-              </span>
-            </div>
+              {activeSeoTab === 'linking' && (
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2"><Link className="h-3.5 w-3.5" /> Linking Suggestions</h3>
+                  {linkingSuggestions.length > 0 ? (
+                    <div className="space-y-3">
+                      {linkingSuggestions.map((suggestion, idx) => (
+                        <div key={idx} className="p-4 rounded-2xl bg-black/40 border border-border/60 space-y-2 hover:border-indigo-500/40 transition-all">
+                          <h4 className="text-xs font-bold text-zinc-200">{suggestion.title}</h4>
+                          <p className="text-[10px] font-bold text-indigo-400 select-all bg-background/55 p-2 rounded-lg border border-border/30">{suggestion.recommendedAnchor}</p>
+                          <span className="text-[9px] text-muted-foreground">Reason: {suggestion.reason}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center rounded-2xl border border-dashed border-border bg-black/20 text-muted-foreground text-[10px] font-semibold">No linking opportunities yet. Add more recipes or assign a category!</div>
+                  )}
+                </div>
+              )}
 
-            {linkingSuggestions.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {linkingSuggestions.map((suggestion, idx) => (
-                  <div key={idx} className="p-5 rounded-2xl bg-black/40 border border-border/60 space-y-4 hover:border-indigo-500/40 transition-all group">
+              {activeSeoTab === 'faq' && (
+                <div className="space-y-5">
+                  <div className="space-y-3 bg-black/35 p-4 rounded-2xl border border-border/60">
+                    <h3 className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">FAQ Builder</h3>
+                    <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Question</label><input value={newFaqQuestion} onChange={(e) => setNewFaqQuestion(e.target.value)} placeholder="e.g. Can I substitute butter with coconut oil?" className="w-full h-10 rounded-xl border border-border bg-background px-3 text-[10px] font-bold outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" /></div>
+                    <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Answer</label><textarea value={newFaqAnswer} onChange={(e) => setNewFaqAnswer(e.target.value)} placeholder="Yes! Coconut oil is a 1:1 substitute..." rows={2} className="w-full rounded-xl border border-border bg-background p-3 text-[10px] font-semibold outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" /></div>
+                    <button type="button" onClick={addFaqItem} className="w-full py-2 rounded-xl bg-primary text-primary-foreground text-[10px] font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"><Plus className="h-3.5 w-3.5" /> Add FAQ Item</button>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active FAQs ({faqsList.length})</label>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                      {faqsList.map((faq, idx) => (
+                        <div key={idx} className="p-3 bg-background/55 border border-border/40 rounded-xl flex justify-between items-start gap-3">
+                          <div className="space-y-0.5"><span className="text-[9px] font-bold text-indigo-400 block">Q: {faq.question}</span><p className="text-[9px] font-semibold text-muted-foreground">A: {faq.answer}</p></div>
+                          <button type="button" onClick={() => removeFaqItem(idx)} className="text-rose-500 hover:text-rose-400 p-0.5"><Trash2 className="h-3.5 w-3.5" /></button>
+                        </div>
+                      ))}
+                    </div>
                     <div className="space-y-1">
-                      <span className="text-[8px] font-black uppercase text-indigo-400 block tracking-widest">Recommended Recipe</span>
-                      <h4 className="text-sm font-bold text-zinc-200 group-hover:text-primary transition-colors">{suggestion.title}</h4>
-                    </div>
-
-                    <div className="p-3 bg-secondary/20 rounded-xl border border-border/40 space-y-1.5">
-                      <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest block">Copy Link Anchor Text</span>
-                      <p className="text-[11px] font-bold text-indigo-400 tracking-tight select-all leading-normal cursor-pointer bg-background/55 p-2 rounded-lg border border-border/30">
-                        {suggestion.recommendedAnchor}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-2 border-t border-border/30">
-                      <span>Reason: {suggestion.reason}</span>
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block">Generated JSON-LD Schema</span>
+                      <pre className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-[9px] font-mono text-emerald-400 overflow-x-auto max-h-[120px] leading-relaxed">{JSON.stringify(generateFAQJsonLd(faqsList), null, 2)}</pre>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center rounded-2xl border border-dashed border-border bg-black/20 text-muted-foreground">
-                No linking opportunities detected yet. Add more recipes or assign a primary category to start!
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ─── TAB: FAQ STRUCTURED SCHEMA BUILDER ─── */}
-        {activeSeoTab === 'faq' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            {/* FAQ Manager inputs */}
-            <div className="space-y-6">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Structured FAQ List Builder</h3>
-              
-              <div className="space-y-4 bg-black/35 p-5 rounded-2xl border border-border/60">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Question String</label>
-                  <input
-                    value={newFaqQuestion}
-                    onChange={(e) => setNewFaqQuestion(e.target.value)}
-                    placeholder="e.g. Can I substitute butter with coconut oil?"
-                    className="w-full h-11 rounded-xl border border-border bg-background px-4 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                  />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Answer String</label>
-                  <textarea
-                    value={newFaqAnswer}
-                    onChange={(e) => setNewFaqAnswer(e.target.value)}
-                    placeholder="e.g. Yes! Coconut oil is a 1:1 substitute for butter in this baking recipe..."
-                    rows={3}
-                    className="w-full rounded-xl border border-border bg-background p-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none animate-none"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={addFaqItem}
-                  className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Plus className="h-4 w-4" /> Add FAQ Item
-                </button>
-              </div>
-            </div>
-
-            {/* Active FAQs list & JSON-LD preview */}
-            <div className="space-y-6">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active FAQs ({faqsList.length})</label>
-              
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                {faqsList.map((faq, idx) => (
-                  <div key={idx} className="p-4 bg-background/55 border border-border/40 rounded-xl flex justify-between items-start gap-4">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-indigo-400 block">Q: {faq.question}</span>
-                      <p className="text-[10px] font-semibold text-muted-foreground leading-normal">A: {faq.answer}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFaqItem(idx)}
-                      className="text-rose-500 hover:text-rose-400 p-1 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* JSON-LD Preview block */}
-              <div className="space-y-2">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Generated FAQ Schema.org JSON-LD</span>
-                <pre className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-[9px] font-mono text-emerald-400 overflow-x-auto max-h-[150px] leading-relaxed">
-                  {JSON.stringify(generateFAQJsonLd(faqsList), null, 2)}
-                </pre>
-              </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </form>
   );
 }
+
