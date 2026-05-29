@@ -624,17 +624,21 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             {/* Nutrition Info Card */}
             <div className="p-6 rounded-2xl bg-card border border-border space-y-6 md:col-span-2 lg:col-span-1">
               <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2"><Apple className="h-3 w-3 text-primary" /> Nutrition Info (Optional)</h3>
-              <div className="space-y-3">
-                {nutritionList.map((nut, index) => (
-                  <div key={index} className="flex items-center gap-3 group">
-                    <input value={nut.label} onChange={(e) => updateNutrition(index, 'label', e.target.value)} className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight w-20 bg-transparent border-none outline-none focus:text-primary transition-colors" />
-                    <div className="relative flex-1">
-                      <input value={nut.value} onChange={(e) => updateNutrition(index, 'value', e.target.value)} placeholder="0" className="w-full h-8 rounded-lg border border-border bg-background px-3 pr-10 text-[10px] font-black text-right outline-none focus:border-primary/30 transition-all" />
-                      <input value={nut.unit} onChange={(e) => updateNutrition(index, 'unit', e.target.value)} className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-muted-foreground uppercase w-8 bg-transparent border-none outline-none text-right" />
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {nutritionList.map((nut, index) => (
+                    <div key={index} className="space-y-1.5 group relative">
+                      <div className="flex items-center justify-between">
+                        <input value={nut.label} onChange={(e) => updateNutrition(index, 'label', e.target.value)} className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight bg-transparent border-none outline-none focus:text-primary transition-colors w-full" />
+                        {index >= 5 && <button type="button" onClick={() => removeNutrition(index)} className="opacity-0 group-hover:opacity-100 text-rose-500 transition-all absolute top-0.5 right-0"><Trash2 className="h-3 w-3" /></button>}
+                      </div>
+                      <div className="relative">
+                        <input value={nut.value} onChange={(e) => updateNutrition(index, 'value', e.target.value)} placeholder="0" className="w-full h-9 rounded-lg border border-border bg-background px-3 pr-10 text-[10px] font-black text-right outline-none focus:border-primary/30 transition-all" />
+                        <input value={nut.unit} onChange={(e) => updateNutrition(index, 'unit', e.target.value)} className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-muted-foreground uppercase w-8 bg-transparent border-none outline-none text-right" />
+                      </div>
                     </div>
-                    {index >= 5 && <button type="button" onClick={() => removeNutrition(index)} className="opacity-0 group-hover:opacity-100 text-rose-500 transition-all"><Trash2 className="h-3 w-3" /></button>}
-                  </div>
-                ))}
+                  ))}
+                </div>
                 <button type="button" onClick={addNutrition} className="w-full py-2 rounded-xl border-2 border-dashed border-border bg-secondary/20 text-[10px] font-bold text-muted-foreground hover:border-primary/50 hover:text-primary transition-all flex items-center justify-center gap-2"><Plus className="h-3 w-3" /> Add New Nutrition</button>
               </div>
             </div>
