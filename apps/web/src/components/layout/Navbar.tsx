@@ -190,7 +190,7 @@ export function Navbar() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const shouldShow = currentScrollY > 200;
-      
+
       setShowTopAd((prev) => {
         if (prev !== shouldShow) {
           return shouldShow;
@@ -380,23 +380,16 @@ export function Navbar() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center gap-3">
-                    <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Follow Us</span>
-                    <div className="flex items-center justify-center gap-3 w-full">
-                      <a href="#" className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 shrink-0">
-                        <FacebookIcon />
-                      </a>
-                      <a href="#" className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 shrink-0">
-                        <InstagramIcon />
-                      </a>
-                      <a href="#" className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 shrink-0">
-                        <TwitterIcon />
-                      </a>
-                      <a href="#" className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 shrink-0">
-                        <YoutubeIcon />
-                      </a>
-                    </div>
-                  </div>
+                  settings?.showAuthButtons !== false && (
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/15 hover:-translate-y-0.5"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      <span>Sign In</span>
+                    </Link>
+                  )
                 )}
               </>
             )}
@@ -418,13 +411,13 @@ export function Navbar() {
                 allow="autoplay; encrypted-media"
               />
             ) : activeTopAdUrl.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
-              <video 
-                src={activeTopAdUrl} 
-                autoPlay 
-                muted 
-                playsInline 
+              <video
+                src={activeTopAdUrl}
+                autoPlay
+                muted
+                playsInline
                 onEnded={() => setTopAdIndex((prev) => (prev + 1) % topBarUrls.length)}
-                className="absolute inset-0 w-full h-full object-cover" 
+                className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
               <Image src={activeTopAdUrl} alt="Ad" fill sizes="100vw" className="object-cover" unoptimized />
@@ -445,133 +438,520 @@ export function Navbar() {
       <div className={cn(
         "w-full flex flex-col transition-all duration-500 ease-in-out print:hidden"
       )}>
-      {/* 1. Top Bar */}
-      {settings?.showTopBar !== false && (
-        <div className="w-full bg-background border-b border-border py-2">
-          <div className="container mx-auto px-6 max-w-[1536px] flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              <SocialIcon name="Facebook" icon={FacebookIcon} />
-              <SocialIcon name="Instagram" icon={InstagramIcon} />
-              <SocialIcon name="Twitter" icon={TwitterIcon} />
-              <SocialIcon name="Youtube" icon={YoutubeIcon} />
-            </div>
+        {/* 1. Top Bar */}
+        {settings?.showTopBar !== false && (
+          <div className="w-full bg-background border-b border-border py-2">
+            <div className="container mx-auto px-6 max-w-[1536px] flex items-center justify-between">
+              <div className="flex items-center gap-5">
+                <SocialIcon name="Facebook" icon={FacebookIcon} />
+                <SocialIcon name="Instagram" icon={InstagramIcon} />
+                <SocialIcon name="Twitter" icon={TwitterIcon} />
+                <SocialIcon name="Youtube" icon={YoutubeIcon} />
+              </div>
 
-            <div className="hidden md:flex items-center gap-2">
-              <p className="text-[10px] font-black text-muted-foreground tracking-[0.2em] uppercase">
-                Get 30% Off on Premium Meal Plans — Limited Time Offer! ✨
-              </p>
-            </div>
+              <div className="hidden md:flex items-center gap-2">
+                <p className="text-[10px] font-black text-muted-foreground tracking-[0.2em] uppercase">
+                  Get 30% Off on Premium Meal Plans — Limited Time Offer! ✨
+                </p>
+              </div>
 
-            <div className="flex items-center gap-2 cursor-pointer group">
-              <Globe className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest group-hover:text-white transition-colors">
-                English
-              </span>
-              <ChevronDown className="w-3 h-3 text-muted-foreground/60 group-hover:text-white transition-colors" />
+              <div className="flex items-center gap-2 cursor-pointer group">
+                <Globe className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest group-hover:text-white transition-colors">
+                  English
+                </span>
+                <ChevronDown className="w-3 h-3 text-muted-foreground/60 group-hover:text-white transition-colors" />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 2. Main Navbar */}
-      <header className={`w-full bg-background/95 z-50 backdrop-blur-xl border-b border-border ${settings?.stickyNavbar !== false ? 'sticky top-0' : ''}`}>
-        {/* Desktop Header */}
-        <div className="hidden lg:flex container mx-auto px-4 sm:px-6 max-w-[1536px] h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-1.5 sm:gap-3 group shrink-0">
-            <div className="relative w-8.5 h-8.5 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl group-hover:scale-105 transition-transform ring-2 ring-primary/20 group-hover:ring-primary/40 flex items-center justify-center">
-              {logoUrl ? (
-                <Image
-                  src={logoUrl}
-                  alt={`${brandName} Logo`}
-                  width={44}
-                  height={44}
-                  className="w-full h-full object-cover"
-                  priority
-                />
-              ) : (
-                <ChefHat className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
-              )}
-            </div>
-            <div className="flex flex-col leading-[1.1]">
-              {brandName ? (
+        {/* 2. Main Navbar */}
+        <header className={`w-full bg-background/95 z-50 backdrop-blur-xl border-b border-border ${settings?.stickyNavbar !== false ? 'sticky top-0' : ''}`}>
+          {/* Desktop Header */}
+          <div className="hidden lg:flex container mx-auto px-4 sm:px-6 max-w-[1536px] h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-1.5 sm:gap-3 group shrink-0">
+              <div className="relative w-8.5 h-8.5 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl group-hover:scale-105 transition-transform ring-2 ring-primary/20 group-hover:ring-primary/40 flex items-center justify-center">
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt={`${brandName} Logo`}
+                    width={44}
+                    height={44}
+                    className="w-full h-full object-cover"
+                    priority
+                  />
+                ) : (
+                  <ChefHat className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
+                )}
+              </div>
+              <div className="flex flex-col leading-[1.1]">
+                {brandName ? (
+                  <>
+                    <span className="font-black text-base sm:text-2xl tracking-tighter text-white font-heading">
+                      {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
+                    </span>
+                    <span className="text-[7px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em] ml-0.5">
+                      {tagline}
+                    </span>
+                  </>
+                ) : (
+                  <div className="h-5 sm:h-8 w-20 sm:w-32 bg-white/5 animate-pulse rounded-lg" />
+                )}
+              </div>
+            </Link>
+
+            {/* Navigation — Desktop */}
+            <nav className="hidden lg:flex items-center gap-8">
+              {isLoadingSettings ? (
                 <>
-                  <span className="font-black text-base sm:text-2xl tracking-tighter text-white font-heading">
-                    {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
-                  </span>
-                  <span className="text-[7px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em] ml-0.5">
-                    {tagline}
-                  </span>
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-16 h-2.5 bg-white/10 animate-pulse rounded-full" />
+                  ))}
                 </>
               ) : (
-                <div className="h-5 sm:h-8 w-20 sm:w-32 bg-white/5 animate-pulse rounded-lg" />
+                navLinks.map((item: any) => (
+                  <Link
+                    key={item.label}
+                    href={item.url || item.href}
+                    className="group relative py-2"
+                  >
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground group-hover:text-white transition-colors">
+                      {item.label}
+                    </span>
+                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary transition-all duration-300 group-hover:w-full rounded-full" />
+                  </Link>
+                ))
+              )}
+            </nav>
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-3">
+              {/* Search Bar - Desktop */}
+              <div className="hidden lg:flex items-center relative mr-1">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (searchQuery.trim()) {
+                      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                      setSearchFocused(false);
+                    }
+                  }}
+                  className="relative flex items-center bg-white/5 border border-border hover:border-white/10 rounded-2xl px-3.5 py-2 w-44 focus-within:w-60 focus-within:bg-white/10 focus-within:border-primary/50 transition-all duration-300 group"
+                >
+                  <Search className="w-4 h-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors mr-2 shrink-0" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                    placeholder="Search recipes..."
+                    className="bg-transparent border-0 outline-none text-[11px] text-white placeholder:text-muted-foreground/45 w-full font-bold uppercase tracking-wider"
+                  />
+                </form>
+
+                {/* Suggestions Dropdown */}
+                {searchFocused && searchQuery.trim() && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100] w-60 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="p-2 flex flex-col gap-1">
+                      {isSearching && (
+                        <div className="p-3 text-xs text-muted-foreground flex items-center gap-2">
+                          <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider">Searching...</span>
+                        </div>
+                      )}
+
+                      {!isSearching && suggestions.length === 0 && (
+                        <div className="p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          No recipes found
+                        </div>
+                      )}
+
+                      {!isSearching && suggestions.map((recipe: any) => (
+                        <button
+                          key={recipe.id}
+                          onMouseDown={() => {
+                            router.push(`/recipes/${recipe.slug}`);
+                            setSearchQuery('');
+                            setSearchFocused(false);
+                          }}
+                          className="w-full text-left flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/5 transition-all text-xs text-white group"
+                        >
+                          <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-white/5 relative">
+                            {recipe.imageUrl ? (
+                              <Image
+                                src={recipe.imageUrl}
+                                alt={recipe.title}
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                                unoptimized
+                              />
+                            ) : (
+                              <ChefHat className="w-4 h-4 text-primary absolute inset-0 m-auto" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold truncate text-[11px] leading-snug group-hover:text-primary transition-colors">{recipe.title}</p>
+                            <p className="text-[9px] text-muted-foreground truncate leading-normal">
+                              {recipe.summary || 'Delicious recipe'}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* Auth Area */}
+              {(!mounted || isHydrating) ? (
+                <div className="hidden sm:flex h-[36px] w-[88px] bg-white/5 animate-pulse rounded-[18px] ml-1 pl-4 border-l border-border" />
+              ) : (
+                <>
+                  {isAuthenticated && (
+                    <>
+                      {/* Submit Recipe */}
+                      {(user?.role === 'Administrator' || user?.role === 'Editor') && (
+                        <Link
+                          href="/admin/recipes/new"
+                          id="navbar-submit-recipe"
+                          className="hidden md:flex items-center gap-2.5 bg-primary text-primary-foreground px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-2xl hover:-translate-y-0.5 hover:shadow-primary/30"
+                        >
+                          <Plus className="w-4 h-4 stroke-[3px]" />
+                          Submit Recipe
+                        </Link>
+                      )}
+
+                      <div className="flex items-center gap-2 sm:gap-3 ml-0.5 sm:ml-1 pl-3 sm:pl-4 border-l border-border">
+                        {/* Notifications */}
+                        <button
+                          id="navbar-notifications"
+                          className="relative w-8.5 h-8.5 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/5 text-muted-foreground hover:text-white transition-all group border border-border hover:border-white/10"
+                        >
+                          <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5 group-hover:animate-swing" />
+                          <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-primary rounded-full border-[2px] sm:border-[3px] border-background animate-pulse" />
+                        </button>
+
+                        {/* Profile Dropdown */}
+                        <div className="relative" ref={profileDropdownRef}>
+                          <button
+                            id="navbar-profile-toggle"
+                            onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                            className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer"
+                          >
+                            <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5 group-hover:ring-primary/60">
+                              {user?.avatar ? (
+                                <Image
+                                  src={user.avatar}
+                                  alt="Profile"
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-cover rounded-[10px] sm:rounded-[14px]"
+                                  unoptimized
+                                />
+                              ) : (
+                                <div className="w-full h-full rounded-[10px] sm:rounded-[14px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                                  <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-primary" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="hidden md:flex flex-col items-start">
+                              <span className="text-xs font-bold text-white leading-tight">
+                                {user?.name || 'User'}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground/60 leading-tight">
+                                {user?.role || 'Member'}
+                              </span>
+                            </div>
+                            <ChevronDown
+                              className={`hidden md:block w-3.5 h-3.5 text-muted-foreground/50 transition-transform duration-300 ${profileDropdownOpen ? 'rotate-180' : ''
+                                }`}
+                            />
+                          </button>
+
+                          {/* Dropdown Menu */}
+                          {profileDropdownOpen && (
+                            <div className="absolute right-0 top-full mt-3 w-64 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl shadow-black/50 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                              {/* User Info Header */}
+                              <div className="p-5 border-b border-white/5 bg-gradient-to-r from-primary/5 to-transparent">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-primary/20 p-0.5">
+                                    {user?.avatar ? (
+                                      <Image
+                                        src={user.avatar}
+                                        alt="Profile"
+                                        width={48}
+                                        height={48}
+                                        className="w-full h-full object-cover rounded-[12px]"
+                                        unoptimized
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full rounded-[12px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                                        <User className="w-5 h-5 text-primary" />
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-white">
+                                      {user?.name || 'User'}
+                                    </span>
+                                    <span className="text-[11px] text-muted-foreground/60">
+                                      {user?.email || 'user@example.com'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Menu Items */}
+                              <div className="p-2">
+                                {[
+                                  {
+                                    icon: Heart,
+                                    label: 'Favorites',
+                                    href: '/favorites',
+                                    count: totalFavorited,
+                                    color: 'text-rose-400'
+                                  },
+                                  {
+                                    icon: Bookmark,
+                                    label: 'Saved',
+                                    href: '/saved',
+                                    count: totalSaved,
+                                    color: 'text-primary'
+                                  },
+                                  { icon: Settings, label: 'Settings', href: '/settings' },
+                                ].map((item) => (
+                                  <Link
+                                    key={item.label}
+                                    href={item.href}
+                                    onClick={() => setProfileDropdownOpen(false)}
+                                    className="flex items-center justify-between px-4 py-3 rounded-xl text-muted-foreground hover:text-white hover:bg-white/5 transition-all group"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <item.icon className={cn("w-4 h-4 transition-colors", item.color || "group-hover:text-primary")} />
+                                      <span className="text-[13px] font-semibold">
+                                        {item.label}
+                                      </span>
+                                    </div>
+                                    {item.count !== undefined && (
+                                      <span className={cn(
+                                        "text-[10px] font-black px-2 py-0.5 rounded-lg bg-white/5",
+                                        item.count > 0 ? "text-white" : "text-white/20"
+                                      )}>
+                                        {item.count}
+                                      </span>
+                                    )}
+                                  </Link>
+                                ))}
+                              </div>
+
+                              {/* Logout */}
+                              <div className="p-2 border-t border-white/5">
+                                <button
+                                  id="navbar-logout"
+                                  onMouseDown={handleLogout}
+                                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all group"
+                                >
+                                  <LogOut className="w-4 h-4" />
+                                  <span className="text-[13px] font-semibold">
+                                    Sign Out
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {!isAuthenticated && settings?.showAuthButtons !== false && (
+                    <div className="hidden sm:flex items-center gap-3 ml-1 pl-4 border-l border-border">
+                      <Link
+                        href="/login"
+                        id="navbar-login"
+                        className="flex items-center gap-1.5 px-4.5 py-2 text-[10px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-primary/30"
+                        style={{ borderRadius: '18px' }}
+                      >
+                        <LogIn className="w-3 h-3" />
+                        <span>Sign In</span>
+                      </Link>
+                    </div>
+                  )}
+                </>
               )}
             </div>
-          </Link>
+          </div>
 
-          {/* Navigation — Desktop */}
-          <nav className="hidden lg:flex items-center gap-8">
-            {isLoadingSettings ? (
-              <>
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-16 h-2.5 bg-white/10 animate-pulse rounded-full" />
-                ))}
-              </>
-            ) : (
-              navLinks.map((item: any) => (
-                <Link
-                  key={item.label}
-                  href={item.url || item.href}
-                  className="group relative py-2"
-                >
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground group-hover:text-white transition-colors">
-                    {item.label}
-                  </span>
-                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary transition-all duration-300 group-hover:w-full rounded-full" />
-                </Link>
-              ))
-            )}
-          </nav>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-3">
-            {/* Search Bar - Desktop */}
-            <div className="hidden lg:flex items-center relative mr-1">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (searchQuery.trim()) {
-                    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-                    setSearchFocused(false);
-                  }
-                }}
-                className="relative flex items-center bg-white/5 border border-border hover:border-white/10 rounded-2xl px-3.5 py-2 w-44 focus-within:w-60 focus-within:bg-white/10 focus-within:border-primary/50 transition-all duration-300 group"
+          {/* Mobile Header */}
+          <div className="flex lg:hidden container mx-auto px-4 h-16 items-center justify-between gap-2 relative">
+            {/* Left: Menu Icon + Logo */}
+            <div className="flex items-center gap-3">
+              {/* Mobile Menu Toggle */}
+              <button
+                id="navbar-mobile-toggle"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-muted-foreground hover:text-white transition-all border border-border"
               >
-                <Search className="w-4 h-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors mr-2 shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
-                  placeholder="Search recipes..."
-                  className="bg-transparent border-0 outline-none text-[11px] text-white placeholder:text-muted-foreground/45 w-full font-bold uppercase tracking-wider"
-                />
-              </form>
+                {mobileMenuOpen ? (
+                  <X className="w-4.5 h-4.5" />
+                ) : (
+                  <Menu className="w-4.5 h-4.5" />
+                )}
+              </button>
 
-              {/* Suggestions Dropdown */}
-              {searchFocused && searchQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100] w-60 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <div className="p-2 flex flex-col gap-1">
+              {/* Logo */}
+              <Link href="/" className="flex items-center gap-2 group shrink-0">
+                <div className="relative w-8.5 h-8.5 rounded-xl overflow-hidden ring-2 ring-primary/20 flex items-center justify-center bg-card">
+                  {logoUrl ? (
+                    <Image
+                      src={logoUrl}
+                      alt={`${brandName} Logo`}
+                      width={34}
+                      height={34}
+                      className="w-full h-full object-cover"
+                      priority
+                    />
+                  ) : (
+                    <ChefHat className="w-4.5 h-4.5 text-primary" />
+                  )}
+                </div>
+                <div className="flex flex-col leading-[1.1]">
+                  {brandName ? (
+                    <span className="font-black text-sm tracking-tighter text-white font-heading">
+                      {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
+                    </span>
+                  ) : (
+                    <div className="h-4 w-16 bg-white/5 animate-pulse rounded" />
+                  )}
+                </div>
+              </Link>
+            </div>
+
+            {/* Right: Search Icon + User Badge */}
+            <div className="flex items-center gap-3">
+              {/* Search Icon */}
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-muted-foreground hover:text-white transition-all border border-border"
+              >
+                <Search className="w-4.5 h-4.5" />
+              </button>
+
+              {/* User Badge */}
+              {mounted && !isHydrating && isAuthenticated && (
+                <div className="relative" ref={profileDropdownMobileRef}>
+                  <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5"
+                  >
+                    {user?.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        alt="Profile"
+                        width={36}
+                        height={36}
+                        className="w-full h-full object-cover rounded-lg"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                        <User className="w-4.5 h-4.5 text-primary" />
+                      </div>
+                    )}
+                  </button>
+                  {/* Dropdown Menu on Mobile */}
+                  {profileDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="p-3.5 border-b border-white/5 bg-gradient-to-r from-primary/5 to-transparent">
+                        <span className="text-xs font-bold text-white block truncate">{user?.name || 'User'}</span>
+                        <span className="text-[10px] text-muted-foreground/60 block truncate">{user?.email}</span>
+                      </div>
+                      <div className="p-1">
+                        <Link
+                          href="/favorites"
+                          onClick={() => { setProfileDropdownOpen(false); setMobileMenuOpen(false); }}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-white hover:bg-white/5 transition-all"
+                        >
+                          <Heart className="w-3.5 h-3.5 text-rose-400" /> Favorites
+                        </Link>
+                        <Link
+                          href="/saved"
+                          onClick={() => { setProfileDropdownOpen(false); setMobileMenuOpen(false); }}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-white hover:bg-white/5 transition-all"
+                        >
+                          <Bookmark className="w-3.5 h-3.5 text-primary" /> Saved
+                        </Link>
+                        <Link
+                          href="/settings"
+                          onClick={() => { setProfileDropdownOpen(false); setMobileMenuOpen(false); }}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-white hover:bg-white/5 transition-all"
+                        >
+                          <Settings className="w-3.5 h-3.5" /> Settings
+                        </Link>
+                      </div>
+                      <div className="p-1 border-t border-white/5">
+                        <button
+                          onMouseDown={handleLogout}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-all text-left"
+                        >
+                          <LogOut className="w-3.5 h-3.5" /> Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Search Overlay */}
+            {searchOpen && (
+              <div className="absolute inset-x-0 top-0 bg-[#020617] z-50 flex flex-col px-4 py-3 animate-in fade-in duration-200 border-b border-white/10 shadow-2xl">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (searchQuery.trim()) {
+                      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                      setSearchOpen(false);
+                    }
+                  }}
+                  className="flex items-center gap-2 w-full"
+                >
+                  <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search recipes..."
+                    className="flex-1 bg-transparent border-0 outline-none text-sm text-white placeholder:text-muted-foreground/40 py-1.5"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchOpen(false);
+                      setSearchQuery('');
+                    }}
+                    className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white px-2 py-1"
+                  >
+                    Cancel
+                  </button>
+                </form>
+
+                {/* Suggestions List - Mobile */}
+                {searchQuery.trim() && (
+                  <div className="mt-2 flex flex-col gap-1 border-t border-white/5 pt-2 max-h-[300px] overflow-y-auto">
                     {isSearching && (
-                      <div className="p-3 text-xs text-muted-foreground flex items-center gap-2">
+                      <div className="p-2 text-xs text-muted-foreground flex items-center gap-2">
                         <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
                         <span className="text-[10px] font-bold uppercase tracking-wider">Searching...</span>
                       </div>
                     )}
-                    
+
                     {!isSearching && suggestions.length === 0 && (
-                      <div className="p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      <div className="p-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                         No recipes found
                       </div>
                     )}
@@ -582,7 +962,7 @@ export function Navbar() {
                         onMouseDown={() => {
                           router.push(`/recipes/${recipe.slug}`);
                           setSearchQuery('');
-                          setSearchFocused(false);
+                          setSearchOpen(false);
                         }}
                         className="w-full text-left flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/5 transition-all text-xs text-white group"
                       >
@@ -609,400 +989,13 @@ export function Navbar() {
                       </button>
                     ))}
                   </div>
-                </div>
-              )}
-            </div>
-            {/* Auth Area */}
-            {(!mounted || isHydrating) ? (
-              <div className="hidden sm:flex h-[36px] w-[88px] bg-white/5 animate-pulse rounded-[18px] ml-1 pl-4 border-l border-border" />
-            ) : (
-              <>
-                {isAuthenticated && (
-                  <>
-                    {/* Submit Recipe */}
-                    {(user?.role === 'Administrator' || user?.role === 'Editor') && (
-                      <Link
-                        href="/admin/recipes/new"
-                        id="navbar-submit-recipe"
-                        className="hidden md:flex items-center gap-2.5 bg-primary text-primary-foreground px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-2xl hover:-translate-y-0.5 hover:shadow-primary/30"
-                      >
-                        <Plus className="w-4 h-4 stroke-[3px]" />
-                        Submit Recipe
-                      </Link>
-                    )}
-
-                    <div className="flex items-center gap-2 sm:gap-3 ml-0.5 sm:ml-1 pl-3 sm:pl-4 border-l border-border">
-                      {/* Notifications */}
-                      <button
-                        id="navbar-notifications"
-                        className="relative w-8.5 h-8.5 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/5 text-muted-foreground hover:text-white transition-all group border border-border hover:border-white/10"
-                      >
-                        <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5 group-hover:animate-swing" />
-                        <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-primary rounded-full border-[2px] sm:border-[3px] border-background animate-pulse" />
-                      </button>
-
-                      {/* Profile Dropdown */}
-                      <div className="relative" ref={profileDropdownRef}>
-                        <button
-                          id="navbar-profile-toggle"
-                          onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                          className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer"
-                        >
-                          <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5 group-hover:ring-primary/60">
-                            {user?.avatar ? (
-                              <Image
-                                src={user.avatar}
-                                alt="Profile"
-                                width={40}
-                                height={40}
-                                className="w-full h-full object-cover rounded-[10px] sm:rounded-[14px]"
-                                unoptimized
-                              />
-                            ) : (
-                              <div className="w-full h-full rounded-[10px] sm:rounded-[14px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                                <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-primary" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="hidden md:flex flex-col items-start">
-                            <span className="text-xs font-bold text-white leading-tight">
-                              {user?.name || 'User'}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground/60 leading-tight">
-                              {user?.role || 'Member'}
-                            </span>
-                          </div>
-                          <ChevronDown
-                            className={`hidden md:block w-3.5 h-3.5 text-muted-foreground/50 transition-transform duration-300 ${profileDropdownOpen ? 'rotate-180' : ''
-                              }`}
-                          />
-                        </button>
-
-                        {/* Dropdown Menu */}
-                        {profileDropdownOpen && (
-                          <div className="absolute right-0 top-full mt-3 w-64 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl shadow-black/50 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
-                            {/* User Info Header */}
-                            <div className="p-5 border-b border-white/5 bg-gradient-to-r from-primary/5 to-transparent">
-                              <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-primary/20 p-0.5">
-                                  {user?.avatar ? (
-                                    <Image
-                                      src={user.avatar}
-                                      alt="Profile"
-                                      width={48}
-                                      height={48}
-                                      className="w-full h-full object-cover rounded-[12px]"
-                                      unoptimized
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full rounded-[12px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                                      <User className="w-5 h-5 text-primary" />
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex flex-col">
-                                  <span className="text-sm font-bold text-white">
-                                    {user?.name || 'User'}
-                                  </span>
-                                  <span className="text-[11px] text-muted-foreground/60">
-                                    {user?.email || 'user@example.com'}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                             {/* Menu Items */}
-                             <div className="p-2">
-                               {[
-                                 { 
-                                   icon: Heart, 
-                                   label: 'Favorites', 
-                                   href: '/favorites',
-                                   count: totalFavorited,
-                                   color: 'text-rose-400'
-                                 },
-                                 { 
-                                   icon: Bookmark, 
-                                   label: 'Saved', 
-                                   href: '/saved',
-                                   count: totalSaved,
-                                   color: 'text-primary'
-                                 },
-                                 { icon: Settings, label: 'Settings', href: '/settings' },
-                               ].map((item) => (
-                                 <Link
-                                   key={item.label}
-                                   href={item.href}
-                                   onClick={() => setProfileDropdownOpen(false)}
-                                   className="flex items-center justify-between px-4 py-3 rounded-xl text-muted-foreground hover:text-white hover:bg-white/5 transition-all group"
-                                 >
-                                   <div className="flex items-center gap-3">
-                                     <item.icon className={cn("w-4 h-4 transition-colors", item.color || "group-hover:text-primary")} />
-                                     <span className="text-[13px] font-semibold">
-                                       {item.label}
-                                     </span>
-                                   </div>
-                                   {item.count !== undefined && (
-                                     <span className={cn(
-                                       "text-[10px] font-black px-2 py-0.5 rounded-lg bg-white/5",
-                                       item.count > 0 ? "text-white" : "text-white/20"
-                                     )}>
-                                       {item.count}
-                                     </span>
-                                   )}
-                                 </Link>
-                               ))}
-                             </div>
-
-                            {/* Logout */}
-                            <div className="p-2 border-t border-white/5">
-                              <button
-                                id="navbar-logout"
-                                onMouseDown={handleLogout}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all group"
-                              >
-                                <LogOut className="w-4 h-4" />
-                                <span className="text-[13px] font-semibold">
-                                  Sign Out
-                                </span>
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {!isAuthenticated && settings?.showAuthButtons !== false && (
-                  <div className="hidden sm:flex items-center gap-3 ml-1 pl-4 border-l border-border">
-                    <Link
-                      href="/login"
-                      id="navbar-login"
-                      className="flex items-center gap-1.5 px-4.5 py-2 text-[10px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-primary/30"
-                      style={{ borderRadius: '18px' }}
-                    >
-                      <LogIn className="w-3 h-3" />
-                      <span>Sign In</span>
-                    </Link>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Header */}
-        <div className="flex lg:hidden container mx-auto px-4 h-16 items-center justify-between gap-2 relative">
-          {/* Left: Menu Icon + Logo */}
-          <div className="flex items-center gap-3">
-            {/* Mobile Menu Toggle */}
-            <button
-              id="navbar-mobile-toggle"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-muted-foreground hover:text-white transition-all border border-border"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-4.5 h-4.5" />
-              ) : (
-                <Menu className="w-4.5 h-4.5" />
-              )}
-            </button>
-
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group shrink-0">
-              <div className="relative w-8.5 h-8.5 rounded-xl overflow-hidden ring-2 ring-primary/20 flex items-center justify-center bg-card">
-                {logoUrl ? (
-                  <Image
-                    src={logoUrl}
-                    alt={`${brandName} Logo`}
-                    width={34}
-                    height={34}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                ) : (
-                  <ChefHat className="w-4.5 h-4.5 text-primary" />
-                )}
-              </div>
-              <div className="flex flex-col leading-[1.1]">
-                {brandName ? (
-                  <span className="font-black text-sm tracking-tighter text-white font-heading">
-                    {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
-                  </span>
-                ) : (
-                  <div className="h-4 w-16 bg-white/5 animate-pulse rounded" />
-                )}
-              </div>
-            </Link>
-          </div>
-
-          {/* Right: Search Icon + User Badge */}
-          <div className="flex items-center gap-3">
-            {/* Search Icon */}
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-muted-foreground hover:text-white transition-all border border-border"
-            >
-              <Search className="w-4.5 h-4.5" />
-            </button>
-
-            {/* User Badge */}
-            {mounted && !isHydrating && isAuthenticated && (
-              <div className="relative" ref={profileDropdownMobileRef}>
-                <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5"
-                >
-                  {user?.avatar ? (
-                    <Image
-                      src={user.avatar}
-                      alt="Profile"
-                      width={36}
-                      height={36}
-                      className="w-full h-full object-cover rounded-lg"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                      <User className="w-4.5 h-4.5 text-primary" />
-                    </div>
-                  )}
-                </button>
-                {/* Dropdown Menu on Mobile */}
-                {profileDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-[#0c1021]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="p-3.5 border-b border-white/5 bg-gradient-to-r from-primary/5 to-transparent">
-                      <span className="text-xs font-bold text-white block truncate">{user?.name || 'User'}</span>
-                      <span className="text-[10px] text-muted-foreground/60 block truncate">{user?.email}</span>
-                    </div>
-                    <div className="p-1">
-                      <Link
-                        href="/favorites"
-                        onClick={() => { setProfileDropdownOpen(false); setMobileMenuOpen(false); }}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-white hover:bg-white/5 transition-all"
-                      >
-                        <Heart className="w-3.5 h-3.5 text-rose-400" /> Favorites
-                      </Link>
-                      <Link
-                        href="/saved"
-                        onClick={() => { setProfileDropdownOpen(false); setMobileMenuOpen(false); }}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-white hover:bg-white/5 transition-all"
-                      >
-                        <Bookmark className="w-3.5 h-3.5 text-primary" /> Saved
-                      </Link>
-                      <Link
-                        href="/settings"
-                        onClick={() => { setProfileDropdownOpen(false); setMobileMenuOpen(false); }}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-white hover:bg-white/5 transition-all"
-                      >
-                        <Settings className="w-3.5 h-3.5" /> Settings
-                      </Link>
-                    </div>
-                    <div className="p-1 border-t border-white/5">
-                      <button
-                        onMouseDown={handleLogout}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-all text-left"
-                      >
-                        <LogOut className="w-3.5 h-3.5" /> Sign Out
-                      </button>
-                    </div>
-                  </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Mobile Search Overlay */}
-          {searchOpen && (
-            <div className="absolute inset-x-0 top-0 bg-[#020617] z-50 flex flex-col px-4 py-3 animate-in fade-in duration-200 border-b border-white/10 shadow-2xl">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (searchQuery.trim()) {
-                    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-                    setSearchOpen(false);
-                  }
-                }}
-                className="flex items-center gap-2 w-full"
-              >
-                <Search className="w-4 h-4 text-muted-foreground shrink-0" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search recipes..."
-                  className="flex-1 bg-transparent border-0 outline-none text-sm text-white placeholder:text-muted-foreground/40 py-1.5"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchOpen(false);
-                    setSearchQuery('');
-                  }}
-                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white px-2 py-1"
-                >
-                  Cancel
-                </button>
-              </form>
 
-              {/* Suggestions List - Mobile */}
-              {searchQuery.trim() && (
-                <div className="mt-2 flex flex-col gap-1 border-t border-white/5 pt-2 max-h-[300px] overflow-y-auto">
-                  {isSearching && (
-                    <div className="p-2 text-xs text-muted-foreground flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Searching...</span>
-                    </div>
-                  )}
-
-                  {!isSearching && suggestions.length === 0 && (
-                    <div className="p-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      No recipes found
-                    </div>
-                  )}
-
-                  {!isSearching && suggestions.map((recipe: any) => (
-                    <button
-                      key={recipe.id}
-                      onMouseDown={() => {
-                        router.push(`/recipes/${recipe.slug}`);
-                        setSearchQuery('');
-                        setSearchOpen(false);
-                      }}
-                      className="w-full text-left flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/5 transition-all text-xs text-white group"
-                    >
-                      <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-white/5 relative">
-                        {recipe.imageUrl ? (
-                          <Image
-                            src={recipe.imageUrl}
-                            alt={recipe.title}
-                            width={32}
-                            height={32}
-                            className="w-full h-full object-cover"
-                            unoptimized
-                          />
-                        ) : (
-                          <ChefHat className="w-4 h-4 text-primary absolute inset-0 m-auto" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold truncate text-[11px] leading-snug group-hover:text-primary transition-colors">{recipe.title}</p>
-                        <p className="text-[9px] text-muted-foreground truncate leading-normal">
-                          {recipe.summary || 'Delicious recipe'}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-
-      </header>
+        </header>
       </div>
     </>
   );

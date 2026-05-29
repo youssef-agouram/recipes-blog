@@ -2,14 +2,10 @@ import Link from "next/link";
 export const revalidate = 60;
 import dynamic from "next/dynamic";
 import {
-  ArrowRight, Clock, Users, Star, Search, ChevronRight, ChevronLeft, Heart, Play, Mail,
-  CheckCircle, ShieldCheck, Zap, Sparkles, X, Coffee, Salad, CookingPot, Cake, Leaf,
-  WheatOff, Timer, CupSoda, Soup, Waves, Utensils,
-  Pizza, Sandwich, Apple, Fish, Croissant, Carrot, Flame, Tag, LayoutGrid
+  Users, ChevronRight, Heart, Play, ShieldCheck, Zap, Sparkles
 } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { HeroSlider } from "@/components/home/HeroSlider";
-import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 // Dynamic imports for below-the-fold heavy components
@@ -159,20 +155,9 @@ export default async function HomePage() {
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tighter mb-3 leading-tight font-heading">
               Culinary Masterclass <span className="text-primary">With Michelin-Star Chefs</span>
             </h2>
-            <p className="text-[11px] text-muted-foreground mb-8 max-w-xl leading-relaxed font-medium">
+            <p className="text-[11px] text-muted-foreground mb-2 max-w-xl leading-relaxed font-medium">
               Transform your cooking skills with 150+ ultra-HD video masterclasses. Learn professional culinary secrets, plating techniques, and recipe composition from legendary chefs.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md bg-background/60 backdrop-blur-md border border-white/5 rounded-2xl p-1.5 focus-within:border-primary/40 transition-all">
-              <input
-                type="email"
-                placeholder="Enter email address"
-                className="flex-1 bg-transparent px-4 py-3 text-[11px] text-white placeholder:text-muted-foreground/30 outline-none"
-              />
-              <button className="bg-primary text-primary-foreground px-8 py-3.5 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                Claim 30% Off <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
           </div>
 
           {/* Right Benefits Section */}
