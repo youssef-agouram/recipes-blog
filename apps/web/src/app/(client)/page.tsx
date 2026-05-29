@@ -88,7 +88,7 @@ export default async function HomePage() {
           <div>
             <h2 className="text-sm xs:text-base sm:text-3xl font-black text-white tracking-tight leading-none font-heading">Explore by Category</h2>
           </div>
-          <Link href="/categories" className="flex items-center gap-1.5 text-[9px] sm:text-xs font-black text-primary uppercase tracking-wider sm:tracking-[0.2em] group hover:text-white transition-colors shrink-0">
+          <Link href="/categories" className="hidden sm:flex items-center gap-1.5 text-[9px] sm:text-xs font-black text-primary uppercase tracking-wider sm:tracking-[0.2em] group hover:text-white transition-colors shrink-0">
             View all categories
             <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
           </Link>

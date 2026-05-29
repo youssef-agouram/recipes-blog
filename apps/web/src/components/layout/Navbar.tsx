@@ -380,16 +380,23 @@ export function Navbar() {
                     </div>
                   </div>
                 ) : (
-                  settings?.showAuthButtons !== false && (
-                    <Link
-                      href="/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/15 hover:-translate-y-0.5"
-                    >
-                      <LogIn className="w-4 h-4" />
-                      <span>Sign In</span>
-                    </Link>
-                  )
+                  <div className="flex flex-col items-center gap-3">
+                    <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Follow Us</span>
+                    <div className="flex items-center justify-center gap-3 w-full">
+                      <a href="#" className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 shrink-0">
+                        <FacebookIcon />
+                      </a>
+                      <a href="#" className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 shrink-0">
+                        <InstagramIcon />
+                      </a>
+                      <a href="#" className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 shrink-0">
+                        <TwitterIcon />
+                      </a>
+                      <a href="#" className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 shrink-0">
+                        <YoutubeIcon />
+                      </a>
+                    </div>
+                  </div>
                 )}
               </>
             )}

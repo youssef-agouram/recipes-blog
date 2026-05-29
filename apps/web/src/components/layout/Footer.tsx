@@ -33,11 +33,62 @@ export function Footer() {
     <footer className="w-full bg-[#030408] border-t border-white/5 py-10 sm:py-12 font-body print:hidden">
       <div className="container mx-auto px-6 max-w-[1536px]">
         
-        {/* Fully responsive Grid layout supporting Mobile, Tablet, and Desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 items-center gap-y-6 md:gap-y-8 lg:gap-y-0 gap-x-4">
+        {/* Mobile-Only Layout (below md breakpoint) */}
+        <div className="flex flex-col gap-6 md:hidden">
+          {/* Row 1: Left Column (Logo & Copyright) + Right Column (2x2 Legal Links) */}
+          <div className="flex items-start justify-between w-full gap-4">
+            {/* Left Column: Logo & Copyright directly underneath */}
+            <div className="flex flex-col gap-1.5 items-start">
+              <Link href="/" className="flex items-center gap-2 group">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#f59e0b] to-[#d97706] text-black font-black text-xs flex items-center justify-center shadow-lg">
+                  <span>T</span>
+                </div>
+                <span className="font-heading font-black text-base tracking-tighter text-white">
+                  Taste<span className="text-[#f59e0b]">ful</span>
+                </span>
+              </Link>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">
+                © {new Date().getFullYear()} Tasteful.
+              </p>
+            </div>
+
+            {/* Right Column: Legal Pages (2x2 Grid Layout aligned to the right) */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-right justify-items-end shrink-0">
+              {legalLinks.map((link) => (
+                <Link 
+                  key={link.href}
+                  href={link.href} 
+                  className="text-[9px] font-bold text-slate-400 hover:text-white uppercase tracking-wider transition-colors duration-200"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Row 2: Social Media Links (Down - Center) */}
+          <div className="flex items-center justify-center gap-4">
+            {socialLinks.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <a 
+                  key={i} 
+                  href={item.href} 
+                  aria-label={item.label}
+                  className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] transition-all duration-300 active:scale-95 shrink-0"
+                >
+                  <Icon />
+                </a>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tablet and Desktop Grid Layout (md breakpoint and up) */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-12 items-center gap-y-8 lg:gap-y-0 gap-x-4">
           
           {/* Logo (Left column: span 1/2 on tablet, span 3/12 on desktop) */}
-          <div className="col-span-1 md:col-span-1 lg:col-span-3 flex justify-center md:justify-start">
+          <div className="col-span-1 md:col-span-1 lg:col-span-3 flex justify-start">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f59e0b] to-[#d97706] text-black font-black text-base flex items-center justify-center shadow-lg shadow-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-primary/30">
                 <span>T</span>
@@ -48,23 +99,21 @@ export function Footer() {
             </Link>
           </div>
 
-          {/* Legal Pages links (Center/Bottom row: span 2/2 on tablet, span 6/12 on desktop) */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-6 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 order-2 md:order-3 lg:order-2 md:mt-4 lg:mt-0">
-            {legalLinks.map((link, idx) => (
-              <React.Fragment key={link.href}>
-                {idx > 0 && <span className="text-slate-600 text-[10px] select-none">/</span>}
-                <Link 
-                  href={link.href} 
-                  className="text-[10px] font-bold text-slate-400 hover:text-white uppercase tracking-wider transition-colors duration-200"
-                >
-                  {link.label}
-                </Link>
-              </React.Fragment>
+          {/* Legal Pages links (Center/Bottom row: span 2/2 on tablet, span 6/12 on desktop - Balanced 2x2 Grid) */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-6 grid grid-cols-2 gap-x-8 gap-y-2.5 max-w-[280px] mx-auto text-center order-2 md:order-3 lg:order-2 md:mt-4 lg:mt-0 justify-items-center">
+            {legalLinks.map((link) => (
+              <Link 
+                key={link.href}
+                href={link.href} 
+                className="text-[10px] font-bold text-slate-400 hover:text-white uppercase tracking-wider transition-colors duration-200 w-full"
+              >
+                {link.label}
+              </Link>
             ))}
           </div>
 
           {/* Social Links & Copyright (Right column: span 1/2 on tablet, span 3/12 on desktop, stacked vertically) */}
-          <div className="col-span-1 md:col-span-1 lg:col-span-3 flex flex-col items-center md:items-end gap-2 order-3 md:order-2 lg:order-3">
+          <div className="col-span-1 md:col-span-1 lg:col-span-3 flex flex-col items-end gap-2 order-3 md:order-2 lg:order-3">
             {/* Social Media Links */}
             <div className="flex items-center gap-2.5">
               {socialLinks.map((item, i) => {
@@ -82,7 +131,7 @@ export function Footer() {
               })}
             </div>
             {/* Copyright */}
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center md:text-right">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-right">
               © {new Date().getFullYear()} Tasteful. All rights reserved.
             </p>
           </div>
