@@ -54,6 +54,18 @@ export function Navbar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   const [topAdIndex, setTopAdIndex] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -233,6 +245,158 @@ export function Navbar() {
 
   return (
     <>
+      {/* Mobile Menu Backdrop and Drawer (outside stacking context for z-index safety) */}
+      {/* Backdrop overlay */}
+      <div
+        className={cn(
+          "fixed inset-0 bg-black/65 z-[99999] lg:hidden transition-opacity duration-300",
+          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
+      {/* Drawer content */}
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 w-[290px] sm:w-[320px] bg-[#0c1021] border-r border-white/10 z-[100000] transition-transform duration-300 ease-in-out transform lg:hidden shadow-2xl flex flex-col",
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
+          <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={() => setMobileMenuOpen(false)}>
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden ring-2 ring-primary/20 flex items-center justify-center bg-card">
+              {logoUrl ? (
+                <Image
+                  src={logoUrl}
+                  alt={`${brandName} Logo`}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                  priority
+                />
+              ) : (
+                <ChefHat className="w-4.5 h-4.5 text-primary" />
+              )}
+            </div>
+            <div className="flex flex-col leading-[1.1]">
+              {brandName ? (
+                <span className="font-black text-sm tracking-tighter text-white font-heading">
+                  {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
+                </span>
+              ) : (
+                <div className="h-4 w-16 bg-white/5 animate-pulse rounded" />
+              )}
+            </div>
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-muted-foreground hover:text-white hover:bg-white/10 transition-all border border-white/10"
+          >
+            <X className="w-4.5 h-4.5" />
+          </button>
+        </div>
+
+        {/* Drawer Body - Scrollable */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col justify-between">
+          {/* Mobile Nav Links */}
+          <nav className="flex flex-col gap-1.5">
+            {navLinks.map((item: any, idx: number) => {
+              const href = item.url || item.href;
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={item.label}
+                  href={href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-4.5 py-3.5 rounded-2xl transition-all duration-300 group border",
+                    isActive
+                      ? "bg-primary/10 border-primary/20 text-primary shadow-lg shadow-primary/5"
+                      : "border-transparent text-muted-foreground hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <span className={cn(
+                    "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                    isActive
+                      ? "bg-primary scale-125 shadow-[0_0_8px_var(--color-primary)]"
+                      : "bg-muted-foreground/30 group-hover:bg-primary"
+                  )} />
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Mobile Profile if logged in / Sign in if not logged in */}
+          <div className="mt-auto pt-6 border-t border-white/5">
+            {mounted && !isHydrating && (
+              <>
+                {isAuthenticated ? (
+                  <div className="flex flex-col gap-4">
+                    {(user?.role === 'Administrator' || user?.role === 'Editor') && (
+                      <Link
+                        href="/admin/recipes/new"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/15 hover:-translate-y-0.5"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3px]" />
+                        Submit Recipe
+                      </Link>
+                    )}
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-border shadow-md">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-primary/20 p-0.5">
+                        {user?.avatar ? (
+                          <Image
+                            src={user.avatar}
+                            alt="Profile"
+                            width={40}
+                            height={40}
+                            className="w-full h-full object-cover rounded-lg"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-full h-full rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                            <User className="w-4 h-4 text-primary" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <span className="text-sm font-bold text-white truncate">
+                          {user?.name || 'User'}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground/60 truncate">
+                          {user?.email}
+                        </span>
+                      </div>
+                      <button
+                        onMouseDown={handleLogout}
+                        className="p-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all shrink-0"
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  settings?.showAuthButtons !== false && (
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/15 hover:-translate-y-0.5"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      <span>Sign In</span>
+                    </Link>
+                  )
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Floating Top Ad Bar - Appears when navbar is hidden */}
       {settings?.adSettings?.showTopBarAd && activeTopAdUrl && (
         <div className={cn(
@@ -830,85 +994,7 @@ export function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu */}
-        <div
-          className={`
-            lg:hidden overflow-hidden transition-all duration-500 ease-in-out border-t border-border/50
-            ${mobileMenuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0 border-t-transparent'}
-          `}
-        >
-          <div className="container mx-auto px-6 max-w-[1536px] py-6">
 
-
-            {/* Mobile Nav Links */}
-            <nav className="flex flex-col gap-1 mb-6">
-              {navLinks.map((item: any, idx: number) => (
-                <Link
-                  key={item.label}
-                  href={item.url || item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-muted-foreground hover:text-white hover:bg-white/5 transition-all group"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary/30 group-hover:bg-primary group-hover:shadow-lg group-hover:shadow-primary/30 transition-all" />
-                  <span className="text-[13px] font-bold uppercase tracking-wider">
-                    {item.label}
-                  </span>
-                </Link>
-              ))}
-            </nav>
-
-
-
-            {/* Mobile Profile if logged in */}
-            {mounted && !isHydrating && isAuthenticated && (
-              <div className="pt-4 border-t border-white/5">
-                {(user?.role === 'Administrator' || user?.role === 'Editor') && (
-                  <Link
-                    href="/admin/recipes/new"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-xs font-black uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 transition-all mb-3"
-                  >
-                    <Plus className="w-4 h-4 stroke-[3px]" />
-                    Submit Recipe
-                  </Link>
-                )}
-                <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/5">
-                  <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-primary/20 p-0.5">
-                    {user?.avatar ? (
-                       <Image
-                         src={user.avatar}
-                         alt="Profile"
-                         width={40}
-                         height={40}
-                         className="w-full h-full object-cover rounded-lg"
-                         unoptimized
-                       />
-                    ) : (
-                      <div className="w-full h-full rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                        <User className="w-4 h-4 text-primary" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col flex-1">
-                    <span className="text-sm font-bold text-white">
-                      {user?.name || 'User'}
-                    </span>
-                    <span className="text-[11px] text-muted-foreground/60">
-                      {user?.email}
-                    </span>
-                  </div>
-                  <button
-                    onMouseDown={handleLogout}
-                    className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-all"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
       </header>
       </div>
     </>

@@ -26,6 +26,22 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response, next: Next
       ];
     }
 
+    const selectFields: any = {
+      id: true,
+      title: true,
+      slug: true,
+      summary: true,
+      imageUrl: true,
+      category: true,
+      isTopArticle: true,
+      createdAt: true,
+      updatedAt: true,
+    };
+    if (userId) {
+      selectFields.savedArticles = { where: { userId } };
+      selectFields.favoriteArticles = { where: { userId } };
+    }
+
     if (page) {
       const pageNum = Number(page);
       const limitNum = Number(limit);
@@ -36,12 +52,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response, next: Next
           where,
           skip,
           take: limitNum,
-          include: {
-            ...(userId ? { 
-              savedArticles: { where: { userId } },
-              favoriteArticles: { where: { userId } }
-            } : {})
-          },
+          select: selectFields,
           orderBy: { createdAt: 'desc' },
         }),
         prisma.article.count({ where }),
@@ -67,12 +78,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response, next: Next
       const articles = await prisma.article.findMany({
         where,
         ...(limit ? { take: Number(limit) } : {}),
-        include: {
-          ...(userId ? { 
-            savedArticles: { where: { userId } },
-            favoriteArticles: { where: { userId } }
-          } : {})
-        },
+        select: selectFields,
         orderBy: { createdAt: 'desc' },
       });
 

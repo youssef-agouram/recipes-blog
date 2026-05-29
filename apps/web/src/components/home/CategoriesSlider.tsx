@@ -86,25 +86,47 @@ export default function CategoriesSlider({ categories }: CategoriesSliderProps) 
   const [centerOffset, setCenterOffset] = useState(initialValues.centerOffset);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Handle responsive behavior & client-side activation using ResizeObserver
+  // Handle responsive behavior & client-side activation using window matchMedia & event listeners
   useEffect(() => {
     setIsMounted(true);
-    if (!containerRef.current) return;
+    if (typeof window === 'undefined') return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        const containerWidth = entry.contentRect.width;
-        const mobile = window.innerWidth < 768;
-        setIsMobile(mobile);
-        const cardW = mobile ? 95 : 120;
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const updateMode = () => {
+      const mobile = mediaQuery.matches;
+      setIsMobile(mobile);
+      if (!mobile && containerRef.current) {
+        const cardW = 120;
+        const containerWidth = containerRef.current.getBoundingClientRect().width;
         setCenterOffset((containerWidth / 2) - (cardW / 2));
       }
-    });
+    };
 
-    resizeObserver.observe(containerRef.current);
+    updateMode();
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', updateMode);
+    } else {
+      mediaQuery.addListener(updateMode);
+    }
+
+    const handleResize = () => {
+      if (!mediaQuery.matches && containerRef.current) {
+        const cardW = 120;
+        const containerWidth = containerRef.current.getBoundingClientRect().width;
+        setCenterOffset((containerWidth / 2) - (cardW / 2));
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      resizeObserver.disconnect();
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', updateMode);
+      } else {
+        mediaQuery.removeListener(updateMode);
+      }
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -194,6 +216,47 @@ export default function CategoriesSlider({ categories }: CategoriesSliderProps) 
                     {cat.name}
                   </span>
                 </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <div className="relative w-full py-1">
+        {/* Left edge fade overlay */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-background to-transparent z-10" />
+        
+        {/* Right edge fade overlay */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent z-10" />
+
+        <div className="w-full overflow-x-auto py-2 scrollbar-hide scroll-smooth snap-x snap-mandatory flex gap-3 px-6">
+          {categories.map((cat) => {
+            const Icon = getCategoryIcon(cat.name, cat.icon);
+            return (
+              <div key={cat.slug} className="shrink-0 w-[95px] snap-center">
+                <Link
+                  href={`/category/${cat.slug}`}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-1.5 rounded-2xl px-2 h-[72px]",
+                    "border transition-all duration-300 bg-card/40 border-white/5 hover:border-primary/20 active:scale-95 shadow-md"
+                  )}
+                >
+                  {/* Icon Wrapper */}
+                  <div className="w-8.5 h-8.5 rounded-full flex items-center justify-center bg-white/5 text-primary/80 transition-colors border border-white/5">
+                    <Icon className="w-4 h-4 stroke-[1.8px]" />
+                  </div>
+
+                  {/* Name */}
+                  <div className="flex flex-col items-center text-center min-w-0 w-full">
+                    <span className="text-[9px] font-black uppercase tracking-[0.06em] text-white/80 leading-none truncate w-full px-1">
+                      {cat.name}
+                    </span>
+                  </div>
+                </Link>
               </div>
             );
           })}

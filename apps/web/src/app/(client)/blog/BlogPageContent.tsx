@@ -54,6 +54,69 @@ function LocalArticleCardSkeleton() {
   );
 }
 
+function LocalArticleCard({ article }: { article: Article }) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  return (
+    <div
+      className="group/card flex flex-col bg-card/25 rounded-2xl overflow-hidden border border-white/5 hover:border-white/10 hover:shadow-2xl transition-all duration-500 h-full animate-in fade-in slide-in-from-bottom-4 duration-500"
+    >
+      <Link href={`/blog/${article.slug}`} className="flex flex-col flex-1">
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-white/[0.02]">
+          {article.imageUrl ? (
+            <Image
+              src={article.imageUrl}
+              alt={article.title}
+              fill
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              onLoad={() => setIsLoaded(true)}
+              className={cn(
+                "object-cover group-hover/card:scale-105 transition-all duration-700",
+                isLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+              )}
+            />
+          ) : (
+            <div className="w-full h-full bg-white/[0.02] flex items-center justify-center text-muted-foreground/20 italic text-xs">
+              No image available
+            </div>
+          )}
+          <span className="absolute top-4 left-4 px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white text-[8px] font-black uppercase tracking-widest">
+            {article.category || 'Lifestyle'}
+          </span>
+        </div>
+
+        <div className="p-5 flex flex-col flex-1">
+          <div className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-primary" />
+              {new Date(article.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3 text-primary" />
+              5 MIN READ
+            </span>
+          </div>
+
+          <h3 className="text-[14px] font-black text-white leading-snug mb-2 group-hover/card:text-primary transition-colors line-clamp-2">
+            {article.title}
+          </h3>
+
+          <p className="text-[11px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-3">
+            {article.summary || "Explore expert culinary insights, kitchen tips, and lifestyle enhancement guides in this article."}
+          </p>
+
+          <button className="flex items-center gap-1.5 text-[9px] font-black text-white uppercase tracking-wider group/btn mt-auto text-left">
+            <span className="border-b pb-0.5 border-primary">
+              Read Article
+            </span>
+            <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform text-primary" />
+          </button>
+        </div>
+      </Link>
+    </div>
+  );
+}
+
 export default function BlogPageContent({ initialArticles, initialMeta, categories }: BlogPageContentProps) {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [page, setPage] = useState(initialMeta.page);
@@ -83,7 +146,7 @@ export default function BlogPageContent({ initialArticles, initialMeta, categori
     try {
       const response = await api.articles.list({
         page: 1,
-        limit: 6,
+        limit: 3,
         category: cat === "All" ? undefined : cat,
         search: search || undefined
       });
@@ -113,7 +176,7 @@ export default function BlogPageContent({ initialArticles, initialMeta, categori
       const nextPage = page + 1;
       const response = await api.articles.list({
         page: nextPage,
-        limit: 6,
+        limit: 3,
         category: selectedCategory === "All" ? undefined : selectedCategory,
         search: debouncedSearch || undefined
       });
@@ -267,7 +330,7 @@ export default function BlogPageContent({ initialArticles, initialMeta, categori
         {/* Regular Articles Grid */}
         {articles.length === 0 && loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
               <LocalArticleCardSkeleton key={i} />
             ))}
           </div>
@@ -278,60 +341,7 @@ export default function BlogPageContent({ initialArticles, initialMeta, categori
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {(searchQuery !== "" || selectedCategory !== "All" ? articles : regularArticles).map((article) => (
-                <div
-                  key={article.id}
-                  className="group/card flex flex-col bg-card/25 rounded-2xl overflow-hidden border border-white/5 hover:border-white/10 hover:shadow-2xl transition-all duration-500 h-full"
-                >
-                  <Link href={`/blog/${article.slug}`} className="flex flex-col flex-1">
-                    <div className="relative aspect-[16/10] w-full overflow-hidden">
-                      {article.imageUrl ? (
-                        <Image
-                          src={article.imageUrl}
-                          alt={article.title}
-                          fill
-                          loading="lazy"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          className="object-cover group-hover/card:scale-105 transition-transform duration-[1.5s]"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-white/[0.02] flex items-center justify-center text-muted-foreground/20 italic text-xs">
-                          No image available
-                        </div>
-                      )}
-                      <span className="absolute top-4 left-4 px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white text-[8px] font-black uppercase tracking-widest">
-                        {article.category || 'Lifestyle'}
-                      </span>
-                    </div>
-
-                    <div className="p-5 flex flex-col flex-1">
-                      <div className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-primary" />
-                          {new Date(article.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-primary" />
-                          5 MIN READ
-                        </span>
-                      </div>
-
-                      <h3 className="text-[14px] font-black text-white leading-snug mb-2 group-hover/card:text-primary transition-colors line-clamp-2">
-                        {article.title}
-                      </h3>
-
-                      <p className="text-[11px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-3">
-                        {article.summary || "Explore expert culinary insights, kitchen tips, and lifestyle enhancement guides in this article."}
-                      </p>
-
-                      <button className="flex items-center gap-1.5 text-[9px] font-black text-white uppercase tracking-wider group/btn mt-auto text-left">
-                        <span className="border-b pb-0.5 border-primary">
-                          Read Article
-                        </span>
-                        <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform text-primary" />
-                      </button>
-                    </div>
-                  </Link>
-                </div>
+                <LocalArticleCard key={article.id} article={article} />
               ))}
             </div>
 

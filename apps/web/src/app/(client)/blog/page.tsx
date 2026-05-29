@@ -11,13 +11,13 @@ export const metadata = {
 const DEFAULT_META = {
   total: 0,
   page: 1,
-  limit: 6,
+  limit: 3,
   totalPages: 0
 };
 
 export default async function BlogPage() {
   try {
-    const response = await api.articles.list({ page: 1, limit: 6 }).catch(() => ({ data: [], meta: DEFAULT_META }));
+    const response = await api.articles.list({ page: 1, limit: 3 }).catch(() => ({ data: [], meta: DEFAULT_META }));
     const categories = await api.articles.getCategories().catch(() => []);
     
     return (
