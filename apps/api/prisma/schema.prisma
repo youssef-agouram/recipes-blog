@@ -240,15 +240,8 @@ model CategorySeo {
 
 model AnalyticsSettings {
   id                Int      @id @default(1)
-  googleAnalyticsId String?  @default("")
   customScriptsCode String?  @default("")
-  ga4Id             String?  @default("")
-  gtmId             String?  @default("")
-  ga4PropertyId     String?  @default("")
-  ga4ServiceAccount String?  @default("")
   analyticsEnabled  Boolean  @default(true)
-  debugMode         Boolean  @default(false)
-  trackingSettings  Json?    @default("{\"pageTracking\": true, \"recipeTracking\": true, \"searchTracking\": true}")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

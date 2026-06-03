@@ -34,7 +34,7 @@ export default function CookiePolicyPage() {
             <strong>Preference Cookies:</strong> These cookies allow our platform to remember choices you make (such as dark mode preferences, recently viewed recipe list, or filters you selected).
           </li>
           <li>
-            <strong>Analytics Cookies:</strong> We use aggregated tracking cookies (primarily Google Analytics / GA4) to compile statistics on how visitors interact with our pages. This helps us understand which recipes are popular and improve site layout.
+            <strong>Analytics Cookies:</strong> We use aggregated tracking cookies (primarily Vercel Web Analytics) to compile statistics on how visitors interact with our pages. This helps us understand which recipes are popular and improve site layout.
           </li>
           <li>
             <strong>Advertising and Sponsorship Cookies:</strong> These cookies are used to track user interactions with our dynamic top bars, michelin promotion banners, or sponsored recipe cards to verify campaign performance.
@@ -53,7 +53,6 @@ export default function CookiePolicyPage() {
         <ul className="list-disc pl-6 space-y-2 text-slate-300">
           <li>To manage cookies in your browser, refer to your browser’s help menus (Chrome, Safari, Firefox, Edge).</li>
           <li>Blocking essential cookies may prevent you from logging in, saving favorite recipes, or using custom meal planning lists.</li>
-          <li>You can opt-out of Google Analytics tracking across all sites by installing Google’s opt-out browser add-on.</li>
         </ul>
 
         <h2 className="text-xl font-heading font-black text-white mt-8 mb-4">5. Contact Us</h2>

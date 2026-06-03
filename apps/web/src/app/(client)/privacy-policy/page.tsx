@@ -59,9 +59,6 @@ export default function PrivacyPolicyPage() {
           <li>
             <strong>Supabase / Prisma:</strong> Our database providers store account credentials, comments, and recipe collections securely.
           </li>
-          <li>
-            <strong>Google Analytics (GA4):</strong> We use analytics tracking to understand aggregate site performance. No personally identifiable data is sent to GA4.
-          </li>
         </ul>
 
         <h2 className="text-xl font-heading font-black text-white mt-8 mb-4">4. Cookies and Tracking</h2>

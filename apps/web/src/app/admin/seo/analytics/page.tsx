@@ -46,7 +46,7 @@ export default function AnalyticsDashboardPage() {
   const { data: statsData, isLoading } = useGetDashboardStatsQuery(undefined, { pollingInterval: 60000 });
   const [activeTab, setActiveTab] = useState<'overview' | 'pageviews' | 'sessions'>('overview');
 
-  const isConfigured = !!(settings?.ga4Id || settings?.googleAnalyticsId || process.env.NEXT_PUBLIC_GA_ID);
+  // Google Analytics removed
 
   if (isLoading) {
     return (
@@ -87,34 +87,12 @@ export default function AnalyticsDashboardPage() {
             href="/admin/seo/analytics/settings"
             className="h-11 inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 text-xs font-black uppercase tracking-wider text-slate-300 transition-all hover:bg-white/10 active:scale-95"
           >
-            <Settings className="h-4 w-4" /> Configure GA4 Setup
+            <Settings className="h-4 w-4" /> Custom Scripts
           </Link>
         </div>
       </div>
 
-      {/* Integration Warning Notice if not configured */}
-      {!isConfigured && (
-        <div className="p-6 rounded-3xl bg-rose-500/5 border border-rose-500/20 shadow-xl relative overflow-hidden group flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-rose-500/10 blur-[60px] pointer-events-none rounded-full" />
-          <div className="flex items-start gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-400 shrink-0">
-              <ShieldAlert className="h-6 w-6" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white">Google Analytics GA4 Not Connected</h3>
-              <p className="text-[11px] text-muted-foreground/60 leading-relaxed max-w-2xl">
-                No active Google Analytics GA4 Measurement ID was found in the database settings. Configure your tracking credentials to begin streaming production-grade analytics.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/admin/seo/analytics/settings"
-            className="h-10 px-5 inline-flex items-center justify-center text-[10px] font-black uppercase tracking-wider bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-xl transition-all shrink-0 active:scale-95"
-          >
-            Connect GA4 Now
-          </Link>
-        </div>
-      )}
+      {/* Google Analytics removal */}
 
       {/* Vercel Web Analytics Status Banner */}
       <div className="p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/20 shadow-xl relative overflow-hidden group flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -253,9 +231,9 @@ export default function AnalyticsDashboardPage() {
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-[#5850ec]" />
-                GA4 Traffic Stream Trends
+                Visitor Traffic Trends
               </h3>
-              <p className="text-[11px] text-muted-foreground/60">Live metrics analysis across active search domains</p>
+              <p className="text-[11px] text-muted-foreground/60">Live metrics analysis from local traffic logs</p>
             </div>
             
             {/* Chart Sub-tabs */}
@@ -444,20 +422,11 @@ export default function AnalyticsDashboardPage() {
               <BarChart2 className="h-5 w-5 text-emerald-400" />
               Tracking Nodes Status
             </h3>
-            <p className="text-[11px] text-muted-foreground/60 font-medium mt-0.5">GA4 & Vercel integration status logs</p>
+            <p className="text-[11px] text-muted-foreground/60 font-medium mt-0.5">Vercel integration status logs</p>
           </div>
 
           <div className="space-y-4 font-semibold">
-            {/* Status 1: Primary Stream */}
-            <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl">
-              <div className="space-y-0.5">
-                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none">GA4 Streaming</span>
-                <p className="text-xs font-bold text-white mt-0.5">{isConfigured ? 'CONNECTED' : 'DISCONNECTED'}</p>
-              </div>
-              <div className={`h-2.5 w-2.5 rounded-full ${isConfigured ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-rose-500 shadow-[0_0_8px_#ef4444]'}`} />
-            </div>
-
-            {/* Status 2: Vercel Web Analytics */}
+            {/* Status: Vercel Web Analytics */}
             <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl">
               <div className="space-y-0.5">
                 <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none">Vercel Analytics</span>
@@ -465,34 +434,6 @@ export default function AnalyticsDashboardPage() {
               </div>
               <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
             </div>
-
-            {/* Status 2: Active modules */}
-            <div className="space-y-3">
-              <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Active Stream Filters</span>
-              
-              <div className="space-y-2">
-                {[
-                  { name: 'Route Transitions', val: settings?.trackingSettings?.pageTracking ?? true },
-                  { name: 'Recipe Clicks / Cooking Start', val: settings?.trackingSettings?.recipeTracking ?? true },
-                  { name: 'Search Terms Analyzer', val: settings?.trackingSettings?.searchTracking ?? true },
-                ].map((node, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs py-1">
-                    <span className="text-slate-400">{node.name}</span>
-                    <span className={`text-[10px] font-black uppercase tracking-wider ${node.val ? 'text-emerald-400' : 'text-slate-500'}`}>
-                      {node.val ? 'ACTIVE' : 'INACTIVE'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Help Card */}
-          <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex items-start gap-3">
-            <Sparkles className="h-5 w-5 text-indigo-400 shrink-0 mt-0.5" />
-            <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
-              Google Analytics (GA4) uses cookies and client tags. Event data streams take up to 24 hours to aggregate fully inside custom exploration lists on your Google console.
-            </p>
           </div>
         </div>
       </div>

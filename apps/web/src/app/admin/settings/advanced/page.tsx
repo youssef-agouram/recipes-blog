@@ -79,13 +79,7 @@ export default function AdvancedSettingsPage() {
         }).unwrap();
       } else if (activeTab === 'analytics') {
         await updateAnalytics({
-          googleAnalyticsId: ga4Id,
-          ga4Id,
-          gtmId,
-          ga4PropertyId,
-          ga4ServiceAccount,
           analyticsEnabled,
-          debugMode,
           customScriptsCode
         }).unwrap();
       }
@@ -117,7 +111,7 @@ export default function AdvancedSettingsPage() {
 
   const tabs = [
     { id: 'cloudinary', label: 'Cloudinary Settings', icon: ImageIcon, sub: 'Cloud media storage' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, sub: 'Tracking codes' },
+    { id: 'analytics', label: 'Custom Scripts', icon: Code, sub: 'Tracking overrides' },
     { id: 'performance', label: 'Performance', icon: Zap, sub: 'Optimize speed' },
     { id: 'security', label: 'Security', icon: Shield, sub: 'Site protection' },
     { id: 'maintenance', label: 'Maintenance', icon: Power, sub: 'Mode toggle' },
@@ -290,17 +284,17 @@ export default function AdvancedSettingsPage() {
               </section>
            )}
 
-           {/* Analytics Settings Section */}
+           {/* Custom Scripts Section */}
            {activeTab === 'analytics' && (
               <section className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-8 transition-all duration-500 hover:border-white/10 w-full animate-in fade-in duration-300">
                  <div className="flex items-center justify-between border-b border-white/5 pb-6">
                     <div className="flex items-center gap-4">
                        <div className="w-12 h-12 rounded-2xl bg-[#5850ec]/10 flex items-center justify-center border border-[#5850ec]/20">
-                          <BarChart3 className="w-6 h-6 text-[#5850ec]" />
+                          <Code className="w-6 h-6 text-[#5850ec]" />
                        </div>
                        <div>
-                          <h2 className="text-xl font-bold text-white mb-0.5">Google Analytics (GA4)</h2>
-                          <p className="text-[12px] text-muted-foreground/40 leading-tight italic">Configure global website tracking codes and analytics engines.</p>
+                          <h2 className="text-xl font-bold text-white mb-0.5">Custom Scripts Configuration</h2>
+                          <p className="text-[12px] text-muted-foreground/40 leading-tight italic">Configure global website custom scripts and tracking overrides.</p>
                        </div>
                     </div>
                     
@@ -317,100 +311,26 @@ export default function AdvancedSettingsPage() {
                       {analyticsEnabled ? (
                         <>
                           <Check className="h-4 w-4 text-emerald-400" />
-                          Analytics Active
+                          Scripts Active
                         </>
                       ) : (
                         <>
                           <Power className="h-4 w-4 text-slate-500" />
-                          Analytics Suspended
+                          Scripts Suspended
                         </>
                       )}
                     </button>
                  </div>
 
                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                       <div className="space-y-2">
-                          <label className="text-sm font-bold text-white/90">GA4 Measurement ID</label>
-                          <input 
-                            type="text" 
-                            value={ga4Id} 
-                            onChange={(e) => setGa4Id(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec]" 
-                            placeholder="e.g. G-R2BCX12345"
-                          />
-                          <p className="text-[10px] text-muted-foreground/40">The primary measurement identifier for Google Analytics 4 tracking.</p>
-                       </div>
-
-                       <div className="space-y-2">
-                          <label className="text-sm font-bold text-white/90">Google Tag Manager ID (Optional)</label>
-                          <input 
-                            type="text" 
-                            value={gtmId} 
-                            onChange={(e) => setGtmId(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec]" 
-                            placeholder="e.g. GTM-XXXXXXX"
-                          />
-                          <p className="text-[10px] text-muted-foreground/40">Provide to boot Tag Manager tags concurrently alongside Google Analytics.</p>
-                       </div>
-
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
-                        <div className="space-y-2">
-                           <label className="text-sm font-bold text-white/90">GA4 Property ID (For Dashboard API)</label>
-                           <input 
-                             type="text" 
-                             value={ga4PropertyId} 
-                             onChange={(e) => setGa4PropertyId(e.target.value)}
-                             className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#5850ec]" 
-                             placeholder="e.g. 312345678"
-                           />
-                           <p className="text-[10px] text-muted-foreground/40">The numeric property identifier to query the GA4 Reporting API.</p>
-                        </div>
-
-                        <div className="space-y-2">
-                           <label className="text-sm font-bold text-white/90">Google Cloud Service Account JSON Key</label>
-                           <textarea 
-                             rows={3}
-                             value={ga4ServiceAccount} 
-                             onChange={(e) => setGa4ServiceAccount(e.target.value)}
-                             className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-[11px] text-indigo-300 font-mono focus:outline-none focus:ring-1 focus:ring-[#5850ec] resize-none" 
-                             placeholder='e.g. { "type": "service_account", ... }'
-                           />
-                           <p className="text-[10px] text-muted-foreground/40">Provide the JSON credentials file content for authenticated Google Analytics Data API queries.</p>
-                        </div>
-                     </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl">
-                       <div className="space-y-1">
-                          <p className="text-xs font-bold text-white flex items-center gap-2">
-                             Enable GA4 Debug Mode
-                          </p>
-                          <p className="text-[10px] text-muted-foreground/50 leading-relaxed">
-                             Sends pageviews and custom interaction events with debug directives, visible instantly inside GA4's Realtime DebugView.
-                          </p>
-                       </div>
-                       <button 
-                         type="button"
-                         onClick={() => setDebugMode(!debugMode)}
-                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                           debugMode ? 'bg-[#5850ec]' : 'bg-white/10'
-                         }`}
-                       >
-                         <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                           debugMode ? 'translate-x-5' : 'translate-x-0'
-                         }`} />
-                       </button>
-                    </div>
-
-                    <div className="space-y-3 pt-4 border-t border-white/5">
+                    <div className="space-y-3">
                        <label className="text-xs font-black text-white/60 uppercase tracking-widest">Custom Tracking/Verification Scripts</label>
                        <textarea 
-                         rows={4}
+                         rows={8}
                          value={customScriptsCode}
                          onChange={(e) => setCustomScriptsCode(e.target.value)}
                          placeholder="e.g. <!-- Custom scripts here -->"
-                         className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-[12px] font-mono text-indigo-400 focus:outline-none focus:ring-1 focus:ring-[#5850ec] resize-none leading-relaxed"
+                         className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-[12px] font-mono text-[#a5b4fc] focus:outline-none focus:ring-1 focus:ring-[#5850ec] resize-y leading-relaxed"
                        />
                        <p className="text-[10px] text-muted-foreground/40">Inject auxiliary HTML scripts (like Pinterest pixel or custom verification tags) directly into the head element.</p>
                     </div>

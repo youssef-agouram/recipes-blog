@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const RecipeSchema = z.object({
   title: z.string().min(1).max(255),
   slug: z.string().optional(),
-  summary: z.string().max(160).optional(),
+  summary: z.string().max(1000).optional(),
   imageUrl: z.string().optional(),
   content: z.any(), // Will be Tiptap JSON
   categoryIds: z.array(z.number()).optional(),
@@ -128,15 +128,8 @@ export const SeoSettingsSchema = z.object({
 });
 
 export const AnalyticsSettingsSchema = z.object({
-  googleAnalyticsId: z.string().nullable().optional().or(z.literal("")),
   customScriptsCode: z.string().nullable().optional().or(z.literal("")),
-  ga4Id: z.string().nullable().optional().or(z.literal("")),
-  gtmId: z.string().nullable().optional().or(z.literal("")),
-  ga4PropertyId: z.string().nullable().optional().or(z.literal("")),
-  ga4ServiceAccount: z.string().nullable().optional().or(z.literal("")),
   analyticsEnabled: z.boolean().default(true),
-  debugMode: z.boolean().default(false),
-  trackingSettings: z.any().optional(),
 });
 
 export const WebmasterToolsSchema = z.object({
