@@ -14,6 +14,19 @@ interface RecipePageProps {
 
 export const revalidate = 3600;
 
+export async function generateStaticParams() {
+  try {
+    const response = await api.recipes.list({ limit: 100 });
+    const list = response?.data || [];
+    return list.map((recipe: any) => ({
+      slug: recipe.slug,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for recipes:", error);
+    return [];
+  }
+}
+
 export default async function RecipePage({ params }: RecipePageProps) {
   const { slug } = await params;
 

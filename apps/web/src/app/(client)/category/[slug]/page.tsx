@@ -16,6 +16,18 @@ interface CategoryPageProps {
 
 export const revalidate = 3600;
 
+export async function generateStaticParams() {
+  try {
+    const categories = await api.categories.list();
+    return categories.map((category: any) => ({
+      slug: category.slug,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for categories:", error);
+    return [];
+  }
+}
+
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
 
