@@ -72,7 +72,7 @@ export default async function CategoriesPage() {
       {/* Categories Grid */}
       <div className="container mx-auto px-3 sm:px-6 max-w-[1536px] mt-16">
         {categories.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {categories.map((cat) => {
               // Calculate recipe count
               const recipeCount = cat._count?.recipes || 0;
@@ -94,32 +94,55 @@ export default async function CategoriesPage() {
                 <Link
                   key={cat.id}
                   href={`/category/${cat.slug}`}
-                  className="group/card relative flex flex-col bg-card/20 rounded-[32px] overflow-hidden border border-white/5 p-6 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 min-h-[220px]"
+                  className="group/card relative flex flex-col bg-card/20 rounded-[32px] overflow-hidden border border-white/5 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 min-h-[240px]"
                 >
-                  {/* Glowing background on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500"></div>
-
-                  <div className="flex items-start justify-between mb-6 relative z-10">
-                    <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-muted-foreground group-hover/card:bg-primary/10 group-hover/card:border-primary/20 group-hover/card:text-primary transition-all duration-500 shadow-inner">
-                      <CategoryIcon className="w-6 h-6 stroke-[1.5px] group-hover/card:scale-110 transition-transform" />
+                  {/* Category Image Background */}
+                  {cat.imageUrl ? (
+                    <div className="absolute inset-0 z-0">
+                      <Image
+                        src={cat.imageUrl}
+                        alt={cat.name}
+                        fill
+                        className="object-cover group-hover/card:scale-105 transition-transform duration-700"
+                        sizes="(max-width: 640px) 50vw, 25vw"
+                      />
+                      {/* Premium gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#05060b]/95 via-[#05060b]/75 to-[#05060b]/40 group-hover/card:via-[#05060b]/65 transition-all duration-500"></div>
                     </div>
-                    <span className="px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/5 text-[8px] font-black uppercase tracking-widest text-muted-foreground group-hover/card:bg-primary/10 group-hover/card:border-primary/20 group-hover/card:text-primary transition-all duration-500">
-                      {recipeCount} {recipeCount === 1 ? 'Recipe' : 'Recipes'}
-                    </span>
-                  </div>
+                  ) : (
+                    /* Fallback subtle gradient if no image */
+                    <div className="absolute inset-0 z-0 bg-gradient-to-br from-card/30 via-card/10 to-transparent">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#05060b]/95 via-[#05060b]/70 to-transparent"></div>
+                    </div>
+                  )}
 
-                  <div className="flex-1 flex flex-col relative z-10">
-                    <h3 className="text-[14px] font-black text-white leading-tight mb-2 tracking-tight group-hover/card:text-primary transition-colors">
-                      {cat.name}
-                    </h3>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed font-medium mb-6 line-clamp-3">
-                      {cat.description || `Explore our handpicked collection of delicious ${cat.name.toLowerCase()} recipes. Detailed with step-by-step guides.`}
-                    </p>
+                  {/* Glowing border overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 z-10"></div>
 
-                    <span className="inline-flex items-center gap-1.5 text-[9px] font-black text-white uppercase tracking-wider group/btn mt-auto self-start">
-                      <span className="border-b pb-0.5 border-primary">Explore Category</span>
-                      <ChevronRight className="w-3.5 h-3.5 group-hover/card:translate-x-0.5 transition-transform text-primary" />
-                    </span>
+                  {/* Content Container */}
+                  <div className="relative z-20 p-5 sm:p-6 flex flex-col flex-1 h-full">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-10 h-10 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-primary/80 group-hover/card:text-primary transition-all duration-500">
+                        <CategoryIcon className="w-5 h-5 stroke-[1.5px] group-hover/card:scale-110 transition-transform" />
+                      </div>
+                      <span className="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[8px] font-black uppercase tracking-widest text-muted-foreground group-hover/card:text-primary transition-all duration-500">
+                        {recipeCount} {recipeCount === 1 ? 'Recipe' : 'Recipes'}
+                      </span>
+                    </div>
+
+                    <div className="flex-1 flex flex-col">
+                      <h3 className="text-[13px] sm:text-[14px] font-black text-white leading-tight mb-1.5 tracking-tight group-hover/card:text-primary transition-colors">
+                        {cat.name}
+                      </h3>
+                      <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-relaxed font-medium mb-4 line-clamp-3">
+                        {cat.description || `Explore our handpicked collection of delicious ${cat.name.toLowerCase()} recipes. Detailed with step-by-step guides.`}
+                      </p>
+
+                      <span className="inline-flex items-center gap-1.5 text-[8px] sm:text-[9px] font-black text-white uppercase tracking-wider group/btn mt-auto self-start">
+                        <span className="border-b pb-0.5 border-primary">Explore Category</span>
+                        <ChevronRight className="w-3.5 h-3.5 group-hover/card:translate-x-0.5 transition-transform text-primary" />
+                      </span>
+                    </div>
                   </div>
                 </Link>
               );
