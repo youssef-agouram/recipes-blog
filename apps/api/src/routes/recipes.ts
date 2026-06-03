@@ -249,8 +249,18 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
         ingredients: data.ingredientIds
           ? { connect: data.ingredientIds.map((id) => ({ id })) }
           : undefined,
-        seo: data.seo && (data.seo.title || data.seo.description)
-          ? { create: data.seo }
+        seo: data.seo && (data.seo.title || data.seo.description || data.seo.seoTitle || data.seo.metaDescription)
+          ? {
+              create: {
+                seoTitle: data.seo.seoTitle || data.seo.title || null,
+                metaDescription: data.seo.metaDescription || data.seo.description || null,
+                focusKeyword: data.seo.focusKeyword || null,
+                canonicalUrl: data.seo.canonicalUrl || null,
+                ogImage: data.seo.ogImage || null,
+                robotsMeta: data.seo.robotsMeta || 'index, follow',
+                faqJson: data.seo.faqJson || null,
+              }
+            }
           : undefined,
       },
       include: { categories: true, ingredients: true, seo: true },
@@ -403,10 +413,19 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
       updateData.ingredients = { set: data.ingredientIds.map((id) => ({ id })) };
     }
     if (data.seo && (data.seo.title || data.seo.description || data.seo.seoTitle || data.seo.metaDescription)) {
+      const cleanSeo = {
+        seoTitle: data.seo.seoTitle || data.seo.title || null,
+        metaDescription: data.seo.metaDescription || data.seo.description || null,
+        focusKeyword: data.seo.focusKeyword || null,
+        canonicalUrl: data.seo.canonicalUrl || null,
+        ogImage: data.seo.ogImage || null,
+        robotsMeta: data.seo.robotsMeta || 'index, follow',
+        faqJson: data.seo.faqJson || null,
+      };
       updateData.seo = {
         upsert: {
-          create: data.seo,
-          update: data.seo,
+          create: cleanSeo,
+          update: cleanSeo,
         },
       };
     }
