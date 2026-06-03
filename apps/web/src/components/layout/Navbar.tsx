@@ -472,7 +472,7 @@ export function Navbar() {
           <div className="hidden lg:flex container mx-auto px-4 sm:px-6 max-w-[1536px] h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-1.5 sm:gap-3 group shrink-0">
-              <div className="relative w-8.5 h-8.5 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl group-hover:scale-105 transition-transform ring-2 ring-primary/20 group-hover:ring-primary/40 flex items-center justify-center">
+              <div className="relative w-8.5 h-8.5 sm:w-11 sm:h-11 rounded-xl sm:rounded-[22px] overflow-hidden shadow-2xl group-hover:scale-105 transition-transform ring-2 ring-primary/20 group-hover:ring-primary/40 flex items-center justify-center">
                 {logoUrl ? (
                   <Image
                     src={logoUrl}
@@ -628,7 +628,7 @@ export function Navbar() {
                         {/* Notifications */}
                         <button
                           id="navbar-notifications"
-                          className="relative w-8.5 h-8.5 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/5 text-muted-foreground hover:text-white transition-all group border border-border hover:border-white/10"
+                          className="relative w-8.5 h-8.5 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl sm:rounded-[22px] bg-white/5 text-muted-foreground hover:text-white transition-all group border border-border hover:border-white/10"
                         >
                           <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5 group-hover:animate-swing" />
                           <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-primary rounded-full border-[2px] sm:border-[3px] border-background animate-pulse" />
@@ -641,18 +641,18 @@ export function Navbar() {
                             onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                             className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer"
                           >
-                            <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5 group-hover:ring-primary/60">
+                            <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-[22px] overflow-hidden ring-2 ring-border hover:ring-primary/50 transition-all p-0.5 group-hover:ring-primary/60">
                               {user?.avatar ? (
                                 <Image
                                   src={user.avatar}
                                   alt="Profile"
                                   width={40}
                                   height={40}
-                                  className="w-full h-full object-cover rounded-[10px] sm:rounded-[14px]"
+                                  className="w-full h-full object-cover rounded-[10px] sm:rounded-[22px]"
                                   unoptimized
                                 />
                               ) : (
-                                <div className="w-full h-full rounded-[10px] sm:rounded-[14px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                                <div className="w-full h-full rounded-[10px] sm:rounded-[22px] bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
                                   <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-primary" />
                                 </div>
                               )}

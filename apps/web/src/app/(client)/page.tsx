@@ -128,9 +128,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. Professional Ad Banner Section */}
       <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] pb-8 sm:pb-8 pt-8 sm:pt-4">
-        <div className="relative bg-gradient-to-r from-card/80 via-card/95 to-card/80 border border-primary/10 hover:border-primary/30 rounded-2xl sm:rounded-[32px] overflow-hidden flex flex-col lg:flex-row items-stretch shadow-[0_0_50px_rgba(234,179,8,0.03)] hover:shadow-[0_0_50px_rgba(234,179,8,0.08)] transition-all duration-700 group">
+        <div className="relative bg-gradient-to-r from-card/80 via-card/95 to-card/80 border border-primary/10 hover:border-primary/30 rounded-2xl sm:rounded-[22px] overflow-hidden flex flex-col lg:flex-row items-stretch shadow-[0_0_50px_rgba(234,179,8,0.03)] hover:shadow-[0_0_50px_rgba(234,179,8,0.08)] transition-all duration-700 group">
           {/* Left Image Section */}
           <div className="lg:w-[26%] relative min-h-[220px] overflow-hidden">
             <Image

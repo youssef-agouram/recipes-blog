@@ -362,7 +362,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
 
           {/* Left Column: Visuals, Stats, Actions, Ingredients, Instructions, Nutrition */}
           <div className="w-full lg:w-[55%] flex flex-col gap-4 md:gap-8">
-            <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[48px] overflow-hidden shadow-2xl group border border-white/5 mb-4">
+            <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[22px] overflow-hidden shadow-2xl group border border-white/5 mb-4">
               <Image src={selectedImage} alt={recipe.title} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute top-8 right-8 flex flex-col gap-3">
@@ -390,7 +390,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               <div className="relative group/gallery -mx-6 px-6 overflow-hidden mb-4">
                 <div id="thumbnail-slider" className="flex gap-2.5 sm:gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth touch-pan-x">
                   {allImages.map((imgUrl, i) => (
-                    <button key={i} id={`thumb-${i}`} onClick={() => setSelectedImage(imgUrl)} className={`relative flex-none w-[76px] h-[57px] xs:w-[100px] xs:h-[75px] sm:w-[160px] sm:h-[120px] rounded-xl sm:rounded-[24px] overflow-hidden border transition-all duration-300 snap-center ${selectedImage === imgUrl ? 'border-primary ring-2 ring-primary/25 scale-95 shadow-xl animate-pulse-once' : 'border-white/5 opacity-60 hover:opacity-100'}`}>
+                    <button key={i} id={`thumb-${i}`} onClick={() => setSelectedImage(imgUrl)} className={`relative flex-none w-[76px] h-[57px] xs:w-[100px] xs:h-[75px] sm:w-[160px] sm:h-[120px] rounded-xl sm:rounded-[22px] overflow-hidden border transition-all duration-300 snap-center ${selectedImage === imgUrl ? 'border-primary ring-2 ring-primary/25 scale-95 shadow-xl animate-pulse-once' : 'border-white/5 opacity-60 hover:opacity-100'}`}>
                       <Image src={imgUrl} alt={`${recipe.title} photo ${i + 1}`} fill sizes="160px" className="object-cover" />
                     </button>
                   ))}
@@ -406,15 +406,15 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                     <h3 className="text-xl font-black text-white tracking-tighter font-heading">Watch the Recipe</h3>
                   </div>
                   {embedUrl ? (
-                    <div className="relative aspect-video rounded-xl sm:rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group">
+                    <div className="relative aspect-video rounded-xl sm:rounded-[22px] overflow-hidden border border-white/5 shadow-2xl group">
                       <iframe src={embedUrl} className="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                     </div>
                   ) : isDirectVideo(recipe.videoUrl) ? (
-                    <div className="relative aspect-video rounded-xl sm:rounded-[32px] overflow-hidden border border-white/5 shadow-2xl group bg-black">
+                    <div className="relative aspect-video rounded-xl sm:rounded-[22px] overflow-hidden border border-white/5 shadow-2xl group bg-black">
                       <video src={recipe.videoUrl} className="absolute inset-0 w-full h-full" controls />
                     </div>
                   ) : (
-                    <a href={recipe.videoUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-6 aspect-video rounded-xl sm:rounded-[32px] bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative">
+                    <a href={recipe.videoUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-6 aspect-video rounded-xl sm:rounded-[22px] bg-card/40 border border-white/5 hover:border-primary/50 transition-all group overflow-hidden relative">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><PlayCircle className="w-8 h-8" /></div>
                       <div className="text-center"><p className="text-base font-black text-white tracking-tight">Watch on External Platform</p><p className="text-xs text-muted-foreground font-medium">Click to view video on source site</p></div>
@@ -477,7 +477,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </button>
 
             {/* Unified Accordion Card */}
-            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] shadow-2xl overflow-hidden divide-y divide-white/5">
+            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[22px] shadow-2xl overflow-hidden divide-y divide-white/5">
               
               {/* Ingredients Section */}
               <div className="flex flex-col">
@@ -732,7 +732,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
 
             {/* Community Feedback — desktop full card */}
             <div className="hidden md:flex flex-col w-full h-[600px]">
-              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-2xl print:hidden flex flex-col flex-1 h-full min-h-[400px]">
+              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[22px] p-5 sm:p-8 shadow-2xl print:hidden flex flex-col flex-1 h-full min-h-[400px]">
                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar animate-in fade-in duration-700">
                   <CommentsSection recipeId={recipe.id} className="animate-in fade-in duration-700" />
                 </div>
@@ -757,7 +757,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         </div>
 
         <section className="mt-24 print:hidden">
-          <div className="relative w-full h-[240px] sm:h-[300px] rounded-2xl sm:rounded-[40px] lg:rounded-[56px] overflow-hidden border border-white/5 group shadow-2xl">
+          <div className="relative w-full h-[240px] sm:h-[300px] rounded-2xl sm:rounded-[22px] lg:rounded-[56px] overflow-hidden border border-white/5 group shadow-2xl">
             <Image
               src="/cooking_ad_banner_1778463092338.png"
               alt="Ad Banner"

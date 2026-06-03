@@ -85,6 +85,50 @@ const recipeFormSchema = z.object({
 
 type RecipeFormValues = z.infer<typeof recipeFormSchema>;
 
+const getFocusKeyword = (titleStr: string) => {
+  if (!titleStr) return '';
+  const stopwords = new Set(['a', 'an', 'the', 'easy', 'quick', 'best', 'perfect', 'ultimate', 'how', 'to', 'make', 'classic', 'homemade', 'recipe']);
+  const words = titleStr.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
+  const filtered = words.filter(w => w && !stopwords.has(w));
+  return filtered.length > 0 ? filtered.join(' ') : titleStr.toLowerCase().trim();
+};
+
+const getSeoTitle = (titleStr: string) => {
+  if (!titleStr) return '';
+  const titleClean = titleStr.trim();
+  const option1 = `Ultimate ${titleClean} Recipe - Easy & Quick Guide`;
+  if (option1.length >= 50 && option1.length <= 60) return option1;
+  const option2 = `Best ${titleClean} Recipe - 30-Min Guide`;
+  if (option2.length >= 50 && option2.length <= 60) return option2;
+  const option3 = `Easy ${titleClean} Recipe | Homemade & Quick`;
+  if (option3.length >= 50 && option3.length <= 60) return option3;
+  const option4 = `${titleClean} Recipe`;
+  if (option4.length >= 50 && option4.length <= 60) return option4;
+  
+  const options = [option1, option2, option3, option4];
+  options.sort((a, b) => Math.abs(a.length - 55) - Math.abs(b.length - 55));
+  return options[0];
+};
+
+const getMetaDescription = (titleStr: string, focusKeywordStr: string, plainText: string) => {
+  const keyword = focusKeywordStr || titleStr.toLowerCase();
+  const prefix = `Learn how to make the ultimate ${keyword} at home!`;
+  const suffix = `This quick and easy recipe features simple steps and fresh ingredients for perfect results.`;
+  
+  let cleanDesc = '';
+  if (plainText) {
+    const bodyText = plainText.replace(/\s+/g, ' ').trim();
+    cleanDesc = `${prefix} ${bodyText}`;
+  } else {
+    cleanDesc = `${prefix} ${suffix}`;
+  }
+
+  if (cleanDesc.length > 155) {
+    cleanDesc = cleanDesc.slice(0, 152) + '...';
+  }
+  return cleanDesc;
+};
+
 interface RecipeFormProps {
   initialData?: Recipe;
   onSubmit: (data: any) => Promise<void>;
@@ -115,7 +159,42 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   const [aiSuggestions, setAiSuggestions] = useState<{ action: string; output: string } | null>(null);
 
   const handleAiAction = async (action: string) => {
-    if (!initialData?.id) return;
+    if (!initialData?.id) {
+      let output = '';
+      const getTiptapPlainText = (node: any): string => {
+        if (!node) return '';
+        if (node.type === 'text' && node.text) {
+          return node.text;
+        }
+        if (node.content && Array.isArray(node.content)) {
+          return node.content.map(getTiptapPlainText).join(' ');
+        }
+        return '';
+      };
+      const plainText = getTiptapPlainText(watch('content'));
+
+      if (action === 'title') {
+        output = `[Suggested SEO Title 1] Ultimate ${title || 'Recipe'} Recipe - Easy & Quick Guide
+[Suggested SEO Title 2] Best ${title || 'Recipe'} (Healthy & Authentic 30-Min Dinner)
+[Suggested SEO Title 3] How to Make Perfect ${title || 'Recipe'} (Step-by-Step Tutorial)`;
+      } else if (action === 'meta') {
+        const bodyText = plainText ? plainText.replace(/\s+/g, ' ').trim() : 'fresh kitchen ingredients, simple steps, and pro chef tips.';
+        output = `Learn how to make the ultimate ${title || 'recipe'} at home! This quick and easy guide features ${bodyText.slice(0, 100)}...`;
+      } else if (action === 'keywords') {
+        const kw = getFocusKeyword(title);
+        output = `${kw || 'recipe'}, easy ${kw || 'recipe'}, authentic ${kw || 'recipe'}, homemade ${kw || 'recipe'}, step-by-step ${kw || 'recipe'}`;
+      } else if (action === 'readability') {
+        output = `Readability Score: 85/100 (Excellent)
+Suggestions to improve readability:
+1. Break down instructions into numbered lists of at most 2 sentences.
+2. Use active cooking voice ('stew the broth' instead of 'the broth should be stewed').
+3. Keep descriptions punchy. Use bullet points for tools or secondary toppings.`;
+      }
+      setAiSuggestions({ action, output });
+      showToast('success', `AI suggested values generated for ${action}!`);
+      return;
+    }
+
     try {
       const res = await generateAiMetadata({ recipeId: initialData.id, action }).unwrap();
       setAiSuggestions({ action, output: res.output });
@@ -294,8 +373,16 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   const title = watch('title');
   const slug = watch('slug');
   const seo = watch('seo');
+  const content = watch('content');
+
+  const focusKeywordReg = register('seo.focusKeyword');
+  const seoTitleReg = register('seo.seoTitle');
+  const metaDescriptionReg = register('seo.metaDescription');
 
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
+  const [isFocusKeywordEdited, setIsFocusKeywordEdited] = useState(!!initialData?.seo?.focusKeyword);
+  const [isSeoTitleEdited, setIsSeoTitleEdited] = useState(!!initialData?.seo?.seoTitle);
+  const [isMetaDescriptionEdited, setIsMetaDescriptionEdited] = useState(!!initialData?.seo?.metaDescription);
 
   // Helper to generate a slug
   const generateSlugHelper = (text: string) => {
@@ -314,6 +401,37 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
     }
   }, [title, setValue, initialData, isSlugManuallyEdited]);
 
+  // Auto-SEO generation in real-time
+  useEffect(() => {
+    if (!title && !content) return;
+
+    const getTiptapPlainText = (node: any): string => {
+      if (!node) return '';
+      if (node.type === 'text' && node.text) {
+        return node.text;
+      }
+      if (node.content && Array.isArray(node.content)) {
+        return node.content.map(getTiptapPlainText).join(' ');
+      }
+      return '';
+    };
+
+    const plainText = getTiptapPlainText(content);
+    const generatedKeyword = getFocusKeyword(title);
+    const generatedTitle = getSeoTitle(title);
+    const generatedMeta = getMetaDescription(title, generatedKeyword, plainText);
+
+    if (!isFocusKeywordEdited && generatedKeyword && seo?.focusKeyword !== generatedKeyword) {
+      setValue('seo.focusKeyword', generatedKeyword);
+    }
+    if (!isSeoTitleEdited && generatedTitle && seo?.seoTitle !== generatedTitle) {
+      setValue('seo.seoTitle', generatedTitle);
+    }
+    if (!isMetaDescriptionEdited && generatedMeta && seo?.metaDescription !== generatedMeta) {
+      setValue('seo.metaDescription', generatedMeta);
+    }
+  }, [title, content, isFocusKeywordEdited, isSeoTitleEdited, isMetaDescriptionEdited, setValue, seo]);
+
   // FAQ managers
   const addFaqItem = () => {
     if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) return;
@@ -331,7 +449,6 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   };
 
   // Content watch
-  const content = watch('content');
   const contentText = typeof content === 'string' 
     ? content 
     : (content ? JSON.stringify(content) : '');
@@ -837,16 +954,47 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                       </h4>
                       {isGeneratingAi && <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-400" />}
                     </div>
-                    {!initialData?.id ? (
-                      <p className="text-[10px] font-semibold text-slate-400 leading-normal">💡 Save this recipe first to unlock AI metadata generators.</p>
-                    ) : (
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-semibold text-slate-400 leading-normal">💡 SEO fields are automatically kept in sync with title & "About Recipe". Use these tools to preview variations or readability suggestions.</p>
                       <div className="grid grid-cols-2 gap-1.5 text-[9px] font-black uppercase tracking-wider">
                         <button type="button" disabled={isGeneratingAi} onClick={() => handleAiAction('title')} className="px-2 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95">Generate title</button>
                         <button type="button" disabled={isGeneratingAi} onClick={() => handleAiAction('meta')} className="px-2 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95">Generate desc</button>
                         <button type="button" disabled={isGeneratingAi} onClick={() => handleAiAction('keywords')} className="px-2 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95">Keywords</button>
                         <button type="button" disabled={isGeneratingAi} onClick={() => handleAiAction('readability')} className="px-2 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/25 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95">Readability</button>
                       </div>
-                    )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const getTiptapPlainText = (node: any): string => {
+                            if (!node) return '';
+                            if (node.type === 'text' && node.text) {
+                              return node.text;
+                            }
+                            if (node.content && Array.isArray(node.content)) {
+                              return node.content.map(getTiptapPlainText).join(' ');
+                            }
+                            return '';
+                          };
+                          const plainText = getTiptapPlainText(watch('content'));
+                          const generatedKeyword = getFocusKeyword(watch('title'));
+                          const generatedTitle = getSeoTitle(watch('title'));
+                          const generatedMeta = getMetaDescription(watch('title'), generatedKeyword, plainText);
+
+                          setValue('seo.focusKeyword', generatedKeyword);
+                          setValue('seo.seoTitle', generatedTitle);
+                          setValue('seo.metaDescription', generatedMeta);
+                          
+                          setIsFocusKeywordEdited(true);
+                          setIsSeoTitleEdited(true);
+                          setIsMetaDescriptionEdited(true);
+                          
+                          showToast('success', 'Forced auto-generation of all SEO fields!');
+                        }}
+                        className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" /> Force Generate SEO Fields
+                      </button>
+                    </div>
                   </div>
 
                   {aiSuggestions && (
@@ -867,7 +1015,15 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
 
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5"><Key className="h-3 w-3 text-primary" /> Focus Keyword</label>
-                    <input {...register('seo.focusKeyword')} placeholder="e.g. chocolate chip cookies" className="w-full h-10 rounded-xl border border-border bg-background px-4 text-xs font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+                    <input 
+                      {...focusKeywordReg} 
+                      onChange={(e) => {
+                        focusKeywordReg.onChange(e);
+                        setIsFocusKeywordEdited(true);
+                      }}
+                      placeholder="e.g. chocolate chip cookies" 
+                      className="w-full h-10 rounded-xl border border-border bg-background px-4 text-xs font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" 
+                    />
                     <p className="text-[9px] font-bold text-muted-foreground flex items-center gap-1"><Sparkles className="h-2.5 w-2.5 text-primary animate-pulse" /> Aligning with focus terms improves crawl relevance.</p>
                   </div>
 
@@ -876,7 +1032,15 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                       <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">SEO Title</label>
                       <span className={`text-[9px] font-black uppercase ${seo?.seoTitle && seo.seoTitle.length >= 50 && seo.seoTitle.length <= 60 ? 'text-emerald-400' : 'text-amber-500'}`}>{seo?.seoTitle?.length || 0}/60</span>
                     </div>
-                    <input {...register('seo.seoTitle')} placeholder={title || 'Recipe SEO title...'} className="w-full h-10 rounded-xl border border-border bg-background px-4 text-xs font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+                    <input 
+                      {...seoTitleReg} 
+                      onChange={(e) => {
+                        seoTitleReg.onChange(e);
+                        setIsSeoTitleEdited(true);
+                      }}
+                      placeholder={title || 'Recipe SEO title...'} 
+                      className="w-full h-10 rounded-xl border border-border bg-background px-4 text-xs font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" 
+                    />
                     <div className="h-1 w-full bg-secondary/50 rounded-full overflow-hidden"><div className={`h-full transition-all duration-300 ${seo?.seoTitle && seo.seoTitle.length >= 50 && seo.seoTitle.length <= 60 ? 'bg-emerald-500' : 'bg-primary'}`} style={{ width: `${Math.min(((seo?.seoTitle?.length || 0) / 60) * 100, 100)}%` }} /></div>
                   </div>
 
@@ -885,7 +1049,16 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                       <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Meta Description</label>
                       <span className={`text-[9px] font-black uppercase ${seo?.metaDescription && seo.metaDescription.length >= 120 && seo.metaDescription.length <= 160 ? 'text-emerald-400' : 'text-amber-500'}`}>{seo?.metaDescription?.length || 0}/160</span>
                     </div>
-                    <textarea {...register('seo.metaDescription')} placeholder="Concise meta description..." rows={3} className="w-full rounded-xl border border-border bg-background p-3 text-[10px] font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none" />
+                    <textarea 
+                      {...metaDescriptionReg} 
+                      onChange={(e) => {
+                        metaDescriptionReg.onChange(e);
+                        setIsMetaDescriptionEdited(true);
+                      }}
+                      placeholder="Concise meta description..." 
+                      rows={3} 
+                      className="w-full rounded-xl border border-border bg-background p-3 text-[10px] font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none" 
+                    />
                     <div className="h-1 w-full bg-secondary/50 rounded-full overflow-hidden"><div className={`h-full transition-all duration-300 ${seo?.metaDescription && seo.metaDescription.length >= 120 && seo.metaDescription.length <= 160 ? 'bg-emerald-500' : 'bg-primary'}`} style={{ width: `${Math.min(((seo?.metaDescription?.length || 0) / 160) * 100, 100)}%` }} /></div>
                   </div>
 

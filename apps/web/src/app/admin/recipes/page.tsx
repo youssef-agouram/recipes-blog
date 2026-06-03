@@ -335,6 +335,15 @@ export default function AdminRecipesPage() {
                         <Crown className={`h-3.5 w-3.5 ${recipe.isTopArticle ? 'fill-primary' : ''}`} />
                       </button>
                       <Link
+                        href={`/recipes/${recipe.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="h-8 w-8 flex items-center justify-center rounded-lg border border-border bg-background hover:bg-secondary transition-colors"
+                        title="Preview Recipe"
+                      >
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                      </Link>
+                      <Link
                         href={`/admin/recipes/edit/${recipe.id}`}
                         className="h-8 w-8 flex items-center justify-center rounded-lg border border-border bg-background hover:bg-secondary transition-colors"
                         title="Edit Recipe"
