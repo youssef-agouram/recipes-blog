@@ -144,11 +144,11 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
 
   const getCategoryColor = (category?: string) => {
     const cat = category?.toLowerCase() || '';
-    if (cat.includes('dinner')) return 'bg-orange-600';
-    if (cat.includes('breakfast')) return 'bg-amber-500';
-    if (cat.includes('healthy')) return 'bg-primary';
-    if (cat.includes('dessert')) return 'bg-purple-600';
-    return 'bg-primary';
+    if (cat.includes('dinner')) return 'bg-orange-600 text-white';
+    if (cat.includes('breakfast')) return 'bg-amber-500 text-black';
+    if (cat.includes('healthy')) return 'bg-emerald-600 text-white';
+    if (cat.includes('dessert')) return 'bg-purple-600 text-white';
+    return 'bg-primary text-primary-foreground';
   };
 
 
@@ -255,18 +255,6 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                             >
                               <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
                             </button>
-                            <button
-                              suppressHydrationWarning
-                              onClick={(e) => handleFavoriteToggle(e, recipe)}
-                              className={cn(
-                                "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-                                isFavorited
-                                  ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
-                                  : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
-                              )}
-                            >
-                              <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
-                            </button>
                           </div>
                           <Image
                             src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
@@ -275,8 +263,11 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                             sizes="(max-width: 640px) 50vw, (max-width: 768px) 100vw, (max-width: 1024px) 33vw, 20vw"
                             className="object-cover group-hover/card:scale-105 transition-transform duration-[1.5s]"
                           />
-                          <div className="absolute bottom-2.5 left-2.5 z-20">
-                            <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider text-white ${getCategoryColor(recipe.categories?.[0]?.name)}`}>
+                          <div className="absolute top-4 left-4 z-20">
+                            <span className={cn(
+                              "px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider shadow-lg shadow-black/50 border border-white/10",
+                              getCategoryColor(recipe.categories?.[0]?.name)
+                            )}>
                               {recipe.categories?.[0]?.name || 'Recipe'}
                             </span>
                           </div>
@@ -294,10 +285,18 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                               <Clock className="w-3 h-3 text-primary" />
                               <span>{recipe.totalTime || recipe.prepTime || '30m'}</span>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Star className="w-3 h-3 fill-primary text-primary" />
-                              <span className="text-[9px] font-black text-white">4.9</span>
-                            </div>
+                            <button
+                              suppressHydrationWarning
+                              onClick={(e) => handleFavoriteToggle(e, recipe)}
+                              className={cn(
+                                "w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300 shrink-0",
+                                isFavorited
+                                  ? "text-rose-500 bg-rose-500/10 shadow-sm"
+                                  : "text-muted-foreground hover:text-rose-500 hover:bg-rose-500/5"
+                              )}
+                            >
+                              <Heart className={cn("w-4 h-4", isFavorited && "fill-current")} />
+                            </button>
                           </div>
                         </div>
                       </Link>
@@ -369,18 +368,6 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                             >
                               <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
                             </button>
-                            <button
-                              suppressHydrationWarning
-                              onClick={(e) => handleFavoriteToggle(e, recipe)}
-                              className={cn(
-                                "w-10 h-10 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-                                isFavorited
-                                  ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
-                                  : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
-                              )}
-                            >
-                              <Heart className={cn("w-5 h-5", isFavorited && "fill-current")} />
-                            </button>
                           </div>
                           <Image
                             src={recipe.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"}
@@ -389,8 +376,11 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                             sizes="(max-width: 640px) 50vw, (max-width: 768px) 100vw, (max-width: 1024px) 33vw, 20vw"
                             className="object-cover group-hover/card:scale-105 transition-transform duration-[1.5s]"
                           />
-                          <div className="absolute bottom-2.5 left-2.5 z-20">
-                            <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider text-white ${getCategoryColor(recipe.categories?.[0]?.name)}`}>
+                          <div className="absolute top-4 left-4 z-20">
+                            <span className={cn(
+                              "px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider shadow-lg shadow-black/50 border border-white/10",
+                              getCategoryColor(recipe.categories?.[0]?.name)
+                            )}>
                               {recipe.categories?.[0]?.name || 'Recipe'}
                             </span>
                           </div>
@@ -408,10 +398,18 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                               <Clock className="w-3 h-3 text-primary" />
                               <span>{recipe.totalTime || recipe.prepTime || '30m'}</span>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Star className="w-3 h-3 fill-primary text-primary" />
-                              <span className="text-[9px] font-black text-white">4.9</span>
-                            </div>
+                            <button
+                              suppressHydrationWarning
+                              onClick={(e) => handleFavoriteToggle(e, recipe)}
+                              className={cn(
+                                "w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300 shrink-0",
+                                isFavorited
+                                  ? "text-rose-500 bg-rose-500/10 shadow-sm"
+                                  : "text-muted-foreground hover:text-rose-500 hover:bg-rose-500/5"
+                              )}
+                            >
+                              <Heart className={cn("w-4 h-4", isFavorited && "fill-current")} />
+                            </button>
                           </div>
                         </div>
                       </Link>

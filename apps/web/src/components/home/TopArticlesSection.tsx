@@ -79,6 +79,17 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
   };
+
+  const getCategoryColor = (categoryName?: string) => {
+    const cat = categoryName?.toLowerCase() || '';
+    if (cat.includes('dinner')) return 'bg-orange-600 text-white';
+    if (cat.includes('breakfast')) return 'bg-amber-500 text-black';
+    if (cat.includes('healthy')) return 'bg-emerald-600 text-white';
+    if (cat.includes('dessert')) return 'bg-purple-600 text-white';
+    if (cat.includes('recipe')) return 'bg-blue-600 text-white';
+    if (cat.includes('article') || cat.includes('lifestyle') || cat.includes('nutrition')) return 'bg-zinc-700 text-white';
+    return 'bg-primary text-primary-foreground';
+  };
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerWidthRef = useRef<number>(0);
 
@@ -296,8 +307,11 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                         className="flex flex-col flex-1"
                       >
                         <div className="relative aspect-[4/3] w-full overflow-hidden">
-                          <div className="absolute top-2 left-2 z-20">
-                            <span className={`px-1.5 py-0.5 rounded text-[6px] font-black uppercase tracking-wider text-white ${isRecipe ? 'bg-blue-500' : 'bg-primary'}`}>
+                          <div className="absolute top-4 left-4 z-20">
+                            <span className={cn(
+                              "px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider shadow-lg shadow-black/50 border border-white/10",
+                              getCategoryColor(category)
+                            )}>
                               {category}
                             </span>
                           </div>
@@ -314,18 +328,6 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                             >
                               <Bookmark className={cn("w-4.5 h-4.5", isSaved && "fill-current")} />
                             </button>
-                            <button
-                              suppressHydrationWarning
-                              onClick={(e) => handleFavoriteToggle(e, item, isRecipe)}
-                              className={cn(
-                                "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-                                isFavorited
-                                  ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
-                                  : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
-                              )}
-                            >
-                              <Heart className={cn("w-4.5 h-4.5", isFavorited && "fill-current")} />
-                            </button>
                           </div>
                           <Image
                             src={item.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80"}
@@ -337,22 +339,39 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                         </div>
 
                         <div className="p-3.5 flex flex-col flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-[7px] font-black uppercase tracking-wider ${isRecipe ? 'text-blue-400' : 'text-primary'}`}>{category}</span>
-                            <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-wider">{date}</span>
-                          </div>
+
                           <h3 className="text-[12px] font-black text-white leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-1">
                             {item.title}
                           </h3>
-                          <p className="text-[9px] text-muted-foreground font-medium leading-relaxed mb-2 line-clamp-3 h-[42px]">
+                          <p className="text-[9px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-3 h-[42px]">
                             {item.summary || (isRecipe ? "Master this delicious dish with our step-by-step guide." : "Expert guides and nutritional insights.")}
                           </p>
-                          <button className="flex items-center gap-1 text-[7px] font-black text-white uppercase tracking-wider group/btn mt-auto">
-                            <span className={`border-b pb-0.5 ${isRecipe ? 'border-blue-400' : 'border-primary'}`}>
-                              {isRecipe ? 'View Recipe' : 'Read Story'}
-                            </span>
-                            <ArrowRight className={`w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform ${isRecipe ? 'text-blue-400' : 'text-primary'}`} />
-                          </button>
+                          {!isRecipe && (
+                            <button className="flex items-center gap-1 text-[7px] font-black text-white uppercase tracking-wider group/btn mb-4 mt-auto">
+                              <span className="border-b pb-0.5 border-primary">
+                                Read Story
+                              </span>
+                              <ArrowRight className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform text-primary" />
+                            </button>
+                          )}
+                          <div className={cn("flex items-center justify-between pt-2.5 border-t border-border", isRecipe ? "mt-auto" : "")}>
+                            <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
+                              <Clock className="w-3 h-3 text-primary" />
+                              <span>{isRecipe ? (item.totalTime || item.prepTime || '30m') : '5m'}</span>
+                            </div>
+                            <button
+                              suppressHydrationWarning
+                              onClick={(e) => handleFavoriteToggle(e, item, isRecipe)}
+                              className={cn(
+                                "w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300 shrink-0",
+                                isFavorited
+                                  ? "text-rose-500 bg-rose-500/10 shadow-sm"
+                                  : "text-muted-foreground hover:text-rose-500 hover:bg-rose-500/5"
+                              )}
+                            >
+                              <Heart className={cn("w-4 h-4", isFavorited && "fill-current")} />
+                            </button>
+                          </div>
                         </div>
                       </Link>
                     </m.div>
@@ -415,8 +434,11 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                         className="flex flex-col flex-1"
                       >
                         <div className="relative aspect-[4/3] w-full overflow-hidden">
-                          <div className="absolute top-2 left-2 z-20">
-                            <span className={`px-1.5 py-0.5 rounded text-[6px] font-black uppercase tracking-wider text-white ${isRecipe ? 'bg-blue-500' : 'bg-primary'}`}>
+                          <div className="absolute top-4 left-4 z-20">
+                            <span className={cn(
+                              "px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider shadow-lg shadow-black/50 border border-white/10",
+                              getCategoryColor(category)
+                            )}>
                               {category}
                             </span>
                           </div>
@@ -433,18 +455,6 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                             >
                               <Bookmark className={cn("w-4.5 h-4.5", isSaved && "fill-current")} />
                             </button>
-                            <button
-                              suppressHydrationWarning
-                              onClick={(e) => handleFavoriteToggle(e, item, isRecipe)}
-                              className={cn(
-                                "w-9 h-9 rounded-xl backdrop-blur-md flex items-center justify-center transition-all duration-300",
-                                isFavorited
-                                  ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
-                                  : "bg-black/40 text-white hover:bg-rose-500 hover:text-white"
-                              )}
-                            >
-                              <Heart className={cn("w-4.5 h-4.5", isFavorited && "fill-current")} />
-                            </button>
                           </div>
                           <Image
                             src={item.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80"}
@@ -456,22 +466,39 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                         </div>
 
                         <div className="p-3.5 flex flex-col flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-[7px] font-black uppercase tracking-wider ${isRecipe ? 'text-blue-400' : 'text-primary'}`}>{category}</span>
-                            <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-wider">{date}</span>
-                          </div>
+
                           <h3 className="text-[12px] font-black text-white leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-1">
                             {item.title}
                           </h3>
-                          <p className="text-[9px] text-muted-foreground font-medium leading-relaxed mb-2 line-clamp-3 h-[42px]">
+                          <p className="text-[9px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-3 h-[42px]">
                             {item.summary || (isRecipe ? "Master this delicious dish with our step-by-step guide." : "Expert guides and nutritional insights.")}
                           </p>
-                          <button className="flex items-center gap-1 text-[7px] font-black text-white uppercase tracking-wider group/btn mt-auto">
-                            <span className={`border-b pb-0.5 ${isRecipe ? 'border-blue-400' : 'border-primary'}`}>
-                              {isRecipe ? 'View Recipe' : 'Read Story'}
-                            </span>
-                            <ArrowRight className={`w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform ${isRecipe ? 'text-blue-400' : 'text-primary'}`} />
-                          </button>
+                          {!isRecipe && (
+                            <button className="flex items-center gap-1 text-[7px] font-black text-white uppercase tracking-wider group/btn mb-4 mt-auto">
+                              <span className="border-b pb-0.5 border-primary">
+                                Read Story
+                              </span>
+                              <ArrowRight className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform text-primary" />
+                            </button>
+                          )}
+                          <div className={cn("flex items-center justify-between pt-2.5 border-t border-border", isRecipe ? "mt-auto" : "")}>
+                            <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
+                              <Clock className="w-3 h-3 text-primary" />
+                              <span>{isRecipe ? (item.totalTime || item.prepTime || '30m') : '5m'}</span>
+                            </div>
+                            <button
+                              suppressHydrationWarning
+                              onClick={(e) => handleFavoriteToggle(e, item, isRecipe)}
+                              className={cn(
+                                "w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300 shrink-0",
+                                isFavorited
+                                  ? "text-rose-500 bg-rose-500/10 shadow-sm"
+                                  : "text-muted-foreground hover:text-rose-500 hover:bg-rose-500/5"
+                              )}
+                            >
+                              <Heart className={cn("w-4 h-4", isFavorited && "fill-current")} />
+                            </button>
+                          </div>
                         </div>
                       </Link>
                     </m.div>
