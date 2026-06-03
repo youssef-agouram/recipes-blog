@@ -574,12 +574,58 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 {openSections.nutrition && (
                   <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                      {[{ label: 'Calories', value: `${recipe.nutrition?.calories || '0'}`, color: 'text-orange-400' }, { label: 'Protein', value: `${recipe.nutrition?.protein ? recipe.nutrition.protein + 'g' : '0g'}`, color: 'text-blue-400' }, { label: 'Carbs', value: `${recipe.nutrition?.carbohydrates ? recipe.nutrition.carbohydrates + 'g' : '0g'}`, color: 'text-amber-400' }, { label: 'Fat', value: `${recipe.nutrition?.fat ? recipe.nutrition.fat + 'g' : '0g'}`, color: 'text-red-400' }, { label: 'Fiber', value: `${recipe.nutrition?.fiber ? recipe.nutrition.fiber + 'g' : '0g'}`, color: 'text-emerald-400' }].map(nut => (
-                        <div key={nut.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center animate-in fade-in duration-300">
-                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>
-                          <span className={`text-xl font-black ${nut.color}`}>{nut.value}</span>
-                        </div>
-                      ))}
+                      {(() => {
+                        const standardList = [
+                          { label: 'Calories', value: recipe.nutrition?.calories ? `${recipe.nutrition.calories}` : '', color: 'text-orange-400' },
+                          { label: 'Protein', value: recipe.nutrition?.protein ? `${recipe.nutrition.protein}g` : '', color: 'text-blue-400' },
+                          { label: 'Carbs', value: recipe.nutrition?.carbohydrates ? `${recipe.nutrition.carbohydrates}g` : '', color: 'text-amber-400' },
+                          { label: 'Fat', value: recipe.nutrition?.fat ? `${recipe.nutrition.fat}g` : '', color: 'text-red-400' },
+                          { label: 'Fiber', value: recipe.nutrition?.fiber ? `${recipe.nutrition.fiber}g` : '', color: 'text-emerald-400' },
+                        ];
+
+                        const displayedKeys = new Set(['calories', 'protein', 'carbohydrates', 'fat', 'fiber']);
+                        const items = [...standardList];
+
+                        if (recipe.nutrition) {
+                          const customColors = [
+                            'text-purple-400',
+                            'text-teal-400',
+                            'text-indigo-400',
+                            'text-pink-400',
+                            'text-yellow-400',
+                          ];
+                          let colorIndex = 0;
+
+                          Object.keys(recipe.nutrition).forEach((key) => {
+                            const lowerKey = key.toLowerCase();
+                            if (displayedKeys.has(lowerKey)) return;
+
+                            const label = key.charAt(0).toUpperCase() + key.slice(1);
+                            const val = String((recipe.nutrition as any)[key] || '');
+                            if (val) {
+                              items.push({
+                                label,
+                                value: val,
+                                color: customColors[colorIndex % customColors.length],
+                              });
+                              colorIndex++;
+                            }
+                          });
+                        }
+
+                        const finalItems = items.map(item => {
+                          if (item.value) return item;
+                          if (item.label === 'Calories') return { ...item, value: '0' };
+                          return { ...item, value: '0g' };
+                        });
+
+                        return finalItems.map(nut => (
+                          <div key={nut.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center animate-in fade-in duration-300">
+                            <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>
+                            <span className={`text-xl font-black ${nut.color}`}>{nut.value}</span>
+                          </div>
+                        ));
+                      })()}
                     </div>
                   </div>
                 )}

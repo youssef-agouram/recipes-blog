@@ -144,19 +144,92 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   }, []);
 
   // Convert initialData.nutrition object to nutritionList array
-  const initialNutrition = initialData?.nutrition ? [
-    { label: 'Calories', value: initialData.nutrition.calories || '', unit: 'kcal' },
-    { label: 'Protein', value: initialData.nutrition.protein || '', unit: 'g' },
-    { label: 'Carbs', value: initialData.nutrition.carbohydrates || '', unit: 'g' },
-    { label: 'Fat', value: initialData.nutrition.fat || '', unit: 'g' },
-    { label: 'Fiber', value: initialData.nutrition.fiber || '', unit: 'g' },
-  ] : [
-    { label: 'Calories', value: '', unit: 'kcal' },
-    { label: 'Protein', value: '', unit: 'g' },
-    { label: 'Carbs', value: '', unit: 'g' },
-    { label: 'Fat', value: '', unit: 'g' },
-    { label: 'Fiber', value: '', unit: 'g' },
-  ];
+  const initialNutrition = (() => {
+    const list = [
+      { label: 'Calories', value: '', unit: 'kcal' },
+      { label: 'Protein', value: '', unit: 'g' },
+      { label: 'Carbs', value: '', unit: 'g' },
+      { label: 'Fat', value: '', unit: 'g' },
+      { label: 'Fiber', value: '', unit: 'g' },
+    ];
+
+    if (!initialData?.nutrition) return list;
+
+    const nutritionObj = initialData.nutrition as Record<string, string>;
+    const processedKeys = new Set<string>();
+
+    Object.keys(nutritionObj).forEach((key) => {
+      const lowerKey = key.toLowerCase();
+      const valStr = String(nutritionObj[key] || '');
+
+      let value = valStr;
+      let unit = '';
+      
+      if (valStr.endsWith('kcal')) {
+        value = valStr.replace('kcal', '').trim();
+        unit = 'kcal';
+      } else if (valStr.endsWith('mg')) {
+        value = valStr.replace('mg', '').trim();
+        unit = 'mg';
+      } else if (valStr.endsWith('g')) {
+        value = valStr.replace('g', '').trim();
+        unit = 'g';
+      } else if (valStr.endsWith('%')) {
+        value = valStr.replace('%', '').trim();
+        unit = '%';
+      }
+
+      if (lowerKey === 'calories') {
+        list[0].value = value;
+        if (unit) list[0].unit = unit;
+        processedKeys.add(key);
+      } else if (lowerKey === 'protein') {
+        list[1].value = value;
+        if (unit) list[1].unit = unit;
+        processedKeys.add(key);
+      } else if (lowerKey === 'carbohydrates' || lowerKey === 'carbs') {
+        list[2].value = value;
+        if (unit) list[2].unit = unit;
+        processedKeys.add(key);
+      } else if (lowerKey === 'fat') {
+        list[3].value = value;
+        if (unit) list[3].unit = unit;
+        processedKeys.add(key);
+      } else if (lowerKey === 'fiber') {
+        list[4].value = value;
+        if (unit) list[4].unit = unit;
+        processedKeys.add(key);
+      }
+    });
+
+    Object.keys(nutritionObj).forEach((key) => {
+      if (processedKeys.has(key)) return;
+      
+      const valStr = String(nutritionObj[key] || '');
+      let value = valStr;
+      let unit = '';
+      
+      if (valStr.endsWith('kcal')) {
+        value = valStr.replace('kcal', '').trim();
+        unit = 'kcal';
+      } else if (valStr.endsWith('mg')) {
+        value = valStr.replace('mg', '').trim();
+        unit = 'mg';
+      } else if (valStr.endsWith('g')) {
+        value = valStr.replace('g', '').trim();
+        unit = 'g';
+      } else if (valStr.endsWith('%')) {
+        value = valStr.replace('%', '').trim();
+        unit = '%';
+      }
+
+      const label = key.charAt(0).toUpperCase() + key.slice(1);
+      list.push({ label, value, unit });
+    });
+
+    return list;
+  })();
+
 
   const {
     register,
@@ -423,11 +496,26 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   /* --- Form submission --- */
   const onFormSubmit = async (data: RecipeFormValues) => {
     // Convert nutritionList back to the format the backend expects
-    const caloriesItem = data.nutritionList.find(n => n.label.toLowerCase() === 'calories');
-    const proteinItem = data.nutritionList.find(n => n.label.toLowerCase() === 'protein');
-    const carbsItem = data.nutritionList.find(n => n.label.toLowerCase() === 'carbs' || n.label.toLowerCase() === 'carbohydrates');
-    const fatItem = data.nutritionList.find(n => n.label.toLowerCase() === 'fat');
-    const fiberItem = data.nutritionList.find(n => n.label.toLowerCase() === 'fiber');
+    const nutrition: Record<string, string> = {};
+    data.nutritionList.forEach((item) => {
+      if (item.label && item.value) {
+        let key = item.label.toLowerCase();
+        // Normalize 'carbs' to 'carbohydrates' for standard schema mapping
+        if (key === 'carbs') {
+          key = 'carbohydrates';
+        }
+
+        const value = item.value.trim();
+        const unit = item.unit ? item.unit.trim() : '';
+
+        if (['calories', 'protein', 'carbohydrates', 'fat', 'fiber'].includes(key)) {
+          nutrition[key] = value;
+        } else {
+          // Custom field: append unit if it is present and not already at the end of the value
+          nutrition[key] = (unit && !value.endsWith(unit)) ? `${value}${unit}` : value;
+        }
+      }
+    });
 
     const formattedData = {
       ...data,
@@ -436,13 +524,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
         title: data.seo?.seoTitle || data.seo?.title || '',
         description: data.seo?.metaDescription || data.seo?.description || '',
       },
-      nutrition: {
-        calories: caloriesItem?.value || '',
-        protein: proteinItem?.value || '',
-        carbohydrates: carbsItem?.value || '',
-        fat: fatItem?.value || '',
-        fiber: fiberItem?.value || '',
-      }
+      nutrition
     };
 
     try {

@@ -38,13 +38,7 @@ export const RecipeSchema = z.object({
     robotsMeta: z.string().optional().nullable(),
     faqJson: z.string().optional().nullable(),
   }).optional(),
-  nutrition: z.object({
-    calories: z.string().optional(),
-    protein: z.string().optional(),
-    carbohydrates: z.string().optional(),
-    fat: z.string().optional(),
-    fiber: z.string().optional(),
-  }).optional(),
+  nutrition: z.record(z.string()).optional(),
 });
 
 export const CategorySchema = z.object({

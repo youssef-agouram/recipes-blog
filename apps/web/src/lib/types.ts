@@ -68,6 +68,7 @@ export interface Recipe {
     carbohydrates?: string;
     fat?: string;
     fiber?: string;
+    [key: string]: string | undefined;
   };
   allowComments: boolean;
   ingredientsJson?: RecipeIngredient[];
