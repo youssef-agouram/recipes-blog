@@ -391,7 +391,6 @@ export default function SiteIdentityPage() {
   const sections = [
     { id: 'navbar', label: 'Navbar Settings', sub: 'Logo, menu, search & top bar', icon: Layout },
     { id: 'hero', label: 'Hero Slider', sub: 'Manage dynamic hero slider', icon: Type },
-    { id: 'logos', label: 'Logos & Icons', sub: 'Favicon and footer branding', icon: ImageIcon },
     { id: 'ads', label: 'Advertisements', sub: 'Top/bottom bars and popup ads', icon: Share2 },
     { id: 'footer', label: 'Footer Settings', sub: 'About description & copyright', icon: Columns },
   ];
@@ -551,39 +550,72 @@ export default function SiteIdentityPage() {
               </div>
 
               <div className="space-y-8">
-                {/* Logo Upload */}
+                {/* Brand Assets Upload Grid */}
                 <div className="space-y-4">
-                  <label className="text-xs font-black text-white/60 uppercase tracking-widest">Navbar Logo</label>
-                  <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-2xl bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden group hover:border-[#5850ec]/50 transition-all cursor-pointer relative">
-                      {formData.logoUrl ? (
-                        <img src={formData.logoUrl} alt="Logo" className="w-full h-full object-cover rounded-xl" />
-                      ) : (
-                        <div className="text-muted-foreground/20 font-black text-2xl uppercase">Logo</div>
-                      )}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Upload className="w-5 h-5 text-white" />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    {[
+                      { label: 'Navbar Logo', size: '200x200px PNG or SVG', key: 'logoUrl', logo: true },
+                      { label: 'Favicon', size: '32x32px PNG', key: 'faviconUrl' },
+                      { label: 'Site Logo (Footer)', size: '200x60px PNG', key: 'footerLogoUrl', logo: true },
+                    ].map((logo) => (
+                      <div key={logo.label} className="space-y-3">
+                        <label className="text-xs font-black text-white/60 uppercase tracking-widest">{logo.label}</label>
+                        <div className="aspect-video rounded-2xl bg-white border border-black/5 flex items-center justify-center p-4 relative group overflow-hidden">
+                          {formData[logo.key] ? (
+                            <img src={formData[logo.key]} alt={logo.label} className="max-w-full max-h-full object-contain" />
+                          ) : (
+                            <div className="flex items-center gap-1">
+                              <ChefHat className="w-5.5 h-5.5 text-black" />
+                              {logo.logo && <span className="text-[15px] font-black text-black">{formData.brandName}</span>}
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*';
+                                input.onchange = (e: any) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleAssetUpload(logo.key as any, file);
+                                };
+                                input.click();
+                              }}
+                              className="p-2 bg-white text-black rounded-lg shadow-xl"
+                            >
+                              <Upload className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*';
+                              input.onchange = (e: any) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleAssetUpload(logo.key as any, file);
+                              };
+                              input.click();
+                            }}
+                            className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold rounded-lg border border-white/10 transition-all"
+                          >
+                            Change
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => setFormData({ ...formData, [logo.key]: '' })}
+                            className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground/40 italic">Recommended: {logo.size}</p>
                       </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <input
-                        type="file"
-                        id="logo-upload"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleAssetUpload('logoUrl', file);
-                        }}
-                        accept="image/*"
-                      />
-                      <button 
-                        onClick={() => document.getElementById('logo-upload')?.click()}
-                        className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold rounded-lg border border-white/10 transition-all"
-                      >
-                        Change Logo
-                      </button>
-                      <p className="text-[10px] text-muted-foreground/40 italic">Recommended: 200×200px PNG or SVG</p>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
@@ -925,75 +957,7 @@ export default function SiteIdentityPage() {
 
           {/* Right Column: Logos and Advertisements */}
           <div className="space-y-8">
-            {/* Logos Settings Section */}
-            <section id="logos-section" className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-10 scroll-mt-36 transition-all duration-500 hover:border-white/10">
-              <div>
-                <h2 className="text-xl font-bold text-white mb-1">Logos & Icons</h2>
-                <p className="text-sm text-muted-foreground/60">Manage your brand assets and touch icons</p>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {[
-                  { label: 'Favicon', size: '32x32px PNG', key: 'faviconUrl' },
-                  { label: 'Site Logo (Footer)', size: '200x60px PNG', key: 'footerLogoUrl', logo: true },
-                ].map((logo) => (
-                  <div key={logo.label} className="space-y-3">
-                    <label className="text-xs font-black text-white/60 uppercase tracking-widest">{logo.label}</label>
-                    <div className="aspect-video rounded-2xl bg-white border border-black/5 flex items-center justify-center p-4 relative group overflow-hidden">
-                      {formData[logo.key] ? (
-                        <img src={formData[logo.key]} alt={logo.label} className="max-w-full max-h-full object-contain" />
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <ChefHat className="w-5 h-5 text-black" />
-                          {logo.logo && <span className="text-[15px] font-black text-black">{formData.brandName}</span>}
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <button 
-                            onClick={() => {
-                              const input = document.createElement('input');
-                              input.type = 'file';
-                              input.accept = 'image/*';
-                              input.onchange = (e: any) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleAssetUpload(logo.key as any, file);
-                              };
-                              input.click();
-                            }}
-                            className="p-2 bg-white text-black rounded-lg shadow-xl"
-                          >
-                            <Upload className="w-4 h-4" />
-                          </button>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => {
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = 'image/*';
-                          input.onchange = (e: any) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleAssetUpload(logo.key as any, file);
-                          };
-                          input.click();
-                        }}
-                        className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold rounded-lg border border-white/10 transition-all"
-                      >
-                        Change
-                      </button>
-                      <button 
-                        onClick={() => setFormData({ ...formData, [logo.key]: '' })}
-                        className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground/40 italic">Recommended: {logo.size}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
 
             {/* Advertisements Settings Section */}
             <section id="ads-section" className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-10 scroll-mt-36 transition-all duration-500 hover:border-white/10">
