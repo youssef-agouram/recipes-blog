@@ -670,7 +670,7 @@ export default function SiteIdentityPage() {
                           <div className="relative w-11 h-11 rounded-xl border border-white/10 overflow-hidden bg-white/5 hover:border-white/20 transition-all flex items-center justify-center cursor-pointer group" title="Choose color for Part 1">
                             <input 
                               type="color" 
-                              value={formData.brandColor1} 
+                              value={formData.brandColor1 || '#ffffff'} 
                               onChange={(e) => setFormData({...formData, brandColor1: e.target.value})}
                               className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0 z-20"
                             />
@@ -702,7 +702,7 @@ export default function SiteIdentityPage() {
                           <div className="relative w-11 h-11 rounded-xl border border-white/10 overflow-hidden bg-white/5 hover:border-white/20 transition-all flex items-center justify-center cursor-pointer group" title="Choose color for Part 2">
                             <input 
                               type="color" 
-                              value={formData.brandColor2} 
+                              value={formData.brandColor2 || '#f29e1f'} 
                               onChange={(e) => setFormData({...formData, brandColor2: e.target.value})}
                               className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0 z-20"
                             />
