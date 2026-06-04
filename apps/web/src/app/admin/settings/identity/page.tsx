@@ -67,6 +67,10 @@ export default function SiteIdentityPage() {
   const [heroFormData, setHeroFormData] = useState<any>({
     imageUrl: '',
     title: '',
+    titlePart1: '',
+    titlePart2: '',
+    titleColor1: '',
+    titleColor2: '',
     subtitle: '',
     ctaText: '',
     images: []
@@ -183,9 +187,14 @@ export default function SiteIdentityPage() {
         });
       }
 
+      const hasComma = heroSettings.title && heroSettings.title.includes(',');
       setHeroFormData({
         imageUrl: heroSettings.imageUrl || '',
         title: heroSettings.title || '',
+        titlePart1: heroSettings.titlePart1 || (hasComma ? heroSettings.title.substring(0, heroSettings.title.indexOf(',') + 1) : heroSettings.title || ''),
+        titlePart2: heroSettings.titlePart2 || (hasComma ? heroSettings.title.substring(heroSettings.title.indexOf(',') + 1).trim() : ''),
+        titleColor1: heroSettings.titleColor1 || '#ffffff',
+        titleColor2: heroSettings.titleColor2 || '#f29e1f',
         subtitle: heroSettings.subtitle || '',
         ctaText: heroSettings.ctaText || '',
         images: list
@@ -241,9 +250,13 @@ export default function SiteIdentityPage() {
         .filter((url: string) => url !== '');
 
       const heroSettingsPayload = {
-        title: heroFormData.title || '',
+        title: `${heroFormData.titlePart1 || ''}${heroFormData.titlePart2 || ''}`.trim() || heroFormData.title || '',
+        titlePart1: heroFormData.titlePart1 || '',
+        titlePart2: heroFormData.titlePart2 || '',
+        titleColor1: heroFormData.titleColor1 || '#ffffff',
+        titleColor2: heroFormData.titleColor2 || '#f29e1f',
         subtitle: heroFormData.subtitle || '',
-        ctaText: heroFormData.ctaText || '',
+        ctaText: '',
         imageUrl: heroImagesArray[0] || '',
         images: heroImagesArray
       };
@@ -847,17 +860,69 @@ export default function SiteIdentityPage() {
               </div>
 
               <div className="space-y-6">
-                {/* Hero Fields */}
-                <div className="space-y-4">
-                  <div className="space-y-3">
-                    <label className="text-sm font-bold text-white/90">Hero Title</label>
-                    <input 
-                      type="text" 
-                      value={heroFormData.title} 
-                      onChange={(e) => setHeroFormData({...heroFormData, title: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
-                    />
+                  {/* HN-1&C */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-white/60 uppercase tracking-widest">HN-1&C</label>
+                    <div className="flex gap-4 items-center">
+                      <input 
+                        type="text" 
+                        value={heroFormData.titlePart1} 
+                        onChange={(e) => setHeroFormData({...heroFormData, titlePart1: e.target.value})}
+                        placeholder="Part 1 (e.g. Good Food, )"
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
+                      />
+                      <div className="flex flex-col items-center gap-1 shrink-0">
+                        <div className="relative w-11 h-11 rounded-xl border border-white/10 overflow-hidden bg-white/5 hover:border-white/20 transition-all flex items-center justify-center cursor-pointer group" title="Choose color for Title Part 1">
+                          <input 
+                            type="color" 
+                            value={heroFormData.titleColor1 || '#ffffff'} 
+                            onChange={(e) => setHeroFormData({...heroFormData, titleColor1: e.target.value})}
+                            className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0 z-20"
+                          />
+                          <div 
+                            className="w-7.5 h-7.5 rounded-lg shadow-lg border border-white/10 transition-transform group-hover:scale-105" 
+                             style={{ backgroundColor: heroFormData.titleColor1 || '#ffffff' }}
+                          />
+                        </div>
+                        <span className="text-[9px] font-mono font-bold text-white/40 uppercase tracking-wider select-all">
+                          {heroFormData.titleColor1 || '#ffffff'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* HN-2&C */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-white/60 uppercase tracking-widest">HN-2&C</label>
+                    <div className="flex gap-4 items-center">
+                      <input 
+                        type="text" 
+                        value={heroFormData.titlePart2} 
+                        onChange={(e) => setHeroFormData({...heroFormData, titlePart2: e.target.value})}
+                        placeholder="Part 2 (e.g. Good Mood)"
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
+                      />
+                      <div className="flex flex-col items-center gap-1 shrink-0">
+                        <div className="relative w-11 h-11 rounded-xl border border-white/10 overflow-hidden bg-white/5 hover:border-white/20 transition-all flex items-center justify-center cursor-pointer group" title="Choose color for Title Part 2">
+                          <input 
+                            type="color" 
+                            value={heroFormData.titleColor2 || '#f29e1f'} 
+                            onChange={(e) => setHeroFormData({...heroFormData, titleColor2: e.target.value})}
+                            className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0 z-20"
+                          />
+                          <div 
+                            className="w-7.5 h-7.5 rounded-lg shadow-lg border border-white/10 transition-transform group-hover:scale-105" 
+                            style={{ backgroundColor: heroFormData.titleColor2 || '#f29e1f' }}
+                          />
+                        </div>
+                        <span className="text-[9px] font-mono font-bold text-white/40 uppercase tracking-wider select-all">
+                          {heroFormData.titleColor2 || '#f29e1f'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hero Subtitle */}
                   <div className="space-y-3">
                     <label className="text-sm font-bold text-white/90">Hero Subtitle</label>
                     <input 
@@ -867,16 +932,6 @@ export default function SiteIdentityPage() {
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
                     />
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-sm font-bold text-white/90">CTA Button Text</label>
-                    <input 
-                      type="text" 
-                      value={heroFormData.ctaText} 
-                      onChange={(e) => setHeroFormData({...heroFormData, ctaText: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
-                    />
-                  </div>
-                </div>
 
                 {/* Slider Image List */}
                 <div className="space-y-4 pt-4 border-t border-white/5">

@@ -342,10 +342,14 @@ model SiteSettings {
 model HeroSettings {
   id          Int      @id @default(1)
   title       String   @default("Good Food, Good Mood")
+  titlePart1  String   @default("Good Food, ")
+  titlePart2  String   @default("Good Mood")
+  titleColor1 String   @default("#ffffff")
+  titleColor2 String   @default("#f29e1f")
   subtitle    String   @default("Explore thousands of handpicked recipes from around the world.")
   imageUrl    String?
   images      String[] @default([])
-  ctaText     String   @default("Explore Recipes")
+  ctaText     String?  @default("Explore Recipes")
 }
 
 model Subscriber {

@@ -364,6 +364,10 @@ exports.Prisma.SiteSettingsScalarFieldEnum = {
 exports.Prisma.HeroSettingsScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  titlePart1: 'titlePart1',
+  titlePart2: 'titlePart2',
+  titleColor1: 'titleColor1',
+  titleColor2: 'titleColor2',
   subtitle: 'subtitle',
   imageUrl: 'imageUrl',
   images: 'images',

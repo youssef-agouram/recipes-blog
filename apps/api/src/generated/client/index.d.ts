@@ -22729,6 +22729,10 @@ export namespace Prisma {
   export type HeroSettingsMinAggregateOutputType = {
     id: number | null
     title: string | null
+    titlePart1: string | null
+    titlePart2: string | null
+    titleColor1: string | null
+    titleColor2: string | null
     subtitle: string | null
     imageUrl: string | null
     ctaText: string | null
@@ -22737,6 +22741,10 @@ export namespace Prisma {
   export type HeroSettingsMaxAggregateOutputType = {
     id: number | null
     title: string | null
+    titlePart1: string | null
+    titlePart2: string | null
+    titleColor1: string | null
+    titleColor2: string | null
     subtitle: string | null
     imageUrl: string | null
     ctaText: string | null
@@ -22745,6 +22753,10 @@ export namespace Prisma {
   export type HeroSettingsCountAggregateOutputType = {
     id: number
     title: number
+    titlePart1: number
+    titlePart2: number
+    titleColor1: number
+    titleColor2: number
     subtitle: number
     imageUrl: number
     images: number
@@ -22764,6 +22776,10 @@ export namespace Prisma {
   export type HeroSettingsMinAggregateInputType = {
     id?: true
     title?: true
+    titlePart1?: true
+    titlePart2?: true
+    titleColor1?: true
+    titleColor2?: true
     subtitle?: true
     imageUrl?: true
     ctaText?: true
@@ -22772,6 +22788,10 @@ export namespace Prisma {
   export type HeroSettingsMaxAggregateInputType = {
     id?: true
     title?: true
+    titlePart1?: true
+    titlePart2?: true
+    titleColor1?: true
+    titleColor2?: true
     subtitle?: true
     imageUrl?: true
     ctaText?: true
@@ -22780,6 +22800,10 @@ export namespace Prisma {
   export type HeroSettingsCountAggregateInputType = {
     id?: true
     title?: true
+    titlePart1?: true
+    titlePart2?: true
+    titleColor1?: true
+    titleColor2?: true
     subtitle?: true
     imageUrl?: true
     images?: true
@@ -22876,10 +22900,14 @@ export namespace Prisma {
   export type HeroSettingsGroupByOutputType = {
     id: number
     title: string
+    titlePart1: string
+    titlePart2: string
+    titleColor1: string
+    titleColor2: string
     subtitle: string
     imageUrl: string | null
     images: string[]
-    ctaText: string
+    ctaText: string | null
     _count: HeroSettingsCountAggregateOutputType | null
     _avg: HeroSettingsAvgAggregateOutputType | null
     _sum: HeroSettingsSumAggregateOutputType | null
@@ -22904,6 +22932,10 @@ export namespace Prisma {
   export type HeroSettingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titlePart1?: boolean
+    titlePart2?: boolean
+    titleColor1?: boolean
+    titleColor2?: boolean
     subtitle?: boolean
     imageUrl?: boolean
     images?: boolean
@@ -22913,6 +22945,10 @@ export namespace Prisma {
   export type HeroSettingsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titlePart1?: boolean
+    titlePart2?: boolean
+    titleColor1?: boolean
+    titleColor2?: boolean
     subtitle?: boolean
     imageUrl?: boolean
     images?: boolean
@@ -22922,6 +22958,10 @@ export namespace Prisma {
   export type HeroSettingsSelectScalar = {
     id?: boolean
     title?: boolean
+    titlePart1?: boolean
+    titlePart2?: boolean
+    titleColor1?: boolean
+    titleColor2?: boolean
     subtitle?: boolean
     imageUrl?: boolean
     images?: boolean
@@ -22935,10 +22975,14 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       title: string
+      titlePart1: string
+      titlePart2: string
+      titleColor1: string
+      titleColor2: string
       subtitle: string
       imageUrl: string | null
       images: string[]
-      ctaText: string
+      ctaText: string | null
     }, ExtArgs["result"]["heroSettings"]>
     composites: {}
   }
@@ -23334,6 +23378,10 @@ export namespace Prisma {
   interface HeroSettingsFieldRefs {
     readonly id: FieldRef<"HeroSettings", 'Int'>
     readonly title: FieldRef<"HeroSettings", 'String'>
+    readonly titlePart1: FieldRef<"HeroSettings", 'String'>
+    readonly titlePart2: FieldRef<"HeroSettings", 'String'>
+    readonly titleColor1: FieldRef<"HeroSettings", 'String'>
+    readonly titleColor2: FieldRef<"HeroSettings", 'String'>
     readonly subtitle: FieldRef<"HeroSettings", 'String'>
     readonly imageUrl: FieldRef<"HeroSettings", 'String'>
     readonly images: FieldRef<"HeroSettings", 'String[]'>
@@ -36599,6 +36647,10 @@ export namespace Prisma {
   export const HeroSettingsScalarFieldEnum: {
     id: 'id',
     title: 'title',
+    titlePart1: 'titlePart1',
+    titlePart2: 'titlePart2',
+    titleColor1: 'titleColor1',
+    titleColor2: 'titleColor2',
     subtitle: 'subtitle',
     imageUrl: 'imageUrl',
     images: 'images',
@@ -38489,19 +38541,27 @@ export namespace Prisma {
     NOT?: HeroSettingsWhereInput | HeroSettingsWhereInput[]
     id?: IntFilter<"HeroSettings"> | number
     title?: StringFilter<"HeroSettings"> | string
+    titlePart1?: StringFilter<"HeroSettings"> | string
+    titlePart2?: StringFilter<"HeroSettings"> | string
+    titleColor1?: StringFilter<"HeroSettings"> | string
+    titleColor2?: StringFilter<"HeroSettings"> | string
     subtitle?: StringFilter<"HeroSettings"> | string
     imageUrl?: StringNullableFilter<"HeroSettings"> | string | null
     images?: StringNullableListFilter<"HeroSettings">
-    ctaText?: StringFilter<"HeroSettings"> | string
+    ctaText?: StringNullableFilter<"HeroSettings"> | string | null
   }
 
   export type HeroSettingsOrderByWithRelationInput = {
     id?: SortOrder
     title?: SortOrder
+    titlePart1?: SortOrder
+    titlePart2?: SortOrder
+    titleColor1?: SortOrder
+    titleColor2?: SortOrder
     subtitle?: SortOrder
     imageUrl?: SortOrderInput | SortOrder
     images?: SortOrder
-    ctaText?: SortOrder
+    ctaText?: SortOrderInput | SortOrder
   }
 
   export type HeroSettingsWhereUniqueInput = Prisma.AtLeast<{
@@ -38510,19 +38570,27 @@ export namespace Prisma {
     OR?: HeroSettingsWhereInput[]
     NOT?: HeroSettingsWhereInput | HeroSettingsWhereInput[]
     title?: StringFilter<"HeroSettings"> | string
+    titlePart1?: StringFilter<"HeroSettings"> | string
+    titlePart2?: StringFilter<"HeroSettings"> | string
+    titleColor1?: StringFilter<"HeroSettings"> | string
+    titleColor2?: StringFilter<"HeroSettings"> | string
     subtitle?: StringFilter<"HeroSettings"> | string
     imageUrl?: StringNullableFilter<"HeroSettings"> | string | null
     images?: StringNullableListFilter<"HeroSettings">
-    ctaText?: StringFilter<"HeroSettings"> | string
+    ctaText?: StringNullableFilter<"HeroSettings"> | string | null
   }, "id">
 
   export type HeroSettingsOrderByWithAggregationInput = {
     id?: SortOrder
     title?: SortOrder
+    titlePart1?: SortOrder
+    titlePart2?: SortOrder
+    titleColor1?: SortOrder
+    titleColor2?: SortOrder
     subtitle?: SortOrder
     imageUrl?: SortOrderInput | SortOrder
     images?: SortOrder
-    ctaText?: SortOrder
+    ctaText?: SortOrderInput | SortOrder
     _count?: HeroSettingsCountOrderByAggregateInput
     _avg?: HeroSettingsAvgOrderByAggregateInput
     _max?: HeroSettingsMaxOrderByAggregateInput
@@ -38536,10 +38604,14 @@ export namespace Prisma {
     NOT?: HeroSettingsScalarWhereWithAggregatesInput | HeroSettingsScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"HeroSettings"> | number
     title?: StringWithAggregatesFilter<"HeroSettings"> | string
+    titlePart1?: StringWithAggregatesFilter<"HeroSettings"> | string
+    titlePart2?: StringWithAggregatesFilter<"HeroSettings"> | string
+    titleColor1?: StringWithAggregatesFilter<"HeroSettings"> | string
+    titleColor2?: StringWithAggregatesFilter<"HeroSettings"> | string
     subtitle?: StringWithAggregatesFilter<"HeroSettings"> | string
     imageUrl?: StringNullableWithAggregatesFilter<"HeroSettings"> | string | null
     images?: StringNullableListFilter<"HeroSettings">
-    ctaText?: StringWithAggregatesFilter<"HeroSettings"> | string
+    ctaText?: StringNullableWithAggregatesFilter<"HeroSettings"> | string | null
   }
 
   export type SubscriberWhereInput = {
@@ -41180,64 +41252,92 @@ export namespace Prisma {
   export type HeroSettingsCreateInput = {
     id?: number
     title?: string
+    titlePart1?: string
+    titlePart2?: string
+    titleColor1?: string
+    titleColor2?: string
     subtitle?: string
     imageUrl?: string | null
     images?: HeroSettingsCreateimagesInput | string[]
-    ctaText?: string
+    ctaText?: string | null
   }
 
   export type HeroSettingsUncheckedCreateInput = {
     id?: number
     title?: string
+    titlePart1?: string
+    titlePart2?: string
+    titleColor1?: string
+    titleColor2?: string
     subtitle?: string
     imageUrl?: string | null
     images?: HeroSettingsCreateimagesInput | string[]
-    ctaText?: string
+    ctaText?: string | null
   }
 
   export type HeroSettingsUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titlePart1?: StringFieldUpdateOperationsInput | string
+    titlePart2?: StringFieldUpdateOperationsInput | string
+    titleColor1?: StringFieldUpdateOperationsInput | string
+    titleColor2?: StringFieldUpdateOperationsInput | string
     subtitle?: StringFieldUpdateOperationsInput | string
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: HeroSettingsUpdateimagesInput | string[]
-    ctaText?: StringFieldUpdateOperationsInput | string
+    ctaText?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type HeroSettingsUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titlePart1?: StringFieldUpdateOperationsInput | string
+    titlePart2?: StringFieldUpdateOperationsInput | string
+    titleColor1?: StringFieldUpdateOperationsInput | string
+    titleColor2?: StringFieldUpdateOperationsInput | string
     subtitle?: StringFieldUpdateOperationsInput | string
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: HeroSettingsUpdateimagesInput | string[]
-    ctaText?: StringFieldUpdateOperationsInput | string
+    ctaText?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type HeroSettingsCreateManyInput = {
     id?: number
     title?: string
+    titlePart1?: string
+    titlePart2?: string
+    titleColor1?: string
+    titleColor2?: string
     subtitle?: string
     imageUrl?: string | null
     images?: HeroSettingsCreateimagesInput | string[]
-    ctaText?: string
+    ctaText?: string | null
   }
 
   export type HeroSettingsUpdateManyMutationInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titlePart1?: StringFieldUpdateOperationsInput | string
+    titlePart2?: StringFieldUpdateOperationsInput | string
+    titleColor1?: StringFieldUpdateOperationsInput | string
+    titleColor2?: StringFieldUpdateOperationsInput | string
     subtitle?: StringFieldUpdateOperationsInput | string
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: HeroSettingsUpdateimagesInput | string[]
-    ctaText?: StringFieldUpdateOperationsInput | string
+    ctaText?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type HeroSettingsUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titlePart1?: StringFieldUpdateOperationsInput | string
+    titlePart2?: StringFieldUpdateOperationsInput | string
+    titleColor1?: StringFieldUpdateOperationsInput | string
+    titleColor2?: StringFieldUpdateOperationsInput | string
     subtitle?: StringFieldUpdateOperationsInput | string
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: HeroSettingsUpdateimagesInput | string[]
-    ctaText?: StringFieldUpdateOperationsInput | string
+    ctaText?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SubscriberCreateInput = {
@@ -43552,6 +43652,10 @@ export namespace Prisma {
   export type HeroSettingsCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titlePart1?: SortOrder
+    titlePart2?: SortOrder
+    titleColor1?: SortOrder
+    titleColor2?: SortOrder
     subtitle?: SortOrder
     imageUrl?: SortOrder
     images?: SortOrder
@@ -43565,6 +43669,10 @@ export namespace Prisma {
   export type HeroSettingsMaxOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titlePart1?: SortOrder
+    titlePart2?: SortOrder
+    titleColor1?: SortOrder
+    titleColor2?: SortOrder
     subtitle?: SortOrder
     imageUrl?: SortOrder
     ctaText?: SortOrder
@@ -43573,6 +43681,10 @@ export namespace Prisma {
   export type HeroSettingsMinOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titlePart1?: SortOrder
+    titlePart2?: SortOrder
+    titleColor1?: SortOrder
+    titleColor2?: SortOrder
     subtitle?: SortOrder
     imageUrl?: SortOrder
     ctaText?: SortOrder

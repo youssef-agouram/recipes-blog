@@ -74,11 +74,15 @@ export const ArticleSchema = z.object({
 });
 
 export const HeroSettingsSchema = z.object({
-  title: z.string(),
+  title: z.string().optional().nullable(),
+  titlePart1: z.string().optional(),
+  titlePart2: z.string().optional(),
+  titleColor1: z.string().optional(),
+  titleColor2: z.string().optional(),
   subtitle: z.string(),
   imageUrl: z.string().optional().nullable(),
   images: z.array(z.string()).optional(),
-  ctaText: z.string(),
+  ctaText: z.string().optional().nullable(),
 });
 
 export const SubscriberSchema = z.object({

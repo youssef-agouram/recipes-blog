@@ -76,6 +76,27 @@ export default async function HomePage() {
           images={heroSettings.images || []}
           fallbackImage={heroSettings.imageUrl}
         />
+        {/* Dynamic Text Overlay (Aligned Left) */}
+        <div className="absolute inset-0 z-20 flex flex-col items-start justify-center text-left px-6 sm:px-16 md:px-24 bg-black/40 pointer-events-none">
+          <div className="max-w-4xl space-y-2 sm:space-y-4 pointer-events-auto">
+            {heroSettings.titlePart1 || heroSettings.title ? (
+              <h1 className="text-xl sm:text-4xl md:text-5xl font-black tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] font-heading leading-tight">
+                <span style={{ color: heroSettings.titleColor1 || '#ffffff' }}>
+                  {heroSettings.titlePart1 || (heroSettings.title?.includes(',') ? heroSettings.title.substring(0, heroSettings.title.indexOf(',') + 1) : heroSettings.title)}
+                </span>
+                {` `}
+                <span style={{ color: heroSettings.titleColor2 || '#f29e1f' }}>
+                  {heroSettings.titlePart2 || (heroSettings.title?.includes(',') ? heroSettings.title.substring(heroSettings.title.indexOf(',') + 1).trim() : '')}
+                </span>
+              </h1>
+            ) : null}
+            {heroSettings.subtitle && (
+              <p className="text-[10px] sm:text-base md:text-lg text-white/80 font-medium max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] leading-normal">
+                {heroSettings.subtitle}
+              </p>
+            )}
+          </div>
+        </div>
       </section>
 
       {/* 2. Explore by Category */}

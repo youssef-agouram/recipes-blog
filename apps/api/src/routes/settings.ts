@@ -71,8 +71,18 @@ router.put('/site', authMiddleware, async (req: Request, res: Response, next: Ne
 router.get('/hero', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const settings = await prisma.heroSettings.findFirst();
-    res.json(settings || {
+    res.json(settings ? {
+      ...settings,
+      titlePart1: settings.titlePart1 || (settings.title.includes(',') ? settings.title.substring(0, settings.title.indexOf(',') + 1) : settings.title),
+      titlePart2: settings.titlePart2 || (settings.title.includes(',') ? settings.title.substring(settings.title.indexOf(',') + 1).trim() : ''),
+      titleColor1: settings.titleColor1 || '#ffffff',
+      titleColor2: settings.titleColor2 || '#f29e1f'
+    } : {
       title: "Good Food, Good Mood",
+      titlePart1: "Good Food, ",
+      titlePart2: "Good Mood",
+      titleColor1: "#ffffff",
+      titleColor2: "#f29e1f",
       subtitle: "Explore thousands of handpicked recipes from around the world.",
       images: [],
       ctaText: "Explore Recipes"
@@ -86,10 +96,16 @@ router.get('/hero', async (_req: Request, res: Response, next: NextFunction) => 
 router.put('/hero', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = HeroSettingsSchema.parse(req.body);
+    const titlePart1 = data.titlePart1 || '';
+    const titlePart2 = data.titlePart2 || '';
+    const updatePayload = {
+      ...data,
+      title: `${titlePart1}${titlePart2}`.trim() || data.title || 'Good Food, Good Mood',
+    };
     const settings = await prisma.heroSettings.upsert({
       where: { id: 1 },
-      update: data,
-      create: { ...data, id: 1 },
+      update: updatePayload,
+      create: { ...updatePayload, id: 1 },
     });
     res.json(settings);
   } catch (error) {
