@@ -36,6 +36,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export const TrafficOverviewChart = ({ data }: { data?: any[] }) => {
   const chartData = data && data.length > 0 ? data : trafficData;
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full">
@@ -60,7 +65,8 @@ export const TrafficOverviewChart = ({ data }: { data?: any[] }) => {
       </div>
 
       <div className="h-[260px]">
-        <ResponsiveContainer width="100%" height="100%">
+        {mounted ? (
+          <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="gradVisitors" x1="0" y1="0" x2="0" y2="1">
@@ -108,6 +114,9 @@ export const TrafficOverviewChart = ({ data }: { data?: any[] }) => {
             />
           </AreaChart>
         </ResponsiveContainer>
+        ) : (
+          <div className="w-full h-full bg-slate-900/10 animate-pulse rounded-lg" />
+        )}
       </div>
     </div>
   );

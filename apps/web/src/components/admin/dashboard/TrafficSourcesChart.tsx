@@ -17,6 +17,12 @@ const total = data.reduce((sum, d) => sum + d.value, 0);
 
 export const TrafficSourcesChart = ({ sources }: { sources?: { name: string; value: number; percentage: string; color: string }[] }) => {
   const chartData = sources && sources.length > 0 ? sources : data;
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const total = chartData.reduce((sum, d) => sum + d.value, 0);
 
   return (
@@ -32,38 +38,42 @@ export const TrafficSourcesChart = ({ sources }: { sources?: { name: string; val
       <div className="flex items-center gap-6">
         {/* Donut Chart */}
         <div className="relative w-[180px] h-[180px] shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={55}
-                outerRadius={80}
-                paddingAngle={3}
-                dataKey="value"
-                stroke="none"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const d = payload[0].payload;
-                    return (
-                      <div className="bg-[#0a0e1a] border border-white/10 rounded-lg px-3 py-2 shadow-xl">
-                        <p className="text-[11px] font-bold text-white">{d.name}</p>
-                        <p className="text-[10px] text-slate-400">{d.value.toLocaleString()} visits</p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          {mounted ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={80}
+                  paddingAngle={3}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const d = payload[0].payload;
+                      return (
+                        <div className="bg-[#0a0e1a] border border-white/10 rounded-lg px-3 py-2 shadow-xl">
+                          <p className="text-[11px] font-bold text-white">{d.name}</p>
+                          <p className="text-[10px] text-slate-400">{d.value.toLocaleString()} visits</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="w-full h-full rounded-full border-4 border-dashed border-slate-700 animate-spin" />
+          )}
           {/* Center label */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-xl font-black text-white">{total.toLocaleString()}</span>

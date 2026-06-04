@@ -26,6 +26,12 @@ const liveData = [
 ];
 
 export const RealTimeVisitors = ({ activeUsers }: { activeUsers?: { total: number; pages: { path: string; users: number }[]; chartData?: { time: string; users: number }[] } }) => {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const displayTotal = activeUsers?.total ?? 0;
   const displayPages = activeUsers?.pages && activeUsers.pages.length > 0 ? activeUsers.pages : [{ path: 'No active users', users: 0 }];
   const displayChartData = activeUsers?.chartData && activeUsers.chartData.length > 0 ? activeUsers.chartData : liveData;
@@ -60,29 +66,33 @@ export const RealTimeVisitors = ({ activeUsers }: { activeUsers?: { total: numbe
 
       {/* Mini Bar Chart */}
       <div className="flex-1 h-[80px] mt-auto">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={displayChartData}>
-            <XAxis dataKey="time" hide />
-            <Tooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="bg-[#0a0e1a] border border-white/10 rounded-lg px-3 py-2 shadow-xl">
-                      <p className="text-[11px] font-bold text-white">{payload[0].value} users</p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Bar
-              dataKey="users"
-              fill="#5850ec"
-              radius={[4, 4, 0, 0]}
-              maxBarSize={24}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        {mounted ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={displayChartData}>
+              <XAxis dataKey="time" hide />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-[#0a0e1a] border border-white/10 rounded-lg px-3 py-2 shadow-xl">
+                        <p className="text-[11px] font-bold text-white">{payload[0].value} users</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar
+                dataKey="users"
+                fill="#5850ec"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={24}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="w-full h-full bg-slate-900/10 animate-pulse rounded-lg" />
+        )}
       </div>
 
       <button className="mt-3 w-full py-2 rounded-xl bg-white/[0.03] border border-white/5 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all">

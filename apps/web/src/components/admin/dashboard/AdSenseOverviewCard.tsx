@@ -22,6 +22,12 @@ const metrics = [
 ];
 
 export const AdSenseOverviewCard = () => {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-5">
@@ -50,43 +56,47 @@ export const AdSenseOverviewCard = () => {
 
       {/* Chart */}
       <div className="flex-1 h-[100px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={earningsData}>
-            <defs>
-              <linearGradient id="gradEarnings" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis
-              dataKey="date"
-              tick={{ fill: '#94a3b8', fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="bg-[#0a0e1a] border border-white/10 rounded-lg px-3 py-2 shadow-xl">
-                      <p className="text-[11px] font-bold text-white">${payload[0].value}</p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke="#10b981"
-              strokeWidth={2}
-              fill="url(#gradEarnings)"
-              dot={false}
-              activeDot={{ r: 4, stroke: '#10b981', strokeWidth: 2, fill: '#0F172A' }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        {mounted ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={earningsData}>
+              <defs>
+                <linearGradient id="gradEarnings" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis
+                dataKey="date"
+                tick={{ fill: '#94a3b8', fontSize: 10 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-[#0a0e1a] border border-white/10 rounded-lg px-3 py-2 shadow-xl">
+                        <p className="text-[11px] font-bold text-white">${payload[0].value}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#10b981"
+                strokeWidth={2}
+                fill="url(#gradEarnings)"
+                dot={false}
+                activeDot={{ r: 4, stroke: '#10b981', strokeWidth: 2, fill: '#0F172A' }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="w-full h-full bg-slate-900/10 animate-pulse rounded-lg" />
+        )}
       </div>
     </div>
   );

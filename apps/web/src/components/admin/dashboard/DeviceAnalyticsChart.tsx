@@ -11,6 +11,12 @@ const data = [
 ];
 
 export const DeviceAnalyticsChart = ({ devices }: { devices?: { name: string; value: number }[] }) => {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const chartData = React.useMemo(() => {
     if (!devices || devices.length === 0 || devices.every(d => d.value === 0)) return data;
     
@@ -39,38 +45,42 @@ export const DeviceAnalyticsChart = ({ devices }: { devices?: { name: string; va
       <div className="flex items-center gap-6">
         {/* Donut Chart */}
         <div className="relative w-[160px] h-[160px] shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={48}
-                outerRadius={70}
-                paddingAngle={4}
-                dataKey="value"
-                stroke="none"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const d = payload[0].payload;
-                    return (
-                      <div className="bg-[#0a0e1a] border border-white/10 rounded-lg px-3 py-2 shadow-xl">
-                        <p className="text-[11px] font-bold text-white">{d.name}</p>
-                        <p className="text-[10px] text-slate-400">{d.percentage}</p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          {mounted ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={48}
+                  outerRadius={70}
+                  paddingAngle={4}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const d = payload[0].payload;
+                      return (
+                        <div className="bg-[#0a0e1a] border border-white/10 rounded-lg px-3 py-2 shadow-xl">
+                          <p className="text-[11px] font-bold text-white">{d.name}</p>
+                          <p className="text-[10px] text-slate-400">{d.percentage}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="w-full h-full rounded-full border-4 border-dashed border-slate-700 animate-spin" />
+          )}
           {/* Center icon */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
