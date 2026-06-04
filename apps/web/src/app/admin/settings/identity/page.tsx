@@ -614,58 +614,74 @@ export default function SiteIdentityPage() {
                   ))}
                 </div>
 
-                {/* Brand Name Layout (Split) & Tagline */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-2">
-                  {/* Left Column: Brand Inputs & Color Pickers */}
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      {/* Part 1 */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-white/60 uppercase tracking-widest">Brand Name - Part 1</label>
-                        <div className="flex gap-2">
-                          <input 
-                            type="text" 
-                            value={formData.brandPart1} 
-                            onChange={(e) => setFormData({...formData, brandPart1: e.target.value})}
-                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
-                          />
-                          <div className="relative w-12 h-12 rounded-xl border border-white/10 overflow-hidden shrink-0 bg-white/5 flex items-center justify-center cursor-pointer hover:border-white/20 transition-all">
+                {/* Brand Identity Config (Vertical Stack to prevent wrapping/overflow) */}
+                <div className="space-y-6 pt-6 border-t border-white/5">
+                  <div className="flex items-center gap-2">
+                    <ChefHat className="w-5 h-5 text-primary" style={{ color: formData.brandColor2 || '#f29e1f' }} />
+                    <h3 className="text-xs font-black text-white uppercase tracking-widest">Brand Style & Identity</h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Part 1 */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-white/60 uppercase tracking-widest">BN-1&C</label>
+                      <div className="flex gap-4 items-center">
+                        <input 
+                          type="text" 
+                          value={formData.brandPart1} 
+                          onChange={(e) => setFormData({...formData, brandPart1: e.target.value})}
+                          placeholder="Part 1 (e.g. Taste)"
+                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
+                        />
+                        {/* Custom Color Selector with Code below */}
+                        <div className="flex flex-col items-center gap-1 shrink-0">
+                          <div className="relative w-11 h-11 rounded-xl border border-white/10 overflow-hidden bg-white/5 hover:border-white/20 transition-all flex items-center justify-center cursor-pointer group" title="Choose color for Part 1">
                             <input 
                               type="color" 
                               value={formData.brandColor1} 
                               onChange={(e) => setFormData({...formData, brandColor1: e.target.value})}
-                              className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0"
+                              className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0 z-20"
                             />
                             <div 
-                              className="w-8 h-8 rounded-lg shadow-inner border border-white/10" 
+                              className="w-7.5 h-7.5 rounded-lg shadow-lg border border-white/10 transition-transform group-hover:scale-105" 
                               style={{ backgroundColor: formData.brandColor1 || '#ffffff' }}
                             />
                           </div>
+                          <span className="text-[9px] font-mono font-bold text-white/40 uppercase tracking-wider select-all">
+                            {formData.brandColor1 || '#ffffff'}
+                          </span>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Part 2 */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-white/60 uppercase tracking-widest">Brand Name - Part 2</label>
-                        <div className="flex gap-2">
-                          <input 
-                            type="text" 
-                            value={formData.brandPart2} 
-                            onChange={(e) => setFormData({...formData, brandPart2: e.target.value})}
-                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
-                          />
-                          <div className="relative w-12 h-12 rounded-xl border border-white/10 overflow-hidden shrink-0 bg-white/5 flex items-center justify-center cursor-pointer hover:border-white/20 transition-all">
+                    {/* Part 2 */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-white/60 uppercase tracking-widest">BN-2&C</label>
+                      <div className="flex gap-4 items-center">
+                        <input 
+                          type="text" 
+                          value={formData.brandPart2} 
+                          onChange={(e) => setFormData({...formData, brandPart2: e.target.value})}
+                          placeholder="Part 2 (e.g. ful)"
+                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
+                        />
+                        {/* Custom Color Selector with Code below */}
+                        <div className="flex flex-col items-center gap-1 shrink-0">
+                          <div className="relative w-11 h-11 rounded-xl border border-white/10 overflow-hidden bg-white/5 hover:border-white/20 transition-all flex items-center justify-center cursor-pointer group" title="Choose color for Part 2">
                             <input 
                               type="color" 
                               value={formData.brandColor2} 
                               onChange={(e) => setFormData({...formData, brandColor2: e.target.value})}
-                              className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0"
+                              className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0 z-20"
                             />
                             <div 
-                              className="w-8 h-8 rounded-lg shadow-inner border border-white/10" 
+                              className="w-7.5 h-7.5 rounded-lg shadow-lg border border-white/10 transition-transform group-hover:scale-105" 
                               style={{ backgroundColor: formData.brandColor2 || '#f29e1f' }}
                             />
                           </div>
+                          <span className="text-[9px] font-mono font-bold text-white/40 uppercase tracking-wider select-all">
+                            {formData.brandColor2 || '#f29e1f'}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -677,40 +693,39 @@ export default function SiteIdentityPage() {
                         type="text" 
                         value={formData.tagline} 
                         onChange={(e) => setFormData({...formData, tagline: e.target.value})}
+                        placeholder="e.g. Delicious Recipes"
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
                       />
                     </div>
                   </div>
 
-                  {/* Right Column: Live Logo Branding Preview */}
-                  <div className="flex flex-col justify-end">
-                    <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl space-y-4">
-                      <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        <span>Live Brand Preview</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-3 p-4 bg-black/20 rounded-2xl border border-white/5">
-                        <div className="relative w-10 h-10 rounded-xl overflow-hidden ring-2 ring-primary/20 flex items-center justify-center bg-card shadow-lg">
-                          <ChefHat className="w-5.5 h-5.5 text-primary" style={{ color: formData.brandColor2 || '#f29e1f' }} />
-                        </div>
-                        <div className="flex flex-col leading-[1.1]">
-                          <span className="font-black text-base sm:text-lg tracking-tighter font-heading">
-                            <span style={{ color: formData.brandColor1 || '#ffffff' }}>{formData.brandPart1 || 'Taste'}</span>
-                            <span style={{ color: formData.brandColor2 || '#f29e1f' }}>{formData.brandPart2 || 'ful'}</span>
-                          </span>
-                          {formData.tagline && (
-                            <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.25em] ml-0.5">
-                              {formData.tagline}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <p className="text-[10px] text-muted-foreground/40 leading-relaxed font-medium">
-                        Branding will automatically apply to all logo elements across the Header, Footer, Admin layouts, and Login screens.
-                      </p>
+                  {/* Live Preview Display (Full Width in section) */}
+                  <div className="bg-white/[0.02] border border-white/5 rounded-[22px] p-5 space-y-3.5">
+                    <div className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>Live Branding Preview</span>
                     </div>
+                    
+                    <div className="flex items-center gap-3.5 p-4 bg-black/40 rounded-xl border border-white/5 shadow-inner">
+                      <div className="relative w-10 h-10 rounded-xl overflow-hidden ring-2 ring-primary/20 flex items-center justify-center bg-[#0a0b14] shadow-lg shrink-0">
+                        <ChefHat className="w-5.5 h-5.5 text-primary" style={{ color: formData.brandColor2 || '#f29e1f' }} />
+                      </div>
+                      <div className="flex flex-col leading-[1.1] min-w-0">
+                        <span className="font-black text-base sm:text-lg tracking-tighter font-heading truncate">
+                          <span style={{ color: formData.brandColor1 || '#ffffff' }}>{formData.brandPart1 || 'Taste'}</span>
+                          <span style={{ color: formData.brandColor2 || '#f29e1f' }}>{formData.brandPart2 || 'ful'}</span>
+                        </span>
+                        {formData.tagline && (
+                          <span className="text-[8.5px] font-bold text-muted-foreground uppercase tracking-[0.25em] ml-0.5 truncate">
+                            {formData.tagline}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <p className="text-[10px] text-muted-foreground/30 leading-relaxed font-medium">
+                      Branding updates dynamically across the Header, Footer, Admin layouts, and Login screens.
+                    </p>
                   </div>
                 </div>
 
