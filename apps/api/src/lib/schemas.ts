@@ -106,6 +106,12 @@ export const SiteSettingsSchema = z.object({
   cloudinaryCloudName: z.string().nullable().optional(),
   cloudinaryApiKey: z.string().nullable().optional(),
   cloudinaryApiSecret: z.string().nullable().optional(),
+  categoriesTitle: z.string().optional(),
+  categoriesSubtitle: z.string().optional(),
+  blogTitle: z.string().optional(),
+  blogSubtitle: z.string().optional(),
+  recipesTitle: z.string().optional(),
+  recipesSubtitle: z.string().optional(),
 });
 
 export const SeoSettingsSchema = z.object({

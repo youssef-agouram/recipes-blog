@@ -31,6 +31,8 @@ interface BlogPageContentProps {
   initialArticles: Article[];
   initialMeta: PaginatedMeta;
   categories: string[];
+  pageTitle?: string;
+  pageSubtitle?: string;
 }
 
 function LocalArticleCardSkeleton() {
@@ -117,7 +119,13 @@ function LocalArticleCard({ article }: { article: Article }) {
   );
 }
 
-export default function BlogPageContent({ initialArticles, initialMeta, categories }: BlogPageContentProps) {
+export default function BlogPageContent({ 
+  initialArticles, 
+  initialMeta, 
+  categories,
+  pageTitle,
+  pageSubtitle
+}: BlogPageContentProps) {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [page, setPage] = useState(initialMeta.page);
   const [totalPages, setTotalPages] = useState(initialMeta.totalPages);
@@ -235,11 +243,12 @@ export default function BlogPageContent({ initialArticles, initialMeta, categori
             <Sparkles className="w-3.5 h-3.5" />
             Our Culinary Journal
           </div>
-          <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tighter leading-none font-heading mb-6">
-            Stories, Guides & <span className="text-primary">Tips</span>
-          </h1>
+          <h1 
+            className="text-4xl sm:text-6xl font-black text-white tracking-tighter leading-none font-heading mb-6"
+            dangerouslySetInnerHTML={{ __html: pageTitle || 'Stories, Guides & <span class="text-primary">Tips</span>' }}
+          />
           <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium mb-8">
-            Dive into our articles written by food experts, professional chefs, and kitchen enthusiasts. Learn techniques, get nutritional advice, and stay inspired.
+            {pageSubtitle || "Dive into our articles written by food experts, professional chefs, and kitchen enthusiasts. Learn techniques, get nutritional advice, and stay inspired."}
           </p>
 
           {/* Search bar */}

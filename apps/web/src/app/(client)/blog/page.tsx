@@ -17,14 +17,19 @@ const DEFAULT_META = {
 
 export default async function BlogPage() {
   try {
-    const response = await api.articles.list({ page: 1, limit: 3 }).catch(() => ({ data: [], meta: DEFAULT_META }));
-    const categories = await api.articles.getCategories().catch(() => []);
+    const [response, categories, settings] = await Promise.all([
+      api.articles.list({ page: 1, limit: 3 }).catch(() => ({ data: [], meta: DEFAULT_META })),
+      api.articles.getCategories().catch(() => []),
+      api.settings.getSite().catch(() => null),
+    ]);
     
     return (
       <BlogPageContent 
         initialArticles={response?.data || []} 
         initialMeta={response?.meta || DEFAULT_META}
         categories={categories}
+        pageTitle={settings?.blogTitle}
+        pageSubtitle={settings?.blogSubtitle}
       />
     );
   } catch (error) {

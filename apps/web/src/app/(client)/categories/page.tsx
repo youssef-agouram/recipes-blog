@@ -17,7 +17,10 @@ export const metadata = {
 };
 
 export default async function CategoriesPage() {
-  const categories = await api.categories.list().catch(() => []);
+  const [categories, settings] = await Promise.all([
+    api.categories.list().catch(() => []),
+    api.settings.getSite().catch(() => null)
+  ]);
 
   const iconComponents: Record<string, any> = {
     Utensils, Coffee, Pizza, Sandwich, Cake, Leaf,
@@ -59,11 +62,12 @@ export default async function CategoriesPage() {
               <Sparkles className="w-3.5 h-3.5" />
               Recipe Index
             </div>
-            <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tighter leading-none font-heading mb-6">
-              Browse by <span className="text-primary">Category</span>
-            </h1>
+            <h1 
+              className="text-4xl sm:text-6xl font-black text-white tracking-tighter leading-none font-heading mb-6" 
+              dangerouslySetInnerHTML={{ __html: settings?.categoriesTitle || 'Browse by <span class="text-primary">Category</span>' }} 
+            />
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">
-              Find exactly what you're craving. Explore our handpicked recipe collections by course, ingredient, dietary preferences, or preparation style.
+              {settings?.categoriesSubtitle || "Find exactly what you're craving. Explore our handpicked recipe collections by course, ingredient, dietary preferences, or preparation style."}
             </p>
           </div>
         </div>

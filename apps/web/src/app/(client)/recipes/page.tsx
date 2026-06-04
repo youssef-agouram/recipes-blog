@@ -57,25 +57,29 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
   const search = resolvedParams.search || "";
   const categoryId = resolvedParams.category ? parseInt(resolvedParams.category) : undefined;
 
-  const categories = await api.categories.list().catch(() => []);
-  
-  const recipesResponse = await api.recipes.list({
-    page,
-    limit,
-    search,
-    categoryId,
-  }).catch((err) => {
-    console.error("Error fetching recipes:", err);
-    return { 
-      data: [], 
-      meta: { total: 0, page: 1, limit: 12, totalPages: 0 } 
-    };
-  });
+  const [categories, recipesResponse, settings] = await Promise.all([
+    api.categories.list().catch(() => []),
+    api.recipes.list({
+      page,
+      limit,
+      search,
+      categoryId,
+    }).catch((err) => {
+      console.error("Error fetching recipes:", err);
+      return { 
+        data: [], 
+        meta: { total: 0, page: 1, limit: 12, totalPages: 0 } 
+      };
+    }),
+    api.settings.getSite().catch(() => null)
+  ]);
 
   return (
     <RecipesPageContent
       recipesResponse={recipesResponse}
       initialSearch={search}
+      pageTitle={settings?.recipesTitle}
+      pageSubtitle={settings?.recipesSubtitle}
     />
   );
 }

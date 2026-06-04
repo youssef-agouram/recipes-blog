@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -324,6 +325,14 @@ model SiteSettings {
   cloudinaryCloudName String?
   cloudinaryApiKey    String?
   cloudinaryApiSecret String?
+
+  // Page Settings Control
+  categoriesTitle    String  @default("Browse by Category")
+  categoriesSubtitle String  @default("Find exactly what you're craving. Explore our handpicked recipe collections by course, ingredient, dietary preferences, or preparation style.")
+  blogTitle          String  @default("Stories, Guides & Tips")
+  blogSubtitle       String  @default("Explore our collection of expert culinary guides, cooking techniques, kitchen tips, and lifestyle stories.")
+  recipesTitle       String  @default("Delicious Recipes")
+  recipesSubtitle    String  @default("Browse all our handpicked cooking recipes and start your culinary journey today.")
 }
 
 model HeroSettings {

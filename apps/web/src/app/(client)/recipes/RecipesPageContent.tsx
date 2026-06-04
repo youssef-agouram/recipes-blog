@@ -10,11 +10,15 @@ import { cn } from "@/lib/utils";
 interface RecipesPageContentProps {
   recipesResponse: PaginatedResponse<Recipe>;
   initialSearch: string;
+  pageTitle?: string;
+  pageSubtitle?: string;
 }
 
 export function RecipesPageContent({
   recipesResponse,
   initialSearch,
+  pageTitle,
+  pageSubtitle,
 }: RecipesPageContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -93,11 +97,12 @@ export function RecipesPageContent({
             <Sparkles className="w-3.5 h-3.5" />
             <span>Discover culinary arts</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 leading-tight font-heading">
-            Our Recipe <span className="text-primary">Collection</span>
-          </h1>
+          <h1 
+            className="text-4xl md:text-5xl font-black tracking-tighter mb-4 leading-tight font-heading"
+            dangerouslySetInnerHTML={{ __html: pageTitle || 'Our Recipe <span class="text-primary">Collection</span>' }}
+          />
           <p className="text-sm text-muted-foreground font-medium">
-            Explore thousands of handpicked recipes from around the world. Search by ingredients or names to find your next meal.
+            {pageSubtitle || "Explore thousands of handpicked recipes from around the world. Search by ingredients or names to find your next meal."}
           </p>
         </div>
 

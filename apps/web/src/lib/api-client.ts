@@ -59,6 +59,7 @@ export const api = {
   },
   settings: {
     getHero: () => fetcher<any>("/settings/hero"),
+    getSite: () => fetcher<any>("/settings/site"),
     subscribe: (email: string) => fetcher("/settings/subscribe", {
       method: "POST",
       body: JSON.stringify({ email }),

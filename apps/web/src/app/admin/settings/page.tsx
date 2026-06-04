@@ -4,7 +4,7 @@ import { useGetHeroSettingsQuery, useUpdateHeroSettingsMutation } from '@/store/
 import { 
   Save, Image as ImageIcon, Check, Loader2, 
   Settings, Globe, Mail, Share2, Wrench, 
-  Database, Trash2, ChevronDown, RefreshCw
+  Database, Trash2, ChevronDown, RefreshCw, BookOpen
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -13,6 +13,7 @@ import Link from 'next/link';
 const settingsNav = [
   { id: 'general', label: 'General', sub: 'Basic site settings and preferences', icon: Settings },
   { id: 'identity', label: 'Site Identity', sub: 'Logo, title and site information', icon: Globe },
+  { id: 'pages', label: 'Pages Control', sub: 'Configure titles and descriptions of pages', icon: BookOpen },
   { id: 'email', label: 'Email Settings', sub: 'Configure email preferences', icon: Mail },
   { id: 'social', label: 'Social Profiles', sub: 'Social media links', icon: Share2 },
   { id: 'advanced', label: 'Advanced', sub: 'Custom code and advanced settings', icon: Wrench },
