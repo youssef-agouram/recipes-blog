@@ -353,6 +353,7 @@ exports.Prisma.SiteSettingsScalarFieldEnum = {
   cloudinaryCloudName: 'cloudinaryCloudName',
   cloudinaryApiKey: 'cloudinaryApiKey',
   cloudinaryApiSecret: 'cloudinaryApiSecret',
+  homePageSettings: 'homePageSettings',
   categoriesTitle: 'categoriesTitle',
   categoriesSubtitle: 'categoriesSubtitle',
   blogTitle: 'blogTitle',

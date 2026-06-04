@@ -329,6 +329,7 @@ model SiteSettings {
   cloudinaryCloudName String?
   cloudinaryApiKey    String?
   cloudinaryApiSecret String?
+  homePageSettings Json?   @default("{}")
 
   // Page Settings Control
   categoriesTitle    String  @default("Browse by Category")

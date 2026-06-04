@@ -46,9 +46,9 @@ router.get('/site', async (_req: Request, res: Response, next: NextFunction) => 
 router.put('/site', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = SiteSettingsSchema.parse(req.body);
-    const { adSettings, ...restData } = data;
+    const { adSettings, homePageSettings, ...restData } = data as any;
     
-    const updatePayload = {
+    const updatePayload: any = {
       ...restData,
       commentSettings: {
         ...(typeof restData.commentSettings === 'object' ? restData.commentSettings : {}),
@@ -56,12 +56,16 @@ router.put('/site', authMiddleware, async (req: Request, res: Response, next: Ne
       }
     };
 
+    if (homePageSettings !== undefined) {
+      updatePayload.homePageSettings = homePageSettings;
+    }
+
     const settings = await prisma.siteSettings.upsert({
       where: { id: 1 },
       update: updatePayload,
       create: { ...updatePayload, id: 1 },
     });
-    res.json({ ...settings, adSettings });
+    res.json({ ...settings, adSettings, homePageSettings: settings.homePageSettings });
   } catch (error) {
     next(error);
   }

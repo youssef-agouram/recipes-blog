@@ -21608,6 +21608,7 @@ export namespace Prisma {
     cloudinaryCloudName: number
     cloudinaryApiKey: number
     cloudinaryApiSecret: number
+    homePageSettings: number
     categoriesTitle: number
     categoriesSubtitle: number
     blogTitle: number
@@ -21708,6 +21709,7 @@ export namespace Prisma {
     cloudinaryCloudName?: true
     cloudinaryApiKey?: true
     cloudinaryApiSecret?: true
+    homePageSettings?: true
     categoriesTitle?: true
     categoriesSubtitle?: true
     blogTitle?: true
@@ -21829,6 +21831,7 @@ export namespace Prisma {
     cloudinaryCloudName: string | null
     cloudinaryApiKey: string | null
     cloudinaryApiSecret: string | null
+    homePageSettings: JsonValue | null
     categoriesTitle: string
     categoriesSubtitle: string
     blogTitle: string
@@ -21882,6 +21885,7 @@ export namespace Prisma {
     cloudinaryCloudName?: boolean
     cloudinaryApiKey?: boolean
     cloudinaryApiSecret?: boolean
+    homePageSettings?: boolean
     categoriesTitle?: boolean
     categoriesSubtitle?: boolean
     blogTitle?: boolean
@@ -21916,6 +21920,7 @@ export namespace Prisma {
     cloudinaryCloudName?: boolean
     cloudinaryApiKey?: boolean
     cloudinaryApiSecret?: boolean
+    homePageSettings?: boolean
     categoriesTitle?: boolean
     categoriesSubtitle?: boolean
     blogTitle?: boolean
@@ -21950,6 +21955,7 @@ export namespace Prisma {
     cloudinaryCloudName?: boolean
     cloudinaryApiKey?: boolean
     cloudinaryApiSecret?: boolean
+    homePageSettings?: boolean
     categoriesTitle?: boolean
     categoriesSubtitle?: boolean
     blogTitle?: boolean
@@ -21988,6 +21994,7 @@ export namespace Prisma {
       cloudinaryCloudName: string | null
       cloudinaryApiKey: string | null
       cloudinaryApiSecret: string | null
+      homePageSettings: Prisma.JsonValue | null
       categoriesTitle: string
       categoriesSubtitle: string
       blogTitle: string
@@ -22412,6 +22419,7 @@ export namespace Prisma {
     readonly cloudinaryCloudName: FieldRef<"SiteSettings", 'String'>
     readonly cloudinaryApiKey: FieldRef<"SiteSettings", 'String'>
     readonly cloudinaryApiSecret: FieldRef<"SiteSettings", 'String'>
+    readonly homePageSettings: FieldRef<"SiteSettings", 'Json'>
     readonly categoriesTitle: FieldRef<"SiteSettings", 'String'>
     readonly categoriesSubtitle: FieldRef<"SiteSettings", 'String'>
     readonly blogTitle: FieldRef<"SiteSettings", 'String'>
@@ -36633,6 +36641,7 @@ export namespace Prisma {
     cloudinaryCloudName: 'cloudinaryCloudName',
     cloudinaryApiKey: 'cloudinaryApiKey',
     cloudinaryApiSecret: 'cloudinaryApiSecret',
+    homePageSettings: 'homePageSettings',
     categoriesTitle: 'categoriesTitle',
     categoriesSubtitle: 'categoriesSubtitle',
     blogTitle: 'blogTitle',
@@ -38380,6 +38389,7 @@ export namespace Prisma {
     cloudinaryCloudName?: StringNullableFilter<"SiteSettings"> | string | null
     cloudinaryApiKey?: StringNullableFilter<"SiteSettings"> | string | null
     cloudinaryApiSecret?: StringNullableFilter<"SiteSettings"> | string | null
+    homePageSettings?: JsonNullableFilter<"SiteSettings">
     categoriesTitle?: StringFilter<"SiteSettings"> | string
     categoriesSubtitle?: StringFilter<"SiteSettings"> | string
     blogTitle?: StringFilter<"SiteSettings"> | string
@@ -38414,6 +38424,7 @@ export namespace Prisma {
     cloudinaryCloudName?: SortOrderInput | SortOrder
     cloudinaryApiKey?: SortOrderInput | SortOrder
     cloudinaryApiSecret?: SortOrderInput | SortOrder
+    homePageSettings?: SortOrderInput | SortOrder
     categoriesTitle?: SortOrder
     categoriesSubtitle?: SortOrder
     blogTitle?: SortOrder
@@ -38451,6 +38462,7 @@ export namespace Prisma {
     cloudinaryCloudName?: StringNullableFilter<"SiteSettings"> | string | null
     cloudinaryApiKey?: StringNullableFilter<"SiteSettings"> | string | null
     cloudinaryApiSecret?: StringNullableFilter<"SiteSettings"> | string | null
+    homePageSettings?: JsonNullableFilter<"SiteSettings">
     categoriesTitle?: StringFilter<"SiteSettings"> | string
     categoriesSubtitle?: StringFilter<"SiteSettings"> | string
     blogTitle?: StringFilter<"SiteSettings"> | string
@@ -38485,6 +38497,7 @@ export namespace Prisma {
     cloudinaryCloudName?: SortOrderInput | SortOrder
     cloudinaryApiKey?: SortOrderInput | SortOrder
     cloudinaryApiSecret?: SortOrderInput | SortOrder
+    homePageSettings?: SortOrderInput | SortOrder
     categoriesTitle?: SortOrder
     categoriesSubtitle?: SortOrder
     blogTitle?: SortOrder
@@ -38527,6 +38540,7 @@ export namespace Prisma {
     cloudinaryCloudName?: StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
     cloudinaryApiKey?: StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
     cloudinaryApiSecret?: StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
+    homePageSettings?: JsonNullableWithAggregatesFilter<"SiteSettings">
     categoriesTitle?: StringWithAggregatesFilter<"SiteSettings"> | string
     categoriesSubtitle?: StringWithAggregatesFilter<"SiteSettings"> | string
     blogTitle?: StringWithAggregatesFilter<"SiteSettings"> | string
@@ -41037,6 +41051,7 @@ export namespace Prisma {
     cloudinaryCloudName?: string | null
     cloudinaryApiKey?: string | null
     cloudinaryApiSecret?: string | null
+    homePageSettings?: NullableJsonNullValueInput | InputJsonValue
     categoriesTitle?: string
     categoriesSubtitle?: string
     blogTitle?: string
@@ -41071,6 +41086,7 @@ export namespace Prisma {
     cloudinaryCloudName?: string | null
     cloudinaryApiKey?: string | null
     cloudinaryApiSecret?: string | null
+    homePageSettings?: NullableJsonNullValueInput | InputJsonValue
     categoriesTitle?: string
     categoriesSubtitle?: string
     blogTitle?: string
@@ -41105,6 +41121,7 @@ export namespace Prisma {
     cloudinaryCloudName?: NullableStringFieldUpdateOperationsInput | string | null
     cloudinaryApiKey?: NullableStringFieldUpdateOperationsInput | string | null
     cloudinaryApiSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    homePageSettings?: NullableJsonNullValueInput | InputJsonValue
     categoriesTitle?: StringFieldUpdateOperationsInput | string
     categoriesSubtitle?: StringFieldUpdateOperationsInput | string
     blogTitle?: StringFieldUpdateOperationsInput | string
@@ -41139,6 +41156,7 @@ export namespace Prisma {
     cloudinaryCloudName?: NullableStringFieldUpdateOperationsInput | string | null
     cloudinaryApiKey?: NullableStringFieldUpdateOperationsInput | string | null
     cloudinaryApiSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    homePageSettings?: NullableJsonNullValueInput | InputJsonValue
     categoriesTitle?: StringFieldUpdateOperationsInput | string
     categoriesSubtitle?: StringFieldUpdateOperationsInput | string
     blogTitle?: StringFieldUpdateOperationsInput | string
@@ -41173,6 +41191,7 @@ export namespace Prisma {
     cloudinaryCloudName?: string | null
     cloudinaryApiKey?: string | null
     cloudinaryApiSecret?: string | null
+    homePageSettings?: NullableJsonNullValueInput | InputJsonValue
     categoriesTitle?: string
     categoriesSubtitle?: string
     blogTitle?: string
@@ -41207,6 +41226,7 @@ export namespace Prisma {
     cloudinaryCloudName?: NullableStringFieldUpdateOperationsInput | string | null
     cloudinaryApiKey?: NullableStringFieldUpdateOperationsInput | string | null
     cloudinaryApiSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    homePageSettings?: NullableJsonNullValueInput | InputJsonValue
     categoriesTitle?: StringFieldUpdateOperationsInput | string
     categoriesSubtitle?: StringFieldUpdateOperationsInput | string
     blogTitle?: StringFieldUpdateOperationsInput | string
@@ -41241,6 +41261,7 @@ export namespace Prisma {
     cloudinaryCloudName?: NullableStringFieldUpdateOperationsInput | string | null
     cloudinaryApiKey?: NullableStringFieldUpdateOperationsInput | string | null
     cloudinaryApiSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    homePageSettings?: NullableJsonNullValueInput | InputJsonValue
     categoriesTitle?: StringFieldUpdateOperationsInput | string
     categoriesSubtitle?: StringFieldUpdateOperationsInput | string
     blogTitle?: StringFieldUpdateOperationsInput | string
@@ -43577,6 +43598,7 @@ export namespace Prisma {
     cloudinaryCloudName?: SortOrder
     cloudinaryApiKey?: SortOrder
     cloudinaryApiSecret?: SortOrder
+    homePageSettings?: SortOrder
     categoriesTitle?: SortOrder
     categoriesSubtitle?: SortOrder
     blogTitle?: SortOrder

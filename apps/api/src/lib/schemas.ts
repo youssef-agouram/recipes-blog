@@ -120,6 +120,7 @@ export const SiteSettingsSchema = z.object({
   blogSubtitle: z.string().optional(),
   recipesTitle: z.string().optional(),
   recipesSubtitle: z.string().optional(),
+  homePageSettings: z.any().optional(),
 });
 
 export const SeoSettingsSchema = z.object({

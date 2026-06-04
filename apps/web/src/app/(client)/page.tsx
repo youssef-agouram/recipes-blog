@@ -27,7 +27,8 @@ export default async function HomePage() {
     recipesResponse,
     topRecipesResponse,
     articles,
-    heroSettings
+    heroSettings,
+    siteSettings
   ] = await Promise.all([
     api.categories.list().catch((err) => {
       console.error('Error fetching categories:', err);
@@ -54,11 +55,26 @@ export default async function HomePage() {
         imageUrl: null,
         images: []
       };
+    }),
+    api.settings.getSite().catch((err) => {
+      console.error('Error fetching site settings:', err);
+      return {};
     })
   ]);
 
   const recipes = recipesResponse.data || [];
   const topRecipes = topRecipesResponse.data || [];
+
+  const homePageSettings = (siteSettings as any)?.homePageSettings || {};
+
+  const whyChooseTitle = homePageSettings.whyChooseTitle || 'Why Choose Tasteful?';
+  const featureCards = homePageSettings.featureCards || [
+    { icon: 'Sparkles', title: 'Handpicked Recipes', desc: 'Only the best recipes.' },
+    { icon: 'Heart', title: 'Healthy & Delicious', desc: 'Nutritious & tasty.' },
+    { icon: 'ShieldCheck', title: 'Easy to Follow', desc: 'Step-by-step results.' },
+    { icon: 'Users', title: 'Community Loved', desc: 'Join our food lovers.' },
+  ];
+  const promoBanner = homePageSettings.promoBanner || {};
 
   const stats = [
     { label: 'Recipes', value: '15K+', icon: Zap },
@@ -66,6 +82,10 @@ export default async function HomePage() {
     { label: 'Categories', value: '50+', icon: Sparkles },
     { label: 'Saved Recipes', value: '100K+', icon: Heart },
   ];
+
+  // Map icon name strings to actual icon components
+  const iconMap: Record<string, any> = { Sparkles, Heart, ShieldCheck, Users, Zap, Play };
+  const getIcon = (name: string) => iconMap[name] || Sparkles;
 
   return (
     <div className="w-full bg-background text-foreground pb-0 sm:pb-6">
@@ -124,16 +144,11 @@ export default async function HomePage() {
 
       {/* 5. Why Choose Tasteful? */}
       <section className="container mx-auto px-3 sm:px-6 max-w-[1536px] py-8 sm:py-6 border-t border-border">
-        <h2 className="text-xl sm:text-3xl font-black text-white tracking-tighter mb-6 leading-none font-heading">Why Choose Tasteful?</h2>
+        <h2 className="text-xl sm:text-3xl font-black text-white tracking-tighter mb-6 leading-none font-heading">{whyChooseTitle}</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
-          {[
-            { title: 'Handpicked Recipes', desc: 'Only the best recipes.', icon: Sparkles },
-            { title: 'Healthy & Delicious', desc: 'Nutritious & tasty.', icon: Heart },
-            { title: 'Easy to Follow', desc: 'Step-by-step results.', icon: ShieldCheck },
-            { title: 'Community Loved', desc: 'Join our food lovers.', icon: Users },
-          ].map((item, i) => {
-            const Icon = item.icon;
+          {featureCards.map((item: any, i: number) => {
+            const Icon = getIcon(item.icon);
             return (
               <div key={i} className="flex items-center gap-3 group">
                 <div className="w-12 h-12 shrink-0 rounded-xl bg-card border border-border flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500">
@@ -154,40 +169,40 @@ export default async function HomePage() {
           {/* Left Image Section */}
           <div className="lg:w-[26%] relative min-h-[220px] overflow-hidden">
             <Image
-              src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=800&q=80"
-              alt="Culinary Masterclass"
+              src={promoBanner.imageUrl || "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=800&q=80"}
+              alt={promoBanner.titlePart1 || "Culinary Masterclass"}
               fill
               sizes="(max-width: 1024px) 100vw, 26vw"
               className="object-cover group-hover:scale-105 transition-transform duration-[8s]"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-card/40 to-card"></div>
             <span className="bg-primary text-primary-foreground text-[8px] font-black tracking-[0.25em] px-4 py-2 rounded-full uppercase absolute top-6 left-6 shadow-2xl backdrop-blur-md border border-white/10 animate-pulse">
-              EXCLUSIVE PASS
+              {promoBanner.exclusiveLabel || 'EXCLUSIVE PASS'}
             </span>
           </div>
 
           {/* Middle Content Section */}
           <div className="flex-1 p-5 sm:p-8 lg:p-12 flex flex-col justify-center">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-black uppercase tracking-[0.25em] text-primary mb-4 w-fit">
-              <Sparkles className="w-3 h-3 text-primary animate-pulse" /> SPONSORED PROMOTION
+              <Sparkles className="w-3 h-3 text-primary animate-pulse" /> {promoBanner.badgeText || 'SPONSORED PROMOTION'}
             </span>
             
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tighter mb-3 leading-tight font-heading">
-              Culinary Masterclass <span className="text-primary">With Michelin-Star Chefs</span>
+              {promoBanner.titlePart1 || 'Culinary Masterclass '}<span className="text-primary">{promoBanner.titlePart2 || 'With Michelin-Star Chefs'}</span>
             </h2>
             <p className="text-[11px] text-muted-foreground mb-2 max-w-xl leading-relaxed font-medium">
-              Transform your cooking skills with 150+ ultra-HD video masterclasses. Learn professional culinary secrets, plating techniques, and recipe composition from legendary chefs.
+              {promoBanner.description || 'Transform your cooking skills with 150+ ultra-HD video masterclasses. Learn professional culinary secrets, plating techniques, and recipe composition from legendary chefs.'}
             </p>
           </div>
 
           {/* Right Benefits Section */}
           <div className="lg:w-[32%] bg-white/[0.01] p-5 sm:p-8 lg:p-12 flex flex-col justify-center gap-5 sm:gap-8 border-t lg:border-t-0 lg:border-l border-white/5">
-            {[
-              { title: '150+ HD Video Lessons', desc: 'Watch on any device, anytime', icon: Play },
-              { title: 'Michelin Pro Secrets', desc: 'Expert techniques made simple', icon: Sparkles },
-              { title: '30-Day Cooking Guarantee', desc: 'Unlock elite skills or full refund', icon: ShieldCheck },
-            ].map((item, i) => {
-              const Icon = item.icon;
+            {(promoBanner.benefits || [
+              { icon: 'Play', title: '150+ HD Video Lessons', desc: 'Watch on any device, anytime' },
+              { icon: 'Sparkles', title: 'Michelin Pro Secrets', desc: 'Expert techniques made simple' },
+              { icon: 'ShieldCheck', title: '30-Day Cooking Guarantee', desc: 'Unlock elite skills or full refund' },
+            ]).map((item: any, i: number) => {
+              const Icon = getIcon(item.icon);
               return (
                 <div key={i} className="flex items-center gap-4 group/item">
                   <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-all duration-500 shadow-md">
