@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { Logo } from './Logo';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -264,31 +265,9 @@ export function Navbar() {
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
-          <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={() => setMobileMenuOpen(false)}>
-            <div className="relative w-8 h-8 rounded-lg overflow-hidden ring-2 ring-primary/20 flex items-center justify-center bg-card">
-              {logoUrl ? (
-                <Image
-                  src={logoUrl}
-                  alt={`${brandName} Logo`}
-                  width={32}
-                  height={32}
-                  className="w-full h-full object-cover"
-                  priority
-                />
-              ) : (
-                <ChefHat className="w-4.5 h-4.5 text-primary" />
-              )}
-            </div>
-            <div className="flex flex-col leading-[1.1]">
-              {brandName ? (
-                <span className="font-black text-sm tracking-tighter text-white font-heading">
-                  {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
-                </span>
-              ) : (
-                <div className="h-4 w-16 bg-white/5 animate-pulse rounded" />
-              )}
-            </div>
-          </Link>
+          <div onClick={() => setMobileMenuOpen(false)}>
+            <Logo />
+          </div>
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-muted-foreground hover:text-white hover:bg-white/10 transition-all border border-white/10"
@@ -471,36 +450,7 @@ export function Navbar() {
           {/* Desktop Header */}
           <div className="hidden lg:flex container mx-auto px-4 sm:px-6 max-w-[1536px] h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-1.5 sm:gap-3 group shrink-0">
-              <div className="relative w-8.5 h-8.5 sm:w-11 sm:h-11 rounded-xl sm:rounded-[22px] overflow-hidden shadow-2xl group-hover:scale-105 transition-transform ring-2 ring-primary/20 group-hover:ring-primary/40 flex items-center justify-center">
-                {logoUrl ? (
-                  <Image
-                    src={logoUrl}
-                    alt={`${brandName} Logo`}
-                    width={44}
-                    height={44}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                ) : (
-                  <ChefHat className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
-                )}
-              </div>
-              <div className="flex flex-col leading-[1.1]">
-                {brandName ? (
-                  <>
-                    <span className="font-black text-base sm:text-2xl tracking-tighter text-white font-heading">
-                      {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
-                    </span>
-                    <span className="text-[7px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em] ml-0.5">
-                      {tagline}
-                    </span>
-                  </>
-                ) : (
-                  <div className="h-5 sm:h-8 w-20 sm:w-32 bg-white/5 animate-pulse rounded-lg" />
-                )}
-              </div>
-            </Link>
+            <Logo />
 
             {/* Navigation — Desktop */}
             <nav className="hidden lg:flex items-center gap-8">
@@ -802,32 +752,7 @@ export function Navbar() {
                 )}
               </button>
 
-              {/* Logo */}
-              <Link href="/" className="flex items-center gap-2 group shrink-0">
-                <div className="relative w-8.5 h-8.5 rounded-xl overflow-hidden ring-2 ring-primary/20 flex items-center justify-center bg-card">
-                  {logoUrl ? (
-                    <Image
-                      src={logoUrl}
-                      alt={`${brandName} Logo`}
-                      width={34}
-                      height={34}
-                      className="w-full h-full object-cover"
-                      priority
-                    />
-                  ) : (
-                    <ChefHat className="w-4.5 h-4.5 text-primary" />
-                  )}
-                </div>
-                <div className="flex flex-col leading-[1.1]">
-                  {brandName ? (
-                    <span className="font-black text-sm tracking-tighter text-white font-heading">
-                      {brandName.substring(0, Math.max(0, brandName.length - 3))}<span className="text-primary">{brandName.substring(Math.max(0, brandName.length - 3))}</span>
-                    </span>
-                  ) : (
-                    <div className="h-4 w-16 bg-white/5 animate-pulse rounded" />
-                  )}
-                </div>
-              </Link>
+              <Logo />
             </div>
 
             {/* Right: Search Icon + User Badge */}

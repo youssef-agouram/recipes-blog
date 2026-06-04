@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Save, Layout, ImageIcon, Type, Columns, 
+  Save, Layout, ImageIcon, Type, Columns,
   Plus, Trash2, ChevronDown, Monitor, 
   Smartphone, Upload, X, Check, GripVertical,
   Globe, Share2, Mail, Link as LinkIcon, Loader2,
@@ -33,6 +33,10 @@ export default function SiteIdentityPage() {
   // Site Identity State
   const [formData, setFormData] = useState<any>({
     brandName: '',
+    brandPart1: '',
+    brandPart2: '',
+    brandColor1: '',
+    brandColor2: '',
     tagline: '',
     stickyNavbar: true,
     showSearchBar: true,
@@ -123,6 +127,10 @@ export default function SiteIdentityPage() {
 
       setFormData({
         brandName: settings.brandName || 'Tasteful',
+        brandPart1: settings.brandPart1 || settings.brandName?.substring(0, Math.max(0, settings.brandName.length - 3)) || 'Taste',
+        brandPart2: settings.brandPart2 || settings.brandName?.substring(Math.max(0, settings.brandName.length - 3)) || 'ful',
+        brandColor1: settings.brandColor1 || '#ffffff',
+        brandColor2: settings.brandColor2 || '#f29e1f',
         tagline: settings.tagline || 'Delicious Recipes',
         stickyNavbar: settings.stickyNavbar ?? true,
         showSearchBar: settings.showSearchBar ?? true,
@@ -223,6 +231,7 @@ export default function SiteIdentityPage() {
 
       const siteSettingsPayload = {
         ...formData,
+        brandName: (formData.brandPart1 || '') + (formData.brandPart2 || ''),
         menuItems: serializedMenuItems,
         adSettings: finalAdSettings
       };
@@ -605,25 +614,103 @@ export default function SiteIdentityPage() {
                   ))}
                 </div>
 
-                {/* Brand Name & Tagline */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <label className="text-sm font-bold text-white/90">Brand Name</label>
-                    <input 
-                      type="text" 
-                      value={formData.brandName} 
-                      onChange={(e) => setFormData({...formData, brandName: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
-                    />
+                {/* Brand Name Layout (Split) & Tagline */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-2">
+                  {/* Left Column: Brand Inputs & Color Pickers */}
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {/* Part 1 */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-white/60 uppercase tracking-widest">Brand Name - Part 1</label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            value={formData.brandPart1} 
+                            onChange={(e) => setFormData({...formData, brandPart1: e.target.value})}
+                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
+                          />
+                          <div className="relative w-12 h-12 rounded-xl border border-white/10 overflow-hidden shrink-0 bg-white/5 flex items-center justify-center cursor-pointer hover:border-white/20 transition-all">
+                            <input 
+                              type="color" 
+                              value={formData.brandColor1} 
+                              onChange={(e) => setFormData({...formData, brandColor1: e.target.value})}
+                              className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0"
+                            />
+                            <div 
+                              className="w-8 h-8 rounded-lg shadow-inner border border-white/10" 
+                              style={{ backgroundColor: formData.brandColor1 || '#ffffff' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Part 2 */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-white/60 uppercase tracking-widest">Brand Name - Part 2</label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            value={formData.brandPart2} 
+                            onChange={(e) => setFormData({...formData, brandPart2: e.target.value})}
+                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
+                          />
+                          <div className="relative w-12 h-12 rounded-xl border border-white/10 overflow-hidden shrink-0 bg-white/5 flex items-center justify-center cursor-pointer hover:border-white/20 transition-all">
+                            <input 
+                              type="color" 
+                              value={formData.brandColor2} 
+                              onChange={(e) => setFormData({...formData, brandColor2: e.target.value})}
+                              className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-0"
+                            />
+                            <div 
+                              className="w-8 h-8 rounded-lg shadow-inner border border-white/10" 
+                              style={{ backgroundColor: formData.brandColor2 || '#f29e1f' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tagline */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-white/60 uppercase tracking-widest">Tagline</label>
+                      <input 
+                        type="text" 
+                        value={formData.tagline} 
+                        onChange={(e) => setFormData({...formData, tagline: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-sm font-bold text-white/90">Tagline</label>
-                    <input 
-                      type="text" 
-                      value={formData.tagline} 
-                      onChange={(e) => setFormData({...formData, tagline: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50 transition-all" 
-                    />
+
+                  {/* Right Column: Live Logo Branding Preview */}
+                  <div className="flex flex-col justify-end">
+                    <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl space-y-4">
+                      <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <span>Live Brand Preview</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-4 bg-black/20 rounded-2xl border border-white/5">
+                        <div className="relative w-10 h-10 rounded-xl overflow-hidden ring-2 ring-primary/20 flex items-center justify-center bg-card shadow-lg">
+                          <ChefHat className="w-5.5 h-5.5 text-primary" style={{ color: formData.brandColor2 || '#f29e1f' }} />
+                        </div>
+                        <div className="flex flex-col leading-[1.1]">
+                          <span className="font-black text-base sm:text-lg tracking-tighter font-heading">
+                            <span style={{ color: formData.brandColor1 || '#ffffff' }}>{formData.brandPart1 || 'Taste'}</span>
+                            <span style={{ color: formData.brandColor2 || '#f29e1f' }}>{formData.brandPart2 || 'ful'}</span>
+                          </span>
+                          {formData.tagline && (
+                            <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.25em] ml-0.5">
+                              {formData.tagline}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <p className="text-[10px] text-muted-foreground/40 leading-relaxed font-medium">
+                        Branding will automatically apply to all logo elements across the Header, Footer, Admin layouts, and Login screens.
+                      </p>
+                    </div>
                   </div>
                 </div>
 

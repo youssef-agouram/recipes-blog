@@ -26,6 +26,7 @@ import { logout } from '@/store/slices/authSlice';
 import { apiService } from '@/store/api/apiService';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Logo } from '../layout/Logo';
 import { useState, useEffect } from 'react';
 
 const sidebarLinks = [
@@ -114,21 +115,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-[#05060b]">
       {/* Sidebar */}
       <aside className={`fixed left-0 top-0 z-40 h-screen w-[260px] bg-[#0a0b14] border-r border-white/5 transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 overflow-y-auto scrollbar-hide`}>
-        {/* Logo Section */}
         <div className="pt-8 pb-10 px-6">
-          <Link href="/admin" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl">
-               <ChefHat className="w-7 h-7 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-black text-white leading-none tracking-tight">
-                Tasty<span className="text-[#f59e0b]">Recipes</span>
-              </span>
-              <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mt-1.5">
-                Admin Panel
-              </span>
-            </div>
-          </Link>
+          <Logo />
         </div>
 
         {/* Main Navigation */}

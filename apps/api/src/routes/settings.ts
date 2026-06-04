@@ -22,6 +22,10 @@ router.get('/site', async (_req: Request, res: Response, next: NextFunction) => 
 
     res.json(settings ? { ...settings, adSettings } : {
       brandName: "Tasteful",
+      brandPart1: "Taste",
+      brandPart2: "ful",
+      brandColor1: "#ffffff",
+      brandColor2: "#f29e1f",
       tagline: "Delicious Recipes",
       stickyNavbar: true,
       showSearchBar: true,

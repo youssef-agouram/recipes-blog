@@ -11,6 +11,7 @@ import { setCredentials } from '@/store/slices/authSlice';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Logo } from '@/components/layout/Logo';
 import { BookOpen, Users, ClipboardList, Shield, Mail, Loader2, ArrowLeft, Key, User } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -154,14 +155,9 @@ export default function LoginPage() {
           
           <div className="flex flex-col h-full p-10 relative z-10">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group mb-12">
-              <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-2xl ring-2 ring-primary/20">
-                <Image src="/logo.png" alt="Tasteful" width={44} height={44} className="w-full h-full object-cover" />
-              </div>
-              <span className="font-black text-2xl tracking-tighter text-white font-heading">
-                Taste<span className="text-primary">ful</span>
-              </span>
-            </Link>
+            <div className="mb-12">
+              <Logo />
+            </div>
 
             {/* Welcome Text */}
             <div className="mb-10">
@@ -208,14 +204,9 @@ export default function LoginPage() {
             
             {/* Mobile Header (Shows only on small screens) */}
             <div className="lg:hidden flex flex-col items-center mb-8">
-               <Link href="/" className="flex items-center gap-3 group mb-4">
-                 <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-2xl ring-2 ring-primary/20">
-                   <Image src="/logo.png" alt="Tasteful" width={40} height={40} className="w-full h-full object-cover" />
-                 </div>
-                 <span className="font-black text-xl tracking-tighter text-white font-heading">
-                   Taste<span className="text-primary">ful</span>
-                 </span>
-               </Link>
+               <div className="mb-4">
+                 <Logo />
+               </div>
                <h2 className="text-[26px] sm:text-[28px] font-black text-white tracking-tight mb-2 text-center">
                  {step === 'email' ? 'Sign In / Register' : 'Verify & Register'}
                </h2>

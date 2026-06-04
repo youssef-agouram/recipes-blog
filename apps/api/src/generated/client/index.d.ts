@@ -21532,6 +21532,10 @@ export namespace Prisma {
     faviconUrl: string | null
     footerLogoUrl: string | null
     brandName: string | null
+    brandPart1: string | null
+    brandPart2: string | null
+    brandColor1: string | null
+    brandColor2: string | null
     tagline: string | null
     stickyNavbar: boolean | null
     showSearchBar: boolean | null
@@ -21556,6 +21560,10 @@ export namespace Prisma {
     faviconUrl: string | null
     footerLogoUrl: string | null
     brandName: string | null
+    brandPart1: string | null
+    brandPart2: string | null
+    brandColor1: string | null
+    brandColor2: string | null
     tagline: string | null
     stickyNavbar: boolean | null
     showSearchBar: boolean | null
@@ -21580,6 +21588,10 @@ export namespace Prisma {
     faviconUrl: number
     footerLogoUrl: number
     brandName: number
+    brandPart1: number
+    brandPart2: number
+    brandColor1: number
+    brandColor2: number
     tagline: number
     stickyNavbar: number
     showSearchBar: number
@@ -21620,6 +21632,10 @@ export namespace Prisma {
     faviconUrl?: true
     footerLogoUrl?: true
     brandName?: true
+    brandPart1?: true
+    brandPart2?: true
+    brandColor1?: true
+    brandColor2?: true
     tagline?: true
     stickyNavbar?: true
     showSearchBar?: true
@@ -21644,6 +21660,10 @@ export namespace Prisma {
     faviconUrl?: true
     footerLogoUrl?: true
     brandName?: true
+    brandPart1?: true
+    brandPart2?: true
+    brandColor1?: true
+    brandColor2?: true
     tagline?: true
     stickyNavbar?: true
     showSearchBar?: true
@@ -21668,6 +21688,10 @@ export namespace Prisma {
     faviconUrl?: true
     footerLogoUrl?: true
     brandName?: true
+    brandPart1?: true
+    brandPart2?: true
+    brandColor1?: true
+    brandColor2?: true
     tagline?: true
     stickyNavbar?: true
     showSearchBar?: true
@@ -21785,6 +21809,10 @@ export namespace Prisma {
     faviconUrl: string | null
     footerLogoUrl: string | null
     brandName: string
+    brandPart1: string
+    brandPart2: string
+    brandColor1: string
+    brandColor2: string
     tagline: string
     stickyNavbar: boolean
     showSearchBar: boolean
@@ -21834,6 +21862,10 @@ export namespace Prisma {
     faviconUrl?: boolean
     footerLogoUrl?: boolean
     brandName?: boolean
+    brandPart1?: boolean
+    brandPart2?: boolean
+    brandColor1?: boolean
+    brandColor2?: boolean
     tagline?: boolean
     stickyNavbar?: boolean
     showSearchBar?: boolean
@@ -21864,6 +21896,10 @@ export namespace Prisma {
     faviconUrl?: boolean
     footerLogoUrl?: boolean
     brandName?: boolean
+    brandPart1?: boolean
+    brandPart2?: boolean
+    brandColor1?: boolean
+    brandColor2?: boolean
     tagline?: boolean
     stickyNavbar?: boolean
     showSearchBar?: boolean
@@ -21894,6 +21930,10 @@ export namespace Prisma {
     faviconUrl?: boolean
     footerLogoUrl?: boolean
     brandName?: boolean
+    brandPart1?: boolean
+    brandPart2?: boolean
+    brandColor1?: boolean
+    brandColor2?: boolean
     tagline?: boolean
     stickyNavbar?: boolean
     showSearchBar?: boolean
@@ -21928,6 +21968,10 @@ export namespace Prisma {
       faviconUrl: string | null
       footerLogoUrl: string | null
       brandName: string
+      brandPart1: string
+      brandPart2: string
+      brandColor1: string
+      brandColor2: string
       tagline: string
       stickyNavbar: boolean
       showSearchBar: boolean
@@ -22348,6 +22392,10 @@ export namespace Prisma {
     readonly faviconUrl: FieldRef<"SiteSettings", 'String'>
     readonly footerLogoUrl: FieldRef<"SiteSettings", 'String'>
     readonly brandName: FieldRef<"SiteSettings", 'String'>
+    readonly brandPart1: FieldRef<"SiteSettings", 'String'>
+    readonly brandPart2: FieldRef<"SiteSettings", 'String'>
+    readonly brandColor1: FieldRef<"SiteSettings", 'String'>
+    readonly brandColor2: FieldRef<"SiteSettings", 'String'>
     readonly tagline: FieldRef<"SiteSettings", 'String'>
     readonly stickyNavbar: FieldRef<"SiteSettings", 'Boolean'>
     readonly showSearchBar: FieldRef<"SiteSettings", 'Boolean'>
@@ -36517,6 +36565,10 @@ export namespace Prisma {
     faviconUrl: 'faviconUrl',
     footerLogoUrl: 'footerLogoUrl',
     brandName: 'brandName',
+    brandPart1: 'brandPart1',
+    brandPart2: 'brandPart2',
+    brandColor1: 'brandColor1',
+    brandColor2: 'brandColor2',
     tagline: 'tagline',
     stickyNavbar: 'stickyNavbar',
     showSearchBar: 'showSearchBar',
@@ -38256,6 +38308,10 @@ export namespace Prisma {
     faviconUrl?: StringNullableFilter<"SiteSettings"> | string | null
     footerLogoUrl?: StringNullableFilter<"SiteSettings"> | string | null
     brandName?: StringFilter<"SiteSettings"> | string
+    brandPart1?: StringFilter<"SiteSettings"> | string
+    brandPart2?: StringFilter<"SiteSettings"> | string
+    brandColor1?: StringFilter<"SiteSettings"> | string
+    brandColor2?: StringFilter<"SiteSettings"> | string
     tagline?: StringFilter<"SiteSettings"> | string
     stickyNavbar?: BoolFilter<"SiteSettings"> | boolean
     showSearchBar?: BoolFilter<"SiteSettings"> | boolean
@@ -38286,6 +38342,10 @@ export namespace Prisma {
     faviconUrl?: SortOrderInput | SortOrder
     footerLogoUrl?: SortOrderInput | SortOrder
     brandName?: SortOrder
+    brandPart1?: SortOrder
+    brandPart2?: SortOrder
+    brandColor1?: SortOrder
+    brandColor2?: SortOrder
     tagline?: SortOrder
     stickyNavbar?: SortOrder
     showSearchBar?: SortOrder
@@ -38319,6 +38379,10 @@ export namespace Prisma {
     faviconUrl?: StringNullableFilter<"SiteSettings"> | string | null
     footerLogoUrl?: StringNullableFilter<"SiteSettings"> | string | null
     brandName?: StringFilter<"SiteSettings"> | string
+    brandPart1?: StringFilter<"SiteSettings"> | string
+    brandPart2?: StringFilter<"SiteSettings"> | string
+    brandColor1?: StringFilter<"SiteSettings"> | string
+    brandColor2?: StringFilter<"SiteSettings"> | string
     tagline?: StringFilter<"SiteSettings"> | string
     stickyNavbar?: BoolFilter<"SiteSettings"> | boolean
     showSearchBar?: BoolFilter<"SiteSettings"> | boolean
@@ -38349,6 +38413,10 @@ export namespace Prisma {
     faviconUrl?: SortOrderInput | SortOrder
     footerLogoUrl?: SortOrderInput | SortOrder
     brandName?: SortOrder
+    brandPart1?: SortOrder
+    brandPart2?: SortOrder
+    brandColor1?: SortOrder
+    brandColor2?: SortOrder
     tagline?: SortOrder
     stickyNavbar?: SortOrder
     showSearchBar?: SortOrder
@@ -38387,6 +38455,10 @@ export namespace Prisma {
     faviconUrl?: StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
     footerLogoUrl?: StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
     brandName?: StringWithAggregatesFilter<"SiteSettings"> | string
+    brandPart1?: StringWithAggregatesFilter<"SiteSettings"> | string
+    brandPart2?: StringWithAggregatesFilter<"SiteSettings"> | string
+    brandColor1?: StringWithAggregatesFilter<"SiteSettings"> | string
+    brandColor2?: StringWithAggregatesFilter<"SiteSettings"> | string
     tagline?: StringWithAggregatesFilter<"SiteSettings"> | string
     stickyNavbar?: BoolWithAggregatesFilter<"SiteSettings"> | boolean
     showSearchBar?: BoolWithAggregatesFilter<"SiteSettings"> | boolean
@@ -40873,6 +40945,10 @@ export namespace Prisma {
     faviconUrl?: string | null
     footerLogoUrl?: string | null
     brandName?: string
+    brandPart1?: string
+    brandPart2?: string
+    brandColor1?: string
+    brandColor2?: string
     tagline?: string
     stickyNavbar?: boolean
     showSearchBar?: boolean
@@ -40903,6 +40979,10 @@ export namespace Prisma {
     faviconUrl?: string | null
     footerLogoUrl?: string | null
     brandName?: string
+    brandPart1?: string
+    brandPart2?: string
+    brandColor1?: string
+    brandColor2?: string
     tagline?: string
     stickyNavbar?: boolean
     showSearchBar?: boolean
@@ -40933,6 +41013,10 @@ export namespace Prisma {
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     footerLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     brandName?: StringFieldUpdateOperationsInput | string
+    brandPart1?: StringFieldUpdateOperationsInput | string
+    brandPart2?: StringFieldUpdateOperationsInput | string
+    brandColor1?: StringFieldUpdateOperationsInput | string
+    brandColor2?: StringFieldUpdateOperationsInput | string
     tagline?: StringFieldUpdateOperationsInput | string
     stickyNavbar?: BoolFieldUpdateOperationsInput | boolean
     showSearchBar?: BoolFieldUpdateOperationsInput | boolean
@@ -40963,6 +41047,10 @@ export namespace Prisma {
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     footerLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     brandName?: StringFieldUpdateOperationsInput | string
+    brandPart1?: StringFieldUpdateOperationsInput | string
+    brandPart2?: StringFieldUpdateOperationsInput | string
+    brandColor1?: StringFieldUpdateOperationsInput | string
+    brandColor2?: StringFieldUpdateOperationsInput | string
     tagline?: StringFieldUpdateOperationsInput | string
     stickyNavbar?: BoolFieldUpdateOperationsInput | boolean
     showSearchBar?: BoolFieldUpdateOperationsInput | boolean
@@ -40993,6 +41081,10 @@ export namespace Prisma {
     faviconUrl?: string | null
     footerLogoUrl?: string | null
     brandName?: string
+    brandPart1?: string
+    brandPart2?: string
+    brandColor1?: string
+    brandColor2?: string
     tagline?: string
     stickyNavbar?: boolean
     showSearchBar?: boolean
@@ -41023,6 +41115,10 @@ export namespace Prisma {
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     footerLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     brandName?: StringFieldUpdateOperationsInput | string
+    brandPart1?: StringFieldUpdateOperationsInput | string
+    brandPart2?: StringFieldUpdateOperationsInput | string
+    brandColor1?: StringFieldUpdateOperationsInput | string
+    brandColor2?: StringFieldUpdateOperationsInput | string
     tagline?: StringFieldUpdateOperationsInput | string
     stickyNavbar?: BoolFieldUpdateOperationsInput | boolean
     showSearchBar?: BoolFieldUpdateOperationsInput | boolean
@@ -41053,6 +41149,10 @@ export namespace Prisma {
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     footerLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     brandName?: StringFieldUpdateOperationsInput | string
+    brandPart1?: StringFieldUpdateOperationsInput | string
+    brandPart2?: StringFieldUpdateOperationsInput | string
+    brandColor1?: StringFieldUpdateOperationsInput | string
+    brandColor2?: StringFieldUpdateOperationsInput | string
     tagline?: StringFieldUpdateOperationsInput | string
     stickyNavbar?: BoolFieldUpdateOperationsInput | boolean
     showSearchBar?: BoolFieldUpdateOperationsInput | boolean
@@ -43357,6 +43457,10 @@ export namespace Prisma {
     faviconUrl?: SortOrder
     footerLogoUrl?: SortOrder
     brandName?: SortOrder
+    brandPart1?: SortOrder
+    brandPart2?: SortOrder
+    brandColor1?: SortOrder
+    brandColor2?: SortOrder
     tagline?: SortOrder
     stickyNavbar?: SortOrder
     showSearchBar?: SortOrder
@@ -43391,6 +43495,10 @@ export namespace Prisma {
     faviconUrl?: SortOrder
     footerLogoUrl?: SortOrder
     brandName?: SortOrder
+    brandPart1?: SortOrder
+    brandPart2?: SortOrder
+    brandColor1?: SortOrder
+    brandColor2?: SortOrder
     tagline?: SortOrder
     stickyNavbar?: SortOrder
     showSearchBar?: SortOrder
@@ -43415,6 +43523,10 @@ export namespace Prisma {
     faviconUrl?: SortOrder
     footerLogoUrl?: SortOrder
     brandName?: SortOrder
+    brandPart1?: SortOrder
+    brandPart2?: SortOrder
+    brandColor1?: SortOrder
+    brandColor2?: SortOrder
     tagline?: SortOrder
     stickyNavbar?: SortOrder
     showSearchBar?: SortOrder

@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { Logo } from './Logo';
 
 const FacebookIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
@@ -38,14 +41,7 @@ export function Footer() {
           {/* Row 1: Left Column (Logo) + Right Column (2x2 Legal Links) */}
           <div className="flex items-start justify-between w-full gap-4">
             {/* Left Column: Logo (Aligned to the Left) */}
-            <Link href="/" className="flex items-center gap-2 group shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#f59e0b] to-[#d97706] text-black font-black text-xs flex items-center justify-center shadow-lg">
-                <span>T</span>
-              </div>
-              <span className="font-heading font-black text-base tracking-tighter text-white">
-                Taste<span className="text-[#f59e0b]">ful</span>
-              </span>
-            </Link>
+            <Logo />
 
             {/* Right Column: Legal Pages (2x2 Grid Layout aligned to the right) */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-right justify-items-end shrink-0">
@@ -87,14 +83,7 @@ export function Footer() {
         {/* Desktop Layout (hidden on mobile) */}
         <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 items-center gap-y-6 md:gap-y-8 lg:gap-y-0 gap-x-4">
           <div className="col-span-1 md:col-span-1 lg:col-span-3 flex justify-center md:justify-start">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f59e0b] to-[#d97706] text-black font-black text-base flex items-center justify-center shadow-lg shadow-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-primary/30">
-                <span>T</span>
-              </div>
-              <span className="font-heading font-black text-xl tracking-tighter text-white transition-colors group-hover:text-primary">
-                Taste<span className="text-[#f59e0b]">ful</span>
-              </span>
-            </Link>
+            <Logo />
           </div>
 
           <div className="col-span-1 md:col-span-2 lg:col-span-6 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 order-2 md:order-3 lg:order-2 md:mt-4 lg:mt-0">

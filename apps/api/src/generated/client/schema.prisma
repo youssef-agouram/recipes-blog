@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/client"
+  output   = "../src/generated/temp"
 }
 
 datasource db {
@@ -305,6 +305,10 @@ model SiteSettings {
   faviconUrl    String?
   footerLogoUrl String?
   brandName     String  @default("Tasteful")
+  brandPart1    String  @default("Taste")
+  brandPart2    String  @default("ful")
+  brandColor1   String  @default("#ffffff")
+  brandColor2   String  @default("#f29e1f")
   tagline       String  @default("Delicious Recipes")
 
   // Navbar settings
