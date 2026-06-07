@@ -934,7 +934,8 @@ router.post('/ai/generate', authMiddleware, async (req: Request, res: Response, 
 [Suggested SEO Title 2] Best ${recipe.title} (Healthy & Authentic 30-Min Dinner)
 [Suggested SEO Title 3] How to Make Perfect ${recipe.title} (Step-by-Step Tutorial)`;
     } else if (action === 'meta') {
-      result = `Learn how to make the ultimate ${recipe.title} at home! This quick and easy recipe features simple steps, fresh kitchen ingredients, and pro chef tips to ensure perfect results every single time.`;
+      const baseMeta = `Learn how to make the ultimate ${recipe.title} at home! This quick and easy recipe features simple steps and fresh ingredients for perfect results.`;
+      result = baseMeta.length > 160 ? baseMeta.slice(0, 157) + '...' : baseMeta;
     } else if (action === 'keywords') {
       result = `easy ${recipe.title.toLowerCase()}, authentic ${recipe.title.toLowerCase()}, homemade ${recipe.title.toLowerCase()}, ${recipe.title.toLowerCase()} dinner, step-by-step ${recipe.title.toLowerCase()}`;
     } else if (action === 'readability') {

@@ -60,6 +60,7 @@ const recipeFormSchema = z.object({
   isFeatured: z.boolean().default(false),
   status: z.enum(['DRAFT', 'PUBLISHED', 'HIDDEN', 'TRASH']).default('PUBLISHED'),
   ingredientsJson: z.array(ingredientRowSchema).default([]),
+  ingredientsText: z.string().optional(),
   instructions: z.array(instructionStepSchema).default([]),
   seo: z.object({
     title: z.string().optional().nullable(),
@@ -84,6 +85,51 @@ const recipeFormSchema = z.object({
 });
 
 type RecipeFormValues = z.infer<typeof recipeFormSchema>;
+
+const extractHeadingsFromTiptap = (node: any): { level: number; text: string }[] => {
+  if (!node) return [];
+  const list: { level: number; text: string }[] = [];
+  const traverse = (n: any) => {
+    if (n.type === 'heading' && n.attrs?.level) {
+      const text = n.content?.map((c: any) => c.text || '').join('') || '';
+      list.push({ level: n.attrs.level, text });
+    }
+    if (n.content && Array.isArray(n.content)) {
+      n.content.forEach(traverse);
+    }
+  };
+  traverse(node);
+  return list;
+};
+
+const extractHeadingsFromHtml = (html: string): { level: number; text: string }[] => {
+  const matches = html.matchAll(/<h([1-6])[^>]*>(.*?)<\/h\1>/gi);
+  const list: { level: number; text: string }[] = [];
+  for (const match of matches) {
+    list.push({ level: parseInt(match[1]), text: match[2].replace(/<[^>]*>/g, '').trim() });
+  }
+  return list;
+};
+
+const getHeadings = (content: any): { level: number; text: string }[] => {
+  if (!content) return [];
+  if (typeof content === 'string') {
+    return extractHeadingsFromHtml(content);
+  }
+  return extractHeadingsFromTiptap(content);
+};
+
+const getSuggestedHeadings = (titleStr: string) => {
+  const cleanTitle = titleStr ? titleStr.trim() : 'Recipe';
+  return [
+    { level: 2, text: `Ingredients for ${cleanTitle}` },
+    { level: 2, text: `How to Make ${cleanTitle} (Step-by-Step)` },
+    { level: 2, text: `Pro-Tips for Perfect ${cleanTitle}` },
+    { level: 2, text: `Recipe Variations & Substitutions` },
+    { level: 2, text: `Storage & Reheating Guidelines` },
+    { level: 3, text: `Can you freeze ${cleanTitle}?` }
+  ];
+};
 
 const getFocusKeyword = (titleStr: string) => {
   if (!titleStr) return '';
@@ -148,7 +194,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   const [showImageUrlInput, setShowImageUrlInput] = useState(false);
   const [showVideoUrlInput, setShowVideoUrlInput] = useState(false);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
-  const [activeSeoTab, setActiveSeoTab] = useState<'basic' | 'scoring' | 'social' | 'linking' | 'faq'>('basic');
+  const [activeSeoTab, setActiveSeoTab] = useState<'basic' | 'scoring' | 'headings' | 'social' | 'linking' | 'faq'>('basic');
   const [socialPlatform, setSocialPlatform] = useState<'facebook' | 'twitter' | 'opengraph'>('opengraph');
   const [newFaqQuestion, setNewFaqQuestion] = useState('');
   const [newFaqAnswer, setNewFaqAnswer] = useState('');
@@ -179,7 +225,8 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
 [Suggested SEO Title 3] How to Make Perfect ${title || 'Recipe'} (Step-by-Step Tutorial)`;
       } else if (action === 'meta') {
         const bodyText = plainText ? plainText.replace(/\s+/g, ' ').trim() : 'fresh kitchen ingredients, simple steps, and pro chef tips.';
-        output = `Learn how to make the ultimate ${title || 'recipe'} at home! This quick and easy guide features ${bodyText.slice(0, 100)}...`;
+        const baseMeta = `Learn how to make the ultimate ${title || 'recipe'} at home! This guide features ${bodyText}`;
+        output = baseMeta.length > 160 ? baseMeta.slice(0, 157) + '...' : baseMeta;
       } else if (action === 'keywords') {
         const kw = getFocusKeyword(title);
         output = `${kw || 'recipe'}, easy ${kw || 'recipe'}, authentic ${kw || 'recipe'}, homemade ${kw || 'recipe'}, step-by-step ${kw || 'recipe'}`;
@@ -333,11 +380,15 @@ Suggestions to improve readability:
       allowComments: initialData?.allowComments ?? true,
       isFeatured: initialData?.isFeatured ?? false,
       status: initialData?.status || 'PUBLISHED',
-      ingredientsJson: Array.isArray(initialData?.ingredientsJson)
-        ? initialData.ingredientsJson
-        : (typeof initialData?.ingredientsJson === 'string'
-          ? JSON.parse(initialData.ingredientsJson as string)
-          : []) as any,
+      ingredientsJson: [],
+      ingredientsText: (() => {
+        const raw = Array.isArray(initialData?.ingredientsJson)
+          ? initialData.ingredientsJson
+          : (typeof initialData?.ingredientsJson === 'string'
+            ? JSON.parse(initialData.ingredientsJson as string)
+            : []);
+        return raw.map((ing: any) => `${ing.quantity || ''} ${ing.unit || ''} ${ing.name || ''}`.trim().replace(/\s+/g, ' ')).join('\n');
+      })(),
       instructions: Array.isArray((initialData as any)?.instructions)
         ? (initialData as any).instructions
         : (typeof (initialData as any)?.instructions === 'string'
@@ -375,11 +426,13 @@ Suggestions to improve readability:
   const seo = watch('seo');
   const content = watch('content');
 
+  const slugReg = register('slug');
   const focusKeywordReg = register('seo.focusKeyword');
   const seoTitleReg = register('seo.seoTitle');
   const metaDescriptionReg = register('seo.metaDescription');
 
-  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(!!initialData);
+  const [canEditSlug, setCanEditSlug] = useState(false);
   const [isFocusKeywordEdited, setIsFocusKeywordEdited] = useState(!!initialData?.seo?.focusKeyword);
   const [isSeoTitleEdited, setIsSeoTitleEdited] = useState(!!initialData?.seo?.seoTitle);
   const [isMetaDescriptionEdited, setIsMetaDescriptionEdited] = useState(!!initialData?.seo?.metaDescription);
@@ -394,12 +447,12 @@ Suggestions to improve readability:
       .replace(/^-+|-+$/g, '');
   };
 
-  // Auto-slug generation for NEW recipes
+  // Auto-slug generation
   useEffect(() => {
-    if (!initialData && title && !isSlugManuallyEdited) {
+    if (title && !isSlugManuallyEdited) {
       setValue('slug', generateSlugHelper(title));
     }
-  }, [title, setValue, initialData, isSlugManuallyEdited]);
+  }, [title, setValue, isSlugManuallyEdited]);
 
   // Auto-SEO generation in real-time
   useEffect(() => {
@@ -503,25 +556,7 @@ Suggestions to improve readability:
     }
   }, [prepTime, cookTime, setValue]);
 
-  /* --- Ingredients --- */
-  const ingredients = watch('ingredientsJson') || [];
-  useEffect(() => {
-    if (!initialData && ingredients.length === 0) {
-      setValue('ingredientsJson', [{ name: '', quantity: '', unit: '' }]);
-    }
-  }, [initialData, ingredients.length, setValue]);
 
-  const addIngredient = () => setValue('ingredientsJson', [...ingredients, { name: '', quantity: '', unit: '' }]);
-  const removeIngredient = (index: number) => {
-    const next = [...ingredients];
-    next.splice(index, 1);
-    setValue('ingredientsJson', next);
-  };
-  const updateIngredient = (index: number, field: keyof any, value: string) => {
-    const next = [...ingredients];
-    next[index] = { ...next[index], [field]: value };
-    setValue('ingredientsJson', next);
-  };
 
   /* --- Instructions Steps --- */
   const instructionSteps = watch('instructions') || [];
@@ -634,8 +669,19 @@ Suggestions to improve readability:
       }
     });
 
+    const ingredientsJson = (data.ingredientsText || '')
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => ({
+        name: line,
+        quantity: '',
+        unit: ''
+      }));
+
     const formattedData = {
       ...data,
+      ingredientsJson,
       seo: {
         ...data.seo,
         title: data.seo?.seoTitle || data.seo?.title || '',
@@ -861,25 +907,46 @@ Suggestions to improve readability:
 
           <div className="space-y-4">
             <label className="text-sm font-semibold">Ingredients (Optional)</label>
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
-              <table className="w-full text-left">
-                <tbody className="divide-y divide-border/50">
-                  {ingredients.map((ing, index) => (
-                    <tr key={index}>
-                      <td className="p-2"><input type="text" placeholder="Name" value={ing.name} onChange={(e) => updateIngredient(index, 'name', e.target.value)} className="w-full h-8 px-2 bg-transparent outline-none text-[12px]" /></td>
-                      <td className="p-2 w-12"><input type="text" placeholder="0" value={ing.quantity} onChange={(e) => updateIngredient(index, 'quantity', e.target.value)} className="w-full h-8 bg-transparent outline-none text-[12px] text-center" /></td>
-                      <td className="p-2 w-16 text-center"><button type="button" onClick={() => removeIngredient(index)} className="text-muted-foreground hover:text-rose-500"><Trash2 className="h-3 w-3" /></button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <button type="button" onClick={addIngredient} className="w-full py-2 flex items-center justify-center gap-2 text-[11px] font-bold text-primary hover:bg-primary/5 transition-colors border-t border-dashed border-border"><Plus className="h-3 w-3" /> Add Ingredient</button>
+            <div className="relative rounded-2xl border border-border bg-card p-4">
+              <textarea
+                {...register('ingredientsText')}
+                placeholder={`Enter ingredients, one per line:\ne.g.\n2 cups all-purpose flour\n1 tsp baking powder\n3 large eggs`}
+                rows={6}
+                className="w-full bg-background border border-border/80 rounded-xl p-4 outline-none text-xs font-semibold focus:ring-2 focus:ring-primary/20 transition-all resize-y custom-scrollbar"
+              />
+              <p className="text-[10px] text-muted-foreground mt-2">
+                💡 Paste your list here. Each line will be saved as a separate ingredient automatically.
+              </p>
             </div>
           </div>
 
           <div className="space-y-4">
             <label className="text-sm font-semibold flex items-center gap-1.5"><Lightbulb className="h-4 w-4 text-amber-500" /> About Recipe</label>
             <Controller name="content" control={control} render={({ field }) => <InstructionsEditor initialContent={field.value} onChange={field.onChange} />} />
+            
+            <div className="bg-secondary/10 border border-border/60 p-4 rounded-2xl space-y-3">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" /> Auto SEO Heading Suggestions (Click to Copy)
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {getSuggestedHeadings(title).map((sh, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(sh.text);
+                      showToast('success', `Copied heading: "${sh.text}"`);
+                    }}
+                    className="px-2.5 py-1.5 bg-background hover:bg-secondary border border-border/85 rounded-xl text-[10px] font-bold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                  >
+                    <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded bg-primary/10 text-primary uppercase">
+                      H{sh.level}
+                    </span>
+                    {sh.text}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -909,13 +976,41 @@ Suggestions to improve readability:
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Slug (URL)</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Slug (URL)</label>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setValue('slug', generateSlugHelper(title));
+                      setIsSlugManuallyEdited(false);
+                      showToast('success', 'Slug updated from title!');
+                    }}
+                    className="text-[10px] font-bold text-primary hover:underline transition-all"
+                  >
+                    Set from Title
+                  </button>
+                </div>
                 <div className="flex gap-2">
                   <div className="flex-1 flex items-center h-11 rounded-xl border border-border bg-background px-3 text-xs font-medium text-muted-foreground overflow-hidden">
                     <span className="opacity-50">/recipes/</span>
-                    <input {...register('slug')} className="bg-transparent border-none outline-none text-foreground ml-0.5 w-full" placeholder="url-slug" />
+                    <input 
+                      {...slugReg} 
+                      onChange={(e) => {
+                        slugReg.onChange(e);
+                        setIsSlugManuallyEdited(true);
+                      }}
+                      readOnly={!canEditSlug}
+                      className="bg-transparent border-none outline-none text-foreground ml-0.5 w-full disabled:opacity-50" 
+                      placeholder="url-slug" 
+                    />
                   </div>
-                  <button type="button" className="h-11 w-11 flex items-center justify-center rounded-xl border border-border bg-background hover:bg-secondary"><Edit2 className="h-4 w-4 text-muted-foreground" /></button>
+                  <button 
+                    type="button" 
+                    onClick={() => setCanEditSlug(!canEditSlug)} 
+                    className={`h-11 w-11 flex items-center justify-center rounded-xl border transition-all ${canEditSlug ? 'bg-primary/20 border-primary text-primary' : 'border-border bg-background hover:bg-secondary'}`}
+                  >
+                    {canEditSlug ? <Check className="h-4 w-4 text-emerald-500" /> : <Edit2 className="h-4 w-4 text-muted-foreground" />}
+                  </button>
                 </div>
               </div>
             </div>
@@ -939,6 +1034,7 @@ Suggestions to improve readability:
               <div className="flex flex-wrap items-center gap-1 bg-background/50 p-1 rounded-xl border border-border/40">
                 <button type="button" onClick={() => setActiveSeoTab('basic')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'basic' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>Basic</button>
                 <button type="button" onClick={() => setActiveSeoTab('scoring')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'scoring' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>Scoring</button>
+                <button type="button" onClick={() => setActiveSeoTab('headings')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'headings' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>Headings</button>
                 <button type="button" onClick={() => setActiveSeoTab('social')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'social' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>Social</button>
                 <button type="button" onClick={() => setActiveSeoTab('linking')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'linking' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>Linking</button>
                 <button type="button" onClick={() => setActiveSeoTab('faq')} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${activeSeoTab === 'faq' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}>FAQ</button>
@@ -1063,8 +1159,40 @@ Suggestions to improve readability:
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Recipe Slug</label>
-                    <input {...register('slug')} onChange={(e) => { setIsSlugManuallyEdited(true); setValue('slug', e.target.value); }} placeholder="recipe-slug-url" className="w-full h-10 rounded-xl border border-border bg-background px-4 text-[10px] font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+                    <div className="flex justify-between items-center">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Recipe Slug</label>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setValue('slug', generateSlugHelper(title));
+                            setIsSlugManuallyEdited(false);
+                            showToast('success', 'Slug updated from title!');
+                          }}
+                          className="text-[10px] font-bold text-primary hover:underline transition-all"
+                        >
+                          Set from Title
+                        </button>
+                        <span className="text-muted-foreground/30 text-[9px]">|</span>
+                        <button 
+                          type="button" 
+                          onClick={() => setCanEditSlug(!canEditSlug)} 
+                          className="text-[10px] font-bold text-primary hover:underline"
+                        >
+                          {canEditSlug ? 'Save / Lock' : 'Edit'}
+                        </button>
+                      </div>
+                    </div>
+                    <input 
+                      {...slugReg} 
+                      onChange={(e) => {
+                        slugReg.onChange(e);
+                        setIsSlugManuallyEdited(true);
+                      }} 
+                      readOnly={!canEditSlug}
+                      placeholder="recipe-slug-url" 
+                      className="w-full h-10 rounded-xl border border-border bg-background px-4 text-[10px] font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all disabled:opacity-50" 
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Robots Meta</label>
@@ -1136,6 +1264,82 @@ Suggestions to improve readability:
                     <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center"><span className="text-[9px] font-bold text-muted-foreground uppercase block">Avg Paragraph</span><span className="text-sm font-black">{readabilityAnalysis.details.avgParagraphWords}w</span></div>
                     <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center"><span className="text-[9px] font-bold text-muted-foreground uppercase block">Passive Voice</span><span className="text-sm font-black">{readabilityAnalysis.details.passiveSentencesPercent}%</span></div>
                     <div className="p-3 bg-background/40 rounded-xl border border-border/40 text-center"><span className="text-[9px] font-bold text-muted-foreground uppercase block">Keyword Density</span><span className="text-sm font-black">{Math.round(readabilityAnalysis.keywordDensity * 100) / 100}%</span></div>
+                  </div>
+                </div>
+              )}
+
+              {activeSeoTab === 'headings' && (
+                <div className="space-y-5">
+                  <div className="space-y-3 bg-black/35 p-4 rounded-2xl border border-border/60">
+                    <h3 className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                      <List className="h-3 w-3 animate-pulse" /> Heading Structure Outline
+                    </h3>
+                    
+                    {(() => {
+                      const outline = getHeadings(content);
+                      const multipleH1 = outline.filter(h => h.level === 1).length > 0;
+                      const hasH2 = outline.filter(h => h.level === 2).length > 0;
+                      
+                      return (
+                        <div className="space-y-3">
+                          {multipleH1 && (
+                            <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/25 p-3 rounded-xl text-[10px] text-rose-400">
+                              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                              <p><strong>SEO Warning:</strong> Multiple H1 tags detected in your editor content. Search engines prefer a single H1 (the recipe title). Use H2 for primary headings.</p>
+                            </div>
+                          )}
+                          {!hasH2 && (
+                            <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/25 p-3 rounded-xl text-[10px] text-amber-400">
+                              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                              <p><strong>SEO Recommendation:</strong> Add H2 headings (e.g. "Ingredients", "Instructions") to organize your content for better indexing.</p>
+                            </div>
+                          )}
+
+                          <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+                            {outline.length > 0 ? outline.map((h, idx) => (
+                              <div key={idx} className="flex items-center gap-2" style={{ paddingLeft: `${(h.level - 1) * 8}px` }}>
+                                <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase ${h.level === 1 ? 'bg-rose-500/20 text-rose-400' : h.level === 2 ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground'}`}>
+                                  H{h.level}
+                                </span>
+                                <span className={`text-[10px] truncate font-semibold ${h.level === 1 ? 'text-rose-400/90' : h.level === 2 ? 'text-zinc-200' : 'text-zinc-400'}`}>
+                                  {h.text}
+                                </span>
+                              </div>
+                            )) : (
+                              <p className="text-[10px] text-muted-foreground italic text-center py-4">No headings found in the content. Use the editor to add H2/H3 tags.</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="space-y-3 bg-black/35 p-4 rounded-2xl border border-border/60">
+                    <h3 className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                      <Sparkles className="h-3 w-3 animate-pulse" /> Suggested SEO Headings
+                    </h3>
+                    <p className="text-[9px] text-muted-foreground">Click any heading below to copy it to your clipboard:</p>
+                    
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                      {getSuggestedHeadings(title).map((sh, idx) => (
+                        <div 
+                          key={idx} 
+                          onClick={() => {
+                            navigator.clipboard.writeText(sh.text);
+                            showToast('success', `Copied heading: "${sh.text}"`);
+                          }}
+                          className="p-2.5 bg-background/55 border border-border/40 hover:border-primary/40 rounded-xl cursor-pointer flex justify-between items-center transition-all group"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded bg-primary/10 text-primary uppercase">
+                              H{sh.level}
+                            </span>
+                            <span className="text-[10px] font-semibold text-zinc-300 group-hover:text-white transition-colors">{sh.text}</span>
+                          </div>
+                          <span className="text-[8px] font-bold uppercase text-primary opacity-0 group-hover:opacity-100 transition-opacity">Copy</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
