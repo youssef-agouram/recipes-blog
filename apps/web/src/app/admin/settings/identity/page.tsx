@@ -242,9 +242,9 @@ export default function SiteIdentityPage() {
   const [activeSection, setActiveSection] = useState('navbar');
   const [mounted, setMounted] = useState(false);
 
-  const { data: settings } = useGetSiteSettingsQuery();
+  const { data: settings, isLoading: isLoadingSettings } = useGetSiteSettingsQuery();
   const [updateSettings, { isLoading: isUpdating }] = useUpdateSiteSettingsMutation();
-  const { data: heroSettings } = useGetHeroSettingsQuery();
+  const { data: heroSettings, isLoading: isLoadingHero } = useGetHeroSettingsQuery();
   const [updateHeroSettings, { isLoading: isUpdatingHero }] = useUpdateHeroSettingsMutation();
   const [uploadImage] = useUploadImageMutation();
 
@@ -461,7 +461,6 @@ export default function SiteIdentityPage() {
 
   const scrollToSection = (id: string) => {
     setActiveSection(id);
-    document.getElementById(`${id}-section`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const sections = [
@@ -473,6 +472,19 @@ export default function SiteIdentityPage() {
   ];
 
   if (!mounted) return null;
+
+  if (isLoadingSettings || isLoadingHero) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="relative">
+          <div className="w-16 h-16 rounded-2xl bg-[#5850ec]/10 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-[#5850ec]" />
+          </div>
+        </div>
+        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest animate-pulse">Loading settings...</p>
+      </div>
+    );
+  }
 
   // ── Ad playlist renderer ──────────────────────────────────────────────────
   const renderPlaylist = (title: string, key: 'topBarAdUrls' | 'bottomBarVideoUrls' | 'popupAdImageUrls', accent: string) => (
@@ -604,10 +616,10 @@ export default function SiteIdentityPage() {
         {/* ═══ CONTENT ═══ */}
         <div className="lg:col-span-9 space-y-6">
 
-          {/* ════════════════ NAVBAR SECTION ════════════════ */}
-          <SectionPanel id="navbar" gradient="from-indigo-500/20 via-indigo-500/5 to-transparent" bgGlow="bg-indigo-500/15"
-            icon={<Layout className="w-5 h-5 text-white" />}
-            title="Navbar Settings" desc="Brand assets, visibility controls, identity & navigation">
+          {activeSection === 'navbar' && (
+            <SectionPanel id="navbar" gradient="from-indigo-500/20 via-indigo-500/5 to-transparent" bgGlow="bg-indigo-500/15"
+              icon={<Layout className="w-5 h-5 text-white" />}
+              title="Navbar Settings" desc="Brand assets, visibility controls, identity & navigation">
 
             {/* Brand Assets */}
             <div className="space-y-5">
@@ -695,11 +707,12 @@ export default function SiteIdentityPage() {
               </div>
             </div>
           </SectionPanel>
+          )}
 
-          {/* ════════════════ HERO SECTION ════════════════ */}
-          <SectionPanel id="hero" gradient="from-blue-500/20 via-blue-500/5 to-transparent" bgGlow="bg-blue-500/15"
-            icon={<Type className="w-5 h-5 text-white" />}
-            title="Hero Slider" desc="Dynamic hero title, subtitle, and image/video playlist">
+          {activeSection === 'hero' && (
+            <SectionPanel id="hero" gradient="from-blue-500/20 via-blue-500/5 to-transparent" bgGlow="bg-blue-500/15"
+              icon={<Type className="w-5 h-5 text-white" />}
+              title="Hero Slider" desc="Dynamic hero title, subtitle, and image/video playlist">
 
             {/* Title parts */}
             <div className="space-y-5">
@@ -782,11 +795,12 @@ export default function SiteIdentityPage() {
               </div>
             </div>
           </SectionPanel>
+          )}
 
-          {/* ════════════════ HOME PAGE CONTENT ════════════════ */}
-          <SectionPanel id="homepage" gradient="from-emerald-500/20 via-emerald-500/5 to-transparent" bgGlow="bg-emerald-500/15"
-            icon={<Monitor className="w-5 h-5 text-white" />}
-            title="Home Page Content" desc="Why Choose feature cards and the Sponsored Promo Banner">
+          {activeSection === 'homepage' && (
+            <SectionPanel id="homepage" gradient="from-emerald-500/20 via-emerald-500/5 to-transparent" bgGlow="bg-emerald-500/15"
+              icon={<Monitor className="w-5 h-5 text-white" />}
+              title="Home Page Content" desc="Why Choose feature cards and the Sponsored Promo Banner">
 
             {/* Why Choose */}
             <div className="space-y-4">
@@ -894,11 +908,12 @@ export default function SiteIdentityPage() {
               </div>
             </div>
           </SectionPanel>
+          )}
 
-          {/* ════════════════ ADVERTISEMENTS ════════════════ */}
-          <SectionPanel id="ads" gradient="from-amber-500/20 via-amber-500/5 to-transparent" bgGlow="bg-amber-500/15"
-            icon={<Bell className="w-5 h-5 text-white" />}
-            title="Advertisements" desc="Configure top bar, bottom bar, and popup ad playlists">
+          {activeSection === 'ads' && (
+            <SectionPanel id="ads" gradient="from-amber-500/20 via-amber-500/5 to-transparent" bgGlow="bg-amber-500/15"
+              icon={<Bell className="w-5 h-5 text-white" />}
+              title="Advertisements" desc="Configure top bar, bottom bar, and popup ad playlists">
 
             {/* Top Bar Ad */}
             <div className="space-y-5 p-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
@@ -948,11 +963,12 @@ export default function SiteIdentityPage() {
                 onChange={v => setFormData({ ...formData, adSettings: { ...formData.adSettings, popupAdLink: v } })} />
             </div>
           </SectionPanel>
+          )}
 
-          {/* ════════════════ FOOTER SECTION ════════════════ */}
-          <SectionPanel id="footer" gradient="from-rose-500/20 via-rose-500/5 to-transparent" bgGlow="bg-rose-500/15"
-            icon={<Columns className="w-5 h-5 text-white" />}
-            title="Footer Settings" desc="About description and copyright text displayed in the site footer">
+          {activeSection === 'footer' && (
+            <SectionPanel id="footer" gradient="from-rose-500/20 via-rose-500/5 to-transparent" bgGlow="bg-rose-500/15"
+              icon={<Columns className="w-5 h-5 text-white" />}
+              title="Footer Settings" desc="About description and copyright text displayed in the site footer">
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Field label="About Text (Footer)" value={formData.aboutText} textarea rows={5} placeholder="Tell something about your site…"
@@ -961,9 +977,21 @@ export default function SiteIdentityPage() {
                 onChange={v => setFormData({ ...formData, copyrightText: v })} />
             </div>
           </SectionPanel>
+          )}
 
         </div>{/* end content col */}
       </div>{/* end main grid */}
+
+      {/* Floating Save Button */}
+      <button 
+        onClick={handleSave}
+        disabled={isUpdating || isUpdatingHero}
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-3 px-8 py-4 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-sm font-bold rounded-full transition-all shadow-[0_8px_30px_rgba(88,80,236,0.4)] hover:shadow-[0_12px_40px_rgba(88,80,236,0.6)] hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:hover:translate-y-0"
+      >
+        {(isUpdating || isUpdatingHero) ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+        <span>{(isUpdating || isUpdatingHero) ? 'Saving...' : 'Save Changes'}</span>
+      </button>
+
     </div>
   );
 }
