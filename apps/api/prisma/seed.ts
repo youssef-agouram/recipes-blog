@@ -1,5 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
+const fs = require("fs");
+const path = require("path");
 const prisma = new PrismaClient();
 
 async function main() {
@@ -74,6 +76,54 @@ async function main() {
         }
       },
     });
+  }
+
+  // Seed Easy Chicken Tagine Recipe from JSON if present
+  const taginePath = path.join(__dirname, 'easy-chicken-tagine.json');
+  if (fs.existsSync(taginePath)) {
+    const tagine = JSON.parse(fs.readFileSync(taginePath, 'utf8'));
+    
+    // Find category IDs for the tagine recipe
+    const tagineCategories = [];
+    if (tagine.categoryNames && Array.isArray(tagine.categoryNames)) {
+      for (const catName of tagine.categoryNames) {
+        const cat = await prisma.category.findUnique({ where: { name: catName } });
+        if (cat) {
+          tagineCategories.push({ id: cat.id });
+        }
+      }
+    }
+
+    await prisma.recipe.upsert({
+      where: { slug: tagine.slug },
+      update: {},
+      create: {
+        title: tagine.title,
+        slug: tagine.slug,
+        summary: tagine.summary,
+        content: tagine.content,
+        imageUrl: tagine.imageUrl,
+        images: tagine.images,
+        isFeatured: tagine.isFeatured,
+        isTopArticle: tagine.isTopArticle,
+        status: tagine.status,
+        prepTime: tagine.prepTime,
+        cookTime: tagine.cookTime,
+        totalTime: tagine.totalTime,
+        servings: tagine.servings,
+        difficulty: tagine.difficulty,
+        videoUrl: tagine.videoUrl,
+        nutrition: tagine.nutrition,
+        views: tagine.views,
+        allowComments: tagine.allowComments,
+        ingredientsJson: tagine.ingredientsJson,
+        instructions: tagine.instructions,
+        categories: {
+          connect: tagineCategories
+        }
+      }
+    });
+    console.log("Chicken Tagine recipe seeded successfully!");
   }
 
   console.log("Seeding complete!");
