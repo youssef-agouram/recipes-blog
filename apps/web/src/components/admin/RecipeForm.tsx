@@ -867,8 +867,8 @@ Suggestions to improve readability:
       <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
         {/* Left Column */}
         <div className="space-y-8">
-          {/* Categories, Difficulty, Times/Servings, and Nutrition Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Categories, Difficulty, and Times/Servings Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Categories & Difficulty Card */}
             <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
               <div className="space-y-4">
@@ -902,51 +902,53 @@ Suggestions to improve readability:
                 <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Servings</label><input {...register('servings', { valueAsNumber: true })} type="number" placeholder="4" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
               </div>
             </div>
+          </div>
 
-            {/* Nutrition Info Card */}
-            <div className="p-6 rounded-2xl bg-card border border-border space-y-4 md:col-span-2 lg:col-span-1">
-              <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2"><Apple className="h-3 w-3 text-primary" /> Nutrition Info (Optional)</h3>
-              <div className="relative rounded-xl border border-border/80 bg-background p-2">
+          {/* Cooking Instructions, Ingredients, and Nutrition Info horizontally aligned */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Cooking Instructions (Optional) */}
+            <div className="space-y-4">
+              <label className="text-sm font-semibold flex items-center gap-1.5"><List className="h-4 w-4 text-primary" /> Cooking Instructions (Optional)</label>
+              <div className="relative rounded-2xl border border-border bg-card p-4 h-[250px] flex flex-col justify-between">
+                <textarea
+                  {...register('instructionsText')}
+                  placeholder={`Describe your cooking steps, one per line:\ne.g.\nPreheat oven to 375°F.\nMix ingredients in a bowl.\nBake for 25 minutes.`}
+                  className="w-full flex-1 bg-background border border-border/80 rounded-xl p-4 outline-none text-xs font-semibold focus:ring-2 focus:ring-primary/20 transition-all resize-none custom-scrollbar"
+                />
+                <p className="text-[10px] text-muted-foreground mt-2 shrink-0">
+                  💡 Paste your steps here. One step per line.
+                </p>
+              </div>
+            </div>
+
+            {/* Ingredients (Optional) */}
+            <div className="space-y-4">
+              <label className="text-sm font-semibold flex items-center gap-1.5"><List className="h-4 w-4 text-primary" /> Ingredients (Optional)</label>
+              <div className="relative rounded-2xl border border-border bg-card p-4 h-[250px] flex flex-col justify-between">
+                <textarea
+                  {...register('ingredientsText')}
+                  placeholder={`Enter ingredients, one per line:\ne.g.\n2 cups all-purpose flour\n1 tsp baking powder\n3 large eggs`}
+                  className="w-full flex-1 bg-background border border-border/80 rounded-xl p-4 outline-none text-xs font-semibold focus:ring-2 focus:ring-primary/20 transition-all resize-none custom-scrollbar"
+                />
+                <p className="text-[10px] text-muted-foreground mt-2 shrink-0">
+                  💡 Paste your list here. One ingredient per line.
+                </p>
+              </div>
+            </div>
+
+            {/* Nutrition Info (Optional) */}
+            <div className="space-y-4">
+              <label className="text-sm font-semibold flex items-center gap-1.5"><Apple className="h-4 w-4 text-primary" /> Nutrition Info (Optional)</label>
+              <div className="relative rounded-2xl border border-border bg-card p-4 h-[250px] flex flex-col justify-between">
                 <textarea
                   {...register('nutritionText')}
                   placeholder={`Calories: 250 kcal\nProtein: 15g\nCarbs: 30g\nFat: 8g`}
-                  rows={6}
-                  className="w-full bg-transparent border-none outline-none text-xs font-semibold focus:ring-0 transition-all resize-y custom-scrollbar p-2"
+                  className="w-full flex-1 bg-background border border-border/80 rounded-xl p-4 outline-none text-xs font-semibold focus:ring-2 focus:ring-primary/20 transition-all resize-none custom-scrollbar"
                 />
+                <p className="text-[10px] text-muted-foreground mt-2 shrink-0">
+                  💡 Enter 'Label: Value', one per line.
+                </p>
               </div>
-              <p className="text-[9px] text-muted-foreground">
-                💡 Enter labels and values separated by a colon, one per line.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <label className="text-sm font-semibold flex items-center gap-1.5"><List className="h-4 w-4 text-primary" /> Cooking Instructions (Optional)</label>
-            <div className="relative rounded-2xl border border-border bg-card p-4">
-              <textarea
-                {...register('instructionsText')}
-                placeholder={`Describe your cooking steps, one per line:\ne.g.\nPreheat oven to 375°F.\nMix ingredients in a bowl.\nBake for 25 minutes.`}
-                rows={6}
-                className="w-full bg-background border border-border/80 rounded-xl p-4 outline-none text-xs font-semibold focus:ring-2 focus:ring-primary/20 transition-all resize-y custom-scrollbar"
-              />
-              <p className="text-[10px] text-muted-foreground mt-2">
-                💡 Paste your steps here. Each line will be saved as a separate step automatically.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <label className="text-sm font-semibold">Ingredients (Optional)</label>
-            <div className="relative rounded-2xl border border-border bg-card p-4">
-              <textarea
-                {...register('ingredientsText')}
-                placeholder={`Enter ingredients, one per line:\ne.g.\n2 cups all-purpose flour\n1 tsp baking powder\n3 large eggs`}
-                rows={6}
-                className="w-full bg-background border border-border/80 rounded-xl p-4 outline-none text-xs font-semibold focus:ring-2 focus:ring-primary/20 transition-all resize-y custom-scrollbar"
-              />
-              <p className="text-[10px] text-muted-foreground mt-2">
-                💡 Paste your list here. Each line will be saved as a separate ingredient automatically.
-              </p>
             </div>
           </div>
 
