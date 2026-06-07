@@ -62,6 +62,8 @@ const recipeFormSchema = z.object({
   ingredientsJson: z.array(ingredientRowSchema).default([]),
   ingredientsText: z.string().optional(),
   instructions: z.array(instructionStepSchema).default([]),
+  instructionsText: z.string().optional(),
+  nutritionText: z.string().optional(),
   seo: z.object({
     title: z.string().optional().nullable(),
     description: z.string().optional().nullable(),
@@ -394,6 +396,23 @@ Suggestions to improve readability:
         : (typeof (initialData as any)?.instructions === 'string'
           ? JSON.parse((initialData as any).instructions)
           : []) as any,
+      instructionsText: (() => {
+        const raw = Array.isArray((initialData as any)?.instructions)
+          ? (initialData as any).instructions
+          : (typeof (initialData as any)?.instructions === 'string'
+            ? JSON.parse((initialData as any).instructions)
+            : []);
+        return raw.map((step: any) => step.text || '').filter(Boolean).join('\n');
+      })(),
+      nutritionText: (() => {
+        if (!initialData?.nutrition) return 'Calories: \nProtein: \nCarbs: \nFat: \nFiber: ';
+        const n = initialData.nutrition as Record<string, string>;
+        return Object.keys(n).map(key => {
+          let displayKey = key.charAt(0).toUpperCase() + key.slice(1);
+          if (displayKey.toLowerCase() === 'carbohydrates' || displayKey.toLowerCase() === 'carbs') displayKey = 'Carbs';
+          return `${displayKey}: ${n[key] || ''}`;
+        }).join('\n');
+      })(),
       seo: {
         title: initialData?.seo?.title || '',
         description: initialData?.seo?.description || '',
@@ -419,7 +438,6 @@ Suggestions to improve readability:
   const difficulty = watch('difficulty');
   const prepTime = watch('prepTime') || '';
   const cookTime = watch('cookTime') || '';
-  const nutritionList = watch('nutritionList') || [];
 
   const title = watch('title');
   const slug = watch('slug');
@@ -558,38 +576,7 @@ Suggestions to improve readability:
 
 
 
-  /* --- Instructions Steps --- */
-  const instructionSteps = watch('instructions') || [];
-  useEffect(() => {
-    if (!initialData && instructionSteps.length === 0) {
-      setValue('instructions', [{ text: '' }]);
-    }
-  }, [initialData, instructionSteps.length, setValue]);
 
-  const addStep = () => setValue('instructions', [...instructionSteps, { text: '' }]);
-  const removeStep = (index: number) => {
-    const next = [...instructionSteps];
-    next.splice(index, 1);
-    setValue('instructions', next);
-  };
-  const updateStep = (index: number, value: string) => {
-    const next = [...instructionSteps];
-    next[index] = { text: value };
-    setValue('instructions', next);
-  };
-
-  /* --- Nutrition --- */
-  const addNutrition = () => setValue('nutritionList', [...nutritionList, { label: 'New', value: '', unit: 'g' }]);
-  const removeNutrition = (index: number) => {
-    const next = [...nutritionList];
-    next.splice(index, 1);
-    setValue('nutritionList', next);
-  };
-  const updateNutrition = (index: number, field: keyof any, value: string) => {
-    const next = [...nutritionList];
-    next[index] = { ...next[index], [field]: value };
-    setValue('nutritionList', next);
-  };
 
   /* --- Image upload --- */
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -647,24 +634,31 @@ Suggestions to improve readability:
 
   /* --- Form submission --- */
   const onFormSubmit = async (data: RecipeFormValues) => {
-    // Convert nutritionList back to the format the backend expects
+    // Convert nutritionText back to the format the backend expects
     const nutrition: Record<string, string> = {};
-    data.nutritionList.forEach((item) => {
-      if (item.label && item.value) {
-        let key = item.label.toLowerCase();
-        // Normalize 'carbs' to 'carbohydrates' for standard schema mapping
-        if (key === 'carbs') {
-          key = 'carbohydrates';
-        }
-
-        const value = item.value.trim();
-        const unit = item.unit ? item.unit.trim() : '';
-
-        if (['calories', 'protein', 'carbohydrates', 'fat', 'fiber'].includes(key)) {
+    const nutLines = (data.nutritionText || '').split('\n');
+    nutLines.forEach(line => {
+      const clean = line.trim();
+      if (!clean) return;
+      const colonIdx = clean.indexOf(':');
+      if (colonIdx !== -1) {
+        const label = clean.slice(0, colonIdx).trim().toLowerCase();
+        const value = clean.slice(colonIdx + 1).trim();
+        let key = label;
+        if (key === 'carbs') key = 'carbohydrates';
+        if (key) {
           nutrition[key] = value;
-        } else {
-          // Custom field: append unit if it is present and not already at the end of the value
-          nutrition[key] = (unit && !value.endsWith(unit)) ? `${value}${unit}` : value;
+        }
+      } else {
+        const words = clean.split(/\s+/);
+        if (words.length >= 2) {
+          const label = words[0].toLowerCase();
+          const value = words.slice(1).join(' ');
+          let key = label;
+          if (key === 'carbs') key = 'carbohydrates';
+          if (key) {
+            nutrition[key] = value;
+          }
         }
       }
     });
@@ -679,9 +673,18 @@ Suggestions to improve readability:
         unit: ''
       }));
 
+    const instructions = (data.instructionsText || '')
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => ({
+        text: line
+      }));
+
     const formattedData = {
       ...data,
       ingredientsJson,
+      instructions,
       seo: {
         ...data.seo,
         title: data.seo?.seoTitle || data.seo?.title || '',
@@ -901,41 +904,34 @@ Suggestions to improve readability:
             </div>
 
             {/* Nutrition Info Card */}
-            <div className="p-6 rounded-2xl bg-card border border-border space-y-6 md:col-span-2 lg:col-span-1">
+            <div className="p-6 rounded-2xl bg-card border border-border space-y-4 md:col-span-2 lg:col-span-1">
               <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2"><Apple className="h-3 w-3 text-primary" /> Nutrition Info (Optional)</h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  {nutritionList.map((nut, index) => (
-                    <div key={index} className="space-y-1.5 group relative">
-                      <div className="flex items-center justify-between">
-                        <input value={nut.label} onChange={(e) => updateNutrition(index, 'label', e.target.value)} className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight bg-transparent border-none outline-none focus:text-primary transition-colors w-full" />
-                        {index >= 5 && <button type="button" onClick={() => removeNutrition(index)} className="opacity-0 group-hover:opacity-100 text-rose-500 transition-all absolute top-0.5 right-0"><Trash2 className="h-3 w-3" /></button>}
-                      </div>
-                      <div className="relative">
-                        <input value={nut.value} onChange={(e) => updateNutrition(index, 'value', e.target.value)} placeholder="0" className="w-full h-9 rounded-lg border border-border bg-background px-3 pr-10 text-[10px] font-black text-right outline-none focus:border-primary/30 transition-all" />
-                        <input value={nut.unit} onChange={(e) => updateNutrition(index, 'unit', e.target.value)} className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-muted-foreground uppercase w-8 bg-transparent border-none outline-none text-right" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button type="button" onClick={addNutrition} className="w-full py-2 rounded-xl border-2 border-dashed border-border bg-secondary/20 text-[10px] font-bold text-muted-foreground hover:border-primary/50 hover:text-primary transition-all flex items-center justify-center gap-2"><Plus className="h-3 w-3" /> Add New Nutrition</button>
+              <div className="relative rounded-xl border border-border/80 bg-background p-2">
+                <textarea
+                  {...register('nutritionText')}
+                  placeholder={`Calories: 250 kcal\nProtein: 15g\nCarbs: 30g\nFat: 8g`}
+                  rows={6}
+                  className="w-full bg-transparent border-none outline-none text-xs font-semibold focus:ring-0 transition-all resize-y custom-scrollbar p-2"
+                />
               </div>
+              <p className="text-[9px] text-muted-foreground">
+                💡 Enter labels and values separated by a colon, one per line.
+              </p>
             </div>
           </div>
 
           <div className="space-y-4">
             <label className="text-sm font-semibold flex items-center gap-1.5"><List className="h-4 w-4 text-primary" /> Cooking Instructions (Optional)</label>
-            <div className="space-y-3">
-              {instructionSteps.map((step, index) => (
-                <div key={index} className="flex gap-3 group">
-                  <div className="flex-none h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">{index + 1}</div>
-                  <div className="flex-1 relative">
-                    <textarea value={step.text} onChange={(e) => updateStep(index, e.target.value)} placeholder={`Step ${index + 1}: Describe what to do...`} rows={2} className="w-full rounded-xl border border-border bg-card p-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none" />
-                    {instructionSteps.length > 1 && <button type="button" onClick={() => removeStep(index)} className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 shadow-lg"><X className="h-3 w-3" /></button>}
-                  </div>
-                </div>
-              ))}
-              <button type="button" onClick={addStep} className="w-full py-3 rounded-xl border-2 border-dashed border-border bg-card/50 text-sm font-bold text-muted-foreground hover:border-primary/50 transition-all flex items-center justify-center gap-2"><Plus className="h-4 w-4" /> Add Next Step</button>
+            <div className="relative rounded-2xl border border-border bg-card p-4">
+              <textarea
+                {...register('instructionsText')}
+                placeholder={`Describe your cooking steps, one per line:\ne.g.\nPreheat oven to 375°F.\nMix ingredients in a bowl.\nBake for 25 minutes.`}
+                rows={6}
+                className="w-full bg-background border border-border/80 rounded-xl p-4 outline-none text-xs font-semibold focus:ring-2 focus:ring-primary/20 transition-all resize-y custom-scrollbar"
+              />
+              <p className="text-[10px] text-muted-foreground mt-2">
+                💡 Paste your steps here. Each line will be saved as a separate step automatically.
+              </p>
             </div>
           </div>
 
