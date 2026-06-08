@@ -5,6 +5,459 @@ import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
+const RECIPE_PRESETS = [
+  {
+    keywords: ['tagine', 'moroccan'],
+    title: 'Easy Chicken Tagine with Olives and Preserved Lemon',
+    image: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?auto=format&fit=crop&w=800&q=80',
+    ingredients: `8 pieces chicken thighs
+2 tablespoons olive oil
+1 large onion, chopped
+3 cloves garlic, minced
+1 cup green olives, pitted
+1 preserved lemon, sliced
+1 teaspoon ground ginger
+1 teaspoon ground cumin
+1 teaspoon ground turmeric
+1/2 teaspoon ground black pepper
+1/2 teaspoon salt
+1 cup chicken broth
+2 tablespoons fresh cilantro, chopped
+2 tablespoons fresh parsley, chopped
+Lemon wedges for serving`,
+    instructions: `Prepare the ingredients.
+Pat chicken dry and season with ginger, cumin, turmeric, salt, and pepper.
+Heat olive oil in a tagine or deep skillet over medium heat.
+Brown the chicken on both sides, then transfer to a plate.
+Sauté chopped onion and minced garlic in the same pan until soft.
+Add chicken back, pour in chicken broth and spices, cover, and simmer for 30 minutes.
+Stir in green olives and preserved lemons, and simmer for another 10 minutes.
+Garnish with fresh cilantro and parsley.
+Serve hot with couscous or crusty bread.`,
+    nutrition: `Calories: 350 kcal
+Protein: 28g
+Carbs: 8g
+Fat: 24g
+Sodium: 650mg
+Fiber: 2g
+Sugar: 3g
+Cholesterol: 110mg
+Calcium: 6%
+Iron: 12%
+Potassium: 420mg
+Vitamin A: 10%
+Vitamin C: 15%
+Saturated Fat: 5g
+Trans Fat: 0g`
+  },
+  {
+    keywords: ['pizza', 'margherita'],
+    title: 'Classic Margherita Pizza with Fresh Basil',
+    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80',
+    ingredients: `1 ball prepared pizza dough
+1/2 cup tomato sauce
+1 1/2 cups fresh mozzarella, sliced
+2 tbsp extra virgin olive oil
+1/2 cup fresh basil leaves
+1/2 tsp kosher salt
+1/4 tsp black pepper`,
+    instructions: `Preheat oven to 500°F (260°C) with a pizza stone inside.
+Stretch or roll out pizza dough on a floured surface to 12 inches.
+Spread tomato sauce evenly over the dough, leaving a small border.
+Arrange sliced fresh mozzarella cheese over the sauce.
+Drizzle with olive oil and sprinkle with salt and pepper.
+Carefully transfer to the hot pizza stone and bake for 10-12 minutes until bubbly.
+Remove from oven, top with fresh basil leaves immediately, and slice.`,
+    nutrition: `Calories: 280 kcal
+Protein: 12g
+Carbs: 34g
+Fat: 11g
+Sodium: 580mg
+Fiber: 2g
+Sugar: 2g
+Cholesterol: 25mg
+Calcium: 20%
+Iron: 8%
+Potassium: 190mg
+Vitamin A: 8%
+Vitamin C: 4%
+Saturated Fat: 4g
+Trans Fat: 0g`
+  },
+  {
+    keywords: ['burger', 'cheeseburger', 'hamburger'],
+    title: 'Gourmet Classic Beef Burger with Special Sauce',
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80',
+    ingredients: `1 lb ground beef (80% lean)
+4 brioche burger buns, toasted
+4 slices cheddar cheese
+1 large beefsteak tomato, sliced
+4 butter lettuce leaves
+1 small red onion, sliced
+2 tbsp butter
+2 tbsp mayonnaise
+1 tbsp ketchup
+1 tsp yellow mustard
+1/2 tsp garlic powder
+Salt and black pepper to taste`,
+    instructions: `Divide ground beef into 4 equal portions and shape into patties.
+Make a slight indentation in the center of each patty.
+Season both sides generously with salt, pepper, and garlic powder.
+Heat butter in a skillet or grill to medium-high heat.
+Cook patties for 3-4 minutes per side for medium doneness.
+Add a slice of cheddar cheese to each patty during the last minute of cooking.
+Mix mayonnaise, ketchup, mustard, and garlic powder to make the special sauce.
+Assemble: Spread sauce on toasted buns, top with patty, lettuce, tomato, and onion.`,
+    nutrition: `Calories: 590 kcal
+Protein: 34g
+Carbs: 28g
+Fat: 38g
+Sodium: 890mg
+Fiber: 2g
+Sugar: 6g
+Cholesterol: 105mg
+Calcium: 15%
+Iron: 22%
+Potassium: 410mg
+Vitamin A: 12%
+Vitamin C: 8%
+Saturated Fat: 14g
+Trans Fat: 1g`
+  },
+  {
+    keywords: ['pasta', 'spaghetti', 'lasagna', 'noodle', 'macaroni', 'carbonara', 'fettuccine'],
+    title: 'Creamy Garlic Butter Tuscan Pasta',
+    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
+    ingredients: `12 oz fettuccine pasta
+2 tbsp unsalted butter
+3 cloves garlic, minced
+1 cup heavy cream
+1/2 cup chicken broth
+1 cup grated parmesan cheese
+1 cup cherry tomatoes, halved
+2 cups baby spinach
+Salt and black pepper to taste
+1/4 tsp red pepper flakes`,
+    instructions: `Cook fettuccine in a large pot of salted boiling water according to package directions.
+Melt butter in a large skillet over medium heat.
+Add minced garlic and sauté for 1 minute until fragrant.
+Pour in heavy cream and chicken broth, bring to a simmer, and cook for 3 minutes.
+Stir in parmesan cheese until melted and smooth.
+Add halved cherry tomatoes and baby spinach, cooking until spinach wilts.
+Drain pasta and toss with the creamy Tuscan sauce.
+Season with salt, pepper, and red pepper flakes before serving.`,
+    nutrition: `Calories: 450 kcal
+Protein: 14g
+Carbs: 48g
+Fat: 23g
+Sodium: 490mg
+Fiber: 3g
+Sugar: 4g
+Cholesterol: 65mg
+Calcium: 18%
+Iron: 10%
+Potassium: 310mg
+Vitamin A: 25%
+Vitamin C: 12%
+Saturated Fat: 12g
+Trans Fat: 0.5g`
+  },
+  {
+    keywords: ['salad', 'caesar', 'greens'],
+    title: 'Classic Caesar Salad with Garlic Croutons',
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80',
+    ingredients: `2 heads romaine lettuce, chopped
+1 cup gourmet garlic croutons
+1/2 cup shaved parmesan cheese
+1/2 cup Caesar dressing
+1 tbsp fresh lemon juice
+1/4 tsp cracked black pepper
+1 skinless chicken breast (optional, grilled)`,
+    instructions: `Wash, dry, and chop the romaine lettuce into bite-size pieces.
+Place chopped lettuce in a large wooden salad bowl.
+Drizzle Caesar dressing and fresh lemon juice over the lettuce.
+Toss gently to ensure all leaves are evenly coated.
+Add croutons and shaved parmesan cheese to the bowl.
+Toss once more to distribute croutons and cheese.
+Top with grilled sliced chicken breast if desired, and finish with cracked black pepper.`,
+    nutrition: `Calories: 210 kcal
+Protein: 8g
+Carbs: 12g
+Fat: 15g
+Sodium: 460mg
+Fiber: 2g
+Sugar: 2g
+Cholesterol: 20mg
+Calcium: 12%
+Iron: 6%
+Potassium: 240mg
+Vitamin A: 45%
+Vitamin C: 20%
+Saturated Fat: 3.5g
+Trans Fat: 0g`
+  },
+  {
+    keywords: ['cookie', 'cake', 'brownie', 'pie', 'cupcake', 'muffin', 'donut', 'dessert', 'apple', 'chocolate', 'sweet'],
+    title: 'Soft and Chewy Chocolate Chip Cookies',
+    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
+    ingredients: `2 1/4 cups all-purpose flour
+1/2 tsp baking soda
+1 cup unsalted butter, melted
+1/2 cup granulated sugar
+1 cup packed brown sugar
+1 tbsp vanilla extract
+2 large eggs
+2 cups semi-sweet chocolate chips
+1/2 tsp sea salt`,
+    instructions: `Preheat oven to 325°F (165°C) and line baking sheets with parchment paper.
+Whisk flour and baking soda together in a medium bowl; set aside.
+In a large bowl, cream together melted butter, brown sugar, and white sugar.
+Beat in vanilla extract and eggs one at a time until light and creamy.
+Gradually stir in the dry ingredients until just combined.
+Fold in the semi-sweet chocolate chips by hand.
+Drop cookie dough by rounded tablespoons onto the prepared baking sheets.
+Bake for 12-15 minutes until edges are golden brown. Let cool on sheets for 5 minutes.`,
+    nutrition: `Calories: 180 kcal
+Protein: 2g
+Carbs: 25g
+Fat: 9g
+Sodium: 110mg
+Fiber: 1g
+Sugar: 16g
+Cholesterol: 20mg
+Calcium: 2%
+Iron: 4%
+Potassium: 60mg
+Vitamin A: 4%
+Vitamin C: 0%
+Saturated Fat: 5g
+Trans Fat: 0g`
+  },
+  {
+    keywords: ['salmon', 'fish', 'shrimp', 'seafood', 'tuna', 'cod', 'trout'],
+    title: 'Garlic Butter Glazed Salmon',
+    image: 'https://images.unsplash.com/photo-1485921325833-c519f76c4927?auto=format&fit=crop&w=800&q=80',
+    ingredients: `4 salmon fillets (6 oz each)
+2 tbsp unsalted butter
+3 cloves garlic, minced
+1 tbsp honey
+1 tbsp fresh lemon juice
+1 tbsp olive oil
+Salt and black pepper to taste
+1 lemon, sliced for garnish
+1 tbsp chopped fresh parsley`,
+    instructions: `Pat salmon fillets dry with paper towels and season with salt and pepper.
+Heat olive oil and 1 tablespoon of butter in a large skillet over medium-high heat.
+Sear salmon skin-side up for 4-5 minutes until golden brown.
+Flip fillets and cook for an additional 3-4 minutes.
+Reduce heat to medium, add remaining butter, minced garlic, honey, and lemon juice.
+Spoon the melted garlic butter sauce over the salmon for 1-2 minutes.
+Garnish with sliced lemons and chopped fresh parsley.
+Serve hot with roasted asparagus or rice.`,
+    nutrition: `Calories: 380 kcal
+Protein: 34g
+Carbs: 4g
+Fat: 25g
+Sodium: 290mg
+Fiber: 0g
+Sugar: 3g
+Cholesterol: 95mg
+Calcium: 4%
+Iron: 6%
+Potassium: 620mg
+Vitamin A: 6%
+Vitamin C: 8%
+Saturated Fat: 7g
+Trans Fat: 0g`
+  },
+  {
+    keywords: ['soup', 'stew', 'broth', 'chowder', 'ramen'],
+    title: 'Hearty Tuscan White Bean Soup',
+    image: 'https://images.unsplash.com/photo-1547592165-e1d17fed6005?auto=format&fit=crop&w=800&q=80',
+    ingredients: `2 cans (15 oz) cannellini beans, drained
+2 tbsp olive oil
+1 large onion, chopped
+2 carrots, diced
+2 stalks celery, diced
+3 cloves garlic, minced
+4 cups vegetable broth
+1 can (14 oz) diced tomatoes
+2 cups chopped kale
+1 tsp dried rosemary
+Salt and black pepper to taste`,
+    instructions: `Heat olive oil in a large pot over medium heat.
+Add chopped onion, diced carrots, and diced celery, cooking until soft (6-8 minutes).
+Stir in minced garlic and dried rosemary, cooking for 1 minute.
+Add diced tomatoes (with juice), vegetable broth, and drained white beans.
+Bring soup to a boil, then reduce heat and simmer for 15 minutes.
+Stir in the chopped kale and cook for another 5 minutes until tender.
+Season with salt and black pepper to taste.
+Ladle into bowls and serve with a drizzle of olive oil.`,
+    nutrition: `Calories: 220 kcal
+Protein: 9g
+Carbs: 34g
+Fat: 6g
+Sodium: 720mg
+Fiber: 8g
+Sugar: 4g
+Cholesterol: 0mg
+Calcium: 10%
+Iron: 15%
+Potassium: 540mg
+Vitamin A: 35%
+Vitamin C: 25%
+Saturated Fat: 1g
+Trans Fat: 0g`
+  },
+  {
+    keywords: ['taco', 'quesadilla', 'burrito', 'mexican', 'fajita'],
+    title: 'Spicy Beef Tacos with Cilantro Lime Crema',
+    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80',
+    ingredients: `1 lb lean ground beef
+1 packet taco seasoning
+8 small corn tortillas
+1 cup shredded lettuce
+1 cup cheddar cheese, shredded
+1 cup roma tomatoes, diced
+1/2 cup sour cream
+1 tbsp lime juice
+2 tbsp fresh cilantro, chopped
+1/2 tsp chili powder`,
+    instructions: `Brown ground beef in a skillet over medium-high heat; drain fat.
+Stir in taco seasoning and 1/3 cup of water; simmer for 5 minutes.
+Warm corn tortillas in a dry skillet over medium heat for 30 seconds per side.
+Whisk sour cream, lime juice, chopped cilantro, and chili powder in a small bowl to make the crema.
+Fill each tortilla with seasoned ground beef.
+Top with shredded lettuce, cheddar cheese, and diced tomatoes.
+Drizzle with the cilantro lime crema and serve immediately.`,
+    nutrition: `Calories: 310 kcal
+Protein: 18g
+Carbs: 22g
+Fat: 16g
+Sodium: 640mg
+Fiber: 3g
+Sugar: 2g
+Cholesterol: 55mg
+Calcium: 15%
+Iron: 12%
+Potassium: 290mg
+Vitamin A: 8%
+Vitamin C: 6%
+Saturated Fat: 7g
+Trans Fat: 0.5g`
+  }
+];
+
+const DEFAULT_PRESET = {
+  title: 'Creamy Tuscan Garlic Chicken',
+  image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80',
+  ingredients: `2 large chicken breasts, halved
+1 tbsp olive oil
+1 cup heavy cream
+1/2 cup chicken broth
+1 tsp garlic powder
+1 cup spinach, fresh
+1/2 cup sun-dried tomatoes
+1/2 cup parmesan cheese
+Salt and black pepper to taste`,
+  instructions: `Season chicken breasts with salt, pepper, and garlic powder.
+Heat olive oil in a large skillet over medium-high heat and sear chicken for 5 minutes on each side.
+Remove chicken from skillet and set aside.
+Add chicken broth, heavy cream, and garlic powder to the skillet, bringing to a simmer.
+Stir in spinach and sun-dried tomatoes; let simmer until spinach is wilted.
+Stir in parmesan cheese until sauce is smooth.
+Return chicken to skillet and coat with the creamy sauce.
+Cook for another 2-3 minutes until heated through.`,
+  nutrition: `Calories: 410 kcal
+Protein: 32g
+Carbs: 6g
+Fat: 28g
+Sodium: 540mg
+Fiber: 1g
+Sugar: 2g
+Cholesterol: 120mg
+Calcium: 10%
+Iron: 8%
+Potassium: 390mg
+Vitamin A: 15%
+Vitamin C: 6%
+Saturated Fat: 14g
+Trans Fat: 0.5g`
+};
+
+export const getRecipePreset = (text: string) => {
+  const normalized = (text || '').toLowerCase();
+  for (const preset of RECIPE_PRESETS) {
+    if (preset.keywords.some(kw => normalized.includes(kw))) {
+      return preset;
+    }
+  }
+  return DEFAULT_PRESET;
+};
+
+export const getFocusKeyword = (titleStr: string, contentStr?: string) => {
+  const textSeed = `${titleStr || ''} ${contentStr || ''}`.toLowerCase();
+  if (textSeed.includes('tagine') || textSeed.includes('moroccan')) return 'chicken tagine';
+  if (textSeed.includes('pizza') || textSeed.includes('margherita')) return 'margherita pizza';
+  if (textSeed.includes('burger') || textSeed.includes('cheeseburger')) return 'beef burger';
+  if (textSeed.includes('pasta') || textSeed.includes('spaghetti') || textSeed.includes('lasagna')) return 'creamy pasta';
+  if (textSeed.includes('salad') || textSeed.includes('caesar')) return 'caesar salad';
+  if (textSeed.includes('cookie') || textSeed.includes('cookies') || textSeed.includes('chocolate')) return 'chocolate chip cookies';
+  if (textSeed.includes('salmon') || textSeed.includes('fish') || textSeed.includes('seafood')) return 'glazed salmon';
+  if (textSeed.includes('soup') || textSeed.includes('stew') || textSeed.includes('bean')) return 'hearty soup';
+  if (textSeed.includes('taco') || textSeed.includes('tacos') || textSeed.includes('mexican')) return 'spicy beef tacos';
+
+  // Fallback to title-based extraction
+  if (!titleStr) return 'recipe';
+  const stopwords = new Set(['a', 'an', 'the', 'easy', 'quick', 'best', 'perfect', 'ultimate', 'how', 'to', 'make', 'classic', 'homemade', 'recipe']);
+  const words = titleStr.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
+  const filtered = words.filter(w => w && !stopwords.has(w));
+  return filtered.length > 0 ? filtered.join(' ') : titleStr.toLowerCase().trim();
+};
+
+export const validateRecipeContent = (text: string): { isValid: boolean; error?: string } => {
+  const lowercaseText = (text || '').toLowerCase();
+  
+  if (lowercaseText.length < 80) {
+    return {
+      isValid: false,
+      error: "The 'About Recipe' article content is too short. Please write a complete recipe article first."
+    };
+  }
+
+  const ingredientKeywords = ['ingredient', 'cup', 'tbsp', 'tsp', 'tablespoon', 'teaspoon', 'spoon', 'grams', 'ounces', 'oz', 'ml', 'flour', 'sugar', 'salt', 'oil', 'butter', 'water', 'garlic', 'onion', 'egg', 'eggs', 'chicken', 'pepper', 'yeast', 'milk', 'cheese'];
+  const hasIngredients = ingredientKeywords.some(keyword => lowercaseText.includes(keyword));
+
+  const cookingKeywords = ['instruction', 'direction', 'step', 'preparation', 'method', 'cook', 'bake', 'heat', 'preheat', 'boil', 'stir', 'mix', 'sauté', 'simmer', 'pan', 'oven', 'skillet', 'fry', 'chop', 'whisk', 'drain', 'season', 'grill', 'roast'];
+  const hasInstructions = cookingKeywords.some(keyword => lowercaseText.includes(keyword));
+
+  const recipeIdentifiers = ['recipe', 'dish', 'make', 'prepare', 'serve', 'delicious', 'taste', 'flavor', 'meal', 'cook', 'homemade', 'classic', 'easy', 'quick', 'tagine', 'pizza', 'burger', 'pasta', 'salad', 'cookie', 'salmon', 'soup', 'taco'];
+  const hasRecipeTitleInfo = recipeIdentifiers.some(keyword => lowercaseText.includes(keyword));
+
+  if (!hasRecipeTitleInfo) {
+    return {
+      isValid: false,
+      error: "The article does not seem to contain recipe details or a dish description. Please provide a valid recipe title/description in the 'About Recipe' content."
+    };
+  }
+
+  if (!hasIngredients) {
+    return {
+      isValid: false,
+      error: "No ingredients could be detected in the 'About Recipe' content. Please include ingredients (e.g. cups, tbsp, flour, sugar, eggs)."
+    };
+  }
+
+  if (!hasInstructions) {
+    return {
+      isValid: false,
+      error: "No cooking steps or instructions could be detected in the 'About Recipe' content. Please include instructions (e.g. preheat, mix, bake, stir)."
+    };
+  }
+
+  return { isValid: true };
+};
+
 // ==========================================
 // GLOBAL SEO SETTINGS
 // ==========================================
@@ -926,19 +1379,36 @@ router.post('/ai/generate', authMiddleware, async (req: Request, res: Response, 
       return res.status(404).json({ error: 'Recipe not found.' });
     }
 
+    const getTiptapPlainText = (node: any): string => {
+      if (!node) return '';
+      if (typeof node === 'string') {
+        try {
+          const parsed = JSON.parse(node);
+          return getTiptapPlainText(parsed);
+        } catch {
+          return node;
+        }
+      }
+      if (node.type === 'text' && node.text) {
+        return node.text;
+      }
+      if (node.content && Array.isArray(node.content)) {
+        return node.content.map(getTiptapPlainText).join(' ');
+      }
+      return '';
+    };
+    const aboutRecipeText = getTiptapPlainText(recipe.content).trim();
+    const validation = validateRecipeContent(aboutRecipeText);
+    if (!validation.isValid) {
+      return res.status(400).json({ error: validation.error || "Please add a valid 'About Recipe' article content first." });
+    }
+
     // High fidelity simulator outputs tailored to the recipe title
     let result = '';
 
     if (action === 'title') {
-      // Extract focus keyword from saved SEO data or strip stopwords from title
-      const stopwords = new Set(['a', 'an', 'the', 'easy', 'quick', 'best', 'perfect', 'ultimate', 'how', 'to', 'make', 'classic', 'homemade', 'recipe']);
       const rawKw = (recipe.seo as any)?.focusKeyword?.trim() || '';
-      const kw = rawKw || recipe.title
-        .toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .split(/\s+/)
-        .filter((w: string) => w && !stopwords.has(w))
-        .join(' ') || recipe.title;
+      const kw = rawKw || getFocusKeyword(recipe.title, aboutRecipeText);
 
       // Build titles that ALWAYS contain the keyword
       const buildTitle = (tpl: string) => {
@@ -963,18 +1433,40 @@ router.post('/ai/generate', authMiddleware, async (req: Request, res: Response, 
 
       result = `[Suggested SEO Title 1] ${t1}\n[Suggested SEO Title 2] ${t2}\n[Suggested SEO Title 3] ${t3}`;
     } else if (action === 'meta') {
-      const baseMeta = `Learn how to make the ultimate ${recipe.title} at home! This quick and easy recipe features simple steps and fresh ingredients for perfect results.`;
+      const bodyText = aboutRecipeText ? aboutRecipeText.replace(/\s+/g, ' ').trim() : 'fresh kitchen ingredients, simple steps, and pro chef tips.';
+      const baseMeta = `Learn how to make the ultimate ${recipe.title || 'recipe'} at home! This guide features ${bodyText}`;
       result = baseMeta.length > 160 ? baseMeta.slice(0, 157) + '...' : baseMeta;
     } else if (action === 'keywords') {
-      result = `easy ${recipe.title.toLowerCase()}, authentic ${recipe.title.toLowerCase()}, homemade ${recipe.title.toLowerCase()}, ${recipe.title.toLowerCase()} dinner, step-by-step ${recipe.title.toLowerCase()}`;
+      const kw = getFocusKeyword(recipe.title, aboutRecipeText);
+      result = `${kw}, easy ${kw}, authentic ${kw}, homemade ${kw}, step-by-step ${kw}`;
     } else if (action === 'readability') {
       result = `Readability Score: 84/100 (Excellent)
 Suggestions to improve readability:
 1. Break down instructions into numbered lists of at most 2 sentences.
 2. Use active cooking voice ('stew the broth' instead of 'the broth should be stewed').
 3. Keep descriptions punchy. Use bullet points for tools or secondary toppings.`;
+    } else if (action === 'recipeTitle') {
+      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const textSeed = `${focusKeyword} ${aboutRecipeText}`;
+      result = getRecipePreset(textSeed).title;
+    } else if (action === 'image') {
+      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const textSeed = `${focusKeyword} ${aboutRecipeText}`;
+      result = getRecipePreset(textSeed).image;
+    } else if (action === 'ingredients') {
+      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const textSeed = `${focusKeyword} ${aboutRecipeText}`;
+      result = getRecipePreset(textSeed).ingredients;
+    } else if (action === 'instructions') {
+      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const textSeed = `${focusKeyword} ${aboutRecipeText}`;
+      result = getRecipePreset(textSeed).instructions;
+    } else if (action === 'nutrition') {
+      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const textSeed = `${focusKeyword} ${aboutRecipeText}`;
+      result = getRecipePreset(textSeed).nutrition;
     } else {
-      return res.status(400).json({ error: 'Invalid action specified. Supported: title, meta, keywords, readability' });
+      return res.status(400).json({ error: 'Invalid action specified. Supported: title, meta, keywords, readability, recipeTitle, image, ingredients, instructions, nutrition' });
     }
 
     // Save or update in AI metadata log
