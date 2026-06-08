@@ -478,7 +478,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
 
             {/* Unified Accordion Card */}
             <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[22px] shadow-2xl overflow-hidden divide-y divide-white/5">
-
+              
               {/* Ingredients Section */}
               <div className="flex flex-col">
                 <button
@@ -537,17 +537,50 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 {openSections.instructions && (
                   <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="space-y-6">
-                      {instructionItems.length > 0 ? instructionItems.map((s: any, idx: number) => (
-                        <div key={idx} className="flex gap-4 group/step">
-                          <div className="flex flex-col items-center animate-in fade-in duration-300">
-                            <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">{idx + 1}</div>
-                            {idx < instructionItems.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
+                      {(() => {
+                        if (instructionItems.length === 0) {
+                          return <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>;
+                        }
+                        
+                        const numberedSteps = instructionItems.filter((s: any) => /\d/.test(s.text || ''));
+                        const remainingSteps = instructionItems.filter((s: any) => !/\d/.test(s.text || ''));
+
+                        return (
+                          <div className="space-y-6">
+                            {numberedSteps.length > 0 && (
+                              <div className="space-y-6">
+                                {numberedSteps.map((s: any, idx: number) => (
+                                  <div key={idx} className="flex gap-4 group/step">
+                                    <div className="flex flex-col items-center animate-in fade-in duration-300">
+                                      <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">{idx + 1}</div>
+                                      {idx < numberedSteps.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
+                                    </div>
+                                    <div className="flex-1 pt-0.5">
+                                      <p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">{s.text}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {remainingSteps.length > 0 && (
+                              <div className={cn("space-y-3", numberedSteps.length > 0 && "pt-6 border-t border-white/5")}>
+                                <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                                  💡 Additional Details & Tips
+                                </h4>
+                                <ul className="space-y-2.5">
+                                  {remainingSteps.map((s: any, idx: number) => (
+                                    <li key={idx} className="flex items-start gap-2.5 text-[13px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
+                                      <span className="text-primary mt-1.5">•</span>
+                                      <span>{s.text}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                           </div>
-                          <div className="flex-1 pt-0.5">
-                            <p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">{s.text}</p>
-                          </div>
-                        </div>
-                      )) : <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>}
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
@@ -655,7 +688,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               {recipe.summary || "Embark on a culinary journey with this masterpiece. Perfectly balanced flavors and textures that will leave your guests in awe."}
             </p>
 
-            <section id="cooking-guide-section" className="max-w-none pb-4 border-b border-white/5 mb-4 scroll-mt-20">
+             <section id="cooking-guide-section" className="max-w-none pb-4 border-b border-white/5 mb-4 scroll-mt-20">
               <button
                 onClick={() => {
                   if (!isAuthenticated) {
@@ -783,7 +816,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
       {/* Sleek Custom Sign In / Register Prompt Modal */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
+          <div 
             className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
             onClick={() => setShowAuthModal(false)}
           />
@@ -791,23 +824,23 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mb-4 shadow-inner">
               <Lock className="w-5 h-5" />
             </div>
-
+            
             <h3 className="text-xl font-black text-white tracking-tight font-heading mb-2">
               Unlock Cooking Guide
             </h3>
-
+            
             <p className="text-xs text-muted-foreground leading-relaxed mb-6 px-2">
               Sign in to unlock the step-by-step cooking guide.
             </p>
-
+            
             <div className="grid grid-cols-2 gap-3 w-full">
-              <button
+              <button 
                 onClick={() => setShowAuthModal(false)}
                 className="h-11 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all active:scale-95"
               >
                 Cancel
               </button>
-              <button
+              <button 
                 onClick={() => {
                   setShowAuthModal(false);
                   router.push(`/login?redirect=/recipes/${recipe.slug}`);
