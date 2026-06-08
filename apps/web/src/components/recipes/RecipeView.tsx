@@ -582,28 +582,20 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                               {numberedSteps.length > 0 && (
                                 <div className="space-y-6">
                                   {numberedSteps.map((s: any, idx: number) => (
-                                    <div key={idx} className="flex gap-4 group/step">
-                                      <div className="flex flex-col items-center animate-in fade-in duration-300">
-                                        <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">
-                                          {s.extractedNum}
-                                        </div>
-                                        {idx < numberedSteps.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
-                                      </div>
-                                      <div className="flex-1 pt-0.5">
-                                        <h4 className={cn("text-[13.5px] tracking-tight transition-colors", s.points.length > 0 ? "font-bold text-white" : "font-medium text-muted-foreground group-hover/step:text-white")}>
-                                          {s.title}
-                                        </h4>
-                                        {s.points.length > 0 && (
-                                          <ul className="mt-2 space-y-1.5 pl-0.5">
-                                            {s.points.map((pt: string, ptIdx: number) => (
-                                              <li key={ptIdx} className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
-                                                <span className="text-primary mt-1.5 text-[8px]">•</span>
-                                                <span>{pt}</span>
-                                              </li>
-                                            ))}
-                                          </ul>
-                                        )}
-                                      </div>
+                                    <div key={idx} className="animate-in fade-in duration-300">
+                                      <h4 className="text-[14px] font-bold text-white tracking-tight">
+                                        {s.extractedNum}. {s.title}
+                                      </h4>
+                                      {s.points.length > 0 && (
+                                        <ul className="mt-2 space-y-1.5 pl-4">
+                                          {s.points.map((pt: string, ptIdx: number) => (
+                                            <li key={ptIdx} className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
+                                              <span className="text-primary mt-1.5 text-[8px]">•</span>
+                                              <span>{pt}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
@@ -621,7 +613,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                                           {s.title}
                                         </h5>
                                         {s.points.length > 0 && (
-                                          <ul className="mt-1.5 space-y-1 pl-1">
+                                          <ul className="mt-1.5 space-y-1 pl-4">
                                             {s.points.map((pt: string, ptIdx: number) => (
                                               <li key={ptIdx} className="flex items-start gap-2 text-[12px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
                                                 <span className="text-primary/70 mt-1.5 text-[6px]">•</span>
@@ -642,28 +634,20 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                           return (
                             <div className="space-y-6">
                               {processedSteps.map((s: any, idx: number) => (
-                                <div key={idx} className="flex gap-4 group/step">
-                                  <div className="flex flex-col items-center animate-in fade-in duration-300">
-                                    <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">
-                                      {idx + 1}
-                                    </div>
-                                    {idx < processedSteps.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
-                                  </div>
-                                  <div className="flex-1 pt-0.5">
-                                    <h4 className={cn("text-[13.5px] tracking-tight transition-colors", s.points.length > 0 ? "font-bold text-white" : "font-medium text-muted-foreground group-hover/step:text-white")}>
-                                      {s.title}
-                                    </h4>
-                                    {s.points.length > 0 && (
-                                      <ul className="mt-2 space-y-1.5 pl-0.5">
-                                        {s.points.map((pt: string, ptIdx: number) => (
-                                          <li key={ptIdx} className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
-                                            <span className="text-primary mt-1.5 text-[8px]">•</span>
-                                            <span>{pt}</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    )}
-                                  </div>
+                                <div key={idx} className="animate-in fade-in duration-300">
+                                  <h4 className="text-[14px] font-bold text-white tracking-tight">
+                                    {idx + 1}. {s.title}
+                                  </h4>
+                                  {s.points.length > 0 && (
+                                    <ul className="mt-2 space-y-1.5 pl-4">
+                                      {s.points.map((pt: string, ptIdx: number) => (
+                                        <li key={ptIdx} className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
+                                          <span className="text-primary mt-1.5 text-[8px]">•</span>
+                                          <span>{pt}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
                                 </div>
                               ))}
                             </div>
