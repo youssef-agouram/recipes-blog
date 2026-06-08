@@ -597,7 +597,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                                   return (
                                     <div key={idx} className="pl-4 group/tip animate-in fade-in duration-300">
                                       <h5 className={cn("text-[13px] tracking-tight transition-colors", s.points.length > 0 ? "font-semibold text-white/90" : "font-medium text-muted-foreground hover:text-white")}>
-                                        💡 {s.title}
+                                        {s.title}
                                       </h5>
                                       {s.points.length > 0 && (
                                         <ul className="mt-1.5 space-y-1 pl-4">
