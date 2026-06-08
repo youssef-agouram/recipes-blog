@@ -141,37 +141,37 @@ const getFocusKeyword = (titleStr: string) => {
   return filtered.length > 0 ? filtered.join(' ') : titleStr.toLowerCase().trim();
 };
 
-const getSeoTitle = (titleStr: string) => {
-  if (!titleStr) return '';
-  const titleClean = titleStr.trim();
-  
-  const getSuggestion = (template: string) => {
-    let title = template.replace('[Title]', titleClean);
-    if (title.length > 60) {
-      const maxBaseLength = 60 - (template.replace('[Title]', '').length);
-      if (maxBaseLength > 10) {
-        const truncatedBase = titleClean.substring(0, maxBaseLength - 3).trim() + '...';
-        title = template.replace('[Title]', truncatedBase);
-      } else {
-        title = title.substring(0, 57) + '...';
-      }
-    }
-    return title;
-  };
+/**
+ * Build an SEO title that ALWAYS contains the focus keyword.
+ * Templates are tried from richest to shortest; the first one
+ * whose keyword fits intact wins. If even the bare keyword
+ * exceeds 60 chars it is intelligently truncated.
+ */
+const getSeoTitle = (titleStr: string, focusKeyword?: string) => {
+  if (!titleStr && !focusKeyword) return '';
+  // Use the keyword as the core subject — it MUST appear in the title
+  const kw = (focusKeyword || getFocusKeyword(titleStr) || titleStr).trim();
 
-  const option1 = getSuggestion(`Ultimate [Title] Recipe - Easy Guide`);
-  const option2 = getSuggestion(`Best [Title] Recipe - 30-Min Guide`);
-  const option3 = getSuggestion(`Easy [Title] Recipe | Homemade & Quick`);
-  const option4 = getSuggestion(`[Title] Recipe`);
-  
-  const options = [option1, option2, option3, option4];
-  const validOptions = options.filter(opt => opt.length <= 60);
-  if (validOptions.length > 0) {
-    validOptions.sort((a, b) => Math.abs(a.length - 55) - Math.abs(b.length - 55));
-    return validOptions[0];
+  // Templates ordered from most descriptive to shortest.
+  // [KW] is replaced with the focus keyword.
+  const templates = [
+    `[KW] Recipe - Easy & Authentic Guide`,
+    `[KW] Recipe - Quick & Easy`,
+    `Best [KW] Recipe (30-Min)`,
+    `Easy [KW] Recipe`,
+    `How to Make [KW]`,
+    `[KW] Recipe`,
+    `[KW]`,
+  ];
+
+  for (const tpl of templates) {
+    const candidate = tpl.replace('[KW]', kw);
+    if (candidate.length <= 60) return candidate;
   }
-  
-  return titleClean.length > 60 ? titleClean.substring(0, 57) + '...' : titleClean;
+
+  // Keyword itself is > 60 chars — truncate it just enough
+  const truncated = kw.substring(0, 56).trimEnd() + '...';
+  return truncated;
 };
 
 const getMetaDescription = (titleStr: string, focusKeywordStr: string, plainText: string) => {
@@ -238,28 +238,34 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       const plainText = getTiptapPlainText(watch('content'));
 
       if (action === 'title') {
-        const getTitleSuggestion = (baseTitle: string, template: string) => {
-          let titleVal = template.replace('[Title]', baseTitle);
-          if (titleVal.length > 60) {
-            const maxBaseLength = 60 - (template.replace('[Title]', '').length);
-            if (maxBaseLength > 10) {
-              const truncatedBase = baseTitle.substring(0, maxBaseLength - 3).trim() + '...';
-              titleVal = template.replace('[Title]', truncatedBase);
-            } else {
-              titleVal = titleVal.substring(0, 57) + '...';
-            }
-          }
-          return titleVal;
+        // Titles must contain the focus keyword
+        const seo = watch('seo');
+        const title = watch('title');
+        const kw = (seo?.focusKeyword?.trim() || getFocusKeyword(title || '')).trim() || (title || 'Recipe');
+
+        const buildTitle = (tpl: string) => {
+          const candidate = tpl.replace('[KW]', kw);
+          if (candidate.length <= 60) return candidate;
+          // Keyword too long for this template — try shorter
+          return null;
         };
 
-        const baseTitle = title || 'Recipe';
-        const t1 = getTitleSuggestion(baseTitle, `Ultimate [Title] Recipe - Easy Guide`);
-        const t2 = getTitleSuggestion(baseTitle, `Best [Title] (Healthy 30-Min Dinner)`);
-        const t3 = getTitleSuggestion(baseTitle, `How to Make Perfect [Title]`);
+        const t1 = buildTitle(`[KW] Recipe - Easy & Authentic Guide`)
+          ?? buildTitle(`[KW] Recipe - Quick & Easy`)
+          ?? buildTitle(`Easy [KW] Recipe`)
+          ?? buildTitle(`[KW] Recipe`)
+          ?? kw.substring(0, 57) + '...';
 
-        output = `[Suggested SEO Title 1] ${t1}
-[Suggested SEO Title 2] ${t2}
-[Suggested SEO Title 3] ${t3}`;
+        const t2 = buildTitle(`Best [KW] Recipe (30-Min)`)
+          ?? buildTitle(`Best [KW] Recipe`)
+          ?? buildTitle(`[KW] Recipe`)
+          ?? kw.substring(0, 57) + '...';
+
+        const t3 = buildTitle(`How to Make [KW]`)
+          ?? buildTitle(`[KW] Recipe`)
+          ?? kw.substring(0, 57) + '...';
+
+        output = `[Suggested SEO Title 1] ${t1}\n[Suggested SEO Title 2] ${t2}\n[Suggested SEO Title 3] ${t3}`;
       } else if (action === 'meta') {
         const bodyText = plainText ? plainText.replace(/\s+/g, ' ').trim() : 'fresh kitchen ingredients, simple steps, and pro chef tips.';
         const baseMeta = `Learn how to make the ultimate ${title || 'recipe'} at home! This guide features ${bodyText}`;
@@ -500,12 +506,16 @@ Suggestions to improve readability:
       .replace(/^-+|-+$/g, '');
   };
 
-  // Auto-slug generation
+  // Auto-slug generation — from focus keyword (cleaner, more SEO-friendly)
   useEffect(() => {
     if (title && !isSlugManuallyEdited) {
-      setValue('slug', generateSlugHelper(title));
+      const keyword = getFocusKeyword(title);
+      setValue('slug', generateSlugHelper(keyword || title));
     }
   }, [title, setValue, isSlugManuallyEdited]);
+
+  // Track last forced-generation checklist results
+  const [seoValidation, setSeoValidation] = useState<Record<string, { status: 'pass' | 'fail' | 'warning'; label: string; message: string }> | null>(null);
 
   // Auto-SEO generation in real-time
   useEffect(() => {
@@ -524,7 +534,7 @@ Suggestions to improve readability:
 
     const plainText = getTiptapPlainText(content);
     const generatedKeyword = getFocusKeyword(title);
-    const generatedTitle = getSeoTitle(title);
+    const generatedTitle = getSeoTitle(title, generatedKeyword);
     const generatedMeta = getMetaDescription(title, generatedKeyword, plainText);
 
     if (!isFocusKeywordEdited && generatedKeyword && seo?.focusKeyword !== generatedKeyword) {
@@ -1130,28 +1140,69 @@ Suggestions to improve readability:
                         onClick={() => {
                           const getTiptapPlainText = (node: any): string => {
                             if (!node) return '';
-                            if (node.type === 'text' && node.text) {
-                              return node.text;
-                            }
+                            if (node.type === 'text' && node.text) return node.text;
                             if (node.content && Array.isArray(node.content)) {
                               return node.content.map(getTiptapPlainText).join(' ');
                             }
                             return '';
                           };
+                          const currentTitle = watch('title');
                           const plainText = getTiptapPlainText(watch('content'));
-                          const generatedKeyword = getFocusKeyword(watch('title'));
-                          const generatedTitle = getSeoTitle(watch('title'));
-                          const generatedMeta = getMetaDescription(watch('title'), generatedKeyword, plainText);
+                          const generatedKeyword = getFocusKeyword(currentTitle);
+                          const generatedTitle = getSeoTitle(currentTitle, generatedKeyword);
+                          const generatedMeta = getMetaDescription(currentTitle, generatedKeyword, plainText);
+                          // Generate slug from focus keyword
+                          const generatedSlug = generateSlugHelper(generatedKeyword || currentTitle);
 
                           setValue('seo.focusKeyword', generatedKeyword);
                           setValue('seo.seoTitle', generatedTitle);
                           setValue('seo.metaDescription', generatedMeta);
+                          setValue('slug', generatedSlug);
                           
                           setIsFocusKeywordEdited(true);
                           setIsSeoTitleEdited(true);
                           setIsMetaDescriptionEdited(true);
-                          
-                          showToast('success', 'Forced auto-generation of all SEO fields!');
+                          setIsSlugManuallyEdited(true);
+
+                          // Build real-time validation results
+                          const kw = generatedKeyword.toLowerCase().trim();
+                          const titleLen = generatedTitle.length;
+                          const descLen = generatedMeta.length;
+                          const slugLower = generatedSlug.toLowerCase();
+                          const contentHtml = typeof watch('content') === 'string' ? watch('content') : JSON.stringify(watch('content') || '');
+                          const h2 = (contentHtml.match(/<h2[^>]*>/gi) || []).length;
+                          const h3 = (contentHtml.match(/<h3[^>]*>/gi) || []).length;
+                          const links = (contentHtml.match(/<a\s+href=["']\//gi) || []).length;
+                          const hasImage = !!watch('imageUrl');
+
+                          setSeoValidation({
+                            title: titleLen >= 50 && titleLen <= 60
+                              ? { status: 'pass', label: 'SEO Title', message: 'SEO Title length is ideal (50-60 characters).' }
+                              : { status: 'warning', label: 'SEO Title', message: `SEO Title is ${titleLen} chars — keep it 50-60 characters.` },
+                            description: descLen >= 120 && descLen <= 160
+                              ? { status: 'pass', label: 'Meta Description', message: 'Meta Description length is ideal (120-160 characters).' }
+                              : { status: 'warning', label: 'Meta Description', message: `Meta Description is ${descLen} chars — aim for 120-160 characters.` },
+                            keywordInTitle: generatedTitle.toLowerCase().includes(kw)
+                              ? { status: 'pass', label: 'Keyword in Title', message: 'Target keyword found in your SEO Title.' }
+                              : { status: 'fail', label: 'Keyword in Title', message: 'Target keyword is missing from SEO Title.' },
+                            keywordInDescription: generatedMeta.toLowerCase().includes(kw)
+                              ? { status: 'pass', label: 'Keyword in Description', message: 'Target keyword found in your Meta Description.' }
+                              : { status: 'fail', label: 'Keyword in Description', message: 'Target keyword is missing from Meta Description.' },
+                            keywordInSlug: slugLower.includes(kw.replace(/\s+/g, '-'))
+                              ? { status: 'pass', label: 'Keyword in Slug', message: 'Target keyword found in the URL slug.' }
+                              : { status: 'fail', label: 'Keyword in Slug', message: 'Target keyword is missing from the URL slug.' },
+                            headings: (h2 > 0 || h3 > 0)
+                              ? { status: 'pass', label: 'Headings', message: `Found heading tags (H2: ${h2}, H3: ${h3}) in content.` }
+                              : { status: 'warning', label: 'Headings', message: 'Add H2 or H3 headers to break up your recipe instructions.' },
+                            imagesAlt: hasImage
+                              ? { status: 'pass', label: 'Image Alt', message: 'Descriptive alt texts configured on recipe images.' }
+                              : { status: 'warning', label: 'Image Alt', message: 'Upload a main image and set alt text to boost image search rank.' },
+                            internalLinks: links > 0
+                              ? { status: 'pass', label: 'Internal Links', message: `Good internal linking. Found ${links} link(s) in content.` }
+                              : { status: 'warning', label: 'Internal Links', message: 'No internal links detected. Add links to related recipes.' },
+                          });
+
+                          showToast('success', 'SEO fields generated & validated!');
                         }}
                         className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                       >
@@ -1176,6 +1227,36 @@ Suggestions to improve readability:
                     </div>
                   )}
 
+                  {seoValidation && (
+                    <div className="rounded-2xl border border-white/5 bg-black/30 overflow-hidden">
+                      <div className="flex items-center justify-between px-3 py-2 border-b border-white/5">
+                        <span className="text-[9px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
+                          <Sparkles className="h-3 w-3 animate-pulse" /> SEO Validation Results
+                        </span>
+                        <button type="button" onClick={() => setSeoValidation(null)} className="text-slate-500 hover:text-white">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="divide-y divide-white/5">
+                        {Object.values(seoValidation).map((item, idx) => (
+                          <div key={idx} className="flex items-start gap-2 px-3 py-2">
+                            <span className={`mt-0.5 shrink-0 text-[8px] w-2 h-2 rounded-full ${
+                              item.status === 'pass' ? 'bg-emerald-400' :
+                              item.status === 'fail' ? 'bg-rose-500' : 'bg-amber-400'
+                            }`} />
+                            <div className="min-w-0">
+                              <span className={`text-[9px] font-black uppercase tracking-wide block ${
+                                item.status === 'pass' ? 'text-emerald-400' :
+                                item.status === 'fail' ? 'text-rose-400' : 'text-amber-400'
+                              }`}>{item.label}</span>
+                              <p className="text-[9px] font-medium text-slate-400 leading-tight">{item.message}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5"><Key className="h-3 w-3 text-primary" /> Focus Keyword</label>
                     <input 
@@ -1183,11 +1264,15 @@ Suggestions to improve readability:
                       onChange={(e) => {
                         focusKeywordReg.onChange(e);
                         setIsFocusKeywordEdited(true);
+                        // Also regenerate slug from the new keyword value
+                        if (!isSlugManuallyEdited) {
+                          setValue('slug', generateSlugHelper(e.target.value || title));
+                        }
                       }}
                       placeholder="e.g. chocolate chip cookies" 
                       className="w-full h-10 rounded-xl border border-border bg-background px-4 text-xs font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" 
                     />
-                    <p className="text-[9px] font-bold text-muted-foreground flex items-center gap-1"><Sparkles className="h-2.5 w-2.5 text-primary animate-pulse" /> Aligning with focus terms improves crawl relevance.</p>
+                    <p className="text-[9px] font-bold text-muted-foreground flex items-center gap-1"><Sparkles className="h-2.5 w-2.5 text-primary animate-pulse" /> Slug is auto-generated from keyword. Aligning with focus terms improves crawl relevance.</p>
                   </div>
 
                   <div className="space-y-1.5">
@@ -1232,13 +1317,15 @@ Suggestions to improve readability:
                         <button 
                           type="button"
                           onClick={() => {
-                            setValue('slug', generateSlugHelper(title));
+                            // Generate slug from focus keyword (not raw title)
+                            const kw = seo?.focusKeyword || getFocusKeyword(title);
+                            setValue('slug', generateSlugHelper(kw || title));
                             setIsSlugManuallyEdited(false);
-                            showToast('success', 'Slug updated from title!');
+                            showToast('success', 'Slug set from focus keyword!');
                           }}
                           className="text-[10px] font-bold text-primary hover:underline transition-all"
                         >
-                          Set from Title
+                          Set from Keyword
                         </button>
                         <span className="text-muted-foreground/30 text-[9px]">|</span>
                         <button 

@@ -930,28 +930,38 @@ router.post('/ai/generate', authMiddleware, async (req: Request, res: Response, 
     let result = '';
 
     if (action === 'title') {
-      const getTitleSuggestion = (baseTitle: string, template: string) => {
-        let titleVal = template.replace('[Title]', baseTitle);
-        if (titleVal.length > 60) {
-          const maxBaseLength = 60 - (template.replace('[Title]', '').length);
-          if (maxBaseLength > 10) {
-            const truncatedBase = baseTitle.substring(0, maxBaseLength - 3).trim() + '...';
-            titleVal = template.replace('[Title]', truncatedBase);
-          } else {
-            titleVal = titleVal.substring(0, 57) + '...';
-          }
-        }
-        return titleVal;
+      // Extract focus keyword from saved SEO data or strip stopwords from title
+      const stopwords = new Set(['a', 'an', 'the', 'easy', 'quick', 'best', 'perfect', 'ultimate', 'how', 'to', 'make', 'classic', 'homemade', 'recipe']);
+      const rawKw = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const kw = rawKw || recipe.title
+        .toLowerCase()
+        .replace(/[^\w\s]/g, '')
+        .split(/\s+/)
+        .filter((w: string) => w && !stopwords.has(w))
+        .join(' ') || recipe.title;
+
+      // Build titles that ALWAYS contain the keyword
+      const buildTitle = (tpl: string) => {
+        const candidate = tpl.replace('[KW]', kw);
+        return candidate.length <= 60 ? candidate : null;
       };
 
-      const baseTitle = recipe.title;
-      const t1 = getTitleSuggestion(baseTitle, `Ultimate [Title] Recipe - Easy Guide`);
-      const t2 = getTitleSuggestion(baseTitle, `Best [Title] (Healthy 30-Min Dinner)`);
-      const t3 = getTitleSuggestion(baseTitle, `How to Make Perfect [Title]`);
+      const t1 = buildTitle(`[KW] Recipe - Easy & Authentic Guide`)
+        ?? buildTitle(`[KW] Recipe - Quick & Easy`)
+        ?? buildTitle(`Easy [KW] Recipe`)
+        ?? buildTitle(`[KW] Recipe`)
+        ?? kw.substring(0, 57) + '...';
 
-      result = `[Suggested SEO Title 1] ${t1}
-[Suggested SEO Title 2] ${t2}
-[Suggested SEO Title 3] ${t3}`;
+      const t2 = buildTitle(`Best [KW] Recipe (30-Min)`)
+        ?? buildTitle(`Best [KW] Recipe`)
+        ?? buildTitle(`[KW] Recipe`)
+        ?? kw.substring(0, 57) + '...';
+
+      const t3 = buildTitle(`How to Make [KW]`)
+        ?? buildTitle(`[KW] Recipe`)
+        ?? kw.substring(0, 57) + '...';
+
+      result = `[Suggested SEO Title 1] ${t1}\n[Suggested SEO Title 2] ${t2}\n[Suggested SEO Title 3] ${t3}`;
     } else if (action === 'meta') {
       const baseMeta = `Learn how to make the ultimate ${recipe.title} at home! This quick and easy recipe features simple steps and fresh ingredients for perfect results.`;
       result = baseMeta.length > 160 ? baseMeta.slice(0, 157) + '...' : baseMeta;
