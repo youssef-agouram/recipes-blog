@@ -33,66 +33,23 @@ export function Footer() {
   ];
 
   return (
-    <footer className="w-full bg-[#030408] border-t border-white/5 pt-10 pb-28 md:py-12 font-body print:hidden">
+    <footer className="w-full bg-[#030408] border-t border-white/5 pt-10 pb-28 sm:pb-10 md:py-12 font-body print:hidden">
       <div className="container mx-auto px-6 max-w-[1536px]">
-
-        {/* Mobile-Only Layout (below md breakpoint) */}
-        <div className="flex flex-col gap-4 md:hidden">
-          {/* Row 1: Left Column (Logo) + Right Column (2x2 Legal Links) */}
-          <div className="flex items-start justify-between w-full gap-4">
-            {/* Left Column: Logo (Aligned to the Left) */}
-            <Logo />
-
-            {/* Right Column: Legal Pages (2x2 Grid Layout aligned to the right) */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-right justify-items-end shrink-0">
-              {legalLinks.map((link) => (
-                <Link 
-                  key={link.href}
-                  href={link.href} 
-                  className="text-[9px] font-bold text-slate-400 hover:text-white uppercase tracking-wider transition-colors duration-200"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Row 2: Copyright (Left) and Social Icons (Right) */}
-          <div className="flex items-center justify-between w-full border-t border-white/5 pt-4 mt-1">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">
-              © {new Date().getFullYear()} Tasteful.
-            </p>
-            <div className="flex items-center gap-2.5">
-              {socialLinks.map((item, i) => {
-                const Icon = item.icon;
-                return (
-                  <a 
-                    key={i} 
-                    href={item.href} 
-                    aria-label={item.label}
-                    className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-slate-400 hover:text-black hover:bg-[#f59e0b] hover:border-[#f59e0b] transition-all duration-300 active:scale-95 shrink-0"
-                  >
-                    <Icon />
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Layout (hidden on mobile) */}
-        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 items-center gap-y-6 md:gap-y-8 lg:gap-y-0 gap-x-4">
-          <div className="col-span-1 md:col-span-1 lg:col-span-3 flex justify-center md:justify-start">
+        <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-4">
+          
+          {/* Logo Section */}
+          <div className="flex justify-center md:justify-start">
             <Logo />
           </div>
 
-          <div className="col-span-1 md:col-span-2 lg:col-span-6 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 order-2 md:order-3 lg:order-2 md:mt-4 lg:mt-0">
+          {/* Legal Links Section */}
+          <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-xs md:text-[10px]">
             {legalLinks.map((link, idx) => (
               <React.Fragment key={link.href}>
-                {idx > 0 && <span className="text-slate-600 text-[10px] select-none">/</span>}
+                {idx > 0 && <span className="hidden sm:inline text-slate-700 text-[10px] select-none">/</span>}
                 <Link
                   href={link.href}
-                  className="text-[10px] font-bold text-slate-400 hover:text-white uppercase tracking-wider transition-colors duration-200"
+                  className="text-slate-400 hover:text-white uppercase tracking-wider font-bold transition-colors duration-200"
                 >
                   {link.label}
                 </Link>
@@ -100,7 +57,8 @@ export function Footer() {
             ))}
           </div>
 
-          <div className="col-span-1 md:col-span-1 lg:col-span-3 flex flex-col items-center md:items-end gap-2 order-3 md:order-2 lg:order-3">
+          {/* Socials & Copyright Section */}
+          <div className="flex flex-col items-center md:items-end gap-3">
             <div className="flex items-center gap-2.5">
               {socialLinks.map((item, i) => {
                 const Icon = item.icon;
@@ -120,8 +78,8 @@ export function Footer() {
               © {new Date().getFullYear()} Tasteful. All rights reserved.
             </p>
           </div>
-        </div>
 
+        </div>
       </div>
     </footer>
   );
