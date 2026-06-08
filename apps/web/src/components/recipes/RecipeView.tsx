@@ -537,17 +537,50 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 {openSections.instructions && (
                   <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="space-y-6">
-                      {instructionItems.length > 0 ? instructionItems.map((s: any, idx: number) => (
-                        <div key={idx} className="flex gap-4 group/step">
-                          <div className="flex flex-col items-center animate-in fade-in duration-300">
-                            <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">{idx + 1}</div>
-                            {idx < instructionItems.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
+                      {(() => {
+                        if (instructionItems.length === 0) {
+                          return <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>;
+                        }
+                        
+                        const numberedSteps = instructionItems.filter((s: any) => /\d/.test(s.text || ''));
+                        const remainingSteps = instructionItems.filter((s: any) => !/\d/.test(s.text || ''));
+
+                        return (
+                          <div className="space-y-6">
+                            {numberedSteps.length > 0 && (
+                              <div className="space-y-6">
+                                {numberedSteps.map((s: any, idx: number) => (
+                                  <div key={idx} className="flex gap-4 group/step">
+                                    <div className="flex flex-col items-center animate-in fade-in duration-300">
+                                      <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">{idx + 1}</div>
+                                      {idx < numberedSteps.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
+                                    </div>
+                                    <div className="flex-1 pt-0.5">
+                                      <p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">{s.text}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {remainingSteps.length > 0 && (
+                              <div className={cn("space-y-3", numberedSteps.length > 0 && "pt-6 border-t border-white/5")}>
+                                <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                                  💡 Additional Details & Tips
+                                </h4>
+                                <ul className="space-y-2.5">
+                                  {remainingSteps.map((s: any, idx: number) => (
+                                    <li key={idx} className="flex items-start gap-2.5 text-[13px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
+                                      <span className="text-primary mt-1.5">•</span>
+                                      <span>{s.text}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                           </div>
-                          <div className="flex-1 pt-0.5">
-                            <p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">{s.text}</p>
-                          </div>
-                        </div>
-                      )) : <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>}
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
