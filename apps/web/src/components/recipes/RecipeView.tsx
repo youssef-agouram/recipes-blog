@@ -572,16 +572,11 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                         const hasExplicitNumbers = processedSteps.some((s: any) => s.extractedNum !== null);
 
                         if (hasExplicitNumbers) {
-                          const numberedSteps = processedSteps
-                            .filter((s: any) => s.extractedNum !== null)
-                            .sort((a: any, b: any) => a.extractedNum - b.extractedNum);
-                          const remainingSteps = processedSteps.filter((s: any) => s.extractedNum === null);
-
                           return (
                             <div className="space-y-6">
-                              {numberedSteps.length > 0 && (
-                                <div className="space-y-6">
-                                  {numberedSteps.map((s: any, idx: number) => (
+                              {processedSteps.map((s: any, idx: number) => {
+                                if (s.extractedNum !== null) {
+                                  return (
                                     <div key={idx} className="animate-in fade-in duration-300">
                                       <h4 className="text-[14px] font-bold text-white tracking-tight">
                                         {s.extractedNum}. {s.title}
@@ -597,36 +592,27 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                                         </ul>
                                       )}
                                     </div>
-                                  ))}
-                                </div>
-                              )}
-
-                              {remainingSteps.length > 0 && (
-                                <div className={cn("space-y-4", numberedSteps.length > 0 && "pt-6 border-t border-white/5")}>
-                                  <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                                    💡 Additional Details & Tips
-                                  </h4>
-                                  <div className="space-y-3">
-                                    {remainingSteps.map((s: any, idx: number) => (
-                                      <div key={idx} className="group/tip">
-                                        <h5 className={cn("text-[13px] tracking-tight transition-colors", s.points.length > 0 ? "font-semibold text-white/90" : "font-medium text-muted-foreground hover:text-white")}>
-                                          {s.title}
-                                        </h5>
-                                        {s.points.length > 0 && (
-                                          <ul className="mt-1.5 space-y-1 pl-4">
-                                            {s.points.map((pt: string, ptIdx: number) => (
-                                              <li key={ptIdx} className="flex items-start gap-2 text-[12px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
-                                                <span className="text-primary/70 mt-1.5 text-[6px]">•</span>
-                                                <span>{pt}</span>
-                                              </li>
-                                            ))}
-                                          </ul>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
+                                  );
+                                } else {
+                                  return (
+                                    <div key={idx} className="pl-4 group/tip animate-in fade-in duration-300">
+                                      <h5 className={cn("text-[13px] tracking-tight transition-colors", s.points.length > 0 ? "font-semibold text-white/90" : "font-medium text-muted-foreground hover:text-white")}>
+                                        💡 {s.title}
+                                      </h5>
+                                      {s.points.length > 0 && (
+                                        <ul className="mt-1.5 space-y-1 pl-4">
+                                          {s.points.map((pt: string, ptIdx: number) => (
+                                            <li key={ptIdx} className="flex items-start gap-2 text-[12px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
+                                              <span className="text-primary/70 mt-1.5 text-[6px]">•</span>
+                                              <span>{pt}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      )}
+                                    </div>
+                                  );
+                                }
+                              })}
                             </div>
                           );
                         } else {
