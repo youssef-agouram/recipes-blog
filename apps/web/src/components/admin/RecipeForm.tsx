@@ -144,18 +144,34 @@ const getFocusKeyword = (titleStr: string) => {
 const getSeoTitle = (titleStr: string) => {
   if (!titleStr) return '';
   const titleClean = titleStr.trim();
-  const option1 = `Ultimate ${titleClean} Recipe - Easy & Quick Guide`;
-  if (option1.length >= 50 && option1.length <= 60) return option1;
-  const option2 = `Best ${titleClean} Recipe - 30-Min Guide`;
-  if (option2.length >= 50 && option2.length <= 60) return option2;
-  const option3 = `Easy ${titleClean} Recipe | Homemade & Quick`;
-  if (option3.length >= 50 && option3.length <= 60) return option3;
-  const option4 = `${titleClean} Recipe`;
-  if (option4.length >= 50 && option4.length <= 60) return option4;
+  
+  const getSuggestion = (template: string) => {
+    let title = template.replace('[Title]', titleClean);
+    if (title.length > 60) {
+      const maxBaseLength = 60 - (template.replace('[Title]', '').length);
+      if (maxBaseLength > 10) {
+        const truncatedBase = titleClean.substring(0, maxBaseLength - 3).trim() + '...';
+        title = template.replace('[Title]', truncatedBase);
+      } else {
+        title = title.substring(0, 57) + '...';
+      }
+    }
+    return title;
+  };
+
+  const option1 = getSuggestion(`Ultimate [Title] Recipe - Easy Guide`);
+  const option2 = getSuggestion(`Best [Title] Recipe - 30-Min Guide`);
+  const option3 = getSuggestion(`Easy [Title] Recipe | Homemade & Quick`);
+  const option4 = getSuggestion(`[Title] Recipe`);
   
   const options = [option1, option2, option3, option4];
-  options.sort((a, b) => Math.abs(a.length - 55) - Math.abs(b.length - 55));
-  return options[0];
+  const validOptions = options.filter(opt => opt.length <= 60);
+  if (validOptions.length > 0) {
+    validOptions.sort((a, b) => Math.abs(a.length - 55) - Math.abs(b.length - 55));
+    return validOptions[0];
+  }
+  
+  return titleClean.length > 60 ? titleClean.substring(0, 57) + '...' : titleClean;
 };
 
 const getMetaDescription = (titleStr: string, focusKeywordStr: string, plainText: string) => {
@@ -222,9 +238,28 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       const plainText = getTiptapPlainText(watch('content'));
 
       if (action === 'title') {
-        output = `[Suggested SEO Title 1] Ultimate ${title || 'Recipe'} Recipe - Easy & Quick Guide
-[Suggested SEO Title 2] Best ${title || 'Recipe'} (Healthy & Authentic 30-Min Dinner)
-[Suggested SEO Title 3] How to Make Perfect ${title || 'Recipe'} (Step-by-Step Tutorial)`;
+        const getTitleSuggestion = (baseTitle: string, template: string) => {
+          let titleVal = template.replace('[Title]', baseTitle);
+          if (titleVal.length > 60) {
+            const maxBaseLength = 60 - (template.replace('[Title]', '').length);
+            if (maxBaseLength > 10) {
+              const truncatedBase = baseTitle.substring(0, maxBaseLength - 3).trim() + '...';
+              titleVal = template.replace('[Title]', truncatedBase);
+            } else {
+              titleVal = titleVal.substring(0, 57) + '...';
+            }
+          }
+          return titleVal;
+        };
+
+        const baseTitle = title || 'Recipe';
+        const t1 = getTitleSuggestion(baseTitle, `Ultimate [Title] Recipe - Easy Guide`);
+        const t2 = getTitleSuggestion(baseTitle, `Best [Title] (Healthy 30-Min Dinner)`);
+        const t3 = getTitleSuggestion(baseTitle, `How to Make Perfect [Title]`);
+
+        output = `[Suggested SEO Title 1] ${t1}
+[Suggested SEO Title 2] ${t2}
+[Suggested SEO Title 3] ${t3}`;
       } else if (action === 'meta') {
         const bodyText = plainText ? plainText.replace(/\s+/g, ' ').trim() : 'fresh kitchen ingredients, simple steps, and pro chef tips.';
         const baseMeta = `Learn how to make the ultimate ${title || 'recipe'} at home! This guide features ${bodyText}`;

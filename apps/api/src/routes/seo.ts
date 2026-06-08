@@ -930,9 +930,28 @@ router.post('/ai/generate', authMiddleware, async (req: Request, res: Response, 
     let result = '';
 
     if (action === 'title') {
-      result = `[Suggested SEO Title 1] Ultimate ${recipe.title} Recipe - Easy & Quick Guide
-[Suggested SEO Title 2] Best ${recipe.title} (Healthy & Authentic 30-Min Dinner)
-[Suggested SEO Title 3] How to Make Perfect ${recipe.title} (Step-by-Step Tutorial)`;
+      const getTitleSuggestion = (baseTitle: string, template: string) => {
+        let titleVal = template.replace('[Title]', baseTitle);
+        if (titleVal.length > 60) {
+          const maxBaseLength = 60 - (template.replace('[Title]', '').length);
+          if (maxBaseLength > 10) {
+            const truncatedBase = baseTitle.substring(0, maxBaseLength - 3).trim() + '...';
+            titleVal = template.replace('[Title]', truncatedBase);
+          } else {
+            titleVal = titleVal.substring(0, 57) + '...';
+          }
+        }
+        return titleVal;
+      };
+
+      const baseTitle = recipe.title;
+      const t1 = getTitleSuggestion(baseTitle, `Ultimate [Title] Recipe - Easy Guide`);
+      const t2 = getTitleSuggestion(baseTitle, `Best [Title] (Healthy 30-Min Dinner)`);
+      const t3 = getTitleSuggestion(baseTitle, `How to Make Perfect [Title]`);
+
+      result = `[Suggested SEO Title 1] ${t1}
+[Suggested SEO Title 2] ${t2}
+[Suggested SEO Title 3] ${t3}`;
     } else if (action === 'meta') {
       const baseMeta = `Learn how to make the ultimate ${recipe.title} at home! This quick and easy recipe features simple steps and fresh ingredients for perfect results.`;
       result = baseMeta.length > 160 ? baseMeta.slice(0, 157) + '...' : baseMeta;
