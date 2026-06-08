@@ -542,44 +542,86 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                           return <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>;
                         }
                         
-                        const numberedSteps = instructionItems.filter((s: any) => /\d/.test(s.text || ''));
-                        const remainingSteps = instructionItems.filter((s: any) => !/\d/.test(s.text || ''));
+                        const processedSteps = instructionItems.map((s: any) => {
+                          const textStr = s.text || '';
+                          const match = textStr.match(/^\s*(?:step|phase|no\.?|n°)?\s*(\d+)\s*(?:[\.\-\:\)]\s*|\s+)/i);
+                          if (match) {
+                            return {
+                              text: textStr.substring(match[0].length).trim(),
+                              extractedNum: parseInt(match[1], 10),
+                            };
+                          }
+                          return {
+                            text: textStr.trim(),
+                            extractedNum: null,
+                          };
+                        });
 
-                        return (
-                          <div className="space-y-6">
-                            {numberedSteps.length > 0 && (
-                              <div className="space-y-6">
-                                {numberedSteps.map((s: any, idx: number) => (
-                                  <div key={idx} className="flex gap-4 group/step">
-                                    <div className="flex flex-col items-center animate-in fade-in duration-300">
-                                      <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">{idx + 1}</div>
-                                      {idx < numberedSteps.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
-                                    </div>
-                                    <div className="flex-1 pt-0.5">
-                                      <p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">{s.text}</p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                        const hasExplicitNumbers = processedSteps.some((s: any) => s.extractedNum !== null);
 
-                            {remainingSteps.length > 0 && (
-                              <div className={cn("space-y-3", numberedSteps.length > 0 && "pt-6 border-t border-white/5")}>
-                                <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                                  💡 Additional Details & Tips
-                                </h4>
-                                <ul className="space-y-2.5">
-                                  {remainingSteps.map((s: any, idx: number) => (
-                                    <li key={idx} className="flex items-start gap-2.5 text-[13px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
-                                      <span className="text-primary mt-1.5">•</span>
-                                      <span>{s.text}</span>
-                                    </li>
+                        if (hasExplicitNumbers) {
+                          const numberedSteps = processedSteps
+                            .filter((s: any) => s.extractedNum !== null)
+                            .sort((a: any, b: any) => a.extractedNum - b.extractedNum);
+                          const remainingSteps = processedSteps.filter((s: any) => s.extractedNum === null);
+
+                          return (
+                            <div className="space-y-6">
+                              {numberedSteps.length > 0 && (
+                                <div className="space-y-6">
+                                  {numberedSteps.map((s: any, idx: number) => (
+                                    <div key={idx} className="flex gap-4 group/step">
+                                      <div className="flex flex-col items-center animate-in fade-in duration-300">
+                                        <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">
+                                          {s.extractedNum}
+                                        </div>
+                                        {idx < numberedSteps.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
+                                      </div>
+                                      <div className="flex-1 pt-0.5">
+                                        <p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">{s.text}</p>
+                                      </div>
+                                    </div>
                                   ))}
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                        );
+                                </div>
+                              )}
+
+                              {remainingSteps.length > 0 && (
+                                <div className={cn("space-y-3", numberedSteps.length > 0 && "pt-6 border-t border-white/5")}>
+                                  <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                                    💡 Additional Details & Tips
+                                  </h4>
+                                  <ul className="space-y-2.5">
+                                    {remainingSteps.map((s: any, idx: number) => (
+                                      <li key={idx} className="flex items-start gap-2.5 text-[13px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
+                                        <span className="text-primary mt-1.5">•</span>
+                                        <span>{s.text}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        } else {
+                          // No explicit numbers in the steps - display in original chronological sequence
+                          return (
+                            <div className="space-y-6">
+                              {processedSteps.map((s: any, idx: number) => (
+                                <div key={idx} className="flex gap-4 group/step">
+                                  <div className="flex flex-col items-center animate-in fade-in duration-300">
+                                    <div className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black text-white group-hover/step:border-primary group-hover/step:text-primary transition-all">
+                                      {idx + 1}
+                                    </div>
+                                    {idx < processedSteps.length - 1 && <div className="flex-1 w-px bg-white/5 my-2 min-h-[20px]" />}
+                                  </div>
+                                  <div className="flex-1 pt-0.5">
+                                    <p className="text-[13px] text-muted-foreground leading-relaxed font-medium group-hover/step:text-white transition-colors">{s.text}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        }
                       })()}
                     </div>
                   </div>
