@@ -666,9 +666,76 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   // AI SEO Assistant helpers
   const [generateAiMetadata, { isLoading: isGeneratingAi }] = useGenerateAiMetadataMutation();
   const [aiSuggestions, setAiSuggestions] = useState<{ action: string; output: string } | null>(null);
-  const [generatingField, setGeneratingField] = useState<string | null>(null);
+  const [generatingField, setGeneratingField] = useState<'title' | 'image' | 'ingredients' | 'instructions' | 'nutrition' | null>(null);
 
   const handleAiGenerateField = async (field: 'title' | 'image' | 'ingredients' | 'instructions' | 'nutrition') => {
+    let currentTitle = watch('title') || '';
+
+    if (field === 'image') {
+      const promptedTitle = prompt(
+        "Please enter or confirm the recipe name for image generation:",
+        currentTitle
+      );
+      if (promptedTitle === null) {
+        return;
+      }
+      
+      const trimmedTitle = promptedTitle.trim();
+      if (!trimmedTitle) {
+        showToast('error', 'Recipe name is required for image generation.');
+        return;
+      }
+      
+      if (!currentTitle || trimmedTitle !== currentTitle) {
+        setValue('title', trimmedTitle);
+        currentTitle = trimmedTitle;
+      }
+
+      setGeneratingField('image');
+      try {
+        const res = await generateAiMetadata({
+          recipeId: initialData?.id,
+          action: 'image',
+          recipeTitle: currentTitle,
+          aboutRecipeText: 'Generating image only.'
+        }).unwrap();
+
+        if (res.output) {
+          setValue('imageUrl', res.output);
+          showToast('success', 'Image generated successfully!');
+        } else {
+          showToast('error', 'Failed to generate image URL.');
+        }
+      } catch (err: any) {
+        console.error('Image generation error:', err);
+        let errorMsg = 'Failed to generate main image.';
+        if (err) {
+          if (err.data && typeof err.data === 'object' && err.data.error) {
+            errorMsg = err.data.error;
+          } else if (err.data && typeof err.data === 'object' && err.data.message) {
+            errorMsg = err.data.message;
+          } else if (err.data && typeof err.data === 'string') {
+            errorMsg = err.data;
+          } else if (err.message) {
+            errorMsg = err.message;
+          } else if (err.error) {
+            errorMsg = err.error;
+          } else {
+            try {
+              errorMsg = typeof err === 'object' ? JSON.stringify(err) : String(err);
+            } catch (e) {
+              // ignore
+            }
+          }
+        }
+        showToast('error', errorMsg);
+      } finally {
+        setGeneratingField(null);
+      }
+      return;
+    }
+
+    // For all other fields (title, ingredients, instructions, nutrition), we must check the 'About Recipe' article content length
     const getTiptapPlainText = (node: any): string => {
       if (!node) return '';
       if (node.type === 'text' && node.text) {
@@ -679,9 +746,8 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       }
       return '';
     };
-
-    const aboutRecipeText = getTiptapPlainText(watch('content')).trim();
-    const validation = validateRecipeContent(aboutRecipeText);
+    const plainText = getTiptapPlainText(watch('content')).trim();
+    const validation = validateRecipeContent(plainText);
     if (!validation.isValid) {
       showToast('error', validation.error || "Please add a valid 'About Recipe' article content first.");
       return;
@@ -689,57 +755,66 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
 
     setGeneratingField(field);
     try {
-      let generatedOutput = '';
-      const apiActionMap = {
-        title: 'recipeTitle',
-        image: 'image',
-        ingredients: 'ingredients',
-        instructions: 'instructions',
-        nutrition: 'nutrition',
-      };
-
-      if (initialData?.id) {
-        try {
-          const res = await generateAiMetadata({ recipeId: initialData.id, action: apiActionMap[field] }).unwrap();
-          generatedOutput = res.output;
-        } catch (err) {
-          console.warn('Backend generation failed, falling back to local simulation:', err);
-        }
-      }
-
-      if (!generatedOutput) {
-        const seo = watch('seo');
-        const focusKeyword = seo?.focusKeyword?.trim() || '';
-        const textSeed = `${focusKeyword} ${aboutRecipeText}`;
-        const preset = getRecipePreset(textSeed);
-        if (field === 'title') {
-          generatedOutput = preset.title;
-        } else if (field === 'image') {
-          generatedOutput = preset.image;
-        } else if (field === 'ingredients') {
-          generatedOutput = preset.ingredients;
-        } else if (field === 'instructions') {
-          generatedOutput = preset.instructions;
-        } else if (field === 'nutrition') {
-          generatedOutput = preset.nutrition;
-        }
-      }
+      let actionStr = '';
+      let targetField: 'title' | 'ingredientsText' | 'instructionsText' | 'nutritionText' | null = null;
+      let successMsg = '';
 
       if (field === 'title') {
-        setValue('title', generatedOutput);
-      } else if (field === 'image') {
-        setValue('imageUrl', generatedOutput);
+        actionStr = 'recipeTitle';
+        targetField = 'title';
+        successMsg = 'Recipe title generated successfully!';
       } else if (field === 'ingredients') {
-        setValue('ingredientsText', generatedOutput);
+        actionStr = 'ingredients';
+        targetField = 'ingredientsText';
+        successMsg = 'Ingredients list generated successfully!';
       } else if (field === 'instructions') {
-        setValue('instructionsText', generatedOutput);
+        actionStr = 'instructions';
+        targetField = 'instructionsText';
+        successMsg = 'Instructions list generated successfully!';
       } else if (field === 'nutrition') {
-        setValue('nutritionText', generatedOutput);
+        actionStr = 'nutrition';
+        targetField = 'nutritionText';
+        successMsg = 'Nutrition info generated successfully!';
       }
 
-      showToast('success', `AI successfully generated ${field}!`);
-    } catch (error) {
-      showToast('error', `Failed to generate ${field} using AI.`);
+      if (actionStr && targetField) {
+        const res = await generateAiMetadata({
+          recipeId: initialData?.id,
+          action: actionStr,
+          recipeTitle: currentTitle,
+          aboutRecipeText: plainText
+        }).unwrap();
+
+        if (res.output) {
+          setValue(targetField, res.output);
+          showToast('success', successMsg);
+        } else {
+          showToast('error', `Failed to generate values.`);
+        }
+      }
+    } catch (err: any) {
+      console.error(`${field} generation error:`, err);
+      let errorMsg = `Failed to generate ${field}.`;
+      if (err) {
+        if (err.data && typeof err.data === 'object' && err.data.error) {
+          errorMsg = err.data.error;
+        } else if (err.data && typeof err.data === 'object' && err.data.message) {
+          errorMsg = err.data.message;
+        } else if (err.data && typeof err.data === 'string') {
+          errorMsg = err.data;
+        } else if (err.message) {
+          errorMsg = err.message;
+        } else if (err.error) {
+          errorMsg = err.error;
+        } else {
+          try {
+            errorMsg = typeof err === 'object' ? JSON.stringify(err) : String(err);
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+      showToast('error', errorMsg);
     } finally {
       setGeneratingField(null);
     }
@@ -1299,7 +1374,7 @@ Suggestions to improve readability:
       </AnimatePresence>
 
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-40 bg-background/80 backdrop-blur-md py-4 border-b border-border/50 -mx-4 px-4 sm:-mx-6 sm:px-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-16 z-40 bg-background/80 backdrop-blur-md py-4 border-b border-border/50 -mx-4 px-4 sm:-mx-6 sm:px-6">
         <div className="flex items-center gap-4">
           <button type="button" onClick={() => router.back()} className="flex items-center justify-center h-10 w-10 rounded-full border border-border bg-card hover:bg-secondary transition-colors">
             <ArrowLeft className="h-5 w-5" />
@@ -1308,8 +1383,72 @@ Suggestions to improve readability:
         </div>
         <div className="flex items-center gap-3">
           <button type="button" onClick={() => {
-            const formData = watch();
-            sessionStorage.setItem('recipe-preview', JSON.stringify(formData));
+            const data = watch();
+            
+            // Format nutrition
+            const nutrition: Record<string, string> = {};
+            (data.nutritionText || '')
+              .split('\n')
+              .map(line => line.trim())
+              .filter(Boolean)
+              .forEach(line => {
+                const clean = line.replace(/[:-]/g, ' ').trim();
+                const match = clean.match(/^([A-Za-z\s]+)\s+(\d+(?:\.\d+)?\s*[A-Za-z%]*)$/);
+                if (match) {
+                  const label = match[1].trim().toLowerCase();
+                  const value = match[2].trim();
+                  let key = label;
+                  if (key === 'carbs') key = 'carbohydrates';
+                  if (key) {
+                    nutrition[key] = value;
+                  }
+                } else {
+                  const words = clean.split(/\s+/);
+                  if (words.length >= 2) {
+                    const label = words[0].toLowerCase();
+                    const value = words.slice(1).join(' ');
+                    let key = label;
+                    if (key === 'carbs') key = 'carbohydrates';
+                    if (key) {
+                      nutrition[key] = value;
+                    }
+                  }
+                }
+              });
+
+            // Format ingredientsJson
+            const ingredientsJson = (data.ingredientsText || '')
+              .split('\n')
+              .map(line => line.trim())
+              .filter(Boolean)
+              .map(line => ({
+                name: line,
+                quantity: '',
+                unit: ''
+              }));
+
+            // Format instructions
+            const instructions = (data.instructionsText || '')
+              .split('\n')
+              .map(line => line.trim())
+              .filter(Boolean)
+              .map(line => ({
+                text: line
+              }));
+
+            const formattedPreviewData = {
+              ...data,
+              ingredientsJson,
+              instructions,
+              nutrition,
+              seo: {
+                ...data.seo,
+                title: data.seo?.seoTitle || data.seo?.title || '',
+                description: data.seo?.metaDescription || data.seo?.description || '',
+              }
+            };
+
+            localStorage.setItem('recipe-preview', JSON.stringify(formattedPreviewData));
             window.open('/recipes/preview', '_blank');
           }} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 text-sm font-semibold transition-all hover:bg-secondary">
             <Eye className="h-4 w-4" /> Preview
@@ -1395,9 +1534,31 @@ Suggestions to improve readability:
                 </div>
               </div>
             ) : (
-              <div onClick={() => fileInputRef.current?.click()} className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-secondary/30">
-                <Upload className="h-7 w-7 text-primary animate-bounce-slow" />
-                <span className="text-[10px] font-bold uppercase text-muted-foreground">Upload Image</span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card/50">
+                <div 
+                  onClick={() => fileInputRef.current?.click()} 
+                  className="flex flex-col items-center justify-center gap-2 cursor-pointer hover:text-primary transition-all p-3 rounded-xl hover:bg-secondary/20"
+                >
+                  <Upload className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors animate-bounce-slow" />
+                  <span className="text-[10px] font-bold uppercase text-muted-foreground">Upload Image</span>
+                </div>
+                <div className="text-[9px] font-bold text-muted-foreground uppercase">or</div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAiGenerateField('image');
+                  }}
+                  disabled={generatingField === 'image'}
+                  className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all text-xs font-bold flex items-center gap-2 shadow-sm hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  {generatingField === 'image' ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  Generate Main Image
+                </button>
               </div>
             )}
             <AnimatePresence>{showImageUrlInput && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute inset-x-0 bottom-0 p-3 bg-card/90 backdrop-blur-md border-t border-border z-20"><input {...register('imageUrl')} placeholder="Paste Image URL..." className="w-full h-9 rounded-lg border border-primary/30 bg-background px-3 text-[10px] font-bold outline-none" autoFocus /></motion.div>}</AnimatePresence>
@@ -1606,30 +1767,6 @@ Suggestions to improve readability:
           <div className="space-y-4">
             <label className="text-sm font-semibold flex items-center gap-1.5"><Lightbulb className="h-4 w-4 text-amber-500" /> About Recipe</label>
             <Controller name="content" control={control} render={({ field }) => <InstructionsEditor initialContent={field.value} onChange={field.onChange} />} />
-            
-            <div className="bg-secondary/10 border border-border/60 p-4 rounded-2xl space-y-3">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
-                <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" /> Auto SEO Heading Suggestions (Click to Copy)
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {getSuggestedHeadings(title).map((sh, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(sh.text);
-                      showToast('success', `Copied heading: "${sh.text}"`);
-                    }}
-                    className="px-2.5 py-1.5 bg-background hover:bg-secondary border border-border/85 rounded-xl text-[10px] font-bold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
-                  >
-                    <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded bg-primary/10 text-primary uppercase">
-                      H{sh.level}
-                    </span>
-                    {sh.text}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 

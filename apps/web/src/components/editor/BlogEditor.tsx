@@ -70,6 +70,7 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
       CharacterCount,
     ],
     content: initialContent || '',
+    immediatelyRender: false,
     autofocus: true,
     editorProps: {
       attributes: {
@@ -81,6 +82,25 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
       onChange?.(json);
     },
   });
+
+  // Keep editor content synchronized with initialContent when it changes asynchronously (e.g. on load or AI gen)
+  useEffect(() => {
+    if (!editor || !initialContent) return;
+
+    const isJSON = typeof initialContent === 'object';
+    if (isJSON) {
+      const currentJSON = JSON.stringify(editor.getJSON());
+      const targetJSON = JSON.stringify(initialContent);
+      if (currentJSON !== targetJSON && !editor.isFocused) {
+        editor.commands.setContent(initialContent, { emitUpdate: false });
+      }
+    } else {
+      const currentHTML = editor.getHTML();
+      if (currentHTML !== initialContent && !editor.isFocused) {
+        editor.commands.setContent(initialContent, { emitUpdate: false });
+      }
+    }
+  }, [editor, initialContent]);
 
   // Custom event listener to open image modal from slash command
   useEffect(() => {
@@ -173,7 +193,7 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
   const characters = editor.storage.characterCount?.characters() || 0;
 
   return (
-    <div className="flex flex-col border rounded-xl shadow-sm bg-background transition-all focus-within:ring-2 focus-within:ring-ring focus-within:border-primary">
+    <div className="flex flex-col border rounded-xl shadow-sm bg-background transition-all focus-within:ring-2 focus-within:ring-ring focus-within:border-primary max-w-full w-full overflow-hidden">
       <Toolbar 
         editor={editor} 
         onOpenImageModal={openImageModal}
@@ -186,7 +206,7 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ initialContent, onChange
         onOpenLinkModal={openLinkModal}
       />
 
-      <div className="relative flex-grow">
+      <div className="relative flex-grow max-w-full w-full overflow-hidden">
         <EditorContent editor={editor} />
       </div>
 

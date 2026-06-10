@@ -148,6 +148,12 @@
 
 .tiptap {
   @apply focus:outline-none;
+  width: 100% !important;
+  max-width: 100% !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  box-sizing: border-box !important;
 }
 
 /* ProseMirror / Prose styles */
@@ -157,6 +163,69 @@
   outline: none;
   caret-color: var(--primary);
   -webkit-font-smoothing: antialiased;
+  width: 100% !important;
+  max-width: 100% !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  box-sizing: border-box !important;
+}
+
+/* Force all child elements inside Tiptap editor to stay within boundaries and remain fully responsive */
+.tiptap *,
+.ProseMirror * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Tables pasted from other apps (e.g. Word, Google Docs) often have fixed inline widths that stretch editor width */
+.tiptap table,
+.ProseMirror table {
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+  margin: 1.5rem 0 !important;
+}
+
+.tiptap td,
+.ProseMirror td,
+.tiptap th,
+.ProseMirror th {
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Preformatted code blocks should be scrollable horizontally and never expand the editor width */
+.tiptap pre,
+.ProseMirror pre {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}
+
+.tiptap code,
+.ProseMirror code {
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}
+
+/* Make images inside the editor responsive and never exceed the container width */
+.tiptap img,
+.ProseMirror img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+}
+
+/* Make iframe embeds, videos, etc responsive */
+.tiptap iframe,
+.ProseMirror iframe,
+.tiptap video,
+.ProseMirror video {
+  max-width: 100% !important;
+  border-radius: 8px !important;
 }
 
 .ProseMirror p {

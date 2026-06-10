@@ -1,4 +1,13 @@
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+
+// Try loading from apps/api/.env first
+const apiEnvPath = path.join(__dirname, '../.env');
+if (fs.existsSync(apiEnvPath)) {
+  dotenv.config({ path: apiEnvPath });
+}
+// Load default (which is root .env when run from workspace root)
 dotenv.config();
 
 // Reload trigger: switched to local database on port 5432
@@ -19,14 +28,19 @@ import seoRouter from './routes/seo';
 import compression from 'compression';
 import { errorHandler } from './middleware/error';
 
-// Log JWT configuration status
+// Log JWT and OpenAI configuration status
 const jwtSecretStatus = process.env.JWT_SECRET ? 'LOADED' : 'MISSING (using fallback: "secret")';
+const openAiKeyStatus = process.env.OPENAI_API_KEY
+  ? (process.env.OPENAI_API_KEY === 'your_openai_api_key_here' ? 'PLACEHOLDER (needs key)' : 'LOADED')
+  : 'MISSING';
+
 console.log('='.repeat(60));
 console.log('[STARTUP] Environment Configuration:');
 console.log(`  JWT_SECRET: ${jwtSecretStatus}`);
 if (process.env.JWT_SECRET) {
   console.log(`  JWT_SECRET Preview: ${process.env.JWT_SECRET.substring(0, 15)}...`);
 }
+console.log(`  OPENAI_API_KEY: ${openAiKeyStatus}`);
 console.log(`  NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
 console.log(`  DATABASE_URL: ${process.env.DATABASE_URL ? 'LOADED' : 'MISSING'}`);
 console.log('='.repeat(60));

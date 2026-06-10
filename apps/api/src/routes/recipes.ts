@@ -184,6 +184,38 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response, next: Next
   }
 });
 
+// Admin/Client: Get single recipe by ID
+router.get('/id/:id', optionalAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.userId;
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid recipe ID' });
+    }
+
+    const recipe = await prisma.recipe.findUnique({
+      where: { id },
+      include: {
+        categories: true,
+        ingredients: true,
+        seo: true,
+        ...(userId ? {
+          savedRecipes: { where: { userId } },
+          favoriteRecipes: { where: { userId } }
+        } : {})
+      },
+    });
+
+    if (!recipe) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+
+    res.json(parseRecipe(recipe, userId));
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Client: Get single recipe by slug
 router.get('/:slug', optionalAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

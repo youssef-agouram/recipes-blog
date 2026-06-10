@@ -10,6 +10,10 @@ export const recipeApi = apiService.injectEndpoints({
       }),
       providesTags: ['Recipe'],
     }),
+    getRecipeById: builder.query<Recipe, number>({
+      query: (id) => `/recipes/id/${id}`,
+      providesTags: ['Recipe'],
+    }),
     searchRecipes: builder.query<PaginatedResponse<Recipe>, { search: string; limit?: number }>({
       query: (params) => ({
         url: '/recipes',
@@ -120,6 +124,7 @@ export const recipeApi = apiService.injectEndpoints({
 
 export const {
   useGetAdminRecipesQuery,
+  useGetRecipeByIdQuery,
   useSearchRecipesQuery,
   useGetRecipeStatsQuery,
   useGetFeaturedRecipesQuery,

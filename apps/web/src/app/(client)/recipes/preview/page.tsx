@@ -12,7 +12,7 @@ export default function RecipePreviewPage() {
   const { data: categories } = useGetAdminCategoriesQuery();
 
   useEffect(() => {
-    const previewData = sessionStorage.getItem('recipe-preview');
+    const previewData = localStorage.getItem('recipe-preview');
     if (previewData && categories) {
       try {
         const data = JSON.parse(previewData);
@@ -58,7 +58,7 @@ export default function RecipePreviewPage() {
     }
   }, [categories]);
 
-  if (loading || (sessionStorage.getItem('recipe-preview') && !categories)) {
+  if (loading || (localStorage.getItem('recipe-preview') && !categories)) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

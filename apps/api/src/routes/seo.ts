@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { SeoSettingsSchema, AnalyticsSettingsSchema, WebmasterToolsSchema } from '../lib/schemas';
 import { authMiddleware } from '../middleware/auth';
+import { v2 as cloudinary } from 'cloudinary';
 
 const router = Router();
 
@@ -1365,50 +1366,57 @@ router.get('/ai/recommendations', async (_req: Request, res: Response, next: Nex
 // Run AI Metadata Generator action for a recipe
 router.post('/ai/generate', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { recipeId, action } = req.body;
-    if (!recipeId || !action) {
-      return res.status(400).json({ error: 'Recipe ID and Action parameter are required.' });
+    const { recipeId, action, recipeTitle, aboutRecipeText: clientAboutRecipeText } = req.body;
+    if (!action) {
+      return res.status(400).json({ error: 'Action parameter is required.' });
     }
 
-    const recipe = await prisma.recipe.findUnique({
-      where: { id: parseInt(recipeId) },
-      include: { seo: true }
-    });
+    let recipe: any = null;
+    let title = recipeTitle || '';
+    let aboutRecipeText = clientAboutRecipeText || '';
 
-    if (!recipe) {
-      return res.status(404).json({ error: 'Recipe not found.' });
-    }
-
-    const getTiptapPlainText = (node: any): string => {
-      if (!node) return '';
-      if (typeof node === 'string') {
-        try {
-          const parsed = JSON.parse(node);
-          return getTiptapPlainText(parsed);
-        } catch {
-          return node;
+    if (recipeId) {
+      recipe = await prisma.recipe.findUnique({
+        where: { id: parseInt(recipeId) },
+        include: { seo: true }
+      });
+      if (recipe) {
+        if (!title) title = recipe.title;
+        
+        if (!aboutRecipeText) {
+          const getTiptapPlainText = (node: any): string => {
+            if (!node) return '';
+            if (typeof node === 'string') {
+              try {
+                const parsed = JSON.parse(node);
+                return getTiptapPlainText(parsed);
+              } catch {
+                return node;
+              }
+            }
+            if (node.type === 'text' && node.text) {
+              return node.text;
+            }
+            if (node.content && Array.isArray(node.content)) {
+              return node.content.map(getTiptapPlainText).join(' ');
+            }
+            return '';
+          };
+          aboutRecipeText = getTiptapPlainText(recipe.content).trim();
         }
       }
-      if (node.type === 'text' && node.text) {
-        return node.text;
-      }
-      if (node.content && Array.isArray(node.content)) {
-        return node.content.map(getTiptapPlainText).join(' ');
-      }
-      return '';
-    };
-    const aboutRecipeText = getTiptapPlainText(recipe.content).trim();
-    const validation = validateRecipeContent(aboutRecipeText);
-    if (!validation.isValid) {
-      return res.status(400).json({ error: validation.error || "Please add a valid 'About Recipe' article content first." });
+    }
+
+    if (!title) {
+      return res.status(400).json({ error: 'Recipe title is required.' });
     }
 
     // High fidelity simulator outputs tailored to the recipe title
     let result = '';
 
     if (action === 'title') {
-      const rawKw = (recipe.seo as any)?.focusKeyword?.trim() || '';
-      const kw = rawKw || getFocusKeyword(recipe.title, aboutRecipeText);
+      const rawKw = (recipe?.seo as any)?.focusKeyword?.trim() || '';
+      const kw = rawKw || getFocusKeyword(title, aboutRecipeText);
 
       // Build titles that ALWAYS contain the keyword
       const buildTitle = (tpl: string) => {
@@ -1434,10 +1442,10 @@ router.post('/ai/generate', authMiddleware, async (req: Request, res: Response, 
       result = `[Suggested SEO Title 1] ${t1}\n[Suggested SEO Title 2] ${t2}\n[Suggested SEO Title 3] ${t3}`;
     } else if (action === 'meta') {
       const bodyText = aboutRecipeText ? aboutRecipeText.replace(/\s+/g, ' ').trim() : 'fresh kitchen ingredients, simple steps, and pro chef tips.';
-      const baseMeta = `Learn how to make the ultimate ${recipe.title || 'recipe'} at home! This guide features ${bodyText}`;
+      const baseMeta = `Learn how to make the ultimate ${title || 'recipe'} at home! This guide features ${bodyText}`;
       result = baseMeta.length > 160 ? baseMeta.slice(0, 157) + '...' : baseMeta;
     } else if (action === 'keywords') {
-      const kw = getFocusKeyword(recipe.title, aboutRecipeText);
+      const kw = getFocusKeyword(title, aboutRecipeText);
       result = `${kw}, easy ${kw}, authentic ${kw}, homemade ${kw}, step-by-step ${kw}`;
     } else if (action === 'readability') {
       result = `Readability Score: 84/100 (Excellent)
@@ -1446,54 +1454,112 @@ Suggestions to improve readability:
 2. Use active cooking voice ('stew the broth' instead of 'the broth should be stewed').
 3. Keep descriptions punchy. Use bullet points for tools or secondary toppings.`;
     } else if (action === 'recipeTitle') {
-      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const focusKeyword = (recipe?.seo as any)?.focusKeyword?.trim() || '';
       const textSeed = `${focusKeyword} ${aboutRecipeText}`;
       result = getRecipePreset(textSeed).title;
     } else if (action === 'image') {
-      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
-      const textSeed = `${focusKeyword} ${aboutRecipeText}`;
-      result = getRecipePreset(textSeed).image;
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey || apiKey === 'your_openai_api_key_here') {
+        return res.status(400).json({ error: 'OpenAI API key is not configured. Please set your OPENAI_API_KEY in the .env file.' });
+      }
+
+      try {
+        console.log(`Generating DALL-E image for recipe: ${title}...`);
+        const prompt = `Professional food photography of ${title}, beautifully plated, golden natural lighting, fresh ingredients visible, restaurant-quality presentation, ultra-realistic textures, vibrant colors, appetizing appearance, modern food styling, premium table setting, shallow depth of field, clean background, food magazine photography, DSLR shot, commercial food advertising, highly detailed, photorealistic, 8K, Pinterest-worthy, blog featured image, centered composition, no text, no watermark, no logo.`;
+
+        const openAiResponse = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'dall-e-3',
+            prompt: prompt,
+            n: 1,
+            size: '1024x1024',
+            quality: 'standard'
+          })
+        });
+
+        if (!openAiResponse.ok) {
+          const errorData = await openAiResponse.json().catch(() => ({}));
+          const errMsg = (errorData as any)?.error?.message || `OpenAI returned status ${openAiResponse.status}`;
+          return res.status(400).json({ error: `OpenAI DALL-E error: ${errMsg}` });
+        }
+
+        const openAiData = await openAiResponse.json() as any;
+        const tempImageUrl = openAiData.data?.[0]?.url;
+
+        if (!tempImageUrl) {
+          return res.status(400).json({ error: 'No image URL returned from OpenAI API.' });
+        }
+
+        console.log('Uploading DALL-E generated image to Cloudinary...');
+        const settings = await prisma.siteSettings.findFirst();
+        const cloudName = settings?.cloudinaryCloudName || process.env.CLOUDINARY_CLOUD_NAME || 'dpwkmt5kr';
+        const clApiKey = settings?.cloudinaryApiKey || process.env.CLOUDINARY_API_KEY || '588574244871288';
+        const apiSecret = settings?.cloudinaryApiSecret || process.env.CLOUDINARY_API_SECRET || 'iIBcQz592b1VO0rCkiDndG8FoLM';
+
+        cloudinary.config({
+          cloud_name: cloudName,
+          api_key: clApiKey,
+          api_secret: apiSecret
+        });
+
+        const uploadResult = await cloudinary.uploader.upload(tempImageUrl, {
+          folder: 'recipe-blog'
+        });
+
+        result = uploadResult.secure_url;
+        console.log('Successfully uploaded generated image to Cloudinary:', result);
+      } catch (err: any) {
+        console.error('Image generation/upload failed:', err.message);
+        return res.status(500).json({ error: `Image generation or Cloudinary upload failed: ${err.message}` });
+      }
     } else if (action === 'ingredients') {
-      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const focusKeyword = (recipe?.seo as any)?.focusKeyword?.trim() || '';
       const textSeed = `${focusKeyword} ${aboutRecipeText}`;
       result = getRecipePreset(textSeed).ingredients;
     } else if (action === 'instructions') {
-      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const focusKeyword = (recipe?.seo as any)?.focusKeyword?.trim() || '';
       const textSeed = `${focusKeyword} ${aboutRecipeText}`;
       result = getRecipePreset(textSeed).instructions;
     } else if (action === 'nutrition') {
-      const focusKeyword = (recipe.seo as any)?.focusKeyword?.trim() || '';
+      const focusKeyword = (recipe?.seo as any)?.focusKeyword?.trim() || '';
       const textSeed = `${focusKeyword} ${aboutRecipeText}`;
       result = getRecipePreset(textSeed).nutrition;
     } else {
       return res.status(400).json({ error: 'Invalid action specified. Supported: title, meta, keywords, readability, recipeTitle, image, ingredients, instructions, nutrition' });
     }
 
-    // Save or update in AI metadata log
-    const existingMeta = await prisma.aiGeneratedMetadata.findUnique({
-      where: { recipeId: recipe.id }
-    });
+    // Save or update in AI metadata log if recipe exists in DB
+    if (recipe) {
+      const existingMeta = await prisma.aiGeneratedMetadata.findUnique({
+        where: { recipeId: recipe.id }
+      });
 
-    if (existingMeta) {
-      await prisma.aiGeneratedMetadata.update({
-        where: { recipeId: recipe.id },
-        data: {
-          suggestedTitle: action === 'title' ? result : existingMeta.suggestedTitle,
-          suggestedMeta: action === 'meta' ? result : existingMeta.suggestedMeta,
-          suggestedKeywords: action === 'keywords' ? result : existingMeta.suggestedKeywords,
-          readabilityScore: action === 'readability' ? 84 : existingMeta.readabilityScore
-        }
-      });
-    } else {
-      await prisma.aiGeneratedMetadata.create({
-        data: {
-          recipeId: recipe.id,
-          suggestedTitle: action === 'title' ? result : '',
-          suggestedMeta: action === 'meta' ? result : '',
-          suggestedKeywords: action === 'keywords' ? result : '',
-          readabilityScore: action === 'readability' ? 84 : 0
-        }
-      });
+      if (existingMeta) {
+        await prisma.aiGeneratedMetadata.update({
+          where: { recipeId: recipe.id },
+          data: {
+            suggestedTitle: action === 'title' ? result : existingMeta.suggestedTitle,
+            suggestedMeta: action === 'meta' ? result : existingMeta.suggestedMeta,
+            suggestedKeywords: action === 'keywords' ? result : existingMeta.suggestedKeywords,
+            readabilityScore: action === 'readability' ? 84 : existingMeta.readabilityScore
+          }
+        });
+      } else {
+        await prisma.aiGeneratedMetadata.create({
+          data: {
+            recipeId: recipe.id,
+            suggestedTitle: action === 'title' ? result : '',
+            suggestedMeta: action === 'meta' ? result : '',
+            suggestedKeywords: action === 'keywords' ? result : '',
+            readabilityScore: action === 'readability' ? 84 : 0
+          }
+        });
+      }
     }
 
     res.json({
@@ -1505,6 +1571,7 @@ Suggestions to improve readability:
     next(error);
   }
 });
+
 
 // ==========================================
 // ADVANCED AI SEO AUTOMATION & SCORING ENDPOINTS

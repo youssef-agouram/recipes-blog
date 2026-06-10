@@ -57,6 +57,25 @@ export default function GoogleDocsEditor({ initialContent, onChange }: Props) {
     },
   });
 
+  // Keep editor content synchronized with initialContent when it changes asynchronously (e.g. on load or AI gen)
+  useEffect(() => {
+    if (!editor || !initialContent) return;
+
+    const isJSON = typeof initialContent === 'object';
+    if (isJSON) {
+      const currentJSON = JSON.stringify(editor.getJSON());
+      const targetJSON = JSON.stringify(initialContent);
+      if (currentJSON !== targetJSON && !editor.isFocused) {
+        editor.commands.setContent(initialContent, { emitUpdate: false });
+      }
+    } else {
+      const currentHTML = editor.getHTML();
+      if (currentHTML !== initialContent && !editor.isFocused) {
+        editor.commands.setContent(initialContent, { emitUpdate: false });
+      }
+    }
+  }, [editor, initialContent]);
+
   const [showEmbedModal, setShowEmbedModal] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -118,12 +137,14 @@ export default function GoogleDocsEditor({ initialContent, onChange }: Props) {
         />
       </div>
 
-      <div className="rounded-lg border border-[#272a35] bg-[#1a1d26] p-8 mt-4 min-h-[500px]">
+      <div className="rounded-lg border border-[#272a35] bg-[#1a1d26] p-8 mt-4 min-h-[500px] w-full max-w-full overflow-hidden">
         <EditorBubbleMenu
           editor={editor}
           onOpenLinkModal={openLinkModal}
         />
-        <EditorContent editor={editor} />
+        <div className="w-full max-w-full overflow-hidden">
+          <EditorContent editor={editor} />
+        </div>
       </div>
 
       <div className="mt-2 text-right text-sm text-[#8b929d]">

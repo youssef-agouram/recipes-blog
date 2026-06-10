@@ -15,7 +15,7 @@ import {
   Quote, Code, Link as LinkIcon, Image as ImageIcon,
   Video
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LinkModal from './LinkModal';
 import ImageModal from './ImageModal';
 import { EmbedModal } from './EmbedModal';
@@ -48,10 +48,29 @@ export function InstructionsEditor({ initialContent, onChange }: InstructionsEdi
     },
     editorProps: {
       attributes: {
-        class: 'ProseMirror prose prose-invert max-w-none focus:outline-none min-h-[200px] px-4 py-3',
+        class: 'ProseMirror prose prose-invert max-w-none focus:outline-none min-h-[200px] max-h-[350px] overflow-y-auto custom-scrollbar px-4 py-3',
       },
     },
   });
+
+  // Keep editor content synchronized with initialContent when it changes asynchronously (e.g. on load or AI gen)
+  useEffect(() => {
+    if (!editor || !initialContent) return;
+
+    const isJSON = typeof initialContent === 'object';
+    if (isJSON) {
+      const currentJSON = JSON.stringify(editor.getJSON());
+      const targetJSON = JSON.stringify(initialContent);
+      if (currentJSON !== targetJSON && !editor.isFocused) {
+        editor.commands.setContent(initialContent, { emitUpdate: false });
+      }
+    } else {
+      const currentHTML = editor.getHTML();
+      if (currentHTML !== initialContent && !editor.isFocused) {
+        editor.commands.setContent(initialContent, { emitUpdate: false });
+      }
+    }
+  }, [editor, initialContent]);
 
   const ToolbarButton = ({
     onClick,
@@ -82,7 +101,7 @@ export function InstructionsEditor({ initialContent, onChange }: InstructionsEdi
 
   return (
     <>
-      <div className="rounded-lg border border-[#272a35] bg-[#141821] overflow-hidden">
+      <div className="rounded-lg border border-[#272a35] bg-[#141821] overflow-hidden w-full max-w-full">
         {/* Inline Toolbar */}
         <div className="flex flex-wrap items-center gap-0.5 border-b border-[#272a35] bg-[#1a1d26] px-2 py-1.5">
           <ToolbarButton
@@ -168,7 +187,9 @@ export function InstructionsEditor({ initialContent, onChange }: InstructionsEdi
         </div>
 
         {/* Editor Content */}
-        <EditorContent editor={editor} />
+        <div className="w-full max-w-full">
+          <EditorContent editor={editor} />
+        </div>
       </div>
 
       {/* Modals */}

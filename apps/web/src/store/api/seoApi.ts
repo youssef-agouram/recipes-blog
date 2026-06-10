@@ -135,7 +135,7 @@ export const seoApi = apiService.injectEndpoints({
       query: () => '/seo/ai/recommendations',
       providesTags: ['Settings'],
     }),
-    generateAiMetadata: builder.mutation<any, { recipeId: number; action: string }>({
+    generateAiMetadata: builder.mutation<any, { recipeId?: number; action: string; recipeTitle?: string; aboutRecipeText?: string }>({
       query: (body) => ({
         url: '/seo/ai/generate',
         method: 'POST',
