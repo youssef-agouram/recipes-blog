@@ -17,7 +17,7 @@ export default function BlogRenderer({ content, className = "prose dark:prose-in
       parsedContent = JSON.parse(content);
     } catch (e) {
       console.error("Failed to parse content string in BlogRenderer:", e);
-      return <div className={className}>{content}</div>;
+      return <div className={className} dangerouslySetInnerHTML={{ __html: content }} />;
     }
   }
 
