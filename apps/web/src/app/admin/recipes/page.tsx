@@ -1,12 +1,12 @@
 'use client';
 
-import { useGetAdminRecipesQuery, useGetRecipeStatsQuery, useUpdateRecipeMutation, useCreateRecipeMutation, useDeleteRecipeMutation, useClearTrashRecipesMutation } from '@/store/api/recipeApi';
+import { useGetAdminRecipesQuery, useGetRecipeStatsQuery, useUpdateRecipeMutation, useCreateRecipeMutation, useDeleteRecipeMutation, useClearTrashRecipesMutation, useToggleFeaturedRecipeMutation } from '@/store/api/recipeApi';
 import { 
   Plus, Edit2, Trash2, Loader2, Search, Bell, 
   Calendar, ChevronDown, Filter, Download, 
   MoreVertical, Copy, Eye, ArrowUpRight, ArrowDownRight,
   LayoutGrid, List, CheckCircle2, Clock, Ban,
-  Crown
+  Crown, Star
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -21,6 +21,7 @@ export default function AdminRecipesPage() {
   const [updateRecipe] = useUpdateRecipeMutation();
   const [deleteRecipe, { isLoading: isDeleting }] = useDeleteRecipeMutation();
   const [clearTrashRecipes, { isLoading: isClearing }] = useClearTrashRecipesMutation();
+  const [toggleFeatured] = useToggleFeaturedRecipeMutation();
 
   const handleClearTrash = async () => {
     if (confirm('Are you sure you want to permanently delete all recipes in the trash? This action cannot be undone.')) {
@@ -91,6 +92,14 @@ export default function AdminRecipesPage() {
       }).unwrap();
     } catch (err) {
       console.error('Failed to toggle top article status:', err);
+    }
+  };
+
+  const handleToggleFeatured = async (id: number) => {
+    try {
+      await toggleFeatured(id).unwrap();
+    } catch (err) {
+      console.error('Failed to toggle featured status:', err);
     }
   };
 
@@ -333,6 +342,17 @@ export default function AdminRecipesPage() {
                         }`}
                       >
                         <Crown className={`h-3.5 w-3.5 ${recipe.isTopArticle ? 'fill-primary' : ''}`} />
+                      </button>
+                      <button
+                        onClick={() => handleToggleFeatured(recipe.id)}
+                        title={recipe.isFeatured ? "Remove from Featured" : "Set as Featured"}
+                        className={`h-8 w-8 flex items-center justify-center rounded-lg border transition-all active:scale-95 ${
+                          recipe.isFeatured 
+                            ? 'bg-amber-500/20 border-amber-500/50 text-amber-500' 
+                            : 'bg-background border-border text-muted-foreground hover:bg-secondary'
+                        }`}
+                      >
+                        <Star className={`h-3.5 w-3.5 ${recipe.isFeatured ? 'fill-amber-500' : ''}`} />
                       </button>
                       <Link
                         href={`/recipes/${recipe.slug}`}

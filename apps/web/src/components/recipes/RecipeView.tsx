@@ -279,7 +279,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           <div className="relative w-[46%] aspect-square xs:aspect-[4/3] rounded-2xl overflow-hidden border border-white/5 shrink-0 shadow-lg">
             <Image
               src={selectedImage}
-              alt={recipe.title}
+              alt={recipe.title?.replace(/\u00a0/g, ' ')}
               fill
               sizes="150px"
               className="object-cover"
@@ -300,7 +300,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               <span className="capitalize">{recipe.difficulty || 'Easy'}</span>
             </div>
             <h1 className="text-base xs:text-lg font-black text-white leading-tight tracking-tight font-heading line-clamp-3">
-              {recipe.title}
+              {recipe.title?.replace(/\u00a0/g, ' ')}
             </h1>
             <p className="text-[9px] xs:text-[10px] text-muted-foreground leading-snug font-medium line-clamp-3">
               {recipe.summary || "Embark on a culinary journey with this masterpiece."}
@@ -363,7 +363,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           {/* Left Column: Visuals, Stats, Actions, Ingredients, Instructions, Nutrition */}
           <div className="w-full lg:w-[55%] lg:shrink-0 flex flex-col gap-4 md:gap-8">
             <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[22px] overflow-hidden shadow-2xl group border border-white/5 mb-4">
-              <Image src={selectedImage} alt={recipe.title} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
+              <Image src={selectedImage} alt={recipe.title?.replace(/\u00a0/g, ' ')} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute top-8 right-8 flex flex-col gap-3">
                 <button onClick={handleSaveToggle} className={cn("w-14 h-14 rounded-2xl backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all shadow-2xl hover:scale-110 active:scale-95", isSaved ? "bg-primary text-primary-foreground" : "bg-black/40 text-white/90 hover:bg-primary hover:text-primary-foreground")} title={isSaved ? "Unsave recipe" : "Save recipe"}>
@@ -740,7 +740,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             </div>
 
             <h1 className="hidden md:block text-5xl sm:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter font-heading drop-shadow-2xl mb-4">
-              {recipe.title}
+              {recipe.title?.replace(/\u00a0/g, ' ')}
             </h1>
 
             <p className="hidden md:block text-[16px] text-muted-foreground leading-relaxed font-medium max-w-xl mb-4">
