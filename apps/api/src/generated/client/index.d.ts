@@ -9476,6 +9476,7 @@ export namespace Prisma {
     role: string | null
     status: string | null
     avatar: string | null
+    unlockCookingGuide: boolean | null
     createdAt: Date | null
   }
 
@@ -9487,6 +9488,7 @@ export namespace Prisma {
     role: string | null
     status: string | null
     avatar: string | null
+    unlockCookingGuide: boolean | null
     createdAt: Date | null
   }
 
@@ -9498,6 +9500,7 @@ export namespace Prisma {
     role: number
     status: number
     avatar: number
+    unlockCookingGuide: number
     createdAt: number
     _all: number
   }
@@ -9519,6 +9522,7 @@ export namespace Prisma {
     role?: true
     status?: true
     avatar?: true
+    unlockCookingGuide?: true
     createdAt?: true
   }
 
@@ -9530,6 +9534,7 @@ export namespace Prisma {
     role?: true
     status?: true
     avatar?: true
+    unlockCookingGuide?: true
     createdAt?: true
   }
 
@@ -9541,6 +9546,7 @@ export namespace Prisma {
     role?: true
     status?: true
     avatar?: true
+    unlockCookingGuide?: true
     createdAt?: true
     _all?: true
   }
@@ -9639,6 +9645,7 @@ export namespace Prisma {
     role: string
     status: string
     avatar: string | null
+    unlockCookingGuide: boolean
     createdAt: Date
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
@@ -9669,6 +9676,7 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     avatar?: boolean
+    unlockCookingGuide?: boolean
     createdAt?: boolean
     comments?: boolean | User$commentsArgs<ExtArgs>
     savedRecipes?: boolean | User$savedRecipesArgs<ExtArgs>
@@ -9686,6 +9694,7 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     avatar?: boolean
+    unlockCookingGuide?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["user"]>
 
@@ -9697,6 +9706,7 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     avatar?: boolean
+    unlockCookingGuide?: boolean
     createdAt?: boolean
   }
 
@@ -9727,6 +9737,7 @@ export namespace Prisma {
       role: string
       status: string
       avatar: string | null
+      unlockCookingGuide: boolean
       createdAt: Date
     }, ExtArgs["result"]["user"]>
     composites: {}
@@ -10133,6 +10144,7 @@ export namespace Prisma {
     readonly role: FieldRef<"User", 'String'>
     readonly status: FieldRef<"User", 'String'>
     readonly avatar: FieldRef<"User", 'String'>
+    readonly unlockCookingGuide: FieldRef<"User", 'Boolean'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
   }
     
@@ -36476,6 +36488,7 @@ export namespace Prisma {
     role: 'role',
     status: 'status',
     avatar: 'avatar',
+    unlockCookingGuide: 'unlockCookingGuide',
     createdAt: 'createdAt'
   };
 
@@ -37499,6 +37512,7 @@ export namespace Prisma {
     role?: StringFilter<"User"> | string
     status?: StringFilter<"User"> | string
     avatar?: StringNullableFilter<"User"> | string | null
+    unlockCookingGuide?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     comments?: CommentListRelationFilter
     savedRecipes?: SavedRecipeListRelationFilter
@@ -37515,6 +37529,7 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     avatar?: SortOrderInput | SortOrder
+    unlockCookingGuide?: SortOrder
     createdAt?: SortOrder
     comments?: CommentOrderByRelationAggregateInput
     savedRecipes?: SavedRecipeOrderByRelationAggregateInput
@@ -37534,6 +37549,7 @@ export namespace Prisma {
     role?: StringFilter<"User"> | string
     status?: StringFilter<"User"> | string
     avatar?: StringNullableFilter<"User"> | string | null
+    unlockCookingGuide?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     comments?: CommentListRelationFilter
     savedRecipes?: SavedRecipeListRelationFilter
@@ -37550,6 +37566,7 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     avatar?: SortOrderInput | SortOrder
+    unlockCookingGuide?: SortOrder
     createdAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
@@ -37569,6 +37586,7 @@ export namespace Prisma {
     role?: StringWithAggregatesFilter<"User"> | string
     status?: StringWithAggregatesFilter<"User"> | string
     avatar?: StringNullableWithAggregatesFilter<"User"> | string | null
+    unlockCookingGuide?: BoolWithAggregatesFilter<"User"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
 
@@ -40132,6 +40150,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentCreateNestedManyWithoutUserInput
     savedRecipes?: SavedRecipeCreateNestedManyWithoutUserInput
@@ -40148,6 +40167,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     savedRecipes?: SavedRecipeUncheckedCreateNestedManyWithoutUserInput
@@ -40163,6 +40183,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUpdateManyWithoutUserNestedInput
     savedRecipes?: SavedRecipeUpdateManyWithoutUserNestedInput
@@ -40179,6 +40200,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     savedRecipes?: SavedRecipeUncheckedUpdateManyWithoutUserNestedInput
@@ -40195,6 +40217,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
   }
 
@@ -40205,6 +40228,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -40216,6 +40240,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -43078,6 +43103,7 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     avatar?: SortOrder
+    unlockCookingGuide?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -43093,6 +43119,7 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     avatar?: SortOrder
+    unlockCookingGuide?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -43104,6 +43131,7 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     avatar?: SortOrder
+    unlockCookingGuide?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -46443,6 +46471,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     savedRecipes?: SavedRecipeCreateNestedManyWithoutUserInput
     savedArticles?: SavedArticleCreateNestedManyWithoutUserInput
@@ -46458,6 +46487,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     savedRecipes?: SavedRecipeUncheckedCreateNestedManyWithoutUserInput
     savedArticles?: SavedArticleUncheckedCreateNestedManyWithoutUserInput
@@ -46643,6 +46673,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     savedRecipes?: SavedRecipeUpdateManyWithoutUserNestedInput
     savedArticles?: SavedArticleUpdateManyWithoutUserNestedInput
@@ -46658,6 +46689,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     savedRecipes?: SavedRecipeUncheckedUpdateManyWithoutUserNestedInput
     savedArticles?: SavedArticleUncheckedUpdateManyWithoutUserNestedInput
@@ -47476,6 +47508,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentCreateNestedManyWithoutUserInput
     savedArticles?: SavedArticleCreateNestedManyWithoutUserInput
@@ -47491,6 +47524,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     savedArticles?: SavedArticleUncheckedCreateNestedManyWithoutUserInput
@@ -47593,6 +47627,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUpdateManyWithoutUserNestedInput
     savedArticles?: SavedArticleUpdateManyWithoutUserNestedInput
@@ -47608,6 +47643,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     savedArticles?: SavedArticleUncheckedUpdateManyWithoutUserNestedInput
@@ -47700,6 +47736,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentCreateNestedManyWithoutUserInput
     savedRecipes?: SavedRecipeCreateNestedManyWithoutUserInput
@@ -47715,6 +47752,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     savedRecipes?: SavedRecipeUncheckedCreateNestedManyWithoutUserInput
@@ -47817,6 +47855,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUpdateManyWithoutUserNestedInput
     savedRecipes?: SavedRecipeUpdateManyWithoutUserNestedInput
@@ -47832,6 +47871,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     savedRecipes?: SavedRecipeUncheckedUpdateManyWithoutUserNestedInput
@@ -47924,6 +47964,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentCreateNestedManyWithoutUserInput
     savedRecipes?: SavedRecipeCreateNestedManyWithoutUserInput
@@ -47939,6 +47980,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     savedRecipes?: SavedRecipeUncheckedCreateNestedManyWithoutUserInput
@@ -48001,6 +48043,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUpdateManyWithoutUserNestedInput
     savedRecipes?: SavedRecipeUpdateManyWithoutUserNestedInput
@@ -48016,6 +48059,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     savedRecipes?: SavedRecipeUncheckedUpdateManyWithoutUserNestedInput
@@ -48068,6 +48112,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentCreateNestedManyWithoutUserInput
     savedRecipes?: SavedRecipeCreateNestedManyWithoutUserInput
@@ -48083,6 +48128,7 @@ export namespace Prisma {
     role?: string
     status?: string
     avatar?: string | null
+    unlockCookingGuide?: boolean
     createdAt?: Date | string
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     savedRecipes?: SavedRecipeUncheckedCreateNestedManyWithoutUserInput
@@ -48145,6 +48191,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUpdateManyWithoutUserNestedInput
     savedRecipes?: SavedRecipeUpdateManyWithoutUserNestedInput
@@ -48160,6 +48207,7 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    unlockCookingGuide?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     savedRecipes?: SavedRecipeUncheckedUpdateManyWithoutUserNestedInput

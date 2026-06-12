@@ -65,6 +65,7 @@ export default function AdminUsersPage() {
         name: editingUser.name,
         email: editingUser.email,
         status: editingUser.status,
+        unlockCookingGuide: editingUser.unlockCookingGuide,
       }).unwrap();
       setEditingUser(null);
     } catch (error) {
@@ -172,6 +173,7 @@ export default function AdminUsersPage() {
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Password</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Role</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Status</th>
+                <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50 text-center">Cooking Guide</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50 text-center">Recipes</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Actions</th>
               </tr>
@@ -235,6 +237,32 @@ export default function AdminUsersPage() {
                     }`}>
                       {user.status}
                     </span>
+                  </td>
+                  <td className="px-6 py-5 text-center">
+                    <div className="flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await updateUserDetails({
+                              id: user.id,
+                              unlockCookingGuide: !user.unlockCookingGuide
+                            }).unwrap();
+                          } catch (error) {
+                            console.error('Failed to toggle cooking guide access:', error);
+                          }
+                        }}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          user.unlockCookingGuide ? 'bg-[#5850ec]' : 'bg-white/10 hover:bg-white/15'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                            user.unlockCookingGuide ? 'translate-x-5' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </td>
                   <td className="px-6 py-5 text-center">
                     <span className="text-sm font-bold text-white">-</span>
@@ -318,14 +346,39 @@ export default function AdminUsersPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Status</label>
-                <select 
-                  value={editingUser.status}
-                  onChange={(e) => setEditingUser({...editingUser, status: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec] transition-all appearance-none cursor-pointer"
+                <div className="relative">
+                  <select 
+                    value={editingUser.status}
+                    onChange={(e) => setEditingUser({...editingUser, status: e.target.value})}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#5850ec] transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="Active" className="bg-[#0c1021]">Active</option>
+                    <option value="Inactive" className="bg-[#0c1021]">Inactive</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">Unlock Cooking Guide</span>
+                  <span className="text-[10px] text-muted-foreground/60">Allow user to access the cooking guides</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditingUser({
+                    ...editingUser,
+                    unlockCookingGuide: !editingUser.unlockCookingGuide
+                  })}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    editingUser.unlockCookingGuide ? 'bg-[#5850ec]' : 'bg-white/10 hover:bg-white/15'
+                  }`}
                 >
-                  <option value="Active" className="bg-[#0c1021]">Active</option>
-                  <option value="Inactive" className="bg-[#0c1021]">Inactive</option>
-                </select>
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      editingUser.unlockCookingGuide ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
               </div>
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-white text-sm font-bold hover:bg-white/5 transition-all">Cancel</button>

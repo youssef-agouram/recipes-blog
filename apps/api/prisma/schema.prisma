@@ -122,6 +122,7 @@ model User {
   role      String   @default("Subscriber")
   status    String   @default("Active")
   avatar    String?
+  unlockCookingGuide Boolean @default(false)
   comments  Comment[]
   savedRecipes SavedRecipe[]
   savedArticles SavedArticle[]

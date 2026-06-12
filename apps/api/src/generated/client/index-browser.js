@@ -200,6 +200,7 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   status: 'status',
   avatar: 'avatar',
+  unlockCookingGuide: 'unlockCookingGuide',
   createdAt: 'createdAt'
 };
 

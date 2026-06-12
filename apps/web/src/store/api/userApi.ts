@@ -8,6 +8,7 @@ export interface User {
   role: string;
   status: string;
   avatar: string | null;
+  unlockCookingGuide: boolean;
   createdAt: string;
 }
 
@@ -36,7 +37,7 @@ export const userApi = apiService.injectEndpoints({
       }),
       invalidatesTags: ['User'],
     }),
-    updateUserDetails: builder.mutation<User, { id: number; name?: string; email?: string; status?: string; avatar?: string | null }>({
+    updateUserDetails: builder.mutation<User, { id: number; name?: string; email?: string; status?: string; avatar?: string | null; unlockCookingGuide?: boolean }>({
       query: ({ id, ...body }) => ({
         url: `/users/${id}`,
         method: 'PUT',

@@ -116,19 +116,20 @@ model Ingredient {
 }
 
 model User {
-  id               Int               @id @default(autoincrement())
-  email            String            @unique
-  name             String?
-  password         String
-  role             String            @default("Subscriber")
-  status           String            @default("Active")
-  avatar           String?
-  comments         Comment[]
-  savedRecipes     SavedRecipe[]
-  savedArticles    SavedArticle[]
-  favoriteRecipes  FavoriteRecipe[]
-  favoriteArticles FavoriteArticle[]
-  createdAt        DateTime          @default(now())
+  id                 Int               @id @default(autoincrement())
+  email              String            @unique
+  name               String?
+  password           String
+  role               String            @default("Subscriber")
+  status             String            @default("Active")
+  avatar             String?
+  unlockCookingGuide Boolean           @default(false)
+  comments           Comment[]
+  savedRecipes       SavedRecipe[]
+  savedArticles      SavedArticle[]
+  favoriteRecipes    FavoriteRecipe[]
+  favoriteArticles   FavoriteArticle[]
+  createdAt          DateTime          @default(now())
 }
 
 model SavedRecipe {
