@@ -304,23 +304,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                   );
                 })}
 
-                {/* Placeholders */}
-                {recipes.length < 5 && Array.from({ length: 5 - recipes.length }).map((_, i) => (
-                  <div
-                    key={`placeholder-${i}`}
-                    className="bg-card/30 rounded-xl flex flex-col border border-dashed border-border min-w-[280px] md:min-w-[calc(20%-13px)]"
-                  >
-                    <div className="aspect-[4/3] w-full bg-white/[0.03] rounded-t-xl" />
-                    <div className="p-3.5 space-y-2">
-                      <div className="h-3 w-3/4 bg-white/5 rounded" />
-                      <div className="h-10 w-full bg-white/5 rounded" />
-                      <div className="flex justify-between pt-2">
-                        <div className="h-2 w-1/4 bg-white/5 rounded" />
-                        <div className="h-2 w-1/4 bg-white/5 rounded" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
+
               </m.div>
             ) : (
               <m.div
@@ -417,23 +401,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                   );
                 })}
 
-                {/* Placeholders */}
-                {recipes.length < 5 && Array.from({ length: 5 - recipes.length }).map((_, i) => (
-                  <div
-                    key={`placeholder-${i}`}
-                    className="bg-card/30 rounded-xl flex flex-col border border-dashed border-border w-full"
-                  >
-                    <div className="aspect-[4/3] w-full bg-white/[0.03] rounded-t-xl" />
-                    <div className="p-3.5 space-y-2">
-                      <div className="h-3 w-3/4 bg-white/5 rounded" />
-                      <div className="h-10 w-full bg-white/5 rounded" />
-                      <div className="flex justify-between pt-2">
-                        <div className="h-2 w-1/4 bg-white/5 rounded" />
-                        <div className="h-2 w-1/4 bg-white/5 rounded" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
+
               </m.div>
             )}
           </AnimatePresence>

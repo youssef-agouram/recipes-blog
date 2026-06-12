@@ -361,7 +361,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-12 mb-8 md:mb-16 animate-in fade-in duration-1000">
 
           {/* Left Column: Visuals, Stats, Actions, Ingredients, Instructions, Nutrition */}
-          <div className="w-full lg:w-[55%] flex flex-col gap-4 md:gap-8">
+          <div className="w-full lg:w-[55%] lg:shrink-0 flex flex-col gap-4 md:gap-8">
             <div className="hidden md:block relative aspect-[16/10] rounded-2xl sm:rounded-[22px] overflow-hidden shadow-2xl group border border-white/5 mb-4">
               <Image src={selectedImage} alt={recipe.title} fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover group-hover:scale-105 transition-transform duration-[3s]" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -727,7 +727,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           </div>
 
           {/* Right Column: Title, Summary, About, Video Mobile, Community Feedback */}
-          <div className="flex flex-col flex-1 w-full gap-4 md:gap-8">
+          <div className="flex flex-col flex-1 w-full gap-4 md:gap-8 min-w-0">
             <div className="hidden md:flex items-center gap-3 mb-2">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map(i => (

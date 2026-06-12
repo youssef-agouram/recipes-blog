@@ -121,6 +121,88 @@ export function generateBreadcrumbListJsonLd(categories: Category[], recipeSlug:
   };
 }
 
+function getPlainText(html: string): string {
+  if (!html) return '';
+  // 1. Try to parse as JSON (Tiptap format)
+  try {
+    const parsed = JSON.parse(html);
+    if (parsed && typeof parsed === 'object') {
+      const extractText = (node: any): string => {
+        if (!node) return '';
+        if (node.type === 'text') return node.text || '';
+        if (node.content && Array.isArray(node.content)) {
+          return node.content.map(extractText).join(' ');
+        }
+        return '';
+      };
+      return extractText(parsed);
+    }
+  } catch (e) {
+    // Not JSON, continue to HTML regex replacement
+  }
+
+  // 2. Strip HTML tags
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function parseContentStats(html: string): { h2Count: number; h3Count: number; linkCount: number } {
+  let h2Count = 0;
+  let h3Count = 0;
+  let linkCount = 0;
+
+  if (!html) return { h2Count, h3Count, linkCount };
+
+  // 1. Try to parse as JSON (Tiptap format)
+  try {
+    const parsed = JSON.parse(html);
+    if (parsed && typeof parsed === 'object') {
+      const traverse = (node: any) => {
+        if (!node || typeof node !== 'object') return;
+        
+        if (node.type === 'heading') {
+          const level = node.attrs?.level;
+          if (level === 2) h2Count++;
+          else if (level === 3) h3Count++;
+        }
+        
+        if (node.marks && Array.isArray(node.marks)) {
+          for (const mark of node.marks) {
+            if (mark.type === 'link') {
+              const href = mark.attrs?.href;
+              if (href && (href.startsWith('/') || href.startsWith(SITE_URL) || href.includes('localhost'))) {
+                linkCount++;
+              }
+            }
+          }
+        }
+        
+        if (Array.isArray(node.content)) {
+          node.content.forEach(traverse);
+        }
+      };
+      traverse(parsed);
+      return { h2Count, h3Count, linkCount };
+    }
+  } catch (e) {
+    // Not JSON, fallback to HTML regex matching
+  }
+
+  // 2. HTML regex matching
+  h2Count = (html.match(/<h2[^>]*>/gi) || []).length;
+  h3Count = (html.match(/<h3[^>]*>/gi) || []).length;
+  
+  // Count internal links (href starting with / or matching SITE_URL)
+  const aMatches = html.matchAll(/<a\s+[^>]*href=["']([^"']*)["']/gi);
+  for (const match of aMatches) {
+    const href = match[1];
+    if (href && (href.startsWith('/') || href.startsWith(SITE_URL) || href.includes('localhost'))) {
+      linkCount++;
+    }
+  }
+
+  return { h2Count, h3Count, linkCount };
+}
+
 /**
  * 2. SEO Scoring Service
  */
@@ -209,9 +291,9 @@ export function analyzeRecipeSEO({
   }
   totalScore += checks.keywordInTitle.points + checks.keywordInDescription.points + checks.keywordInSlug.points;
 
-  // Heading hierarchy analysis (simulate heading checks in html tags)
-  const h2Count = (html.match(/<h2[^>]*>/gi) || []).length;
-  const h3Count = (html.match(/<h3[^>]*>/gi) || []).length;
+  // Heading hierarchy and internal links analysis
+  const { h2Count, h3Count, linkCount } = parseContentStats(html);
+
   if (h2Count > 0 || h3Count > 0) {
     checks.headings = { status: 'pass', message: `Great! Found heading tags (H2: ${h2Count}, H3: ${h3Count}) in content.`, points: 10 };
   } else {
@@ -228,9 +310,8 @@ export function analyzeRecipeSEO({
   totalScore += checks.imagesAlt.points;
 
   // Internal Links check
-  const links = (html.match(/<a\s+href=["']\//gi) || []).length;
-  if (links > 0) {
-    checks.internalLinks = { status: 'pass', message: `Good internal linking structure. Found ${links} links.`, points: 10 };
+  if (linkCount > 0) {
+    checks.internalLinks = { status: 'pass', message: `Good internal linking structure. Found ${linkCount} links.`, points: 10 };
   } else {
     checks.internalLinks = { status: 'warning', message: 'No internal links detected. Add links to related recipes.', points: 5 };
   }
@@ -260,7 +341,7 @@ export interface ReadabilityAnalysisResult {
 }
 
 export function analyzeReadability(text: string, focusKeyword?: string): ReadabilityAnalysisResult {
-  const cleanText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  const cleanText = getPlainText(text);
   const words = cleanText.split(' ').filter(Boolean);
   const wordCount = words.length;
 
