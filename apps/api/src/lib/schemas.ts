@@ -103,6 +103,7 @@ export const SiteSettingsSchema = z.object({
   showSearchBar: z.boolean(),
   showAuthButtons: z.boolean(),
   showTopBar: z.boolean(),
+  requireCookingSignIn: z.boolean().optional(),
   menuItems: z.any().optional(),
   profileMenu: z.any().optional(),
   footerLinks: z.any().optional(),

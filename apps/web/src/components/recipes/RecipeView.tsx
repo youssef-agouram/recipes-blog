@@ -24,6 +24,7 @@ import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useGetSiteSettingsQuery } from "@/store/api/settingsApi";
 
 interface RecipeViewProps {
   recipe: Recipe;
@@ -33,6 +34,9 @@ interface RecipeViewProps {
 export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) {
   const router = useRouter();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { data: siteSettings } = useGetSiteSettingsQuery();
+  
+  const isGuideUnlocked = isAuthenticated || siteSettings?.requireCookingSignIn === false;
   const [saveRecipe] = useSaveRecipeMutation();
   const [unsaveRecipe] = useUnsaveRecipeMutation();
   const [favoriteRecipe] = useFavoriteRecipeMutation();
@@ -141,7 +145,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
   };
 
   const handleCookingGuideClick = () => {
-    if (!isAuthenticated) {
+    if (!isGuideUnlocked) {
       setShowAuthModal(true);
       setOpenCookingGuide(true);
       setTimeout(() => {
@@ -750,7 +754,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
              <section id="cooking-guide-section" className="max-w-none pb-4 border-b border-white/5 mb-4 scroll-mt-20">
               <button
                 onClick={() => {
-                  if (!isAuthenticated) {
+                  if (!isGuideUnlocked) {
                     setShowAuthModal(true);
                   }
                   setOpenCookingGuide(!openCookingGuide);
@@ -764,7 +768,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openCookingGuide && "rotate-180")} />
               </button>
 
-              {!isAuthenticated && openCookingGuide && (
+              {!isGuideUnlocked && openCookingGuide && (
                 <div className="relative mt-4 rounded-2xl overflow-hidden border border-white/5 bg-white/[0.01] p-6 text-center backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#05060b]/80" />
                   <div className="relative z-10 flex flex-col items-center py-4">
@@ -785,7 +789,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                 </div>
               )}
 
-              {isAuthenticated && openCookingGuide && (
+              {isGuideUnlocked && openCookingGuide && (
                 <div className="prose prose-neutral dark:prose-invert text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[420px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth animate-in fade-in slide-in-from-top-2 duration-300 mt-4">
                   {recipe.content ? (
                     <BlogRenderer content={recipe.content} />

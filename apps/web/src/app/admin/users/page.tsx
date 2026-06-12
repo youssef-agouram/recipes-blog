@@ -17,6 +17,10 @@ import {
   useUpdateUserDetailsMutation,
   useDeleteUserMutation
 } from '@/store/api/userApi';
+import {
+  useGetSiteSettingsQuery,
+  useUpdateSiteSettingsMutation
+} from '@/store/api/settingsApi';
 
 const getRoleColor = (role: string) => {
   switch (role) {
@@ -35,6 +39,9 @@ export default function AdminUsersPage() {
   const [updateRole, { isLoading: isUpdatingRole }] = useUpdateUserRoleMutation();
   const [updateUserDetails] = useUpdateUserDetailsMutation();
   const [deleteUser] = useDeleteUserMutation();
+
+  const { data: siteSettings, isLoading: isSettingsLoading } = useGetSiteSettingsQuery();
+  const [updateSiteSettings, { isLoading: isUpdatingSettings }] = useUpdateSiteSettingsMutation();
 
   const [editingUser, setEditingUser] = useState<any>(null);
 
@@ -65,7 +72,6 @@ export default function AdminUsersPage() {
         name: editingUser.name,
         email: editingUser.email,
         status: editingUser.status,
-        unlockCookingGuide: editingUser.unlockCookingGuide,
       }).unwrap();
       setEditingUser(null);
     } catch (error) {
@@ -97,13 +103,45 @@ export default function AdminUsersPage() {
             <span className="text-white/60">All Users</span>
           </div>
         </div>
-        <Link 
-          href="/admin/users/new"
-          className="flex items-center gap-2 px-6 py-3 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-[#5850ec]/20 active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New User</span>
-        </Link>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <div className="flex items-center justify-between gap-3 px-5 py-2.5 bg-card/45 border border-white/5 rounded-xl backdrop-blur-xl">
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-white uppercase tracking-wider">Lock Cooking Guide</span>
+              <span className="text-[10px] text-muted-foreground/60">Require sign-in to view guide</span>
+            </div>
+            <button
+              type="button"
+              disabled={isSettingsLoading || isUpdatingSettings}
+              onClick={async () => {
+                if (!siteSettings) return;
+                try {
+                  await updateSiteSettings({
+                    ...siteSettings,
+                    requireCookingSignIn: siteSettings.requireCookingSignIn !== false ? false : true
+                  }).unwrap();
+                } catch (err) {
+                  console.error('Failed to toggle cooking guide sign-in requirement:', err);
+                }
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                siteSettings?.requireCookingSignIn !== false ? 'bg-[#5850ec]' : 'bg-white/10 hover:bg-white/15'
+              } disabled:opacity-50`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  siteSettings?.requireCookingSignIn !== false ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+          <Link 
+            href="/admin/users/new"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-[#5850ec]/20 active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New User</span>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -173,7 +211,6 @@ export default function AdminUsersPage() {
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Password</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Role</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Status</th>
-                <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50 text-center">Cooking Guide</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50 text-center">Recipes</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Actions</th>
               </tr>
@@ -237,32 +274,6 @@ export default function AdminUsersPage() {
                     }`}>
                       {user.status}
                     </span>
-                  </td>
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex items-center justify-center">
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            await updateUserDetails({
-                              id: user.id,
-                              unlockCookingGuide: !user.unlockCookingGuide
-                            }).unwrap();
-                          } catch (error) {
-                            console.error('Failed to toggle cooking guide access:', error);
-                          }
-                        }}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          user.unlockCookingGuide ? 'bg-[#5850ec]' : 'bg-white/10 hover:bg-white/15'
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            user.unlockCookingGuide ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                    </div>
                   </td>
                   <td className="px-6 py-5 text-center">
                     <span className="text-sm font-bold text-white">-</span>
@@ -358,28 +369,7 @@ export default function AdminUsersPage() {
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
-              <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-white uppercase tracking-wider">Unlock Cooking Guide</span>
-                  <span className="text-[10px] text-muted-foreground/60">Allow user to access the cooking guides</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEditingUser({
-                    ...editingUser,
-                    unlockCookingGuide: !editingUser.unlockCookingGuide
-                  })}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    editingUser.unlockCookingGuide ? 'bg-[#5850ec]' : 'bg-white/10 hover:bg-white/15'
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                      editingUser.unlockCookingGuide ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
+
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-white text-sm font-bold hover:bg-white/5 transition-all">Cancel</button>
                 <button type="submit" className="flex-1 px-4 py-2.5 rounded-xl bg-[#5850ec] text-white text-sm font-bold hover:bg-[#4d45d1] transition-all">Save Changes</button>

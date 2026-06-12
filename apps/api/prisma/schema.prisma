@@ -122,7 +122,6 @@ model User {
   role      String   @default("Subscriber")
   status    String   @default("Active")
   avatar    String?
-  unlockCookingGuide Boolean @default(false)
   comments  Comment[]
   savedRecipes SavedRecipe[]
   savedArticles SavedArticle[]
@@ -317,6 +316,7 @@ model SiteSettings {
   showSearchBar   Boolean @default(true)
   showAuthButtons Boolean @default(true)
   showTopBar      Boolean @default(true)
+  requireCookingSignIn Boolean @default(true)
   
   // JSON fields for complex structures
   menuItems       Json?   @default("[]")

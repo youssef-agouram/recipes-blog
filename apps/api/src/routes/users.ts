@@ -81,7 +81,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response, next:
       return res.status(403).json({ error: 'Forbidden: You cannot modify other users' });
     }
 
-    const { name, email, status, avatar, unlockCookingGuide } = req.body;
+    const { name, email, status, avatar } = req.body;
 
     // 3. Build update body
     const updateData: any = {};
@@ -89,12 +89,9 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response, next:
     if (email !== undefined) updateData.email = email;
     if (avatar !== undefined) updateData.avatar = avatar;
 
-    // Only administrators can change the status and unlockCookingGuide permission
+    // Only administrators can change the status
     if (requestingUser.role === 'Administrator') {
       if (status !== undefined) updateData.status = status;
-      if (unlockCookingGuide !== undefined) {
-        updateData.unlockCookingGuide = unlockCookingGuide === true || unlockCookingGuide === 'true';
-      }
     }
 
     const updatedUser = await prisma.user.update({

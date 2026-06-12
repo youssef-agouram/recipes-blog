@@ -200,7 +200,6 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   status: 'status',
   avatar: 'avatar',
-  unlockCookingGuide: 'unlockCookingGuide',
   createdAt: 'createdAt'
 };
 
@@ -343,6 +342,7 @@ exports.Prisma.SiteSettingsScalarFieldEnum = {
   showSearchBar: 'showSearchBar',
   showAuthButtons: 'showAuthButtons',
   showTopBar: 'showTopBar',
+  requireCookingSignIn: 'requireCookingSignIn',
   menuItems: 'menuItems',
   profileMenu: 'profileMenu',
   footerLinks: 'footerLinks',

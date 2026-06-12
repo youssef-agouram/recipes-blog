@@ -31,6 +31,7 @@ router.get('/site', async (_req: Request, res: Response, next: NextFunction) => 
       showSearchBar: true,
       showAuthButtons: true,
       showTopBar: true,
+      requireCookingSignIn: true,
       menuItems: [],
       profileMenu: [],
       socialLinks: [],

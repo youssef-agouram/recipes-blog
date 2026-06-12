@@ -225,6 +225,8 @@ router.post('/check-email', async (req: Request, res: Response, next: NextFuncti
         },
       });
     } else {
+
+
       // User does not exist -> Send OTP code
       // Generate 6 digit numeric code
       const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -287,6 +289,8 @@ router.post('/register-passwordless', async (req: Request, res: Response, next: 
     if (existingUser) {
       return res.status(400).json({ error: 'Account already exists. Please sign in instead.' });
     }
+
+
 
     // Generate a random password for database integrity
     const randomPassword = Math.random().toString(36) + Math.random().toString(36);
