@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import {
@@ -29,7 +30,8 @@ import { AdSenseOverviewCard } from '@/components/admin/dashboard/AdSenseOvervie
 
 export default function AdminDashboardPage() {
   const user = useSelector((state: RootState) => state.auth.user);
-  const { data: statsData, isLoading } = useGetDashboardStatsQuery(undefined, { pollingInterval: 60000 });
+  const [filter, setFilter] = useState<'24h' | '7d' | '30d'>('7d');
+  const { data: statsData, isLoading } = useGetDashboardStatsQuery(filter, { pollingInterval: 60000 });
 
   if (isLoading) {
     return (
@@ -122,7 +124,9 @@ export default function AdminDashboardPage() {
       {/* ───── Header ───── */}
       <DashboardHeader
         userName={user?.name || 'Admin'}
-        activeUsers={statsData?.activeUsers?.total || 1}
+        activeUsers={statsData?.activeUsers?.total || 0}
+        filter={filter}
+        onFilterChange={setFilter}
       />
 
       {/* ───── KPI Cards Row ───── */}

@@ -24599,6 +24599,8 @@ export namespace Prisma {
     userAgent: string | null
     sessionId: string | null
     duration: number | null
+    referrer: string | null
+    country: string | null
     createdAt: Date | null
   }
 
@@ -24609,6 +24611,8 @@ export namespace Prisma {
     userAgent: string | null
     sessionId: string | null
     duration: number | null
+    referrer: string | null
+    country: string | null
     createdAt: Date | null
   }
 
@@ -24619,6 +24623,8 @@ export namespace Prisma {
     userAgent: number
     sessionId: number
     duration: number
+    referrer: number
+    country: number
     createdAt: number
     _all: number
   }
@@ -24641,6 +24647,8 @@ export namespace Prisma {
     userAgent?: true
     sessionId?: true
     duration?: true
+    referrer?: true
+    country?: true
     createdAt?: true
   }
 
@@ -24651,6 +24659,8 @@ export namespace Prisma {
     userAgent?: true
     sessionId?: true
     duration?: true
+    referrer?: true
+    country?: true
     createdAt?: true
   }
 
@@ -24661,6 +24671,8 @@ export namespace Prisma {
     userAgent?: true
     sessionId?: true
     duration?: true
+    referrer?: true
+    country?: true
     createdAt?: true
     _all?: true
   }
@@ -24758,6 +24770,8 @@ export namespace Prisma {
     userAgent: string | null
     sessionId: string | null
     duration: number
+    referrer: string | null
+    country: string | null
     createdAt: Date
     _count: VisitCountAggregateOutputType | null
     _avg: VisitAvgAggregateOutputType | null
@@ -24787,6 +24801,8 @@ export namespace Prisma {
     userAgent?: boolean
     sessionId?: boolean
     duration?: boolean
+    referrer?: boolean
+    country?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["visit"]>
 
@@ -24797,6 +24813,8 @@ export namespace Prisma {
     userAgent?: boolean
     sessionId?: boolean
     duration?: boolean
+    referrer?: boolean
+    country?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["visit"]>
 
@@ -24807,6 +24825,8 @@ export namespace Prisma {
     userAgent?: boolean
     sessionId?: boolean
     duration?: boolean
+    referrer?: boolean
+    country?: boolean
     createdAt?: boolean
   }
 
@@ -24821,6 +24841,8 @@ export namespace Prisma {
       userAgent: string | null
       sessionId: string | null
       duration: number
+      referrer: string | null
+      country: string | null
       createdAt: Date
     }, ExtArgs["result"]["visit"]>
     composites: {}
@@ -25221,6 +25243,8 @@ export namespace Prisma {
     readonly userAgent: FieldRef<"Visit", 'String'>
     readonly sessionId: FieldRef<"Visit", 'String'>
     readonly duration: FieldRef<"Visit", 'Int'>
+    readonly referrer: FieldRef<"Visit", 'String'>
+    readonly country: FieldRef<"Visit", 'String'>
     readonly createdAt: FieldRef<"Visit", 'DateTime'>
   }
     
@@ -36685,6 +36709,8 @@ export namespace Prisma {
     userAgent: 'userAgent',
     sessionId: 'sessionId',
     duration: 'duration',
+    referrer: 'referrer',
+    country: 'country',
     createdAt: 'createdAt'
   };
 
@@ -38682,6 +38708,8 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"Visit"> | string | null
     sessionId?: StringNullableFilter<"Visit"> | string | null
     duration?: IntFilter<"Visit"> | number
+    referrer?: StringNullableFilter<"Visit"> | string | null
+    country?: StringNullableFilter<"Visit"> | string | null
     createdAt?: DateTimeFilter<"Visit"> | Date | string
   }
 
@@ -38692,6 +38720,8 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     sessionId?: SortOrderInput | SortOrder
     duration?: SortOrder
+    referrer?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
     createdAt?: SortOrder
   }
 
@@ -38705,6 +38735,8 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"Visit"> | string | null
     sessionId?: StringNullableFilter<"Visit"> | string | null
     duration?: IntFilter<"Visit"> | number
+    referrer?: StringNullableFilter<"Visit"> | string | null
+    country?: StringNullableFilter<"Visit"> | string | null
     createdAt?: DateTimeFilter<"Visit"> | Date | string
   }, "id">
 
@@ -38715,6 +38747,8 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     sessionId?: SortOrderInput | SortOrder
     duration?: SortOrder
+    referrer?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: VisitCountOrderByAggregateInput
     _avg?: VisitAvgOrderByAggregateInput
@@ -38733,6 +38767,8 @@ export namespace Prisma {
     userAgent?: StringNullableWithAggregatesFilter<"Visit"> | string | null
     sessionId?: StringNullableWithAggregatesFilter<"Visit"> | string | null
     duration?: IntWithAggregatesFilter<"Visit"> | number
+    referrer?: StringNullableWithAggregatesFilter<"Visit"> | string | null
+    country?: StringNullableWithAggregatesFilter<"Visit"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Visit"> | Date | string
   }
 
@@ -41406,6 +41442,8 @@ export namespace Prisma {
     userAgent?: string | null
     sessionId?: string | null
     duration?: number
+    referrer?: string | null
+    country?: string | null
     createdAt?: Date | string
   }
 
@@ -41416,6 +41454,8 @@ export namespace Prisma {
     userAgent?: string | null
     sessionId?: string | null
     duration?: number
+    referrer?: string | null
+    country?: string | null
     createdAt?: Date | string
   }
 
@@ -41425,6 +41465,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -41435,6 +41477,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -41445,6 +41489,8 @@ export namespace Prisma {
     userAgent?: string | null
     sessionId?: string | null
     duration?: number
+    referrer?: string | null
+    country?: string | null
     createdAt?: Date | string
   }
 
@@ -41454,6 +41500,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -41464,6 +41512,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -43749,6 +43799,8 @@ export namespace Prisma {
     userAgent?: SortOrder
     sessionId?: SortOrder
     duration?: SortOrder
+    referrer?: SortOrder
+    country?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -43764,6 +43816,8 @@ export namespace Prisma {
     userAgent?: SortOrder
     sessionId?: SortOrder
     duration?: SortOrder
+    referrer?: SortOrder
+    country?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -43774,6 +43828,8 @@ export namespace Prisma {
     userAgent?: SortOrder
     sessionId?: SortOrder
     duration?: SortOrder
+    referrer?: SortOrder
+    country?: SortOrder
     createdAt?: SortOrder
   }
 

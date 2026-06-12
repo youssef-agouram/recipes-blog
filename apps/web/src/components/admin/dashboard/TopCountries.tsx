@@ -45,7 +45,21 @@ const WorldMapSVG = () => (
 );
 
 export const TopCountries = ({ countries: dynamicCountries }: { countries?: { name: string; value: number; percentage: string; color: string }[] }) => {
-  const displayCountries = dynamicCountries && dynamicCountries.length > 0 ? dynamicCountries : countries;
+  const displayCountries = dynamicCountries || [];
+
+  if (displayCountries.length === 0) {
+    return (
+      <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full flex flex-col min-h-[240px]">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-sm font-bold text-white">Top Countries</h3>
+        </div>
+        <div className="flex-1 flex flex-col justify-center items-center text-slate-400 gap-1.5 border border-dashed border-white/5 rounded-xl py-8">
+          <span className="text-xs font-semibold text-slate-300">No country data yet</span>
+          <span className="text-[10px] text-slate-500">Visitor locations will be mapped in real-time</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full flex flex-col">

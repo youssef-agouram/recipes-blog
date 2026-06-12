@@ -12,8 +12,65 @@ router.post('/visit', async (req: Request, res: Response, next: NextFunction) =>
       return res.status(400).json({ error: 'path is required' });
     }
 
+    // Secondary backend safeguard to ensure no admin path visits are recorded in the database
+    if (path.startsWith('/admin')) {
+      return res.json({ success: true, message: 'Admin visits are not tracked to match Vercel Analytics' });
+    }
+
     const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '';
     const userAgent = req.headers['user-agent'] || '';
+
+    // Extract referrer
+    let referrer = 'Direct';
+    const rawReferrer = (req.headers.referer || req.headers.referrer || '') as string;
+    if (rawReferrer) {
+      try {
+        const refUrl = new URL(rawReferrer);
+        const host = refUrl.hostname.toLowerCase();
+        
+        // Exclude own hosts (local or production domain)
+        const isOwnHost = host.includes('localhost') || 
+                           host.includes('127.0.0.1') || 
+                           host.includes('recipes-blog-web') || 
+                           host.includes('tasteful');
+        
+        if (!isOwnHost) {
+          if (host.includes('google.')) referrer = 'Google Search';
+          else if (host.includes('pinterest.')) referrer = 'Pinterest';
+          else if (host.includes('facebook.')) referrer = 'Facebook';
+          else if (host.includes('youtube.')) referrer = 'YouTube';
+          else if (host.includes('instagram.')) referrer = 'Instagram';
+          else {
+            referrer = refUrl.hostname.replace('www.', '');
+          }
+        }
+      } catch (e) {
+        if (rawReferrer.includes('google')) referrer = 'Google Search';
+        else if (rawReferrer.includes('pinterest')) referrer = 'Pinterest';
+        else if (rawReferrer.includes('facebook')) referrer = 'Facebook';
+        else if (rawReferrer.includes('youtube')) referrer = 'YouTube';
+        else if (rawReferrer.includes('instagram')) referrer = 'Instagram';
+      }
+    }
+
+    // Extract country code from Vercel header
+    const countryCode = (req.headers['x-vercel-ip-country'] as string || '').toUpperCase();
+    const countryMap: { [key: string]: string } = {
+      'MA': 'Morocco',
+      'US': 'United States',
+      'FR': 'France',
+      'DZ': 'Algeria',
+      'CA': 'Canada',
+      'GB': 'United Kingdom',
+      'DE': 'Germany',
+      'ES': 'Spain',
+      'IT': 'Italy',
+      'IN': 'India',
+      'AU': 'Australia',
+      'BR': 'Brazil',
+      'JP': 'Japan',
+    };
+    const country = countryCode ? (countryMap[countryCode] || countryCode) : 'Unknown';
 
     // Update duration of the previous visit in the same session (if any)
     if (sessionId) {
@@ -40,7 +97,9 @@ router.post('/visit', async (req: Request, res: Response, next: NextFunction) =>
         path,
         sessionId: sessionId || 'guest_session',
         ip,
-        userAgent
+        userAgent,
+        referrer,
+        country
       }
     });
 
@@ -53,6 +112,16 @@ router.post('/visit', async (req: Request, res: Response, next: NextFunction) =>
 // Get dashboard stats
 router.get('/dashboard', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const range = (req.query.range || '7d') as string;
+    let startDate = new Date();
+    if (range === '24h') {
+      startDate.setHours(startDate.getHours() - 24);
+    } else if (range === '30d') {
+      startDate.setDate(startDate.getDate() - 30);
+    } else {
+      startDate.setDate(startDate.getDate() - 7);
+    }
+
     const results = await Promise.all([
       prisma.recipe.count({ where: { status: { not: 'TRASH' } } }),
       prisma.category.count(),
@@ -60,7 +129,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       prisma.comment.count(),
       prisma.recipe.count({ where: { status: 'PUBLISHED' } }),
       prisma.recipe.count({ where: { status: 'DRAFT' } }),
-      prisma.visit.count(),
+      prisma.visit.count({ where: { createdAt: { gte: startDate } } }),
       prisma.comment.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
@@ -73,9 +142,11 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       }),
       prisma.visit.groupBy({
         by: ['sessionId'],
+        where: { createdAt: { gte: startDate } }
       }).then(res => res.length),
       prisma.visit.aggregate({
-        _sum: { duration: true }
+        _sum: { duration: true },
+        where: { createdAt: { gte: startDate } }
       }).then(res => res._sum.duration || 0),
       // Count sessions with only 1 visit
       prisma.$queryRaw<{count: string}[]>`
@@ -83,6 +154,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
         FROM (
           SELECT "sessionId" 
           FROM "Visit" 
+          WHERE "createdAt" >= ${startDate}
           GROUP BY "sessionId" 
           HAVING COUNT(*) = 1
         ) as single_visit_sessions
@@ -117,6 +189,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       // Unique IP address count
       prisma.visit.groupBy({
         by: ['ip'],
+        where: { createdAt: { gte: startDate } }
       }).then(res => res.length),
       // GA4 Analytics Settings
       prisma.analyticsSettings.findFirst({
@@ -153,63 +226,88 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
-    // Group visits by day for the last 7 days
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      return d.toISOString().split('T')[0];
-    }).reverse();
+    // Calculate overviewData (hourly for 24h, daily for others)
+    let overviewData = [];
+    if (range === '24h') {
+      const last24Hours = Array.from({ length: 24 }, (_, i) => {
+        const d = new Date();
+        d.setHours(d.getHours() - i);
+        d.setMinutes(0, 0, 0);
+        return d;
+      }).reverse();
 
-    let overviewData = await Promise.all(last7Days.map(async (date) => {
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
+      overviewData = await Promise.all(last24Hours.map(async (hourDate) => {
+        const startOfHour = new Date(hourDate);
+        const endOfHour = new Date(hourDate);
+        endOfHour.setHours(endOfHour.getHours() + 1);
 
-      const pageViews = await prisma.visit.count({
-        where: {
-          createdAt: {
-            gte: startOfDay,
-            lte: endOfDay
+        const pageViews = await prisma.visit.count({
+          where: {
+            createdAt: { gte: startOfHour, lt: endOfHour }
           }
-        }
-      });
+        });
 
-      const visitors = await prisma.visit.groupBy({
-        by: ['sessionId'],
-        where: {
-          createdAt: {
-            gte: startOfDay,
-            lte: endOfDay
+        const visitors = await prisma.visit.groupBy({
+          by: ['sessionId'],
+          where: {
+            createdAt: { gte: startOfHour, lt: endOfHour }
           }
-        }
-      }).then(res => res.length);
+        }).then(res => res.length);
 
-      return {
-        name: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        visitors,
-        pageViews,
-        sessions: visitors,
-        pageviews: pageViews,
-      };
-    }));
+        return {
+          name: hourDate.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
+          visitors,
+          pageViews,
+          sessions: visitors,
+          pageviews: pageViews,
+        };
+      }));
+    } else {
+      const daysCount = range === '30d' ? 30 : 7;
+      const lastDays = Array.from({ length: daysCount }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        return d.toISOString().split('T')[0];
+      }).reverse();
+
+      overviewData = await Promise.all(lastDays.map(async (date) => {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const pageViews = await prisma.visit.count({
+          where: {
+            createdAt: { gte: startOfDay, lte: endOfDay }
+          }
+        });
+
+        const visitors = await prisma.visit.groupBy({
+          by: ['sessionId'],
+          where: {
+            createdAt: { gte: startOfDay, lte: endOfDay }
+          }
+        }).then(res => res.length);
+
+        return {
+          name: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          visitors,
+          pageViews,
+          sessions: visitors,
+          pageviews: pageViews,
+        };
+      }));
+    }
 
     // Fetch and aggregate dynamic Top Recipes views from visits
     const topVisitPaths = await prisma.visit.groupBy({
       by: ['path'],
       where: {
-        path: {
-          startsWith: '/recipes/'
-        }
+        path: { startsWith: '/recipes/' },
+        createdAt: { gte: startDate }
       },
-      _count: {
-        path: true
-      },
-      orderBy: {
-        _count: {
-          path: 'desc'
-        }
-      },
+      _count: { path: true },
+      orderBy: { _count: { path: 'desc' } },
       take: 10
     });
 
@@ -219,9 +317,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
     }).filter(Boolean);
 
     const dbRecipes = await prisma.recipe.findMany({
-      where: {
-        slug: { in: slugs }
-      },
+      where: { slug: { in: slugs } },
       select: {
         id: true,
         title: true,
@@ -256,7 +352,6 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
 
     let finalTopRecipes = formattedTopRecipes;
     if (finalTopRecipes.length === 0) {
-      // Fallback
       finalTopRecipes = topRecipes.map(r => ({
         id: r.id,
         title: r.title,
@@ -273,6 +368,7 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
     // Parse Device UA analytics
     const allVisitsWithUA = await prisma.visit.findMany({
       select: { userAgent: true },
+      where: { createdAt: { gte: startDate } },
       take: 1000
     });
 
@@ -298,44 +394,69 @@ router.get('/dashboard', authMiddleware, async (req: Request, res: Response, nex
       { name: 'Tablet', value: tabletCount },
     ];
 
-    // Define defaults for Traffic Sources and Top Countries
-    let referrerData = [
-      { name: 'Google Search', value: 39874, percentage: '46.5%', color: '#5850ec' },
-      { name: 'Pinterest', value: 17422, percentage: '20.3%', color: '#ec4899' },
-      { name: 'Direct', value: 13476, percentage: '15.7%', color: '#22d3ee' },
-      { name: 'Facebook', value: 8661, percentage: '10.1%', color: '#3b82f6' },
-      { name: 'YouTube', value: 3944, percentage: '4.6%', color: '#ef4444' },
-      { name: 'Instagram', value: 2369, percentage: '2.8%', color: '#f59e0b' },
-    ];
+    // Query and calculate referrer data dynamically
+    const dbReferrers = await prisma.visit.groupBy({
+      by: ['referrer'],
+      where: { createdAt: { gte: startDate } },
+      _count: { referrer: true },
+      orderBy: { _count: { referrer: 'desc' } },
+      take: 6
+    });
 
-    let countryData = [
-      { name: 'Morocco', value: 14782, percentage: '17.2%', color: '#5850ec' },
-      { name: 'United States', value: 12540, percentage: '14.6%', color: '#22d3ee' },
-      { name: 'France', value: 6782, percentage: '7.9%', color: '#a78bfa' },
-      { name: 'Algeria', value: 5432, percentage: '6.3%', color: '#34d399' },
-      { name: 'Canada', value: 4321, percentage: '5.0%', color: '#f59e0b' },
-    ];
+    const totalReferrersCount = await prisma.visit.count({ where: { createdAt: { gte: startDate } } });
+    const chartColors = ['#5850ec', '#ec4899', '#22d3ee', '#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
+
+    let referrerData = dbReferrers.map((r, i) => {
+      const val = r._count.referrer;
+      const pct = totalReferrersCount ? ((val / totalReferrersCount) * 100).toFixed(1) + '%' : '0%';
+      return {
+        name: r.referrer || 'Direct',
+        value: val,
+        percentage: pct,
+        color: chartColors[i % chartColors.length]
+      };
+    });
+
+    // Query and calculate country data dynamically
+    const dbCountries = await prisma.visit.groupBy({
+      by: ['country'],
+      where: { createdAt: { gte: startDate } },
+      _count: { country: true },
+      orderBy: { _count: { country: 'desc' } },
+      take: 5
+    });
+
+    const totalCountriesCount = await prisma.visit.count({ where: { createdAt: { gte: startDate } } });
+
+    let countryData = dbCountries.map((c, i) => {
+      const val = c._count.country;
+      const pct = totalCountriesCount ? ((val / totalCountriesCount) * 100).toFixed(1) + '%' : '0%';
+      return {
+        name: c.country || 'Unknown',
+        value: val,
+        percentage: pct,
+        color: chartColors[i % chartColors.length]
+      };
+    });
 
     let finalActiveUsers = {
-      total: activeUsersCount || 1,
-      pages: activePagesGroup.length > 0 ? activePagesGroup.map(ap => ({ path: ap.path, users: ap._count.path })) : [{ path: '/', users: 1 }],
+      total: activeUsersCount || 0,
+      pages: activePagesGroup.length > 0 ? activePagesGroup.map(ap => ({ path: ap.path, users: ap._count.path })) : [],
       chartData: [] as { time: string; users: number }[]
     };
 
     let finalSummary = {
-      recipes: { total: recipesCount, trend: { value: '12.5%', isUp: true } },
-      categories: { total: categoriesCount, trend: { value: '8.3%', isUp: true } },
-      users: { total: usersCount, trend: { value: '15.7%', isUp: true } },
-      comments: { total: commentsCount, trend: { value: '4.2%', isUp: false } },
-      sessions: { total: uniqueSessionsCount, trend: { value: '23.6%', isUp: true } },
-      pageviews: { total: visitsCount, trend: { value: '18.7%', isUp: true } },
-      uniqueVisitors: { total: uniqueIpsCount, trend: { value: '14.3%', isUp: true } },
-      avgDuration: { value: formatDuration(avgDuration), trend: { value: '16.3%', isUp: true } },
-      pagesPerSession: { value: pagesPerSession, trend: { value: '4.1%', isUp: true } },
-      bounceRate: { value: bounceRate + '%', trend: { value: '5.3%', isUp: false } }
+      recipes: { total: recipesCount, trend: { value: '0%', isUp: true } },
+      categories: { total: categoriesCount, trend: { value: '0%', isUp: true } },
+      users: { total: usersCount, trend: { value: '0%', isUp: true } },
+      comments: { total: commentsCount, trend: { value: '0%', isUp: false } },
+      sessions: { total: uniqueSessionsCount, trend: { value: '0%', isUp: true } },
+      pageviews: { total: visitsCount, trend: { value: '0%', isUp: true } },
+      uniqueVisitors: { total: uniqueIpsCount, trend: { value: '0%', isUp: true } },
+      avgDuration: { value: formatDuration(avgDuration), trend: { value: '0%', isUp: true } },
+      pagesPerSession: { value: pagesPerSession, trend: { value: '0%', isUp: true } },
+      bounceRate: { value: bounceRate + '%', trend: { value: '0%', isUp: false } }
     };
-
-
 
     res.json({
       summary: finalSummary,

@@ -16,7 +16,7 @@ const data = [
 const total = data.reduce((sum, d) => sum + d.value, 0);
 
 export const TrafficSourcesChart = ({ sources }: { sources?: { name: string; value: number; percentage: string; color: string }[] }) => {
-  const chartData = sources && sources.length > 0 ? sources : data;
+  const chartData = sources || [];
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -24,6 +24,20 @@ export const TrafficSourcesChart = ({ sources }: { sources?: { name: string; val
   }, []);
 
   const total = chartData.reduce((sum, d) => sum + d.value, 0);
+
+  if (chartData.length === 0) {
+    return (
+      <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full flex flex-col min-h-[240px]">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-sm font-bold text-white">Traffic Sources</h3>
+        </div>
+        <div className="flex-1 flex flex-col justify-center items-center text-slate-400 gap-1.5 border border-dashed border-white/5 rounded-xl py-8">
+          <span className="text-xs font-semibold text-slate-300">No traffic sources yet</span>
+          <span className="text-[10px] text-slate-500">Live referrers will appear as visitors arrive</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#0F172A] border border-white/5 rounded-2xl p-6 h-full">

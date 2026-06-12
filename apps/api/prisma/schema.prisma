@@ -366,6 +366,8 @@ model Visit {
   userAgent String?
   sessionId String?  // To group visits into sessions
   duration  Int      @default(0) // Seconds spent
+  referrer  String?  @default("Direct")
+  country   String?  @default("Unknown")
   createdAt DateTime @default(now())
 }
 

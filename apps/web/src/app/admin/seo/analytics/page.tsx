@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   BarChart2, Settings, TrendingUp, Users, Eye, Clock, ShieldAlert, ArrowUpRight, 
-  ArrowDownRight, Compass, MousePointer, Share2, Search, Sparkles
+  ArrowDownRight, Compass, MousePointer, Share2, Search, Sparkles, Calendar, ChevronDown
 } from 'lucide-react';
 import { useGetAnalyticsSettingsQuery } from '@/store/api/seoApi';
 import { useGetDashboardStatsQuery } from '@/store/api/statsApi';
@@ -43,8 +43,44 @@ const topRecipePages = [
 
 export default function AnalyticsDashboardPage() {
   const { data: settings } = useGetAnalyticsSettingsQuery();
-  const { data: statsData, isLoading } = useGetDashboardStatsQuery(undefined, { pollingInterval: 60000 });
+  const [filter, setFilter] = useState<'24h' | '7d' | '30d'>('7d');
+  const { data: statsData, isLoading } = useGetDashboardStatsQuery(filter, { pollingInterval: 60000 });
   const [activeTab, setActiveTab] = useState<'overview' | 'pageviews' | 'sessions'>('overview');
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const today = new Date();
+  const getStartDate = () => {
+    const start = new Date(today);
+    if (filter === '24h') {
+      start.setDate(today.getDate() - 1);
+    } else if (filter === '30d') {
+      start.setDate(today.getDate() - 29);
+    } else {
+      start.setDate(today.getDate() - 6);
+    }
+    return start;
+  };
+
+  const formatDate = (d: Date) =>
+    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  const filterLabels = {
+    '24h': 'Last 24 hours',
+    '7d': 'Last 7 days',
+    '30d': 'Last 30 days',
+  };
 
   // Google Analytics removed
 
@@ -63,9 +99,12 @@ export default function AnalyticsDashboardPage() {
     ? statsData.overviewData.map(d => ({ ...d, date: d.name }))
     : dailyTrafficData;
 
-  const displayRecipes = statsData?.topRecipes && statsData.topRecipes.length > 0
-    ? statsData.topRecipes
-    : topRecipePages.map(p => ({ ...p, avgTime: p.duration, bounce: p.bounce }));
+  const displayRecipes = statsData?.topRecipes || [];
+
+  const displayReferrers = statsData?.referrerData || [];
+  const topReferrer = displayReferrers[0];
+  const totalReferrerVal = displayReferrers.reduce((acc, r) => acc + r.value, 0);
+  const topReferrerPct = totalReferrerVal ? Math.round(topReferrer.value / totalReferrerVal * 100) : 0;
 
   return (
     <div className="space-y-8 pb-12">
@@ -82,7 +121,43 @@ export default function AnalyticsDashboardPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Date Range Display */}
+          <div className="flex items-center gap-2 bg-[#0b0c16]/90 border border-white/10 rounded-xl px-4 h-11 text-xs font-semibold text-slate-300">
+            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <span>{formatDate(getStartDate())} - {formatDate(today)}</span>
+          </div>
+
+          {/* Filter Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="h-11 flex items-center gap-2 bg-[#0b0c16]/90 border border-white/10 rounded-xl px-4 text-xs font-semibold text-slate-300 hover:border-white/20 transition-all cursor-pointer select-none"
+            >
+              <span>Range: {filterLabels[filter]}</span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#0b0c16] border border-white/10 shadow-2xl z-50 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                {(['24h', '7d', '30d'] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => {
+                      setFilter(opt);
+                      setDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-xs font-semibold hover:bg-white/5 transition-colors cursor-pointer ${
+                      filter === opt ? 'text-[#5850ec]' : 'text-slate-300'
+                    }`}
+                  >
+                    {filterLabels[opt]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <Link
             href="/admin/seo/analytics/settings"
             className="h-11 inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 text-xs font-black uppercase tracking-wider text-slate-300 transition-all hover:bg-white/10 active:scale-95"
@@ -92,36 +167,6 @@ export default function AnalyticsDashboardPage() {
         </div>
       </div>
 
-      {/* Google Analytics removal */}
-
-      {/* Vercel Web Analytics Status Banner */}
-      <div className="p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/20 shadow-xl relative overflow-hidden group flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-indigo-500/10 blur-[60px] pointer-events-none rounded-full" />
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shrink-0">
-            <Sparkles className="h-6 w-6 animate-pulse" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              Vercel Web Analytics Integration
-              <span className="text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                ACTIVE
-              </span>
-            </h3>
-            <p className="text-[11px] text-muted-foreground/60 leading-relaxed max-w-2xl">
-              Vercel Web Analytics tracking client is successfully active. Real-time visitor counts, session loops, bounce rates, and Core Web Vitals (CLS, LCP) are streaming automatically to your Vercel panel.
-            </p>
-          </div>
-        </div>
-        <a
-          href="https://vercel.com/dashboard"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="h-10 px-5 inline-flex items-center justify-center text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 rounded-xl transition-all shrink-0 active:scale-95 gap-1.5"
-        >
-          Open Vercel Dashboard <ArrowUpRight className="w-3.5 h-3.5" />
-        </a>
-      </div>
 
       {/* Analytics Core Widgets Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -328,44 +373,57 @@ export default function AnalyticsDashboardPage() {
 
           {/* Recharts Pie (Doughnut) */}
           <div className="h-[220px] w-full flex items-center justify-center relative">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={referrersData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {referrersData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f111a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}
-                  itemStyle={{ fontSize: '11px', color: '#fff' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            {displayReferrers.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={displayReferrers}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {displayReferrers.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#0f111a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}
+                    itemStyle={{ fontSize: '11px', color: '#fff' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-slate-500 gap-1">
+                <span className="text-xs font-semibold text-slate-400">No referrer data yet</span>
+                <span className="text-[9px] text-slate-600">Referrers will show up live</span>
+              </div>
+            )}
             
             {/* Absolute Center Metric */}
-            <div className="absolute flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Organic</span>
-              <span className="text-3xl font-black text-white mt-1">45%</span>
-            </div>
+            {displayReferrers.length > 0 && (
+              <div className="absolute flex flex-col items-center justify-center pointer-events-none max-w-[110px] text-center">
+                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none truncate w-full">{topReferrer.name}</span>
+                <span className="text-2xl font-black text-white mt-1">{topReferrerPct}%</span>
+              </div>
+            )}
           </div>
 
           {/* Color Indicators Legend Grid */}
           <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/5">
-            {referrersData.map((item) => (
-              <div key={item.name} className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                <span className="text-[10px] font-bold text-slate-300 truncate">{item.name}</span>
-                <span className="text-[10px] font-black text-white ml-auto">{item.value}%</span>
-              </div>
-            ))}
+            {displayReferrers.length > 0 ? (
+              displayReferrers.map((item) => (
+                <div key={item.name} className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                  <span className="text-[10px] font-bold text-slate-300 truncate">{item.name}</span>
+                  <span className="text-[10px] font-black text-white ml-auto">{item.percentage}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-[9px] text-slate-600 col-span-2 text-center py-2">No indicators available</span>
+            )}
           </div>
         </div>
       </div>
@@ -393,21 +451,29 @@ export default function AnalyticsDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-xs font-semibold">
-                {displayRecipes.map((page, index) => (
-                  <tr key={index} className="group hover:bg-white/5 transition-colors">
-                    <td className="py-3.5 pr-4 max-w-[280px] truncate">
-                      <div className="space-y-0.5">
-                        <p className="text-white group-hover:text-indigo-400 transition-colors truncate">{page.title}</p>
-                        <p className="text-[9px] text-muted-foreground/50 truncate font-mono">{page.path}</p>
-                      </div>
+                {displayRecipes.length > 0 ? (
+                  displayRecipes.map((page, index) => (
+                    <tr key={index} className="group hover:bg-white/5 transition-colors">
+                      <td className="py-3.5 pr-4 max-w-[280px] truncate">
+                        <div className="space-y-0.5">
+                          <p className="text-white group-hover:text-indigo-400 transition-colors truncate">{page.title}</p>
+                          <p className="text-[9px] text-muted-foreground/50 truncate font-mono">{page.path}</p>
+                        </div>
+                      </td>
+                      <td className="py-3.5 text-white">
+                        {typeof page.views === 'number' ? page.views.toLocaleString() : page.views}
+                      </td>
+                      <td className="py-3.5 text-slate-300">{page.avgTime || '4m 12s'}</td>
+                      <td className="py-3.5 text-right text-rose-400">{page.bounce || '32.5%'}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-slate-500 font-semibold text-xs">
+                      No recipes viewed yet
                     </td>
-                    <td className="py-3.5 text-white">
-                      {typeof page.views === 'number' ? page.views.toLocaleString() : page.views}
-                    </td>
-                    <td className="py-3.5 text-slate-300">{page.avgTime || '4m 12s'}</td>
-                    <td className="py-3.5 text-right text-rose-400">{page.bounce || '32.5%'}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -422,17 +488,26 @@ export default function AnalyticsDashboardPage() {
               <BarChart2 className="h-5 w-5 text-emerald-400" />
               Tracking Nodes Status
             </h3>
-            <p className="text-[11px] text-muted-foreground/60 font-medium mt-0.5">Vercel integration status logs</p>
+            <p className="text-[11px] text-muted-foreground/60 font-medium mt-0.5">Analytics engine status indicators</p>
           </div>
 
-          <div className="space-y-4 font-semibold">
-            {/* Status: Vercel Web Analytics */}
+          <div className="space-y-3 font-semibold">
+            {/* Status: Local Database Analytics */}
             <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl">
               <div className="space-y-0.5">
-                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none">Vercel Analytics</span>
-                <p className="text-xs font-bold text-white mt-0.5">ACTIVE & TRACKING</p>
+                <span className="text-[9px] font-black text-[#10b981] uppercase tracking-widest leading-none">Local Database Analytics</span>
+                <p className="text-xs font-bold text-white mt-0.5">ACTIVE & RECORDING</p>
               </div>
               <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+            </div>
+
+            {/* Status: Vercel Web Analytics */}
+            <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl opacity-60">
+              <div className="space-y-0.5">
+                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none">Vercel Analytics</span>
+                <p className="text-xs font-bold text-slate-400 mt-0.5">DISCONNECTED / INACTIVE</p>
+              </div>
+              <div className="h-2.5 w-2.5 rounded-full bg-slate-600" />
             </div>
           </div>
         </div>

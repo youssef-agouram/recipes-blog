@@ -12,6 +12,26 @@ function TrackRouteChange() {
   useEffect(() => {
     if (!pathname) return;
     
+    // Discard admin page visits to match Vercel Analytics filters
+    if (pathname.startsWith('/admin')) {
+      return;
+    }
+
+    // Discard visits from logged-in Administrators or Editors
+    if (typeof window !== 'undefined') {
+      try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user?.role === 'Administrator' || user?.role === 'Editor') {
+            return;
+          }
+        }
+      } catch (e) {
+        // Ignore storage/parsing errors
+      }
+    }
+
     // Build full path including query parameters
     const query = searchParams?.toString();
     const url = query ? `${pathname}?${query}` : pathname;

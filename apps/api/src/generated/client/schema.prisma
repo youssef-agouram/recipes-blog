@@ -329,6 +329,7 @@ model SiteSettings {
   cloudinaryCloudName String?
   cloudinaryApiKey    String?
   cloudinaryApiSecret String?
+  homePageSettings    Json?   @default("{}")
 
   // Page Settings Control
   categoriesTitle    String @default("Browse by Category")
@@ -365,6 +366,8 @@ model Visit {
   userAgent String?
   sessionId String? // To group visits into sessions
   duration  Int      @default(0) // Seconds spent
+  referrer  String?  @default("Direct")
+  country   String?  @default("Unknown")
   createdAt DateTime @default(now())
 }
 

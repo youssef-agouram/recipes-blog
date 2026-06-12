@@ -19,7 +19,6 @@ const lora = Lora({
 
 import { constructMetadata } from "@/lib/seo";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
-import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = constructMetadata({
   title: "TastyRecipes | Elegant Cooking & Delicious Recipes",
@@ -39,7 +38,6 @@ export default function RootLayout({
         <ReduxProvider>
           {children}
           <AnalyticsTracker />
-          <Analytics />
           <Toaster position="top-right" richColors theme="dark" closeButton />
         </ReduxProvider>
       </body>

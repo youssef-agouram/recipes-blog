@@ -388,6 +388,8 @@ exports.Prisma.VisitScalarFieldEnum = {
   userAgent: 'userAgent',
   sessionId: 'sessionId',
   duration: 'duration',
+  referrer: 'referrer',
+  country: 'country',
   createdAt: 'createdAt'
 };
 

@@ -33,8 +33,8 @@ export interface DashboardStats {
 
 export const statsApi = apiService.injectEndpoints({
   endpoints: (builder) => ({
-    getDashboardStats: builder.query<DashboardStats, void>({
-      query: () => '/stats/dashboard',
+    getDashboardStats: builder.query<DashboardStats, string | undefined>({
+      query: (range) => `/stats/dashboard${range ? `?range=${range}` : ''}`,
       providesTags: ['Recipe', 'Category', 'User', 'Comment'],
     }),
   }),
