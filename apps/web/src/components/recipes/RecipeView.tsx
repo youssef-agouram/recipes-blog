@@ -429,8 +429,81 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             )}
 
 
+            {/* Cooking Guide Section — moved to left column */}
+             <section id="cooking-guide-section" className="max-w-none pb-4 border-b border-white/5 mb-4 scroll-mt-20">
+              <button
+                onClick={() => {
+                  if (!isGuideUnlocked) {
+                    setShowAuthModal(true);
+                  }
+                  setOpenCookingGuide(!openCookingGuide);
+                }}
+                className="w-full flex items-center justify-between py-2 text-left not-prose group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-primary rounded-full" />
+                  <h3 className="text-xl font-black text-white tracking-tighter font-heading group-hover:text-primary transition-colors">Cooking Guide</h3>
+                </div>
+                <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openCookingGuide && "rotate-180")} />
+              </button>
 
-            <div className="hidden md:flex w-full items-center gap-2 mb-4">
+              {!isGuideUnlocked && openCookingGuide && (
+                <div className="relative mt-4 rounded-2xl overflow-hidden border border-white/5 bg-white/[0.01] p-6 text-center backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#05060b]/80" />
+                  <div className="relative z-10 flex flex-col items-center py-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-4">
+                      <Star className="w-6 h-6 animate-pulse" />
+                    </div>
+                    <h4 className="text-sm font-bold text-white mb-2">Step-by-Step Cooking Guide is Locked</h4>
+                    <p className="text-xs text-muted-foreground max-w-sm mb-4">
+                      Sign in or create a free account to unlock our exclusive cooking guide, chef tips, and ingredients scaler.
+                    </p>
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="px-6 py-2.5 rounded-xl bg-primary text-[11px] font-black uppercase tracking-widest text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95"
+                    >
+                      Unlock Guide
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {isGuideUnlocked && openCookingGuide && (
+                <div className="prose prose-neutral dark:prose-invert text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[420px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth animate-in fade-in slide-in-from-top-2 duration-300 mt-4">
+                  {recipe.content ? (
+                    <BlogRenderer content={recipe.content} />
+                  ) : (
+                    <p>Master this delicious dish with our step-by-step guide and expert culinary tips. We've simplified the process to ensure professional results at home.</p>
+                  )}
+                </div>
+              )}
+            </section>
+
+          </div>
+
+          {/* Right Column: Title, Summary, Actions, Accordion */}
+          <div className="flex flex-col flex-1 w-full gap-4 md:gap-8 min-w-0">
+            <div className="hidden md:flex items-center gap-3 mb-2">
+              <div className="flex -space-x-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="w-6 h-6 rounded-full border-2 border-background bg-white/10 overflow-hidden">
+                    <Image src={`https://i.pravatar.cc/150?u=${i + 10}`} alt="User" width={24} height={24} />
+                  </div>
+                ))}
+              </div>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Loved by 1.2k people</span>
+            </div>
+
+            <h1 className="hidden md:block text-5xl sm:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter font-heading drop-shadow-2xl mb-4">
+              {recipe.title?.replace(/\u00a0/g, ' ')}
+            </h1>
+
+            <p className="hidden md:block text-[16px] text-muted-foreground leading-relaxed font-medium max-w-xl mb-4">
+              {recipe.summary || "Embark on a culinary journey with this masterpiece. Perfectly balanced flavors and textures that will leave your guests in awe."}
+            </p>
+
+            {/* Action buttons on desktop */}
+            <div className="hidden md:flex w-full items-center gap-2 mb-6">
               <button
                 onClick={() => window.print()}
                 className="flex-1 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-primary/50 transition-all active:scale-90"
@@ -471,18 +544,9 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </button>
             </div>
 
-            {/* Cooking Guide Button — desktop only */}
-            <button
-              onClick={handleCookingGuideClick}
-              className="hidden md:flex w-full h-12 rounded-2xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-all hover:bg-primary/95 mb-6"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              Cooking Guide
-            </button>
+            {/* Accordion Card — Ingredients / Instructions / Nutrition */}
+            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[22px] shadow-2xl overflow-hidden divide-y divide-white/5 mb-4">
 
-            {/* Unified Accordion Card */}
-            <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[22px] shadow-2xl overflow-hidden divide-y divide-white/5">
-              
               {/* Ingredients Section */}
               <div className="flex flex-col">
                 <button
@@ -545,104 +609,39 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                         if (instructionItems.length === 0) {
                           return <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>;
                         }
-                        
                         const processedSteps = instructionItems.map((s: any) => {
                           const textStr = s.text || '';
-                          const match = textStr.match(/^\s*(?:step|phase|no\.?|n°)?\s*(\d+)\s*(?:[\.\-\:\)]\s*|\s+)/i);
+                          const match = textStr.match(/^\s*(?:step|phase|no\.?|n°)?\s*(\d+)\s*(?:[.\-:\)]\s*|\s+)/i);
                           let rawText = textStr;
                           let extractedNum: number | null = null;
-                          if (match) {
-                            rawText = textStr.substring(match[0].length).trim();
-                            extractedNum = parseInt(match[1], 10);
-                          }
-                          
-                          // Parse title and points
-                          const lines = rawText.split('\n')
-                            .map((line: string) => line.trim())
-                            .filter(Boolean);
-                          
+                          if (match) { rawText = textStr.substring(match[0].length).trim(); extractedNum = parseInt(match[1], 10); }
+                          const lines = rawText.split('\n').map((line: string) => line.trim()).filter(Boolean);
                           const title = lines.length > 0 ? lines[0] : '';
-                          const points = lines.slice(1).map((line: string) => {
-                            return line.replace(/^\s*[•\-\*\t]+\s*/, '').trim();
-                          });
-
-                          return {
-                            title,
-                            points,
-                            extractedNum,
-                          };
+                          const points = lines.slice(1).map((line: string) => line.replace(/^\s*[•\-\*\t]+\s*/, '').trim());
+                          return { title, points, extractedNum };
                         });
-
                         const hasExplicitNumbers = processedSteps.some((s: any) => s.extractedNum !== null);
-
-                        if (hasExplicitNumbers) {
-                          return (
-                            <div className="space-y-6">
-                              {processedSteps.map((s: any, idx: number) => {
-                                if (s.extractedNum !== null) {
-                                  return (
-                                    <div key={idx} className="animate-in fade-in duration-300">
-                                      <h4 className="text-[14px] font-bold text-white tracking-tight">
-                                        {s.extractedNum}. {s.title}
-                                      </h4>
-                                      {s.points.length > 0 && (
-                                        <ul className="mt-2 space-y-1.5 pl-4">
-                                          {s.points.map((pt: string, ptIdx: number) => (
-                                            <li key={ptIdx} className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
-                                              <span className="text-primary mt-1.5 text-[8px]">•</span>
-                                              <span>{pt}</span>
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      )}
-                                    </div>
-                                  );
-                                } else {
-                                  return (
-                                    <div key={idx} className="pl-4 group/tip animate-in fade-in duration-300">
-                                      <h5 className={cn("text-[13px] tracking-tight transition-colors", s.points.length > 0 ? "font-semibold text-white/90" : "font-medium text-muted-foreground hover:text-white")}>
-                                        {s.title}
-                                      </h5>
-                                      {s.points.length > 0 && (
-                                        <ul className="mt-1.5 space-y-1 pl-4">
-                                          {s.points.map((pt: string, ptIdx: number) => (
-                                            <li key={ptIdx} className="flex items-start gap-2 text-[12px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
-                                              <span className="text-primary/70 mt-1.5 text-[6px]">•</span>
-                                              <span>{pt}</span>
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      )}
-                                    </div>
-                                  );
-                                }
-                              })}
-                            </div>
-                          );
-                        } else {
-                          // No explicit numbers in the steps - display in original chronological sequence
-                          return (
-                            <div className="space-y-6">
-                              {processedSteps.map((s: any, idx: number) => (
-                                <div key={idx} className="animate-in fade-in duration-300">
-                                  <h4 className="text-[14px] font-bold text-white tracking-tight">
-                                    {idx + 1}. {s.title}
-                                  </h4>
-                                  {s.points.length > 0 && (
-                                    <ul className="mt-2 space-y-1.5 pl-4">
-                                      {s.points.map((pt: string, ptIdx: number) => (
-                                        <li key={ptIdx} className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
-                                          <span className="text-primary mt-1.5 text-[8px]">•</span>
-                                          <span>{pt}</span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        }
+                        return (
+                          <div className="space-y-6">
+                            {processedSteps.map((s: any, idx: number) => (
+                              <div key={idx} className="animate-in fade-in duration-300">
+                                <h4 className="text-[14px] font-bold text-white tracking-tight">
+                                  {hasExplicitNumbers && s.extractedNum !== null ? s.extractedNum : idx + 1}. {s.title}
+                                </h4>
+                                {s.points.length > 0 && (
+                                  <ul className="mt-2 space-y-1.5 pl-4">
+                                    {s.points.map((pt: string, ptIdx: number) => (
+                                      <li key={ptIdx} className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
+                                        <span className="text-primary mt-1.5 text-[8px]">•</span>
+                                        <span>{pt}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        );
                       })()}
                     </div>
                   </div>
@@ -678,49 +677,24 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                           { label: 'Fat', value: recipe.nutrition?.fat ? `${recipe.nutrition.fat}g` : '', color: 'text-red-400' },
                           { label: 'Fiber', value: recipe.nutrition?.fiber ? `${recipe.nutrition.fiber}g` : '', color: 'text-emerald-400' },
                         ];
-
                         const displayedKeys = new Set(['calories', 'protein', 'carbohydrates', 'fat', 'fiber']);
                         const items = [...standardList];
-
                         if (recipe.nutrition) {
-                          const customColors = [
-                            'text-purple-400',
-                            'text-teal-400',
-                            'text-indigo-400',
-                            'text-pink-400',
-                            'text-yellow-400',
-                          ];
+                          const customColors = ['text-purple-400','text-teal-400','text-indigo-400','text-pink-400','text-yellow-400'];
                           let colorIndex = 0;
-
                           Object.keys(recipe.nutrition).forEach((key) => {
-                            const lowerKey = key.toLowerCase();
-                            if (displayedKeys.has(lowerKey)) return;
-
-                            const label = key.charAt(0).toUpperCase() + key.slice(1);
+                            if (displayedKeys.has(key.toLowerCase())) return;
                             const val = String((recipe.nutrition as any)[key] || '');
-                            if (val) {
-                              items.push({
-                                label,
-                                value: val,
-                                color: customColors[colorIndex % customColors.length],
-                              });
-                              colorIndex++;
-                            }
+                            if (val) { items.push({ label: key.charAt(0).toUpperCase() + key.slice(1), value: val, color: customColors[colorIndex++ % customColors.length] }); }
                           });
                         }
-
-                        const finalItems = items.map(item => {
-                          if (item.value) return item;
-                          if (item.label === 'Calories') return { ...item, value: '0' };
-                          return { ...item, value: '0g' };
-                        });
-
-                        return finalItems.map(nut => (
-                          <div key={nut.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center animate-in fade-in duration-300">
-                            <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>
-                            <span className={`text-xl font-black ${nut.color}`}>{nut.value}</span>
-                          </div>
-                        ));
+                        return items.map(item => item.value ? item : { ...item, value: item.label === 'Calories' ? '0' : '0g' })
+                          .map(nut => (
+                            <div key={nut.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center animate-in fade-in duration-300">
+                              <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>
+                              <span className={`text-xl font-black ${nut.color}`}>{nut.value}</span>
+                            </div>
+                          ));
                       })()}
                     </div>
                   </div>
@@ -728,77 +702,6 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
 
             </div>
-          </div>
-
-          {/* Right Column: Title, Summary, About, Video Mobile, Community Feedback */}
-          <div className="flex flex-col flex-1 w-full gap-4 md:gap-8 min-w-0">
-            <div className="hidden md:flex items-center gap-3 mb-2">
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="w-6 h-6 rounded-full border-2 border-background bg-white/10 overflow-hidden">
-                    <Image src={`https://i.pravatar.cc/150?u=${i + 10}`} alt="User" width={24} height={24} />
-                  </div>
-                ))}
-              </div>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Loved by 1.2k people</span>
-            </div>
-
-            <h1 className="hidden md:block text-5xl sm:text-6xl lg:text-[72px] font-black text-white leading-[0.95] tracking-tighter font-heading drop-shadow-2xl mb-4">
-              {recipe.title?.replace(/\u00a0/g, ' ')}
-            </h1>
-
-            <p className="hidden md:block text-[16px] text-muted-foreground leading-relaxed font-medium max-w-xl mb-4">
-              {recipe.summary || "Embark on a culinary journey with this masterpiece. Perfectly balanced flavors and textures that will leave your guests in awe."}
-            </p>
-
-             <section id="cooking-guide-section" className="max-w-none pb-4 border-b border-white/5 mb-4 scroll-mt-20">
-              <button
-                onClick={() => {
-                  if (!isGuideUnlocked) {
-                    setShowAuthModal(true);
-                  }
-                  setOpenCookingGuide(!openCookingGuide);
-                }}
-                className="w-full flex items-center justify-between py-2 text-left not-prose group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-6 bg-primary rounded-full" />
-                  <h3 className="text-xl font-black text-white tracking-tighter font-heading group-hover:text-primary transition-colors">Cooking Guide</h3>
-                </div>
-                <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openCookingGuide && "rotate-180")} />
-              </button>
-
-              {!isGuideUnlocked && openCookingGuide && (
-                <div className="relative mt-4 rounded-2xl overflow-hidden border border-white/5 bg-white/[0.01] p-6 text-center backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#05060b]/80" />
-                  <div className="relative z-10 flex flex-col items-center py-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-4">
-                      <Star className="w-6 h-6 animate-pulse" />
-                    </div>
-                    <h4 className="text-sm font-bold text-white mb-2">Step-by-Step Cooking Guide is Locked</h4>
-                    <p className="text-xs text-muted-foreground max-w-sm mb-4">
-                      Sign in or create a free account to unlock our exclusive cooking guide, chef tips, and ingredients scaler.
-                    </p>
-                    <button
-                      onClick={() => setShowAuthModal(true)}
-                      className="px-6 py-2.5 rounded-xl bg-primary text-[11px] font-black uppercase tracking-widest text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95"
-                    >
-                      Unlock Guide
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {isGuideUnlocked && openCookingGuide && (
-                <div className="prose prose-neutral dark:prose-invert text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[420px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth animate-in fade-in slide-in-from-top-2 duration-300 mt-4">
-                  {recipe.content ? (
-                    <BlogRenderer content={recipe.content} />
-                  ) : (
-                    <p>Master this delicious dish with our step-by-step guide and expert culinary tips. We've simplified the process to ensure professional results at home.</p>
-                  )}
-                </div>
-              )}
-            </section>
 
             {recipe.videoUrl && (
               <div className="block md:hidden pb-4 md:pb-8 border-b border-white/5 mb-4">
@@ -827,8 +730,8 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             )}
 
             {/* Community Feedback — desktop full card */}
-            <div className="hidden md:flex flex-col w-full h-[600px]">
-              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[22px] p-5 sm:p-8 shadow-2xl print:hidden flex flex-col flex-1 h-full min-h-[400px]">
+            <div className="hidden md:flex flex-col w-full h-[480px]">
+              <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[22px] p-4 sm:p-6 shadow-2xl print:hidden flex flex-col flex-1 h-full min-h-[300px]">
                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar animate-in fade-in duration-700">
                   <CommentsSection recipeId={recipe.id} className="animate-in fade-in duration-700" />
                 </div>
