@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { SiteSettingsSchema, HeroSettingsSchema, SubscriberSchema } from '../lib/schemas';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
@@ -20,7 +20,8 @@ router.get('/site', async (_req: Request, res: Response, next: NextFunction) => 
       adSettings = settings.adSettings;
     }
 
-    res.json(settings ? { ...settings, adSettings } : {
+    // SECURITY: Never send Cloudinary API secret to the frontend
+    const responseData = settings ? { ...settings, adSettings } : {
       brandName: "Tasteful",
       brandPart1: "Taste",
       brandPart2: "ful",
@@ -37,14 +38,21 @@ router.get('/site', async (_req: Request, res: Response, next: NextFunction) => 
       socialLinks: [],
       copyrightText: "© {year} Tasteful. All rights reserved.",
       adSettings: undefined
-    });
+    };
+
+    // Strip sensitive fields from public response
+    if (responseData && 'cloudinaryApiSecret' in responseData) {
+      (responseData as any).cloudinaryApiSecret = undefined;
+    }
+
+    res.json(responseData);
   } catch (error) {
     next(error);
   }
 });
 
-// Update site settings (Admin)
-router.put('/site', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+// Update site settings (Admin only)
+router.put('/site', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = SiteSettingsSchema.parse(req.body);
     const { adSettings, homePageSettings, ...restData } = data as any;
@@ -97,8 +105,8 @@ router.get('/hero', async (_req: Request, res: Response, next: NextFunction) => 
   }
 });
 
-// Update hero settings (Admin)
-router.put('/hero', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+// Update hero settings (Admin only)
+router.put('/hero', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = HeroSettingsSchema.parse(req.body);
     const titlePart1 = data.titlePart1 || '';

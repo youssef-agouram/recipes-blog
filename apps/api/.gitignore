@@ -2,3 +2,13 @@
 .env
 .env.*
 pull-db.js
+sync-db.js
+check-supabase.js
+check-other-pw.js
+check-local.js
+check-site-settings.js
+test-prisma-supabase.js
+test-save-settings.js
+test-save.js
+test.js
+check-articles.js

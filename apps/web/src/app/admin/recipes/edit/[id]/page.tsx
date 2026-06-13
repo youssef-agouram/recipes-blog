@@ -21,7 +21,7 @@ export default function EditRecipePage() {
 
   useEffect(() => {
     if (error) {
-      console.error('Error fetching recipe:', error);
+      console.error('Error fetching recipe (detailed):', error, JSON.stringify(error), (error as any)?.status, (error as any)?.data);
     }
   }, [error]);
 

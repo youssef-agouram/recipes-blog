@@ -382,6 +382,16 @@ exports.Prisma.SubscriberScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.OtpCodeScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  code: 'code',
+  expiresAt: 'expiresAt',
+  attempts: 'attempts',
+  used: 'used',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.VisitScalarFieldEnum = {
   id: 'id',
   path: 'path',
@@ -578,6 +588,7 @@ exports.Prisma.ModelName = {
   SiteSettings: 'SiteSettings',
   HeroSettings: 'HeroSettings',
   Subscriber: 'Subscriber',
+  OtpCode: 'OtpCode',
   Visit: 'Visit',
   TechnicalSeoReport: 'TechnicalSeoReport',
   CrawlError: 'CrawlError',

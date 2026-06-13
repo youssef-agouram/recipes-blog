@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { SeoSettingsSchema, AnalyticsSettingsSchema, WebmasterToolsSchema } from '../lib/schemas';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, requireAdmin } from '../middleware/auth';
 import { v2 as cloudinary } from 'cloudinary';
 
 const router = Router();
@@ -515,7 +515,7 @@ router.get('/settings', async (_req: Request, res: Response, next: NextFunction)
 });
 
 // Update global SEO settings (Admin)
-router.put('/settings', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/settings', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = SeoSettingsSchema.parse(req.body);
     const settings = await prisma.seoSettings.upsert({
@@ -547,7 +547,7 @@ router.get('/analytics', async (_req: Request, res: Response, next: NextFunction
 });
 
 // Update analytics settings (Admin)
-router.put('/analytics', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/analytics', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = AnalyticsSettingsSchema.parse(req.body);
     const settings = await prisma.analyticsSettings.upsert({
@@ -592,7 +592,7 @@ router.get('/webmaster', async (_req: Request, res: Response, next: NextFunction
 });
 
 // Update webmaster tools settings (Admin)
-router.put('/webmaster', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/webmaster', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = WebmasterToolsSchema.parse(req.body);
     const settings = await prisma.webmasterTools.upsert({
@@ -604,8 +604,8 @@ router.put('/webmaster', authMiddleware, async (req: Request, res: Response, nex
         pinterestVerify: data.pinterestVerify,
         sitemapUrl: data.sitemapUrl,
         autoSitemapSubmit: data.autoSitemapSubmit,
-        indexingStats: data.indexingStats ?? { indexed: 124, notIndexed: 12, submitted: 136 },
-        crawlErrors: data.crawlErrors ?? []
+        indexingStats: (data.indexingStats ?? { indexed: 124, notIndexed: 12, submitted: 136 }) as any,
+        crawlErrors: (data.crawlErrors ?? []) as any
       },
       create: {
         id: 1,
@@ -615,8 +615,8 @@ router.put('/webmaster', authMiddleware, async (req: Request, res: Response, nex
         pinterestVerify: data.pinterestVerify,
         sitemapUrl: data.sitemapUrl,
         autoSitemapSubmit: data.autoSitemapSubmit,
-        indexingStats: data.indexingStats ?? { indexed: 124, notIndexed: 12, submitted: 136 },
-        crawlErrors: data.crawlErrors ?? []
+        indexingStats: (data.indexingStats ?? { indexed: 124, notIndexed: 12, submitted: 136 }) as any,
+        crawlErrors: (data.crawlErrors ?? []) as any
       },
     });
     res.json(settings);
@@ -685,7 +685,7 @@ router.get('/crawl', async (_req: Request, res: Response, next: NextFunction) =>
 });
 
 // Run simulated live SEO health scan
-router.post('/crawl/scan', authMiddleware, async (_req: Request, res: Response, next: NextFunction) => {
+router.post('/crawl/scan', authMiddleware, requireAdmin, async (_req: Request, res: Response, next: NextFunction) => {
   try {
     // 1. Detect SSL Status (simulate checks)
     const isSslActive = true; 
@@ -889,7 +889,7 @@ router.get('/crawl-errors', async (_req: Request, res: Response, next: NextFunct
 });
 
 // Trigger live Technical SEO health check scan
-router.post('/health/scan', authMiddleware, async (_req: Request, res: Response, next: NextFunction) => {
+router.post('/health/scan', authMiddleware, requireAdmin, async (_req: Request, res: Response, next: NextFunction) => {
   try {
     // 1. Analyze Database Entries for SEO Auditing
     const recipes = await prisma.recipe.findMany({
@@ -1037,7 +1037,7 @@ router.get('/redirects', async (_req: Request, res: Response, next: NextFunction
 });
 
 // Create redirect
-router.post('/redirects', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/redirects', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { sourceUrl, destUrl, type, active } = req.body;
     if (!sourceUrl || !destUrl) {
@@ -1060,7 +1060,7 @@ router.post('/redirects', authMiddleware, async (req: Request, res: Response, ne
 });
 
 // Update redirect
-router.put('/redirects/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/redirects/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = parseInt(req.params.id as string);
     const { sourceUrl, destUrl, type, active } = req.body;
@@ -1082,7 +1082,7 @@ router.put('/redirects/:id', authMiddleware, async (req: Request, res: Response,
 });
 
 // Delete redirect
-router.delete('/redirects/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/redirects/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = parseInt(req.params.id as string);
     await prisma.redirect.delete({ where: { id } });
@@ -1122,7 +1122,7 @@ router.get('/performance', async (_req: Request, res: Response, next: NextFuncti
 });
 
 // Trigger PageSpeed scan simulation
-router.post('/performance/scan', authMiddleware, async (_req: Request, res: Response, next: NextFunction) => {
+router.post('/performance/scan', authMiddleware, requireAdmin, async (_req: Request, res: Response, next: NextFunction) => {
   try {
     // Generate new high quality performance records in DB
     const mobileReport = await prisma.performanceReport.create({
@@ -1394,7 +1394,7 @@ router.get('/ai/recommendations', async (_req: Request, res: Response, next: Nex
 });
 
 // Run AI Metadata Generator action for a recipe
-router.post('/ai/generate', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/ai/generate', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { recipeId, action, recipeTitle, aboutRecipeText: clientAboutRecipeText } = req.body;
     if (!action) {
@@ -1772,7 +1772,7 @@ router.get('/ai/linking', async (_req: Request, res: Response, next: NextFunctio
 });
 
 // Optimize specific content endpoint
-router.post('/ai/optimize', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/ai/optimize', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { recipeId, focusKeyword } = req.body;
     if (!recipeId) {

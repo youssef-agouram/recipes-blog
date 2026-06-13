@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
@@ -110,7 +110,7 @@ router.post('/visit', async (req: Request, res: Response, next: NextFunction) =>
 });
 
 // Get dashboard stats
-router.get('/dashboard', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/dashboard', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const range = (req.query.range || '7d') as string;
     let startDate = new Date();

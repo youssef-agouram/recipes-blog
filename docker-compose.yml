@@ -16,10 +16,11 @@ services:
     container_name: recipes-blog-api
     ports:
       - "4000:4000"
+    env_file:
+      - ./apps/api/.env
     environment:
       NODE_ENV: development
       DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/recipes_db?schema=public"
-      JWT_SECRET: "super-secret-recipe-blog-key-2024"
       PORT: 4000
     depends_on:
       - postgres

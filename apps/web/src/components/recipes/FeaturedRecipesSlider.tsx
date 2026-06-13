@@ -102,7 +102,7 @@ export function FeaturedRecipesSlider() {
               </p>
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <div className="flex items-center gap-4 text-xs font-semibold text-gray-400">
-                  <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {formatTimeCompact(recipe.totalTime || recipe.prepTime || '40 Min')}</span>
+                  <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {formatTimeCompact(recipe.totalTime || '40 Min')}</span>
                   <span className="flex items-center gap-1"><Users className="w-4 h-4" /> 4 Servings</span>
                 </div>
                 <button className="border border-brand-dark text-brand-dark px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider hover:bg-brand-dark hover:text-white transition-colors">

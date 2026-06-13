@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { RecipeSchema } from '../lib/schemas';
 import { generateSlug } from '../lib/utils';
-import { authMiddleware, AuthRequest, optionalAuth } from '../middleware/auth';
+import { authMiddleware, requireAdmin, AuthRequest, optionalAuth } from '../middleware/auth';
 
 const router = Router();
 
@@ -36,8 +36,8 @@ function parseRecipe(recipe: any, userId?: number) {
   return processItem(recipe);
 }
 
-// Admin: Get recipe stats
-router.get('/stats', async (_req: Request, res: Response, next: NextFunction) => {
+// Admin: Get recipe stats — requires admin authentication
+router.get('/stats', authMiddleware, requireAdmin, async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const [total, published, draft, trash] = await Promise.all([
       prisma.recipe.count({ where: { status: { not: 'TRASH' } } }),
@@ -104,7 +104,7 @@ router.get('/favorited', authMiddleware, async (req: AuthRequest, res: Response,
 });
 
 // Admin: Clear all recipes in trash
-router.delete('/trash/clear', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/trash/clear', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const deleted = await prisma.recipe.deleteMany({
       where: { status: 'TRASH' },
@@ -245,7 +245,7 @@ router.get('/:slug', optionalAuth, async (req: AuthRequest, res: Response, next:
 });
 
 // Admin: Create recipe
-router.post('/', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = RecipeSchema.parse(req.body);
     let slug = data.slug ? generateSlug(data.slug) : generateSlug(data.title);
@@ -261,7 +261,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
         title: data.title,
         slug,
         summary: data.summary,
-        content: data.content,
+        content: data.content as any,
         imageUrl: data.imageUrl,
         images: data.images ?? [],
         status: data.status || 'PUBLISHED',
@@ -355,7 +355,7 @@ router.delete('/:id/save', authMiddleware, async (req: AuthRequest, res: Respons
 });
 
 // Admin: Toggle featured status
-router.patch('/:id/feature', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.patch('/:id/feature', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid recipe ID' });
@@ -386,7 +386,7 @@ router.patch('/:id/feature', authMiddleware, async (req: Request, res: Response,
 });
 
 // Admin: Toggle top article status
-router.patch('/:id/top-article', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.patch('/:id/top-article', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid recipe ID' });
@@ -416,7 +416,7 @@ router.patch('/:id/top-article', authMiddleware, async (req: Request, res: Respo
 });
 
 // Admin: Update recipe
-router.put('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const data = RecipeSchema.partial().parse(req.body);
@@ -475,7 +475,7 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
 });
 
 // Admin: Delete recipe
-router.delete('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await prisma.recipe.delete({

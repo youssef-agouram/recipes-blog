@@ -357,7 +357,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                           <div className={cn("flex items-center justify-between pt-2.5 border-t border-border", isRecipe ? "mt-auto" : "")}>
                             <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
                               <Clock className="w-3 h-3 text-primary" />
-                              <span>{isRecipe ? formatCardTime(item.totalTime || item.prepTime || '30m') : '5m'}</span>
+                              <span>{isRecipe ? formatCardTime(item.totalTime || '30m') : '5m'}</span>
                             </div>
                             <button
                               suppressHydrationWarning
@@ -484,7 +484,7 @@ export default function TopArticlesSection({ items, title, subtitle }: TopArticl
                           <div className={cn("flex items-center justify-between pt-2.5 border-t border-border", isRecipe ? "mt-auto" : "")}>
                             <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
                               <Clock className="w-3 h-3 text-primary" />
-                              <span>{isRecipe ? formatCardTime(item.totalTime || item.prepTime || '30m') : '5m'}</span>
+                              <span>{isRecipe ? formatCardTime(item.totalTime || '30m') : '5m'}</span>
                             </div>
                             <button
                               suppressHydrationWarning

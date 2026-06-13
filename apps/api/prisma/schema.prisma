@@ -360,6 +360,20 @@ model Subscriber {
   createdAt DateTime @default(now())
 }
 
+model OtpCode {
+  id        Int      @id @default(autoincrement())
+  email     String
+  code      String   // Stored as bcrypt hash
+  expiresAt DateTime
+  attempts  Int      @default(0) // Track failed verification attempts
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+  @@map("otp_codes")
+}
+
 model Visit {
   id        Int      @id @default(autoincrement())
   path      String

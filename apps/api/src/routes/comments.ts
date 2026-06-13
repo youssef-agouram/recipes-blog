@@ -1,10 +1,20 @@
+/**
+ * Comments Routes
+ * 
+ * SECURITY:
+ * - Like requires authentication (prevents vote manipulation)
+ * - Status change requires Admin role
+ * - Delete requires Admin role
+ * - Comment posting requires authentication
+ */
+
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { authMiddleware, requireAdmin, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Get comments for a recipe (with nested replies)
+// Get comments for a recipe (with nested replies) — public
 router.get('/recipe/:recipeId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { recipeId } = req.params;
@@ -12,7 +22,7 @@ router.get('/recipe/:recipeId', async (req: Request, res: Response, next: NextFu
       where: { 
         recipeId: Number(recipeId),
         status: 'APPROVED',
-        parentId: null // Only get top-level comments
+        parentId: null
       },
       include: {
         user: {
@@ -42,7 +52,7 @@ router.get('/recipe/:recipeId', async (req: Request, res: Response, next: NextFu
 });
 
 // Admin: Get all comments
-router.get('/', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const comments = await prisma.comment.findMany({
       include: {
@@ -57,7 +67,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response, next: NextFu
   }
 });
 
-// Post a comment (or reply)
+// Post a comment (or reply) — requires auth
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { text, rating, recipeId, parentId } = req.body;
@@ -69,8 +79,8 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response, next: N
 
     const comment = await prisma.comment.create({
       data: {
-        text,
-        rating: rating ? Number(rating) : null,
+        text: String(text).substring(0, 2000), // Limit comment length
+        rating: rating ? Math.min(Math.max(Number(rating), 1), 5) : null, // Clamp 1-5
         recipeId: Number(recipeId),
         userId: userId,
         parentId: parentId ? Number(parentId) : null,
@@ -92,8 +102,8 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response, next: N
   }
 });
 
-// Like a comment
-router.patch('/:id/like', async (req: Request, res: Response, next: NextFunction) => {
+// Like a comment — requires auth to prevent vote manipulation
+router.patch('/:id/like', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const comment = await prisma.comment.update({
@@ -107,10 +117,15 @@ router.patch('/:id/like', async (req: Request, res: Response, next: NextFunction
 });
 
 // Admin: Update comment status
-router.patch('/:id/status', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.patch('/:id/status', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
+
+    const validStatuses = ['PENDING', 'APPROVED', 'SPAM'];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
 
     const comment = await prisma.comment.update({
       where: { id: Number(id) },
@@ -124,7 +139,7 @@ router.patch('/:id/status', authMiddleware, async (req: Request, res: Response, 
 });
 
 // Admin: Delete comment
-router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
 

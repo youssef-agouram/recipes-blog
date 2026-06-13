@@ -87,7 +87,7 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
     }
   };
 
-  const timeText = formatCardTime(recipe.totalTime || recipe.prepTime || '30 Min');
+  const timeText = formatCardTime(recipe.totalTime || '30 Min');
 
   return (
     <div className="group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border h-full">

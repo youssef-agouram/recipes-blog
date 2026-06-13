@@ -1,10 +1,18 @@
+/**
+ * Category Groups Routes
+ * 
+ * SECURITY: Write operations (create, update, delete) require
+ * authentication + Administrator role.
+ */
+
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { CategoryGroupSchema } from '../lib/schemas';
+import { authMiddleware, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
-// Get all groups
+// Get all groups — public read
 router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const groups = await prisma.categoryGroup.findMany({
@@ -17,8 +25,8 @@ router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// Create group
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
+// Create group — Admin only
+router.post('/', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = CategoryGroupSchema.parse(req.body);
     const group = await prisma.categoryGroup.create({ data });
@@ -28,8 +36,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// Update group
-router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
+// Update group — Admin only
+router.put('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const data = CategoryGroupSchema.parse(req.body);
@@ -43,8 +51,8 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// Delete group
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
+// Delete group — Admin only
+router.delete('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await prisma.categoryGroup.delete({

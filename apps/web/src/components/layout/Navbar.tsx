@@ -135,9 +135,14 @@ export function Navbar() {
   const brandName = settings?.brandName;
   const tagline = settings?.tagline;
   const logoUrl = settings?.logoUrl;
+  const defaultLinks = [
+    { label: 'Home', href: '/' },
+    { label: 'Recipes', href: '/recipes' },
+    { label: 'Blog', href: '/blog' }
+  ];
   const navLinks = settings?.menuItems?.length > 0
     ? settings.menuItems.filter((m: any) => m.visible !== false)
-    : []; // Remove default links completely if not in settings
+    : defaultLinks;
 
   useEffect(() => {
     setMounted(true);

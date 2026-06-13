@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { ArticleSchema } from '../lib/schemas';
 import { generateSlug } from '../lib/utils';
-import { authMiddleware, AuthRequest, optionalAuth } from '../middleware/auth';
+import { authMiddleware, requireAdmin, AuthRequest, optionalAuth } from '../middleware/auth';
 
 const router = Router();
 
@@ -112,7 +112,7 @@ router.get('/saved', authMiddleware, async (req: AuthRequest, res: Response, nex
 });
 
 // Create article (Admin)
-router.post('/', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = ArticleSchema.parse(req.body);
     const slug = generateSlug(data.title);
@@ -188,7 +188,7 @@ router.get('/:slug', optionalAuth, async (req: AuthRequest, res: Response, next:
 });
 
 // Update article (Admin)
-router.put('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = ArticleSchema.partial().parse(req.body);
     const article = await prisma.article.update({
@@ -202,7 +202,7 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
 });
 
 // Delete article (Admin)
-router.delete('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     await prisma.article.delete({
       where: { id: Number(req.params.id) },
@@ -214,7 +214,7 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response, next: 
 });
 
 // Admin: Toggle top article status
-router.patch('/:id/toggle-top-article', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.patch('/:id/toggle-top-article', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid article ID' });

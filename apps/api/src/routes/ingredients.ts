@@ -1,10 +1,18 @@
+/**
+ * Ingredients Routes
+ * 
+ * SECURITY: Write operations (create, update, delete) require
+ * authentication + Administrator role.
+ */
+
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { IngredientSchema } from '../lib/schemas';
+import { authMiddleware, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
-// Client: Get all ingredients
+// Client: Get all ingredients — public read
 router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const ingredients = await prisma.ingredient.findMany({
@@ -17,7 +25,7 @@ router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
 });
 
 // Admin: Create ingredient
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = IngredientSchema.parse(req.body);
     const ingredient = await prisma.ingredient.create({ data });
@@ -28,7 +36,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // Admin: Update ingredient
-router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const data = IngredientSchema.parse(req.body);
@@ -43,7 +51,7 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // Admin: Delete ingredient
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await prisma.ingredient.delete({

@@ -96,8 +96,8 @@ export default async function HomePage() {
           images={heroSettings.images || []}
           fallbackImage={heroSettings.imageUrl}
         />
-        {/* Dynamic Text Overlay (Aligned Left) */}
-        <div className="absolute inset-0 z-20 flex flex-col items-start justify-center text-left px-6 sm:px-16 md:px-24 bg-black/40 pointer-events-none">
+        {/* Dynamic Text Overlay (Aligned Top-Left) */}
+        <div className="absolute inset-0 z-20 flex flex-col items-start justify-start text-left px-6 sm:px-16 md:px-24 pt-6 sm:pt-12 md:pt-16 bg-black/40 pointer-events-none">
           <div className="max-w-4xl space-y-2 sm:space-y-4 pointer-events-auto">
             {heroSettings.titlePart1 || heroSettings.title ? (
               <h1 className="text-xl sm:text-4xl md:text-5xl font-black tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] font-heading leading-tight">

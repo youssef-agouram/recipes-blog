@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { CategorySchema } from '../lib/schemas';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
@@ -43,7 +43,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // Admin: Create category
-router.post('/', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = CategorySchema.parse(req.body);
     const category = await prisma.category.create({ data });
@@ -54,7 +54,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response, next: NextF
 });
 
 // Admin: Update category
-router.put('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const data = CategorySchema.partial().parse(req.body);
@@ -69,7 +69,7 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response, next: Nex
 });
 
 // Admin: Delete category
-router.delete('/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await prisma.category.delete({
