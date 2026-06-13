@@ -131,13 +131,17 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
   const [openCookingGuide, setOpenCookingGuide] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  const [checkedIngredients, setCheckedIngredients] = useState<Record<number, boolean>>({});
+  const [checkedTimes, setCheckedTimes] = useState<Record<string, boolean>>({});
+
   const [openSections, setOpenSections] = useState({
+    times: true,
     ingredients: false,
     instructions: false,
     nutrition: false,
   });
 
-  const toggleSection = (section: 'ingredients' | 'instructions' | 'nutrition') => {
+  const toggleSection = (section: 'times' | 'ingredients' | 'instructions' | 'nutrition') => {
     setOpenSections(prev => ({
       ...prev,
       [section]: !prev[section]
@@ -469,7 +473,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               )}
 
               {isGuideUnlocked && openCookingGuide && (
-                <div className="prose prose-neutral dark:prose-invert text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[420px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth animate-in fade-in slide-in-from-top-2 duration-300 mt-4">
+                <div className="prose prose-neutral dark:prose-invert max-w-none text-[14px] text-muted-foreground leading-relaxed font-medium max-h-[650px] overflow-y-auto pr-4 custom-scrollbar snap-y snap-mandatory scroll-smooth animate-in fade-in slide-in-from-top-2 duration-300 mt-4">
                   {recipe.content ? (
                     <BlogRenderer content={recipe.content} />
                   ) : (
@@ -547,6 +551,116 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             {/* Accordion Card — Ingredients / Instructions / Nutrition */}
             <div className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[22px] shadow-2xl overflow-hidden divide-y divide-white/5 mb-4">
 
+              {/* Times Section */}
+              {(recipe.prepTime || recipe.cookTime || recipe.totalTime) && (
+                <div className="flex flex-col">
+                  <button
+                    onClick={() => toggleSection('times')}
+                    className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Times</h3>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Quick Overview</p>
+                      </div>
+                    </div>
+                    <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.times && "rotate-180")} />
+                  </button>
+
+                  {openSections.times && (
+                    <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <ul className="space-y-4">
+                        {(() => {
+                          let timingsList: { label: string; value: string }[] = [];
+                          let isJson = false;
+                          if (recipe.cookTime && recipe.cookTime.startsWith('[') && recipe.cookTime.endsWith(']')) {
+                            try {
+                              timingsList = JSON.parse(recipe.cookTime);
+                              isJson = Array.isArray(timingsList);
+                            } catch (e) {
+                              isJson = false;
+                            }
+                          }
+
+                          if (isJson) {
+                            return timingsList.map((item, idx) => {
+                              const key = `timing-${idx}`;
+                              const isChecked = !!checkedTimes[key];
+                              return (
+                                <li 
+                                  key={key}
+                                  onClick={() => setCheckedTimes(prev => ({ ...prev, [key]: !prev[key] }))}
+                                  className="flex items-start gap-4 group cursor-pointer select-none"
+                                >
+                                  <div className={cn(
+                                    "mt-1.5 w-4 h-4 rounded border flex items-center justify-center transition-all",
+                                    isChecked 
+                                      ? "border-primary bg-primary/15 text-primary" 
+                                      : "border-white/10 group-hover:border-primary group-hover:bg-primary/10"
+                                  )}>
+                                    <div className={cn(
+                                      "w-1.5 h-1.5 rounded-sm bg-primary transition-all duration-200",
+                                      isChecked ? "scale-100 opacity-100" : "scale-50 opacity-0 group-hover:opacity-100 group-hover:scale-100"
+                                    )} />
+                                  </div>
+                                  <span className={cn(
+                                    "text-[14px] font-medium leading-relaxed transition-all duration-300",
+                                    isChecked 
+                                      ? "text-muted-foreground/50 line-through" 
+                                      : "text-white/70 group-hover:text-white"
+                                  )}>
+                                    <span className={cn("font-bold", isChecked ? "text-muted-foreground/50" : "text-white")}>{item.label}:</span> {item.value}
+                                  </span>
+                                </li>
+                              );
+                            });
+                          } else {
+                            const legacyItems: { label: string; value: string; key: string }[] = [];
+                            if (recipe.prepTime) legacyItems.push({ label: 'Prep Time', value: recipe.prepTime, key: 'prepTime' });
+                            if (recipe.cookTime) legacyItems.push({ label: 'Cook Time', value: recipe.cookTime, key: 'cookTime' });
+                            if (recipe.totalTime) legacyItems.push({ label: 'Total Time', value: recipe.totalTime, key: 'totalTime' });
+                            
+                            return legacyItems.map((item) => {
+                              const isChecked = !!checkedTimes[item.key];
+                              return (
+                                <li 
+                                  key={item.key}
+                                  onClick={() => setCheckedTimes(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
+                                  className="flex items-start gap-4 group cursor-pointer select-none"
+                                >
+                                  <div className={cn(
+                                    "mt-1.5 w-4 h-4 rounded border flex items-center justify-center transition-all",
+                                    isChecked 
+                                      ? "border-primary bg-primary/15 text-primary" 
+                                      : "border-white/10 group-hover:border-primary group-hover:bg-primary/10"
+                                  )}>
+                                    <div className={cn(
+                                      "w-1.5 h-1.5 rounded-sm bg-primary transition-all duration-200",
+                                      isChecked ? "scale-100 opacity-100" : "scale-50 opacity-0 group-hover:opacity-100 group-hover:scale-100"
+                                    )} />
+                                  </div>
+                                  <span className={cn(
+                                    "text-[14px] font-medium leading-relaxed transition-all duration-300",
+                                    isChecked 
+                                      ? "text-muted-foreground/50 line-through" 
+                                      : "text-white/70 group-hover:text-white"
+                                  )}>
+                                    <span className={cn("font-bold", isChecked ? "text-muted-foreground/50" : "text-white")}>{item.label}:</span> {item.value}
+                                  </span>
+                                </li>
+                              );
+                            });
+                          }
+                        })()}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Ingredients Section */}
               <div className="flex flex-col">
                 <button
@@ -573,12 +687,39 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                       <button onClick={() => setServings(prev => prev + 1)} className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Plus className="w-3.5 h-3.5" /></button>
                     </div>
                     <ul className="space-y-4">
-                      {ingredientItems.length > 0 ? ingredientItems.map((ing: any, idx: number) => (
-                        <li key={idx} className="flex items-start gap-4 group cursor-pointer">
-                          <div className="mt-1.5 w-4 h-4 rounded border border-white/10 flex items-center justify-center transition-all group-hover:border-primary group-hover:bg-primary/10"><div className="w-1.5 h-1.5 rounded-sm bg-primary opacity-0 group-hover:opacity-100 transition-opacity" /></div>
-                          <span className="text-[14px] font-medium text-white/70 leading-relaxed group-hover:text-white transition-colors"><span className="font-bold text-white">{ing.quantity} {ing.unit}</span> {ing.name}</span>
-                        </li>
-                      )) : <p className="text-[11px] text-muted-foreground italic">No ingredients listed yet.</p>}
+                      {ingredientItems.length > 0 ? ingredientItems.map((ing: any, idx: number) => {
+                        const isChecked = !!checkedIngredients[idx];
+                        return (
+                          <li 
+                            key={idx} 
+                            onClick={() => setCheckedIngredients(prev => ({ ...prev, [idx]: !prev[idx] }))}
+                            className="flex items-start gap-4 group cursor-pointer select-none"
+                          >
+                            <div className={cn(
+                              "mt-1.5 w-4 h-4 rounded border flex items-center justify-center transition-all",
+                              isChecked 
+                                ? "border-primary bg-primary/15 text-primary" 
+                                : "border-white/10 group-hover:border-primary group-hover:bg-primary/10"
+                            )}>
+                              <div className={cn(
+                                "w-1.5 h-1.5 rounded-sm bg-primary transition-all duration-200",
+                                isChecked ? "scale-100 opacity-100" : "scale-50 opacity-0 group-hover:opacity-100 group-hover:scale-100"
+                              )} />
+                            </div>
+                            <span className={cn(
+                              "text-[14px] font-medium leading-relaxed transition-all duration-300",
+                              isChecked 
+                                ? "text-muted-foreground/50 line-through" 
+                                : "text-white/70 group-hover:text-white"
+                            )}>
+                              <span className={cn("font-bold", isChecked ? "text-muted-foreground/50" : "text-white")}>
+                                {ing.quantity} {ing.unit}
+                              </span>{" "}
+                              {ing.name}
+                            </span>
+                          </li>
+                        );
+                      }) : <p className="text-[11px] text-muted-foreground italic">No ingredients listed yet.</p>}
                     </ul>
                   </div>
                 )}

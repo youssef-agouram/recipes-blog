@@ -42,10 +42,32 @@ export default async function RecipePage({ params }: RecipePageProps) {
     const breadcrumbJsonLd = generateBreadcrumbListJsonLd(recipe.categories || [], recipe.slug, recipe.title);
 
     // Auto-generate detailed cooking FAQ answers
+    const getFaqCookTime = () => {
+      if (!recipe.cookTime) return "15 minutes cook time";
+      if (recipe.cookTime.startsWith('[') && recipe.cookTime.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(recipe.cookTime);
+          if (Array.isArray(parsed)) {
+            const list = parsed.filter((item: any) => {
+              const lbl = item.label?.toLowerCase() || '';
+              return !lbl.includes('prep') && !lbl.includes('total');
+            });
+            if (list.length > 0) {
+              return list.map((item: any) => `${item.value} ${item.label.toLowerCase()}`).join(', ');
+            }
+          }
+        } catch (e) {
+          // fallback
+        }
+      }
+      return `${recipe.cookTime} cook time`;
+    };
+
+    const faqCookTimeText = getFaqCookTime();
     const faqs = [
       {
         question: `How long does it take to prepare ${recipe.title}?`,
-        answer: `It takes a total of ${recipe.totalTime || "30 minutes"} to prepare and cook this recipe, including ${recipe.prepTime || "15 minutes"} prep time and ${recipe.cookTime || "15 minutes"} cook time.`,
+        answer: `It takes a total of ${recipe.totalTime || "30 minutes"} to prepare and cook this recipe, including ${recipe.prepTime || "15 minutes"} prep time and ${faqCookTimeText}.`,
       },
       {
         question: `What is the difficulty level of this recipe?`,

@@ -64,6 +64,7 @@ const recipeFormSchema = z.object({
   instructions: z.array(instructionStepSchema).default([]),
   instructionsText: z.string().optional(),
   nutritionText: z.string().optional(),
+  timeText: z.string().optional(),
   seo: z.object({
     title: z.string().optional().nullable(),
     description: z.string().optional().nullable(),
@@ -158,6 +159,9 @@ const RECIPE_PRESETS = [
     keywords: ['tagine', 'moroccan'],
     title: 'Easy Chicken Tagine with Olives and Preserved Lemon',
     image: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '45 mins',
+    servings: 4,
     ingredients: `8 pieces chicken thighs
 2 tablespoons olive oil
 1 large onion, chopped
@@ -202,6 +206,9 @@ Trans Fat: 0g`
     keywords: ['pizza', 'margherita'],
     title: 'Classic Margherita Pizza with Fresh Basil',
     image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80',
+    prepTime: '20 mins',
+    cookTime: '12 mins',
+    servings: 2,
     ingredients: `1 ball prepared pizza dough
 1/2 cup tomato sauce
 1 1/2 cups fresh mozzarella, sliced
@@ -236,6 +243,9 @@ Trans Fat: 0g`
     keywords: ['burger', 'cheeseburger', 'hamburger'],
     title: 'Gourmet Classic Beef Burger with Special Sauce',
     image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '10 mins',
+    servings: 4,
     ingredients: `1 lb ground beef (80% lean)
 4 brioche burger buns, toasted
 4 slices cheddar cheese
@@ -276,6 +286,9 @@ Trans Fat: 1g`
     keywords: ['pasta', 'spaghetti', 'lasagna', 'noodle', 'macaroni', 'carbonara', 'fettuccine'],
     title: 'Creamy Garlic Butter Tuscan Pasta',
     image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
+    prepTime: '10 mins',
+    cookTime: '15 mins',
+    servings: 4,
     ingredients: `12 oz fettuccine pasta
 2 tbsp unsalted butter
 3 cloves garlic, minced
@@ -314,6 +327,9 @@ Trans Fat: 0.5g`
     keywords: ['salad', 'caesar', 'greens'],
     title: 'Classic Caesar Salad with Garlic Croutons',
     image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '10 mins',
+    servings: 4,
     ingredients: `2 heads romaine lettuce, chopped
 1 cup gourmet garlic croutons
 1/2 cup shaved parmesan cheese
@@ -348,6 +364,9 @@ Trans Fat: 0g`
     keywords: ['cookie', 'cake', 'brownie', 'pie', 'cupcake', 'muffin', 'donut', 'dessert', 'apple', 'chocolate', 'sweet'],
     title: 'Soft and Chewy Chocolate Chip Cookies',
     image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '15 mins',
+    servings: 24,
     ingredients: `2 1/4 cups all-purpose flour
 1/2 tsp baking soda
 1 cup unsalted butter, melted
@@ -385,6 +404,9 @@ Trans Fat: 0g`
     keywords: ['salmon', 'fish', 'shrimp', 'seafood', 'tuna', 'cod', 'trout'],
     title: 'Garlic Butter Glazed Salmon',
     image: 'https://images.unsplash.com/photo-1485921325833-c519f76c4927?auto=format&fit=crop&w=800&q=80',
+    prepTime: '10 mins',
+    cookTime: '10 mins',
+    servings: 4,
     ingredients: `4 salmon fillets (6 oz each)
 2 tbsp unsalted butter
 3 cloves garlic, minced
@@ -422,6 +444,9 @@ Trans Fat: 0g`
     keywords: ['soup', 'stew', 'broth', 'chowder', 'ramen'],
     title: 'Hearty Tuscan White Bean Soup',
     image: 'https://images.unsplash.com/photo-1547592165-e1d17fed6005?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '25 mins',
+    servings: 6,
     ingredients: `2 cans (15 oz) cannellini beans, drained
 2 tbsp olive oil
 1 large onion, chopped
@@ -461,6 +486,9 @@ Trans Fat: 0g`
     keywords: ['taco', 'quesadilla', 'burrito', 'mexican', 'fajita'],
     title: 'Spicy Beef Tacos with Cilantro Lime Crema',
     image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '15 mins',
+    servings: 4,
     ingredients: `1 lb lean ground beef
 1 packet taco seasoning
 8 small corn tortillas
@@ -468,7 +496,7 @@ Trans Fat: 0g`
 1 cup cheddar cheese, shredded
 1 cup roma tomatoes, diced
 1/2 cup sour cream
-1 tbsp lime juice
+1/2 lime juice
 2 tbsp fresh cilantro, chopped
 1/2 tsp chili powder`,
     instructions: `Brown ground beef in a skillet over medium-high heat; drain fat.
@@ -499,6 +527,9 @@ Trans Fat: 0.5g`
 const DEFAULT_PRESET = {
   title: 'Creamy Tuscan Garlic Chicken',
   image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80',
+  prepTime: '10 mins',
+  cookTime: '20 mins',
+  servings: 4,
   ingredients: `2 large chicken breasts, halved
 1 tbsp olive oil
 1 cup heavy cream
@@ -666,9 +697,9 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   // AI SEO Assistant helpers
   const [generateAiMetadata, { isLoading: isGeneratingAi }] = useGenerateAiMetadataMutation();
   const [aiSuggestions, setAiSuggestions] = useState<{ action: string; output: string } | null>(null);
-  const [generatingField, setGeneratingField] = useState<'title' | 'image' | 'ingredients' | 'instructions' | 'nutrition' | null>(null);
+  const [generatingField, setGeneratingField] = useState<'title' | 'image' | 'ingredients' | 'instructions' | 'nutrition' | 'times' | null>(null);
 
-  const handleAiGenerateField = async (field: 'title' | 'image' | 'ingredients' | 'instructions' | 'nutrition') => {
+  const handleAiGenerateField = async (field: 'title' | 'image' | 'ingredients' | 'instructions' | 'nutrition' | 'times') => {
     let currentTitle = watch('title') || '';
 
     if (field === 'image') {
@@ -756,7 +787,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
     setGeneratingField(field);
     try {
       let actionStr = '';
-      let targetField: 'title' | 'ingredientsText' | 'instructionsText' | 'nutritionText' | null = null;
+      let targetField: 'title' | 'ingredientsText' | 'instructionsText' | 'nutritionText' | 'timeText' | null = null;
       let successMsg = '';
 
       if (field === 'title') {
@@ -775,6 +806,10 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
         actionStr = 'nutrition';
         targetField = 'nutritionText';
         successMsg = 'Nutrition info generated successfully!';
+      } else if (field === 'times') {
+        actionStr = 'times';
+        targetField = 'timeText';
+        successMsg = 'Times & servings info generated successfully!';
       }
 
       if (actionStr && targetField) {
@@ -786,7 +821,14 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
         }).unwrap();
 
         if (res.output) {
-          setValue(targetField, res.output);
+          let outputVal = res.output;
+          if (targetField === 'timeText') {
+            outputVal = res.output
+              .split('\n')
+              .filter((line: string) => !line.toLowerCase().includes('serv'))
+              .join('\n');
+          }
+          setValue(targetField, outputVal);
           showToast('success', successMsg);
         } else {
           showToast('error', `Failed to generate values.`);
@@ -885,6 +927,18 @@ Suggestions to improve readability:
 1. Break down instructions into numbered lists of at most 2 sentences.
 2. Use active cooking voice ('stew the broth' instead of 'the broth should be stewed').
 3. Keep descriptions punchy. Use bullet points for tools or secondary toppings.`;
+      } else if (action === 'times') {
+        const textSeed = `${title || ''} ${plainText}`;
+        const preset = getRecipePreset(textSeed);
+        const prep = preset.prepTime || '15 mins';
+        const cook = preset.cookTime || '20 mins';
+        const parseMin = (val: string) => {
+          const n = parseInt(val.replace(/[^0-9]/g, ''), 10);
+          return isNaN(n) ? 0 : n;
+        };
+        const totalNum = parseMin(prep) + parseMin(cook);
+        const total = totalNum > 0 ? `${totalNum} mins` : '35 mins';
+        output = `Prep Time: ${prep}\nCook Time: ${cook}\nTotal Time: ${total}\nServings: ${preset.servings || 4}`;
       }
       setAiSuggestions({ action, output });
       showToast('success', `AI suggested values generated for ${action}!`);
@@ -1060,6 +1114,23 @@ Suggestions to improve readability:
           return `${displayKey}: ${n[key] || ''}`;
         }).join('\n');
       })(),
+      timeText: (() => {
+        if (initialData?.cookTime && initialData.cookTime.startsWith('[') && initialData.cookTime.endsWith(']')) {
+          try {
+            const list = JSON.parse(initialData.cookTime);
+            if (Array.isArray(list)) {
+              return list.map((item: any) => `${item.label}: ${item.value}`).join('\n');
+            }
+          } catch (e) {
+            // fallback
+          }
+        }
+        const parts = [];
+        if (initialData?.prepTime) parts.push(`Prep Time: ${initialData.prepTime}`);
+        if (initialData?.cookTime) parts.push(`Cook Time: ${initialData.cookTime}`);
+        if (initialData?.totalTime) parts.push(`Total Time: ${initialData.totalTime}`);
+        return parts.join('\n');
+      })(),
       seo: {
         title: initialData?.seo?.title || '',
         description: initialData?.seo?.description || '',
@@ -1214,16 +1285,7 @@ Suggestions to improve readability:
     }
   }, [videoUrl, embedUrl, showVideoUrlInput]);
 
-  useEffect(() => {
-    const extractMins = (val: string) => {
-      const n = parseInt(val.replace(/[^0-9]/g, ''), 10);
-      return isNaN(n) ? 0 : n;
-    };
-    if (prepTime || cookTime) {
-      const total = extractMins(prepTime) + extractMins(cookTime);
-      if (total > 0) setValue('totalTime', `${total} mins`);
-    }
-  }, [prepTime, cookTime, setValue]);
+
 
 
 
@@ -1332,10 +1394,74 @@ Suggestions to improve readability:
         text: line
       }));
 
+    let prepTime: string | null = null;
+    let cookTime: string | null = null;
+    let totalTime: string | null = null;
+    let servings: number | null = data.servings || null;
+
+    const timings: { label: string; value: string }[] = [];
+    const timeLines = (data.timeText || '').split('\n');
+    timeLines.forEach(line => {
+      const clean = line.trim();
+      if (!clean) return;
+      const colonIdx = clean.indexOf(':');
+      if (colonIdx !== -1) {
+        const label = clean.slice(0, colonIdx).trim();
+        const value = clean.slice(colonIdx + 1).trim();
+        if (label.toLowerCase().includes('serv')) {
+          const match = value.match(/\d+/);
+          if (match) {
+            const num = parseInt(match[0], 10);
+            if (!isNaN(num) && !servings) servings = num;
+          }
+        } else {
+          timings.push({ label, value });
+          if (label.toLowerCase().includes('prep')) prepTime = value || null;
+          else if (label.toLowerCase().includes('total')) totalTime = value || null;
+        }
+      } else {
+        const words = clean.split(/\s+/);
+        if (words.length >= 2) {
+          const label = words[0];
+          const value = words.slice(1).join(' ');
+          if (label.toLowerCase().includes('serv')) {
+            const match = value.match(/\d+/);
+            if (match) {
+              const num = parseInt(match[0], 10);
+              if (!isNaN(num) && !servings) servings = num;
+            }
+          } else {
+            timings.push({ label, value });
+            if (label.toLowerCase().includes('prep')) prepTime = value || null;
+            else if (label.toLowerCase().includes('total')) totalTime = value || null;
+          }
+        }
+      }
+    });
+
+    if (timings.length > 0) {
+      cookTime = JSON.stringify(timings);
+    }
+
+    if (!totalTime) {
+      let sumMins = 0;
+      timings.forEach(t => {
+        if (!t.label.toLowerCase().includes('total')) {
+          const n = parseInt(t.value.replace(/[^0-9]/g, ''), 10);
+          if (!isNaN(n)) sumMins += n;
+        }
+      });
+      if (sumMins > 0) totalTime = `${sumMins} mins`;
+    }
+
     const formattedData = {
       ...data,
       ingredientsJson,
       instructions,
+      prepTime,
+      cookTime,
+      totalTime,
+      servings,
       seo: {
         ...data.seo,
         title: data.seo?.seoTitle || data.seo?.title || '',
@@ -1436,11 +1562,75 @@ Suggestions to improve readability:
                 text: line
               }));
 
+            let prepTime: string | null = null;
+            let cookTime: string | null = null;
+            let totalTime: string | null = null;
+            let servings: number | null = data.servings || null;
+
+            const timings: { label: string; value: string }[] = [];
+            const timeLines = (data.timeText || '').split('\n');
+            timeLines.forEach(line => {
+              const clean = line.trim();
+              if (!clean) return;
+              const colonIdx = clean.indexOf(':');
+              if (colonIdx !== -1) {
+                const label = clean.slice(0, colonIdx).trim();
+                const value = clean.slice(colonIdx + 1).trim();
+                if (label.toLowerCase().includes('serv')) {
+                  const match = value.match(/\d+/);
+                  if (match) {
+                    const num = parseInt(match[0], 10);
+                    if (!isNaN(num) && !servings) servings = num;
+                  }
+                } else {
+                  timings.push({ label, value });
+                  if (label.toLowerCase().includes('prep')) prepTime = value || null;
+                  else if (label.toLowerCase().includes('total')) totalTime = value || null;
+                }
+              } else {
+                const words = clean.split(/\s+/);
+                if (words.length >= 2) {
+                  const label = words[0];
+                  const value = words.slice(1).join(' ');
+                  if (label.toLowerCase().includes('serv')) {
+                    const match = value.match(/\d+/);
+                    if (match) {
+                      const num = parseInt(match[0], 10);
+                      if (!isNaN(num) && !servings) servings = num;
+                    }
+                  } else {
+                    timings.push({ label, value });
+                    if (label.toLowerCase().includes('prep')) prepTime = value || null;
+                    else if (label.toLowerCase().includes('total')) totalTime = value || null;
+                  }
+                }
+              }
+            });
+
+            if (timings.length > 0) {
+              cookTime = JSON.stringify(timings);
+            }
+
+            if (!totalTime) {
+              let sumMins = 0;
+              timings.forEach(t => {
+                if (!t.label.toLowerCase().includes('total')) {
+                  const n = parseInt(t.value.replace(/[^0-9]/g, ''), 10);
+                  if (!isNaN(n)) sumMins += n;
+                }
+              });
+              if (sumMins > 0) totalTime = `${sumMins} mins`;
+            }
+
             const formattedPreviewData = {
               ...data,
               ingredientsJson,
               instructions,
               nutrition,
+              prepTime,
+              cookTime,
+              totalTime,
+              servings,
               seo: {
                 ...data.seo,
                 title: data.seo?.seoTitle || data.seo?.title || '',
@@ -1637,7 +1827,7 @@ Suggestions to improve readability:
           {/* Categories, Difficulty, and Times/Servings Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Categories & Difficulty Card */}
-            <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
+            <div className="p-6 rounded-2xl bg-card border border-border min-h-[250px] flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Categories (Optional)</label>
@@ -1657,16 +1847,46 @@ Suggestions to improve readability:
                     ))}
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Servings</label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Number of servings (e.g. 4)"
+                    {...register('servings', { valueAsNumber: true })}
+                    className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20 text-foreground"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Time & Servings Card */}
-            <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Prep Time</label><input {...register('prepTime')} placeholder="20m" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
-                <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Cook Time</label><input {...register('cookTime')} placeholder="30m" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
-                <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase text-amber-500">Total Time</label><input {...register('totalTime')} placeholder="50m" className="w-full h-9 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 text-xs font-bold text-amber-500 outline-none" /></div>
-                <div className="space-y-1.5"><label className="text-[10px] font-bold text-muted-foreground uppercase">Servings</label><input {...register('servings', { valueAsNumber: true })} type="number" placeholder="4" className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs font-bold outline-none" /></div>
+            {/* Times Card */}
+            <div className="p-6 rounded-2xl bg-card border border-border flex flex-col justify-between min-h-[250px]">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5"><Clock className="h-4 w-4 text-primary" /> Times (Optional)</label>
+              <div className="relative flex-1 bg-background border border-border/80 rounded-xl p-4 mt-3 flex flex-col justify-between min-h-[140px]">
+                <textarea
+                  {...register('timeText')}
+                  placeholder={`Prep Time: 20 mins\nCook Time: 30 mins\nTotal Time: 50 mins`}
+                  className="w-full flex-1 bg-transparent border-none outline-none text-xs font-semibold focus:ring-0 transition-all resize-none custom-scrollbar"
+                />
+                <div className="flex items-center justify-between mt-2 shrink-0 border-t border-border/40 pt-2">
+                  <p className="text-[9px] text-muted-foreground">
+                    💡 'Label: Value', one per line.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={generatingField !== null}
+                    onClick={() => handleAiGenerateField('times')}
+                    className="text-[9px] text-primary hover:text-primary/85 font-black uppercase tracking-wider flex items-center gap-1 transition-all disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {generatingField === 'times' ? (
+                      <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    ) : (
+                      <span>🪄</span>
+                    )}
+                    Generate times from description
+                  </button>
+                </div>
               </div>
             </div>
           </div>

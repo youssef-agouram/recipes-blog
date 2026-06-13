@@ -60,6 +60,7 @@ export default function AdminRecipesPage() {
         status: 'DRAFT' as any,
         prepTime: String(recipe.prepTime || ''),
         cookTime: String(recipe.cookTime || ''),
+        totalTime: String(recipe.totalTime || ''),
         servings: recipe.servings ? Number(recipe.servings) : undefined,
         difficulty: (['easy', 'medium', 'hard'].includes(recipe.difficulty?.toLowerCase()) 
           ? recipe.difficulty.toLowerCase() 

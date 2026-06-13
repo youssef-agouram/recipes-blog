@@ -31,6 +31,7 @@ export default function RecipePreviewPage() {
           content: data.content,
           prepTime: data.prepTime,
           cookTime: data.cookTime,
+          totalTime: data.totalTime,
           servings: data.servings,
           difficulty: data.difficulty,
           isFeatured: data.isFeatured,

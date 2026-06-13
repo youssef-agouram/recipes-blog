@@ -11,6 +11,9 @@ const RECIPE_PRESETS = [
     keywords: ['tagine', 'moroccan'],
     title: 'Easy Chicken Tagine with Olives and Preserved Lemon',
     image: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '45 mins',
+    servings: 4,
     ingredients: `8 pieces chicken thighs
 2 tablespoons olive oil
 1 large onion, chopped
@@ -55,6 +58,9 @@ Trans Fat: 0g`
     keywords: ['pizza', 'margherita'],
     title: 'Classic Margherita Pizza with Fresh Basil',
     image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80',
+    prepTime: '20 mins',
+    cookTime: '12 mins',
+    servings: 2,
     ingredients: `1 ball prepared pizza dough
 1/2 cup tomato sauce
 1 1/2 cups fresh mozzarella, sliced
@@ -89,6 +95,9 @@ Trans Fat: 0g`
     keywords: ['burger', 'cheeseburger', 'hamburger'],
     title: 'Gourmet Classic Beef Burger with Special Sauce',
     image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '10 mins',
+    servings: 4,
     ingredients: `1 lb ground beef (80% lean)
 4 brioche burger buns, toasted
 4 slices cheddar cheese
@@ -129,6 +138,9 @@ Trans Fat: 1g`
     keywords: ['pasta', 'spaghetti', 'lasagna', 'noodle', 'macaroni', 'carbonara', 'fettuccine'],
     title: 'Creamy Garlic Butter Tuscan Pasta',
     image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
+    prepTime: '10 mins',
+    cookTime: '15 mins',
+    servings: 4,
     ingredients: `12 oz fettuccine pasta
 2 tbsp unsalted butter
 3 cloves garlic, minced
@@ -167,6 +179,9 @@ Trans Fat: 0.5g`
     keywords: ['salad', 'caesar', 'greens'],
     title: 'Classic Caesar Salad with Garlic Croutons',
     image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '10 mins',
+    servings: 4,
     ingredients: `2 heads romaine lettuce, chopped
 1 cup gourmet garlic croutons
 1/2 cup shaved parmesan cheese
@@ -201,6 +216,9 @@ Trans Fat: 0g`
     keywords: ['cookie', 'cake', 'brownie', 'pie', 'cupcake', 'muffin', 'donut', 'dessert', 'apple', 'chocolate', 'sweet'],
     title: 'Soft and Chewy Chocolate Chip Cookies',
     image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '15 mins',
+    servings: 24,
     ingredients: `2 1/4 cups all-purpose flour
 1/2 tsp baking soda
 1 cup unsalted butter, melted
@@ -238,6 +256,9 @@ Trans Fat: 0g`
     keywords: ['salmon', 'fish', 'shrimp', 'seafood', 'tuna', 'cod', 'trout'],
     title: 'Garlic Butter Glazed Salmon',
     image: 'https://images.unsplash.com/photo-1485921325833-c519f76c4927?auto=format&fit=crop&w=800&q=80',
+    prepTime: '10 mins',
+    cookTime: '10 mins',
+    servings: 4,
     ingredients: `4 salmon fillets (6 oz each)
 2 tbsp unsalted butter
 3 cloves garlic, minced
@@ -275,6 +296,9 @@ Trans Fat: 0g`
     keywords: ['soup', 'stew', 'broth', 'chowder', 'ramen'],
     title: 'Hearty Tuscan White Bean Soup',
     image: 'https://images.unsplash.com/photo-1547592165-e1d17fed6005?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '25 mins',
+    servings: 6,
     ingredients: `2 cans (15 oz) cannellini beans, drained
 2 tbsp olive oil
 1 large onion, chopped
@@ -314,6 +338,9 @@ Trans Fat: 0g`
     keywords: ['taco', 'quesadilla', 'burrito', 'mexican', 'fajita'],
     title: 'Spicy Beef Tacos with Cilantro Lime Crema',
     image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80',
+    prepTime: '15 mins',
+    cookTime: '15 mins',
+    servings: 4,
     ingredients: `1 lb lean ground beef
 1 packet taco seasoning
 8 small corn tortillas
@@ -321,7 +348,7 @@ Trans Fat: 0g`
 1 cup cheddar cheese, shredded
 1 cup roma tomatoes, diced
 1/2 cup sour cream
-1 tbsp lime juice
+1/2 tsp lime juice
 2 tbsp fresh cilantro, chopped
 1/2 tsp chili powder`,
     instructions: `Brown ground beef in a skillet over medium-high heat; drain fat.
@@ -352,6 +379,9 @@ Trans Fat: 0.5g`
 const DEFAULT_PRESET = {
   title: 'Creamy Tuscan Garlic Chicken',
   image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80',
+  prepTime: '10 mins',
+  cookTime: '20 mins',
+  servings: 4,
   ingredients: `2 large chicken breasts, halved
 1 tbsp olive oil
 1 cup heavy cream
@@ -1529,8 +1559,21 @@ Suggestions to improve readability:
       const focusKeyword = (recipe?.seo as any)?.focusKeyword?.trim() || '';
       const textSeed = `${focusKeyword} ${aboutRecipeText}`;
       result = getRecipePreset(textSeed).nutrition;
+    } else if (action === 'times') {
+      const focusKeyword = (recipe?.seo as any)?.focusKeyword?.trim() || '';
+      const textSeed = `${focusKeyword} ${aboutRecipeText}`;
+      const preset = getRecipePreset(textSeed) as any;
+      const prep = preset.prepTime || '15 mins';
+      const cook = preset.cookTime || '20 mins';
+      const parseMin = (val: string) => {
+        const n = parseInt(val.replace(/[^0-9]/g, ''), 10);
+        return isNaN(n) ? 0 : n;
+      };
+      const totalNum = parseMin(prep) + parseMin(cook);
+      const total = totalNum > 0 ? `${totalNum} mins` : '35 mins';
+      result = `Prep Time: ${prep}\nCook Time: ${cook}\nTotal Time: ${total}\nServings: ${preset.servings || 4}`;
     } else {
-      return res.status(400).json({ error: 'Invalid action specified. Supported: title, meta, keywords, readability, recipeTitle, image, ingredients, instructions, nutrition' });
+      return res.status(400).json({ error: 'Invalid action specified. Supported: title, meta, keywords, readability, recipeTitle, image, ingredients, instructions, nutrition, times' });
     }
 
     // Save or update in AI metadata log if recipe exists in DB

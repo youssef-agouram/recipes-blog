@@ -40,6 +40,24 @@ export function generateAdvancedRecipeJsonLd(recipe: Recipe) {
   // Helper to extract numeric minutes
   const parseDuration = (timeStr?: string | null) => {
     if (!timeStr) return undefined;
+    if (timeStr.startsWith('[') && timeStr.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(timeStr);
+        if (Array.isArray(parsed)) {
+          let totalMins = 0;
+          parsed.forEach((item: any) => {
+            const digits = item.value?.replace(/\D/g, '');
+            if (digits) {
+              const num = parseInt(digits, 10);
+              if (!isNaN(num)) totalMins += num;
+            }
+          });
+          return totalMins > 0 ? `PT${totalMins}M` : undefined;
+        }
+      } catch (e) {
+        // fallback
+      }
+    }
     const digits = timeStr.replace(/\D/g, '');
     return digits ? `PT${digits}M` : undefined;
   };
