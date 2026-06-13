@@ -23,7 +23,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, formatTimeCompact } from "@/lib/utils";
 import { useGetSiteSettingsQuery } from "@/store/api/settingsApi";
 
 interface RecipeViewProps {
@@ -303,7 +303,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           <div className="flex-1 min-w-0 flex flex-col gap-0.5">
             <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-wider text-primary">
               <Clock className="w-3 h-3" />
-              <span>{recipe.totalTime || '30 MIN'}</span>
+              <span>{formatTimeCompact(recipe.totalTime) || '30mins'}</span>
               <span>•</span>
               <span className="capitalize">{recipe.difficulty || 'Easy'}</span>
             </div>
@@ -389,7 +389,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               </div>
               <div className="absolute bottom-8 right-8">
                 <div className="px-5 py-2.5 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/90 flex items-center gap-2.5 shadow-2xl">
-                  <Clock className="w-4 h-4 text-primary" /> {recipe.totalTime || '30 MIN'}
+                  <Clock className="w-4 h-4 text-primary" /> {formatTimeCompact(recipe.totalTime) || '30mins'}
                 </div>
               </div>
             </div>
@@ -612,16 +612,16 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                                       ? "text-muted-foreground/50 line-through" 
                                       : "text-white/70 group-hover:text-white"
                                   )}>
-                                    <span className={cn("font-bold", isChecked ? "text-muted-foreground/50" : "text-white")}>{item.label}:</span> {item.value}
+                                    <span className={cn("font-bold", isChecked ? "text-muted-foreground/50" : "text-white")}>{item.label}:</span> {formatTimeCompact(item.value)}
                                   </span>
                                 </li>
                               );
                             });
                           } else {
                             const legacyItems: { label: string; value: string; key: string }[] = [];
-                            if (recipe.prepTime) legacyItems.push({ label: 'Prep Time', value: recipe.prepTime, key: 'prepTime' });
-                            if (recipe.cookTime) legacyItems.push({ label: 'Cook Time', value: recipe.cookTime, key: 'cookTime' });
-                            if (recipe.totalTime) legacyItems.push({ label: 'Total Time', value: recipe.totalTime, key: 'totalTime' });
+                            if (recipe.prepTime) legacyItems.push({ label: 'Prep Time', value: formatTimeCompact(recipe.prepTime), key: 'prepTime' });
+                            if (recipe.cookTime) legacyItems.push({ label: 'Cook Time', value: formatTimeCompact(recipe.cookTime), key: 'cookTime' });
+                            if (recipe.totalTime) legacyItems.push({ label: 'Total Time', value: formatTimeCompact(recipe.totalTime), key: 'totalTime' });
                             
                             return legacyItems.map((item) => {
                               const isChecked = !!checkedTimes[item.key];

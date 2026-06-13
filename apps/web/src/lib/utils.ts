@@ -88,34 +88,101 @@ export function transformEmbedUrl(raw: string): string | null {
 }
 
 /**
- * Formats recipe durations to show just a single time on card layouts
- * rather than a range (e.g. "1 hour 15 minutes – 1 hour 20 minutes" -> "1 hour 15 minutes")
+ * Formats recipe durations into a compact format (e.g., "1h 20mins" or "30mins")
+ * Supports ranges (e.g. "1 hour 15 minutes – 1 hour 20 minutes" -> "1h 15mins – 1h 20mins")
  */
-export function formatCardTime(timeStr: string | null | undefined): string {
+export function formatTimeCompact(timeStr: string | null | undefined, justFirstPart: boolean = false): string {
   if (!timeStr) return '';
   const clean = timeStr.trim();
   
-  // Split by common range separators: – (en-dash), - (hyphen), to
-  const parts = clean.split(/\s*(?:–|-|\bto\b)\s*/);
-  if (parts.length <= 1) return clean;
+  // Regex to match range separators: – (en-dash), - (hyphen), to
+  const rangeMatch = clean.match(/\s*(–|-|\bto\b)\s*/);
+  if (!rangeMatch) {
+    return formatSingleTimeCompact(clean);
+  }
   
+  const separator = rangeMatch[0];
+  const parts = clean.split(separator);
   const firstPart = parts[0].trim();
   const secondPart = parts[1].trim();
   
-  // Check if first part has alphabetical characters (the unit, e.g. "mins", "hour", "minutes")
-  const hasUnit = /[a-zA-Z]/.test(firstPart);
-  if (hasUnit) {
-    return firstPart;
+  if (justFirstPart) {
+    const formattedFirst = formatSingleTimeCompact(firstPart);
+    const firstHasUnit = /[a-zA-Z]/.test(formattedFirst);
+    if (!firstHasUnit) {
+      const formattedSecond = formatSingleTimeCompact(secondPart);
+      const unitMatch = formattedSecond.match(/[a-zA-Z]+/);
+      if (unitMatch) {
+        return `${formattedFirst}${unitMatch[0]}`;
+      }
+    }
+    return formattedFirst;
   }
   
-  // If first part has no unit, extract the unit from the second part
-  // e.g. "15-20 minutes" -> firstPart = "15", secondPart = "20 minutes"
-  // Extract unit from secondPart (everything after the number)
-  const unitMatch = secondPart.match(/[a-zA-Z\s]+/);
-  if (unitMatch) {
-    const unit = unitMatch[0].trim();
-    return `${firstPart} ${unit}`;
+  const formattedFirst = formatSingleTimeCompact(firstPart);
+  const formattedSecond = formatSingleTimeCompact(secondPart);
+  
+  const firstHasUnit = /[a-zA-Z]/.test(formattedFirst);
+  const secondHasUnit = /[a-zA-Z]/.test(formattedSecond);
+  
+  if (!firstHasUnit && secondHasUnit) {
+    const unitMatch = formattedSecond.match(/[a-zA-Z]+/);
+    if (unitMatch) {
+      const unit = unitMatch[0];
+      return `${formattedFirst}${unit}${separator}${formattedSecond}`;
+    }
   }
   
-  return firstPart;
+  return `${formattedFirst}${separator}${formattedSecond}`;
+}
+
+function formatSingleTimeCompact(target: string): string {
+  let hours = 0;
+  let minutes = 0;
+  
+  // Match hours: numbers followed by h, hr, hrs, hour, hours
+  const hourMatch = target.match(/(\d+)\s*(?:h|hr|hrs|hour|hours)\b/i);
+  if (hourMatch) {
+    hours = parseInt(hourMatch[1], 10);
+  }
+  
+  // Match minutes: numbers followed by m, min, mins, minute, minutes
+  const minMatch = target.match(/(\d+)\s*(?:m|min|mins|minute|minutes)\b/i);
+  if (minMatch) {
+    minutes = parseInt(minMatch[1], 10);
+  }
+  
+  if (!hourMatch && !minMatch) {
+    const justNumber = target.match(/^(\d+)$/);
+    if (justNumber) {
+      minutes = parseInt(justNumber[1], 10);
+    } else {
+      const decimalHourMatch = target.match(/(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hour|hours)\b/i);
+      if (decimalHourMatch) {
+        const hVal = parseFloat(decimalHourMatch[1]);
+        hours = Math.floor(hVal);
+        minutes = Math.round((hVal - hours) * 60);
+      } else {
+        return target;
+      }
+    }
+  }
+  
+  if (hours > 0 && minutes > 0) {
+    return `${hours}h ${minutes}mins`;
+  } else if (hours > 0) {
+    return `${hours}h`;
+  } else if (minutes > 0) {
+    return `${minutes}mins`;
+  }
+  
+  return target;
+}
+
+/**
+ * Formats recipe durations to show just a single time on card layouts
+ * rather than a range (e.g. "1 hour 15 minutes – 1 hour 20 minutes" -> "1h 15mins")
+ */
+export function formatCardTime(timeStr: string | null | undefined): string {
+  return formatTimeCompact(timeStr, true);
 }
