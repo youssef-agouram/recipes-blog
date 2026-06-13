@@ -294,7 +294,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               priority
             />
             {/* Simple Category Badge overlay */}
-            <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[6px] xs:text-[7px] font-black uppercase tracking-wider text-white">
+            <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[6px] xs:text-[7px] font-black uppercase tracking-wider text-white">
               {recipe.categories?.[0]?.name || 'Recipe'}
             </span>
           </div>
@@ -381,8 +381,10 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
                   <Heart className={cn("w-6 h-6", isFavorited && "fill-current")} />
                 </button>
               </div>
-              <div className="absolute bottom-8 left-8 flex items-center gap-4">
+              <div className="absolute top-8 left-8">
                 <Link href={recipe.categories?.[0]?.slug ? `/category/${recipe.categories[0].slug}` : '/categories'} className="px-6 py-2.5 rounded-2xl bg-primary text-[10px] font-black uppercase tracking-[0.2em] text-primary-foreground shadow-2xl shadow-primary/20 hover:bg-white hover:text-black transition-colors">{recipe.categories?.[0]?.name || 'Recipe'}</Link>
+              </div>
+              <div className="absolute bottom-8 left-8">
                 <div className="px-5 py-2.5 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/90 flex items-center gap-2.5 shadow-2xl">
                   <PlayCircle className="w-4 h-4 text-primary" /> Watch Video
                 </div>
