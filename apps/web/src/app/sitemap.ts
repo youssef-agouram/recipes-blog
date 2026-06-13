@@ -21,7 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const dynamicRoutes: MetadataRoute.Sitemap = [];
 
   try {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").trim();
     
     // Fetch recipes from Express backend
     const recipesRes = await fetch(`${API_BASE_URL}/recipes?limit=100`, { 
@@ -49,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   try {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").trim();
     
     // Fetch categories from Express backend
     const categoriesRes = await fetch(`${API_BASE_URL}/categories`, { 

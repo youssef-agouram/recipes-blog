@@ -86,3 +86,36 @@ export function transformEmbedUrl(raw: string): string | null {
     return null;
   }
 }
+
+/**
+ * Formats recipe durations to show just a single time on card layouts
+ * rather than a range (e.g. "1 hour 15 minutes – 1 hour 20 minutes" -> "1 hour 15 minutes")
+ */
+export function formatCardTime(timeStr: string | null | undefined): string {
+  if (!timeStr) return '';
+  const clean = timeStr.trim();
+  
+  // Split by common range separators: – (en-dash), - (hyphen), to
+  const parts = clean.split(/\s*(?:–|-|\bto\b)\s*/);
+  if (parts.length <= 1) return clean;
+  
+  const firstPart = parts[0].trim();
+  const secondPart = parts[1].trim();
+  
+  // Check if first part has alphabetical characters (the unit, e.g. "mins", "hour", "minutes")
+  const hasUnit = /[a-zA-Z]/.test(firstPart);
+  if (hasUnit) {
+    return firstPart;
+  }
+  
+  // If first part has no unit, extract the unit from the second part
+  // e.g. "15-20 minutes" -> firstPart = "15", secondPart = "20 minutes"
+  // Extract unit from secondPart (everything after the number)
+  const unitMatch = secondPart.match(/[a-zA-Z\s]+/);
+  if (unitMatch) {
+    const unit = unitMatch[0].trim();
+    return `${firstPart} ${unit}`;
+  }
+  
+  return firstPart;
+}

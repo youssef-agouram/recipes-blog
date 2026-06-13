@@ -17,7 +17,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import { cn, formatCardTime } from '@/lib/utils';
 import Image from 'next/image';
 
 interface FeaturedRecipesProps {
@@ -283,7 +283,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                           <div className="flex items-center justify-between mt-auto pt-2.5 border-t border-border">
                             <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
                               <Clock className="w-3 h-3 text-primary" />
-                              <span>{recipe.totalTime || recipe.prepTime || '30m'}</span>
+                              <span>{formatCardTime(recipe.totalTime || recipe.prepTime || '30m')}</span>
                             </div>
                             <button
                               suppressHydrationWarning
@@ -380,7 +380,7 @@ export default function FeaturedRecipes({ recipes, selectedCategoryId }: Feature
                           <div className="flex items-center justify-between mt-auto pt-2.5 border-t border-border">
                             <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
                               <Clock className="w-3 h-3 text-primary" />
-                              <span>{recipe.totalTime || recipe.prepTime || '30m'}</span>
+                              <span>{formatCardTime(recipe.totalTime || recipe.prepTime || '30m')}</span>
                             </div>
                             <button
                               suppressHydrationWarning

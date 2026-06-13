@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, formatCardTime } from "@/lib/utils";
 import { Heart, Bookmark, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -87,7 +87,7 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
     }
   };
 
-  const timeText = recipe.totalTime || recipe.prepTime || '30 Min';
+  const timeText = formatCardTime(recipe.totalTime || recipe.prepTime || '30 Min');
 
   return (
     <div className="group/card flex flex-col bg-card/50 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-border h-full">
