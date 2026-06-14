@@ -19,9 +19,11 @@ services:
     env_file:
       - ./apps/api/.env
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/recipes_db?schema=public"
       PORT: 4000
+      FRONTEND_URL: "https://recipes-blog-web.vercel.app"
+      NEXT_PUBLIC_SITE_URL: "https://recipes-blog-web.vercel.app"
     depends_on:
       - postgres
     volumes:
