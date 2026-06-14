@@ -12,3 +12,4 @@ test-save-settings.js
 test-save.js
 test.js
 check-articles.js
+.env*
