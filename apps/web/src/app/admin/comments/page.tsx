@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   MessageSquare, CheckCircle, Clock, AlertTriangle, 
   Download, Settings, Search, Filter, 
@@ -17,6 +17,37 @@ export default function AdminCommentsPage() {
   const { data: comments = [], isLoading, refetch } = useGetCommentsQuery();
   const [updateStatus, { isLoading: isUpdating }] = useUpdateCommentStatusMutation();
   const [deleteComment] = useDeleteCommentMutation();
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(filteredComments.map(c => c.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: number) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete the ${selectedIds.length} selected comments?`)) return;
+    setIsBulkDeleting(true);
+    try {
+      await Promise.all(selectedIds.map(id => deleteComment(id).unwrap()));
+      toast.success('Selected comments deleted successfully');
+      setSelectedIds([]);
+    } catch (error) {
+      toast.error('Failed to delete some comments');
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
 
   const filteredComments = useMemo(() => {
     return comments.filter(c => 
@@ -25,6 +56,15 @@ export default function AdminCommentsPage() {
       c.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [comments, searchTerm]);
+
+  // Synchronize selection with filtered comments using a guarded useEffect
+  useEffect(() => {
+    setSelectedIds(prev => {
+      const filtered = prev.filter(id => filteredComments.some(c => c.id === id));
+      const isSame = prev.length === filtered.length && prev.every((id, idx) => id === filtered[idx]);
+      return isSame ? prev : filtered;
+    });
+  }, [filteredComments]);
 
   const stats = useMemo(() => {
     const total = comments.length;
@@ -122,6 +162,21 @@ export default function AdminCommentsPage() {
               <span>Filters:</span>
             </div>
             
+            {selectedIds.length > 0 && (
+              <button 
+                onClick={handleDeleteSelected}
+                disabled={isBulkDeleting}
+                className="flex items-center gap-2 px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 text-xs font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50"
+              >
+                {isBulkDeleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                <span>Delete Selected ({selectedIds.length})</span>
+              </button>
+            )}
+            
             <div className="flex-1 min-w-[200px] relative group ml-auto">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input 
@@ -140,6 +195,14 @@ export default function AdminCommentsPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-white/5">
+                <th className="w-12 px-6 py-5">
+                  <input 
+                    type="checkbox"
+                    className="rounded border-white/10 bg-white/5 text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                    checked={filteredComments.length > 0 && selectedIds.length === filteredComments.length}
+                    onChange={handleSelectAll}
+                  />
+                </th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Comment</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">Recipe</th>
                 <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">User Details</th>
@@ -150,13 +213,21 @@ export default function AdminCommentsPage() {
             <tbody className="divide-y divide-white/5">
               {filteredComments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-20 text-center text-muted-foreground italic text-sm">
+                  <td colSpan={6} className="px-6 py-20 text-center text-muted-foreground italic text-sm">
                     No comments found matching your criteria.
                   </td>
                 </tr>
               ) : (
                 filteredComments.map((comment) => (
-                  <tr key={comment.id} className="group hover:bg-white/[0.02] transition-colors">
+                  <tr key={comment.id} className={`group hover:bg-white/[0.02] transition-colors ${selectedIds.includes(comment.id) ? 'bg-white/[0.01]' : ''}`}>
+                    <td className="w-12 px-6 py-5">
+                      <input 
+                        type="checkbox"
+                        className="rounded border-white/10 bg-white/5 text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                        checked={selectedIds.includes(comment.id)}
+                        onChange={() => handleSelectOne(comment.id)}
+                      />
+                    </td>
                     <td className="px-6 py-5 max-w-[300px]">
                       <div className="flex flex-col gap-2">
                         <p className="text-[13px] font-medium text-slate-300 leading-relaxed group-hover:text-white transition-colors">
