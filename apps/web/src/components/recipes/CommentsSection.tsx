@@ -21,6 +21,12 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
 
+  // Calculate dynamic average rating based on comments that have a rating
+  const ratedComments = comments.filter(c => c.rating && c.rating > 0);
+  const averageRating = ratedComments.length > 0
+    ? Number((ratedComments.reduce((acc, curr) => acc + (curr.rating || 0), 0) / ratedComments.length).toFixed(1))
+    : 0;
+
   const fetchComments = async () => {
     try {
       const data = await api.comments.list(recipeId);
@@ -120,20 +126,28 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
         
         <div className="hidden sm:flex items-center gap-3.5 bg-white/[0.03] border border-white/5 rounded-xl px-3.5 py-1.5">
           <div className="flex items-center gap-0.5">
-            {[1, 2, 3, 4, 5].map(s => (
-              <Star key={s} className="w-3 h-3 fill-primary text-primary" />
-            ))}
+            {[1, 2, 3, 4, 5].map(s => {
+              const ratingRound = Math.round(averageRating || 5);
+              return (
+                <Star 
+                  key={s} 
+                  className={`w-3 h-3 ${averageRating > 0 && s <= ratingRound ? 'fill-primary text-primary' : 'text-white/10'}`} 
+                />
+              );
+            })}
           </div>
-          <span className="text-[10px] font-black text-white tracking-tight">4.9 Average Rating</span>
+          <span className="text-[10px] font-black text-white tracking-tight">
+            {averageRating > 0 ? `${averageRating.toFixed(1)} Average Rating` : 'No ratings yet'}
+          </span>
         </div>
       </div>
 
       {/* Comment Form or slim sign-in prompt */}
       {isAuthenticated ? (
-        <form onSubmit={(e) => handleSubmit(e)} className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-xl p-4 mb-4 shadow-2xl relative overflow-hidden group">
+        <form onSubmit={(e) => handleSubmit(e)} className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-xl p-3 md:p-3.5 mb-4 shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32 rounded-full group-hover:bg-primary/10 transition-colors" />
           
-          <div className="flex items-center gap-3 mb-4 relative">
+          <div className="flex items-center gap-3 mb-2.5 relative">
              <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 shrink-0">
                <Image 
                 src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'U'}&background=random`} 
@@ -149,7 +163,7 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
              </div>
           </div>
           
-          <div className="flex flex-col gap-3 relative">
+          <div className="flex flex-col gap-2.5 relative">
             <div className="flex items-center gap-2">
               <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Your Rating:</span>
               <div className="flex items-center gap-0.5">
@@ -180,7 +194,7 @@ export default function CommentsSection({ recipeId, className }: { recipeId: num
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Share your thoughts about this recipe..."
                 required
-                className="w-full bg-background/50 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/50 min-h-[60px] md:min-h-[75px] transition-all"
+                className="w-full bg-background/50 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/50 min-h-[48px] md:min-h-[56px] transition-all"
               />
             </div>
 

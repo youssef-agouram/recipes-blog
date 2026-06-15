@@ -10,19 +10,23 @@
 
 import { Router, Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
-import { authMiddleware, requireAdmin, AuthRequest } from '../middleware/auth';
+import { authMiddleware, requireAdmin, AuthRequest, optionalAuth } from '../middleware/auth';
 
 const router = Router();
 
 // Get comments for a recipe (with nested replies) — public
-router.get('/recipe/:recipeId', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/recipe/:recipeId', optionalAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { recipeId } = req.params;
+    const userId = req.userId;
     const comments = await prisma.comment.findMany({
       where: { 
         recipeId: Number(recipeId),
-        status: 'APPROVED',
-        parentId: null
+        parentId: null,
+        OR: [
+          { status: 'APPROVED' },
+          userId ? { status: 'PENDING', userId } : null
+        ].filter(Boolean) as any
       },
       include: {
         user: {
@@ -32,7 +36,12 @@ router.get('/recipe/:recipeId', async (req: Request, res: Response, next: NextFu
           }
         },
         replies: {
-          where: { status: 'APPROVED' },
+          where: {
+            OR: [
+              { status: 'APPROVED' },
+              userId ? { status: 'PENDING', userId } : null
+            ].filter(Boolean) as any
+          },
           include: {
             user: {
               select: {
@@ -77,6 +86,13 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response, next: N
       return res.status(400).json({ error: 'Text and recipeId are required' });
     }
 
+    const settings = await prisma.siteSettings.findFirst();
+    let autoApprove = false;
+    if (settings && settings.commentSettings && typeof settings.commentSettings === 'object') {
+      autoApprove = (settings.commentSettings as any).autoApprove === true;
+    }
+    const status = autoApprove ? 'APPROVED' : 'PENDING';
+
     const comment = await prisma.comment.create({
       data: {
         text: String(text).substring(0, 2000), // Limit comment length
@@ -84,7 +100,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response, next: N
         recipeId: Number(recipeId),
         userId: userId,
         parentId: parentId ? Number(parentId) : null,
-        status: 'PENDING'
+        status
       },
       include: {
         user: {
