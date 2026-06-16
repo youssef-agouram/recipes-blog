@@ -963,24 +963,6 @@ export default function SiteIdentityPage() {
                   </button>
                 </div>
               </div>
-
-              {/* Redesigned Center Action Buttons */}
-              <div className="flex items-center justify-center gap-4 pt-6">
-                <button 
-                  onClick={handleSave}
-                  disabled={isUpdating || isUpdatingHero}
-                  className="flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold rounded-full transition-all shadow-[0_8px_30px_rgba(88,80,236,0.3)] hover:shadow-[0_12px_40px_rgba(88,80,236,0.5)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:hover:translate-y-0"
-                >
-                  {(isUpdating || isUpdatingHero) ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                  <span>Save Changes</span>
-                </button>
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="px-8 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-bold rounded-full transition-all active:scale-95"
-                >
-                  Cancel
-                </button>
-              </div>
             </div>
           </SectionPanel>
           )}
