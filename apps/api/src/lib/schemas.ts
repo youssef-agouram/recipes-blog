@@ -11,12 +11,16 @@ import { z } from 'zod';
 
 const MenuItemSchema = z.object({
   label: z.string().max(100),
-  href: z.string().max(500),
+  href: z.string().max(500).optional(),
+  url: z.string().max(500).optional(),
   icon: z.string().max(50).optional(),
+  visible: z.boolean().optional(),
   children: z.array(z.object({
     label: z.string().max(100),
-    href: z.string().max(500),
+    href: z.string().max(500).optional(),
+    url: z.string().max(500).optional(),
     icon: z.string().max(50).optional(),
+    visible: z.boolean().optional(),
   })).optional(),
 });
 
@@ -28,13 +32,16 @@ const SocialLinkSchema = z.object({
 
 const FooterLinksSchema = z.record(z.string(), z.array(z.object({
   label: z.string().max(100),
-  href: z.string().max(500),
+  href: z.string().max(500).optional(),
+  url: z.string().max(500).optional(),
 })));
 
 const ProfileMenuItemSchema = z.object({
   label: z.string().max(100),
-  href: z.string().max(500),
+  href: z.string().max(500).optional(),
+  url: z.string().max(500).optional(),
   icon: z.string().max(50).optional(),
+  visible: z.boolean().optional(),
 });
 
 const CommentSettingsSchema = z.object({

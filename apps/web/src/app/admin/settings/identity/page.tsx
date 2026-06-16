@@ -526,14 +526,6 @@ export default function SiteIdentityPage() {
           </div>
           <h1 className="text-xl font-black text-white tracking-tight">Site Identity</h1>
         </div>
-
-        <button onClick={handleSave} disabled={isUpdating || isUpdatingHero}
-          className="flex items-center gap-2.5 px-6 py-2.5 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-sm font-bold rounded-xl
-            shadow-[0_4px_20px_rgba(88,80,236,0.4)] hover:shadow-[0_8px_30px_rgba(88,80,236,0.6)]
-            transition-all duration-300 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:hover:translate-y-0">
-          {(isUpdating || isUpdatingHero) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {(isUpdating || isUpdatingHero) ? 'Saving…' : 'Save Changes'}
-        </button>
       </div>
 
       {/* ══════════════ MAIN GRID ══════════════ */}

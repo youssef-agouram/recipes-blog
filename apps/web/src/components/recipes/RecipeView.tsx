@@ -198,17 +198,22 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
             color-adjust: exact !important;
           }
           
-          body {
-            background-color: #05060b !important;
+          body, html, .min-h-screen, .bg-background {
+            background-color: white !important;
+            background: white !important;
+            color: black !important;
           }
 
           /* Hide UI elements that shouldn't be printed */
-          .print-hidden, 
-          header, 
-          footer, 
-          aside, 
-          .fixed, 
-          button:not(.print-only) {
+          .print\:hidden,
+          .print-hidden,
+          header,
+          footer,
+          nav,
+          aside,
+          .fixed,
+          button,
+          .draggable-ad {
             display: none !important;
           }
 
@@ -216,31 +221,31 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           .container {
             max-width: 100% !important;
             width: 100% !important;
-            padding: 20px !important;
+            padding: 0px !important;
             margin: 0 !important;
           }
 
-          /* Preserve the dark card backgrounds */
-          .bg-card, .bg-white\/\[0\.02\], .bg-black\/40 {
-            background-color: rgba(255, 255, 255, 0.05) !important;
-          }
-
-          /* Ensure text colors are maintained or adjusted for legibility */
-          .text-white { color: white !important; }
-          .text-muted-foreground { color: #94a3b8 !important; }
-          .text-primary { color: #f59e0b !important; }
-
-          /* Layout adjustments for print */
-          .flex-col.lg\\:flex-row {
-            flex-direction: column !important;
-          }
-          .w-full.lg\\:w-\\[55\\%\\] {
-            width: 100% !important;
+          /* Prevent page breaks inside important sections */
+          h1, h2, h3, h4 {
+            page-break-after: avoid;
           }
           
-          /* Prevent page breaks inside important sections */
-          article, section, .grid {
-            page-break-inside: avoid;
+          .print-prose,
+          .print-prose * {
+            color: black !important;
+            background-color: transparent !important;
+          }
+          
+          .print-prose h1, .print-prose h2, .print-prose h3 {
+            color: black !important;
+            font-weight: bold !important;
+            margin-top: 1em !important;
+            margin-bottom: 0.5em !important;
+          }
+          
+          .print-prose p {
+            color: #374151 !important;
+            margin-bottom: 1em !important;
           }
         }
 
@@ -268,7 +273,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
           scrollbar-color: rgba(245, 158, 11, 0.4) rgba(245, 158, 11, 0.05);
         }
       ` }} />
-      <article className="container mx-auto px-2 md:px-6 max-w-[1536px] pt-4">
+      <article className="container mx-auto px-2 md:px-6 max-w-[1536px] pt-4 print:hidden">
 
         {/* Breadcrumbs */}
         <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-4 md:mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
@@ -920,7 +925,144 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         </section>
 
       </article>
-      <DraggableSidebarAd />
+      <div className="print:hidden">
+        <DraggableSidebarAd />
+      </div>
+
+      {/* Print-only container */}
+      <div className="hidden print:block bg-white text-black p-8 font-sans min-h-screen">
+        <h1 className="text-3xl font-black mb-6 border-b-2 border-black pb-2 text-black">{recipe.title}</h1>
+        
+        {/* Times & Nutrition grid */}
+        <div className="grid grid-cols-2 gap-8 mb-6 border-b border-gray-300 pb-6">
+          <div>
+            <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Times</h2>
+            <ul className="text-xs space-y-1.5 text-gray-800">
+              {(() => {
+                let timingsList: { label: string; value: string }[] = [];
+                let isJson = false;
+                if (recipe.cookTime && recipe.cookTime.startsWith('[') && recipe.cookTime.endsWith(']')) {
+                  try {
+                    timingsList = JSON.parse(recipe.cookTime);
+                    isJson = Array.isArray(timingsList);
+                  } catch (e) {
+                    isJson = false;
+                  }
+                }
+                if (isJson) {
+                  return timingsList.map((item, idx) => (
+                    <li key={idx}><strong>{item.label}:</strong> {formatTimeCompact(item.value)}</li>
+                  ));
+                } else {
+                  return (
+                    <>
+                      {recipe.prepTime && <li><strong>Prep Time:</strong> {formatTimeCompact(recipe.prepTime)}</li>}
+                      {recipe.cookTime && <li><strong>Cook Time:</strong> {formatTimeCompact(recipe.cookTime)}</li>}
+                      {recipe.totalTime && <li><strong>Total Time:</strong> {formatTimeCompact(recipe.totalTime)}</li>}
+                    </>
+                  );
+                }
+              })()}
+            </ul>
+          </div>
+          <div>
+            <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Nutrition (Per Serving)</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {(() => {
+                const standardList = [
+                  { label: 'Calories', value: recipe.nutrition?.calories ? `${recipe.nutrition.calories}` : '' },
+                  { label: 'Protein', value: recipe.nutrition?.protein ? `${recipe.nutrition.protein}g` : '' },
+                  { label: 'Carbs', value: recipe.nutrition?.carbohydrates ? `${recipe.nutrition.carbohydrates}g` : '' },
+                  { label: 'Fat', value: recipe.nutrition?.fat ? `${recipe.nutrition.fat}g` : '' },
+                  { label: 'Fiber', value: recipe.nutrition?.fiber ? `${recipe.nutrition.fiber}g` : '' },
+                ];
+                const displayedKeys = new Set(['calories', 'protein', 'carbohydrates', 'fat', 'fiber']);
+                const items = [...standardList];
+                if (recipe.nutrition) {
+                  Object.keys(recipe.nutrition).forEach((key) => {
+                    if (displayedKeys.has(key.toLowerCase())) return;
+                    const val = String((recipe.nutrition as any)[key] || '');
+                    if (val) { items.push({ label: key.charAt(0).toUpperCase() + key.slice(1), value: val }); }
+                  });
+                }
+                return items.map(item => item.value ? item : { ...item, value: item.label === 'Calories' ? '0' : '0g' })
+                  .map(nut => (
+                    <div key={nut.label} className="p-1.5 border border-gray-300 rounded text-center">
+                      <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">{nut.label}</span>
+                      <span className="text-xs font-black text-black">{nut.value}</span>
+                    </div>
+                  ));
+              })()}
+            </div>
+          </div>
+        </div>
+
+        {/* Ingredients */}
+        <div className="mb-6 border-b border-gray-300 pb-6">
+          <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Ingredients</h2>
+          <ul className="list-disc list-inside space-y-1.5 text-xs text-gray-800">
+            {ingredientItems.length > 0 ? (
+              ingredientItems.map((ing: any, idx: number) => (
+                <li key={idx}>
+                  <span className="font-bold text-black">{ing.quantity} {ing.unit}</span> {ing.name}
+                </li>
+              ))
+            ) : (
+              <li className="italic text-gray-500">No ingredients listed yet.</li>
+            )}
+          </ul>
+        </div>
+
+        {/* Instructions */}
+        <div className="mb-6 border-b border-gray-300 pb-6">
+          <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Instructions</h2>
+          {(() => {
+            if (instructionItems.length === 0) {
+              return <p className="italic text-xs text-gray-500">No instructions listed yet.</p>;
+            }
+            const processedSteps = instructionItems.map((s: any) => {
+              const textStr = s.text || '';
+              const match = textStr.match(/^\s*(?:step|phase|no\.?|n°)?\s*(\d+)\s*(?:[.\-:\)]\s*|\s+)/i);
+              let rawText = textStr;
+              let extractedNum: number | null = null;
+              if (match) { rawText = textStr.substring(match[0].length).trim(); extractedNum = parseInt(match[1], 10); }
+              const lines = rawText.split('\n').map((line: string) => line.trim()).filter(Boolean);
+              const title = lines.length > 0 ? lines[0] : '';
+              const points = lines.slice(1).map((line: string) => line.replace(/^\s*[•\-\*\t]+\s*/, '').trim());
+              return { title, points, extractedNum };
+            });
+            const hasExplicitNumbers = processedSteps.some((s: any) => s.extractedNum !== null);
+            return (
+              <div className="space-y-4">
+                {processedSteps.map((s: any, idx: number) => (
+                  <div key={idx} className="text-xs text-gray-800">
+                    <h4 className="font-black text-black">
+                      {hasExplicitNumbers && s.extractedNum !== null ? s.extractedNum : idx + 1}. {s.title}
+                    </h4>
+                    {s.points.length > 0 && (
+                      <ul className="list-disc list-inside mt-1 pl-4 space-y-1 text-gray-700">
+                        {s.points.map((pt: string, ptIdx: number) => (
+                          <li key={ptIdx}>{pt}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Cooking Guide */}
+        {recipe.content && (
+          <div>
+            <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Cooking Guide</h2>
+            <div className="text-xs leading-relaxed text-gray-800 print-prose">
+              <BlogRenderer content={recipe.content} />
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Sleek Custom Sign In / Register Prompt Modal */}
       {showAuthModal && (
