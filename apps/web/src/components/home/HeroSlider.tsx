@@ -132,7 +132,7 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
             sizes="100vw"
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/10" />
         </div>
       </div>
     );
@@ -186,7 +186,7 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
             sizes="100vw"
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/10" />
         </div>
       )}
 
@@ -234,7 +234,7 @@ export function HeroSlider({ images, fallbackImage }: HeroSliderProps) {
             );
           })()}
           {/* Elegant Dark Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/10" />
         </m.div>
       </AnimatePresence>
       </LazyMotion>

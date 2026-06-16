@@ -619,8 +619,6 @@ export default function SiteIdentityPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 {[
                   { label: 'Navbar Logo', size: '200×200 PNG / SVG', key: 'logoUrl', showBrand: true },
-                  { label: 'Favicon', size: '32×32 PNG / ICO', key: 'faviconUrl', showBrand: false },
-                  { label: 'Footer Logo', size: '200×60 PNG', key: 'footerLogoUrl', showBrand: true },
                 ].map((asset) => (
                   <AssetCard key={asset.key} label={asset.label} size={asset.size}
                     imageUrl={formData[asset.key]} showBrand={asset.showBrand}

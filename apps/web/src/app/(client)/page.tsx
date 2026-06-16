@@ -91,16 +91,22 @@ export default async function HomePage() {
     <div className="w-full bg-background text-foreground pb-0 sm:pb-6">
 
       {/* 1. Hero Slider Section */}
-      <section className="relative w-full h-[25vh] min-h-[180px] sm:h-[45vh] sm:min-h-[300px] border-b border-white/5 mb-8 sm:mb-16 bg-black">
+      <section className="relative w-full h-[35vh] min-h-[260px] sm:h-[60vh] sm:min-h-[500px] border-b border-white/5 mb-8 sm:mb-16 bg-black">
         <HeroSlider
           images={heroSettings.images || []}
           fallbackImage={heroSettings.imageUrl}
         />
-        {/* Dynamic Text Overlay (Aligned Top-Left) */}
-        <div className="absolute inset-0 z-20 flex flex-col items-start justify-start text-left px-6 sm:px-16 md:px-24 pt-6 sm:pt-12 md:pt-16 bg-black/40 pointer-events-none">
-          <div className="max-w-4xl space-y-2 sm:space-y-4 pointer-events-auto">
+        {/* Dynamic Centered Cinematic Glass Card Overlay */}
+        <div className="absolute inset-0 z-20 flex items-center justify-center px-4 sm:px-6 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none">
+          <div className="max-w-xl sm:max-w-2xl bg-black/60 backdrop-blur-md border border-white/10 rounded-[32px] p-6 sm:p-10 shadow-[0_24px_50px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            {/* Premium Badge */}
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#f29e1f]/10 border border-[#f29e1f]/20 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#f29e1f] w-fit">
+              <Sparkles className="w-3.5 h-3.5" /> Handpicked Recipes
+            </span>
+
+            {/* Title */}
             {heroSettings.titlePart1 || heroSettings.title ? (
-              <h1 className="text-xl sm:text-4xl md:text-5xl font-black tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] font-heading leading-tight">
+              <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight font-heading leading-[1.15]">
                 <span style={{ color: heroSettings.titleColor1 || '#ffffff' }}>
                   {heroSettings.titlePart1 || (heroSettings.title?.includes(',') ? heroSettings.title.substring(0, heroSettings.title.indexOf(',') + 1) : heroSettings.title)}
                 </span>
@@ -110,11 +116,24 @@ export default async function HomePage() {
                 </span>
               </h1>
             ) : null}
+
+            {/* Subtitle */}
             {heroSettings.subtitle && (
-              <p className="text-[10px] sm:text-base md:text-lg text-white/80 font-medium max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] leading-normal">
+              <p className="text-xs sm:text-sm md:text-base text-white/70 font-medium leading-relaxed max-w-lg">
                 {heroSettings.subtitle}
               </p>
             )}
+
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <Link href="/recipes" className="flex items-center gap-2 px-6 py-3 bg-[#5850ec] hover:bg-[#4d45d1] text-white text-xs sm:text-sm font-black rounded-xl transition-all shadow-lg shadow-[#5850ec]/20 hover:shadow-[#5850ec]/30 hover:-translate-y-0.5 active:scale-95">
+                <span>Explore Recipes</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+              <Link href="/categories" className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs sm:text-sm font-black rounded-xl transition-all hover:-translate-y-0.5 active:scale-95">
+                <span>Categories</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
