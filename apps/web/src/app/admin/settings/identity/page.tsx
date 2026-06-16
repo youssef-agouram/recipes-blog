@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Save, Layout, Type, Columns, Plus, Trash2, ChevronDown,
+  Save, Layout, Type, Columns, Plus, Trash2, ChevronDown, ChevronUp,
   Monitor, Upload, GripVertical, Share2, Link as LinkIcon, Loader2,
   Eye, EyeOff, Sparkles, ChevronRight, Image as ImageIcon,
   Play, ShieldCheck, LayoutGrid, Palette, Zap, Bell, Users, Heart
@@ -439,6 +439,22 @@ export default function SiteIdentityPage() {
     setHeroFormData({ ...heroFormData, images: filtered });
   };
   const updateHeroImage = (id: string, value: string) => setHeroFormData({ ...heroFormData, images: heroFormData.images.map((img: any) => img.id === id ? { ...img, url: value } : img) });
+  const moveHeroImageUp = (index: number) => {
+    if (index === 0) return;
+    const list = [...heroFormData.images];
+    const temp = list[index];
+    list[index] = list[index - 1];
+    list[index - 1] = temp;
+    setHeroFormData({ ...heroFormData, images: list });
+  };
+  const moveHeroImageDown = (index: number) => {
+    if (index === heroFormData.images.length - 1) return;
+    const list = [...heroFormData.images];
+    const temp = list[index];
+    list[index] = list[index + 1];
+    list[index + 1] = temp;
+    setHeroFormData({ ...heroFormData, images: list });
+  };
 
   const addAdItem = (key: 'topBarAdUrls' | 'bottomBarVideoUrls' | 'popupAdImageUrls') =>
     setFormData({ ...formData, adSettings: { ...formData.adSettings, [key]: [...formData.adSettings[key], { id: `ad-new-${Math.random().toString(36).substring(2, 9)}`, url: '', enabled: false, clickUrl: '' }] } });
@@ -699,89 +715,271 @@ export default function SiteIdentityPage() {
           </SectionPanel>
           )}
 
+
+
           {activeSection === 'hero' && (
             <SectionPanel id="hero" gradient="from-blue-500/20 via-blue-500/5 to-transparent" bgGlow="bg-blue-500/15"
               icon={<Type className="w-5 h-5 text-white" />}
-              title="Hero Slider" desc="Dynamic hero title, subtitle, and image/video playlist">
+              title="Hero Slider" desc="Configure titles, subtitles, and image playlist.">
 
-            {/* Title parts */}
-            <div className="space-y-5">
-              <div className="flex items-center justify-between">
-                <GroupLabel icon={<Type className="w-3 h-3" />} label="Hero Title" />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <BrandField label="HN-1 & Color" textValue={heroFormData.titlePart1} onTextChange={v => setHeroFormData({ ...heroFormData, titlePart1: v })}
-                  colorValue={heroFormData.titleColor1} onColorChange={v => setHeroFormData({ ...heroFormData, titleColor1: v })} placeholder="e.g. Good Food, " />
-                <BrandField label="HN-2 & Color" textValue={heroFormData.titlePart2} onTextChange={v => setHeroFormData({ ...heroFormData, titlePart2: v })}
-                  colorValue={heroFormData.titleColor2} onColorChange={v => setHeroFormData({ ...heroFormData, titleColor2: v })} placeholder="e.g. Good Mood" />
-              </div>
-              {/* Preview */}
-              <div className="p-4 bg-black/30 rounded-2xl border border-white/[0.06] flex items-center gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0" />
-                <p className="text-base font-black tracking-tight">
-                  <span style={{ color: heroFormData.titleColor1 || '#ffffff' }}>{heroFormData.titlePart1 || 'Good Food, '}</span>
-                  <span style={{ color: heroFormData.titleColor2 || '#f29e1f' }}>{heroFormData.titlePart2 || 'Good Mood'}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Subtitle */}
-            <div className="space-y-4">
-              <GroupLabel icon={<Zap className="w-3 h-3" />} label="Hero Subtitle" />
-              <Field label="Subtitle Text" value={heroFormData.subtitle} onChange={v => setHeroFormData({ ...heroFormData, subtitle: v })}
-                placeholder="Explore thousands of handpicked recipes from around the world." />
-            </div>
-
-            {/* Slider images */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <GroupLabel icon={<ImageIcon className="w-3 h-3" />} label="Slider Images & Videos" />
-                <button onClick={addHeroImage} className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all">
-                  <Plus className="w-3.5 h-3.5" /> Add Slide
-                </button>
-              </div>
-              <div className="space-y-3">
-                {heroFormData.images.map((img: any, idx: number) => {
-                  const isYT = img.url?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
-                  const isVid = img.url?.match(/\.(mp4|webm|ogg)(\?.*)?$/i);
-                  return (
-                    <div key={img.id} className="flex gap-4 p-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl hover:border-white/10 transition-all">
-                      {/* Thumbnail */}
-                      <div className="w-28 aspect-video rounded-xl bg-black/30 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
-                        {img.url
-                          ? isYT ? <span className="text-[9px] font-black text-red-400 uppercase tracking-wider">YouTube</span>
-                            : isVid ? <span className="text-[9px] font-black text-blue-400 uppercase tracking-wider">Video</span>
-                              : <img src={img.url} alt="" className="w-full h-full object-cover" />
-                          : <span className="text-[9px] font-black text-white/20 uppercase tracking-wider">Empty</span>
-                        }
-                      </div>
-                      {/* Controls */}
-                      <div className="flex-1 flex flex-col justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[9px] font-black text-white/25 uppercase tracking-widest shrink-0">#{idx + 1}</span>
-                          <input type="text" value={img.url} onChange={e => updateHeroImage(img.id, e.target.value)} placeholder="Image or video URL"
-                            className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all" />
+            <div className="space-y-6">
+              {/* Grid: 60% Left (Title & Text), 40% Right (Live Preview) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                {/* Left Column (col-span-7) */}
+                <div className="lg:col-span-7 flex flex-col gap-6">
+                  {/* Title & Text Card */}
+                  <div className="bg-white/[0.01] border border-white/[0.06] rounded-[24px] p-6 space-y-6 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em] mb-4">Title & Text</h3>
+                      
+                      <div className="space-y-5">
+                        {/* Title & Color 1 */}
+                        <div className="space-y-2.5">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-white/35">Title & Color</label>
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="text" 
+                              value={heroFormData.titlePart1} 
+                              onChange={e => setHeroFormData({ ...heroFormData, titlePart1: e.target.value })}
+                              placeholder="e.g. Good Food, " 
+                              className="flex-1 bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all" 
+                            />
+                            <div className="flex flex-col items-center">
+                              <div className="relative w-11 h-10 rounded-xl overflow-hidden border border-white/10 cursor-pointer">
+                                <input 
+                                  type="color" 
+                                  value={heroFormData.titleColor1 || '#ffffff'} 
+                                  onChange={e => setHeroFormData({ ...heroFormData, titleColor1: e.target.value })}
+                                  className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer" 
+                                />
+                              </div>
+                              <span className="text-[8px] font-mono text-white/30 mt-1 uppercase">{heroFormData.titleColor1 || '#ffffff'}</span>
+                            </div>
+                          </div>
+                          {/* Part 1 Bullet Preview */}
+                          <div className="flex items-center gap-2 pl-1">
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: heroFormData.titleColor1 || '#ffffff' }} />
+                            <span className="text-[11px] font-bold" style={{ color: heroFormData.titleColor1 || '#ffffff' }}>
+                              {heroFormData.titlePart1 || 'Good Food, '}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <input type="file" id={`hero-upload-${img.id}`} className="hidden" accept="image/*,video/mp4,video/webm"
-                            onChange={async (e: any) => {
-                              const file = e.target.files?.[0]; if (!file) return;
-                              const data = new FormData(); data.append('image', file);
-                              try { const res = await uploadImage(data).unwrap(); updateHeroImage(img.id, res.imageUrl); }
-                              catch (err: any) { toast.error('Upload failed: ' + (err.message || JSON.stringify(err))); }
-                            }} />
-                          <button onClick={() => document.getElementById(`hero-upload-${img.id}`)?.click()}
-                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold rounded-lg border border-white/10 transition-all">
-                            Upload File
-                          </button>
-                          <button onClick={() => removeHeroImage(img.id)} className="p-1.5 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg border border-red-500/20 transition-all">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+
+                        {/* HN-2 & Color */}
+                        <div className="space-y-2.5">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-white/35">HN-2 & Color</label>
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="text" 
+                              value={heroFormData.titlePart2} 
+                              onChange={e => setHeroFormData({ ...heroFormData, titlePart2: e.target.value })}
+                              placeholder="e.g. Good Mood" 
+                              className="flex-1 bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all" 
+                            />
+                            <div className="flex flex-col items-center">
+                              <div className="relative w-11 h-10 rounded-xl overflow-hidden border border-white/10 cursor-pointer">
+                                <input 
+                                  type="color" 
+                                  value={heroFormData.titleColor2 || '#f29e1f'} 
+                                  onChange={e => setHeroFormData({ ...heroFormData, titleColor2: e.target.value })}
+                                  className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer" 
+                                />
+                              </div>
+                              <span className="text-[8px] font-mono text-white/30 mt-1 uppercase">{heroFormData.titleColor2 || '#f29e1f'}</span>
+                            </div>
+                          </div>
+                          {/* Part 2 Combined Preview */}
+                          <div className="flex items-center gap-2 pl-1">
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: heroFormData.titleColor2 || '#f29e1f' }} />
+                            <span className="text-[11px] font-bold">
+                              <span style={{ color: heroFormData.titleColor1 || '#ffffff' }}>{heroFormData.titlePart1 || 'Good Food, '}</span>
+                              <span style={{ color: heroFormData.titleColor2 || '#f29e1f' }}>{heroFormData.titlePart2 || 'Good Mood'}</span>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+
+                    {/* Hero Subtitle */}
+                    <div className="space-y-2.5 pt-4 border-t border-white/[0.05]">
+                      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-white/35">
+                        <span>Hero Subtitle</span>
+                        <span>{heroFormData.subtitle?.length || 0} character counts</span>
+                      </div>
+                      <textarea 
+                        value={heroFormData.subtitle} 
+                        onChange={e => setHeroFormData({ ...heroFormData, subtitle: e.target.value })}
+                        placeholder="Explore thousands of handpicked recipes from around the world." 
+                        rows={3}
+                        className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all resize-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column (col-span-5) */}
+                <div className="lg:col-span-5 flex flex-col">
+                  {/* Live Hero Preview Card */}
+                  <div className="bg-white/[0.01] border border-white/[0.06] rounded-[24px] p-6 space-y-4 flex-1 flex flex-col">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">Live Hero Preview</h3>
+                    
+                    {/* Browser Mockup */}
+                    <div className="flex-1 border border-white/10 rounded-2xl overflow-hidden bg-black/40 flex flex-col min-h-[280px]">
+                      {/* Browser Top Bar */}
+                      <div className="bg-white/[0.03] border-b border-white/10 px-4 py-2 flex items-center justify-between shrink-0">
+                        <div className="flex gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                        </div>
+                        <div className="bg-white/5 rounded-md border border-white/10 text-[8px] text-white/30 px-6 py-0.5 truncate text-center w-36 select-none font-mono">
+                          www.website.com
+                        </div>
+                        <div className="w-8" />
+                      </div>
+                      
+                      {/* Viewport content */}
+                      <div className="relative flex-1 bg-slate-900 flex flex-col items-start justify-start text-left p-4 overflow-hidden pt-6">
+                        {/* Background slider image */}
+                        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+                          {heroFormData.images[0]?.url ? (
+                            <img src={heroFormData.images[0].url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80" alt="" className="w-full h-full object-cover" />
+                          )}
+                          {/* Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/20 to-transparent" />
+                        </div>
+                        
+                        {/* Content Overlay */}
+                        <div className="relative z-10 max-w-[95%] pointer-events-none flex flex-col items-start text-left space-y-1">
+                          {/* Title */}
+                          <h4 className="text-[11px] sm:text-xs font-black tracking-tight leading-tight drop-shadow-[0_1px_5px_rgba(0,0,0,0.6)]">
+                            <span style={{ color: heroFormData.titleColor1 || '#ffffff' }}>{heroFormData.titlePart1 || 'Good Food, '}</span>
+                            <span style={{ color: heroFormData.titleColor2 || '#f29e1f' }}>{heroFormData.titlePart2 || 'Good Mood'}</span>
+                          </h4>
+                          {/* Subtitle */}
+                          {heroFormData.subtitle && (
+                            <p className="text-[7px] sm:text-[8px] text-white/80 font-medium leading-normal drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)] line-clamp-3">
+                              {heroFormData.subtitle}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Slider indicator dots */}
+                        <div className="absolute bottom-2 flex justify-center gap-1 z-10">
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <span key={i} className={`w-1 h-1 rounded-full transition-all ${i === 1 ? 'w-2.5 bg-[#f29e1f]' : 'bg-white/30'}`} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slider Media Manager Section (Full Width Card) */}
+              <div className="bg-white/[0.01] border border-white/[0.06] rounded-[24px] p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">Slider Media Manager</h3>
+                  <button onClick={addHeroImage} className="flex items-center gap-1.5 text-[10px] font-black px-3.5 py-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all uppercase tracking-wider">
+                    <Plus className="w-3.5 h-3.5" /> Add Slide
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {heroFormData.images.map((img: any, idx: number) => {
+                    const isYT = img.url?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+                    const isVid = img.url?.match(/\.(mp4|webm|ogg)(\?.*)?$/i);
+                    
+                    return (
+                      <div key={img.id} className="relative aspect-video rounded-2xl overflow-hidden border border-white/5 bg-black/40 group hover:border-white/20 transition-all flex flex-col justify-between">
+                        {/* Thumbnail background image */}
+                        <div className="absolute inset-0 z-0">
+                          {img.url ? (
+                            isYT ? (
+                              <div className="w-full h-full bg-red-950/20 flex items-center justify-center text-[8px] font-black text-red-400 uppercase tracking-widest">YouTube</div>
+                            ) : isVid ? (
+                              <div className="w-full h-full bg-blue-950/20 flex items-center justify-center text-[8px] font-black text-blue-400 uppercase tracking-widest">Video</div>
+                            ) : (
+                              <img src={img.url} alt="" className="w-full h-full object-cover" />
+                            )
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-white/10 gap-1">
+                              <ImageIcon className="w-5 h-5" />
+                              <span className="text-[8px] font-bold uppercase tracking-wider">Empty</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Number tag overlay */}
+                        <span className="absolute top-2.5 left-2.5 z-10 bg-black/60 backdrop-blur-md border border-white/10 text-white text-[9px] font-black w-6 h-6 rounded-lg flex items-center justify-center select-none">
+                          #{idx + 1}
+                        </span>
+
+                        {/* Actions overlay panel */}
+                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-black/85 backdrop-blur-md border border-white/10 rounded-xl p-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                          <button onClick={() => moveHeroImageUp(idx)} disabled={idx === 0} className="p-1 hover:bg-white/10 text-white/60 hover:text-white rounded disabled:opacity-35 transition-colors">
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => moveHeroImageDown(idx)} disabled={idx === heroFormData.images.length - 1} className="p-1 hover:bg-white/10 text-white/60 hover:text-white rounded disabled:opacity-35 transition-colors">
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => {
+                            const url = prompt("Enter Image/Video URL:", img.url);
+                            if (url !== null) updateHeroImage(img.id, url);
+                          }} className="p-1 hover:bg-white/10 text-white/60 hover:text-white rounded transition-colors">
+                            <LinkIcon className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => removeHeroImage(img.id)} className="p-1 hover:bg-red-500/10 text-red-400 rounded transition-colors">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Hidden file input */}
+                        <input type="file" id={`hero-upload-${img.id}`} className="hidden" accept="image/*,video/mp4,video/webm"
+                          onChange={async (e: any) => {
+                            const file = e.target.files?.[0]; if (!file) return;
+                            const data = new FormData(); data.append('image', file);
+                            try { const res = await uploadImage(data).unwrap(); updateHeroImage(img.id, res.imageUrl); }
+                            catch (err: any) { toast.error('Upload failed: ' + (err.message || JSON.stringify(err))); }
+                          }} />
+
+                        {/* Click to upload overlay */}
+                        <div onClick={() => document.getElementById(`hero-upload-${img.id}`)?.click()} 
+                          className="absolute inset-0 z-5 bg-black/35 hover:bg-black/60 flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer text-white/70 hover:text-white">
+                          <Plus className="w-5 h-5 mb-0.5" />
+                          <span className="text-[8px] font-black uppercase tracking-wider">Upload File</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Add Slide Card */}
+                  <button onClick={addHeroImage} 
+                    className="relative aspect-video rounded-2xl border-2 border-dashed border-white/10 hover:border-white/20 bg-white/[0.01] hover:bg-white/[0.03] transition-all flex flex-col items-center justify-center gap-1.5 text-white/30 hover:text-white/60 group">
+                    <Plus className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    <span className="text-[9px] font-black uppercase tracking-widest">Add Slide</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Redesigned Center Action Buttons */}
+              <div className="flex items-center justify-center gap-4 pt-6">
+                <button 
+                  onClick={handleSave}
+                  disabled={isUpdating || isUpdatingHero}
+                  className="flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold rounded-full transition-all shadow-[0_8px_30px_rgba(88,80,236,0.3)] hover:shadow-[0_12px_40px_rgba(88,80,236,0.5)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:hover:translate-y-0"
+                >
+                  {(isUpdating || isUpdatingHero) ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                  <span>Save Changes</span>
+                </button>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="px-8 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-bold rounded-full transition-all active:scale-95"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </SectionPanel>
