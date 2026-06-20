@@ -313,6 +313,60 @@
   animation: swing 0.6s ease-in-out;
 }
 
+/* =====================================================
+   Global responsive containment — prevent horizontal scroll
+   ===================================================== */
+
+/* Recipe article and all prose/blog content must never overflow viewport */
+article,
+.prose,
+.prose-invert {
+  overflow-x: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Clamp every descendant inside prose/article to the column width */
+article *,
+.prose *,
+.prose-invert * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Tables: use fixed layout so cells don't push the table wider */
+article table,
+.prose table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  word-break: break-word;
+}
+
+/* Images are already responsive but enforce it */
+article img,
+.prose img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* iframes inside blog content — keep them within column */
+article iframe,
+.prose iframe {
+  max-width: 100%;
+}
+
+/* Code blocks scroll horizontally inside their own box; never push out */
+article pre,
+.prose pre {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+  word-break: normal;
+}
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;

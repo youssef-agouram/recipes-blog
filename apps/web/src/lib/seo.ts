@@ -114,11 +114,11 @@ export function constructMetadata({
   const parsedKeywords = Array.isArray(keywords)
     ? keywords
     : keywords
-    ? keywords.split(',').map((k) => k.trim())
-    : [];
+      ? keywords.split(',').map((k) => k.trim())
+      : [];
 
-  const metaTitle = title.toLowerCase().includes('tastyrecipes') 
-    ? title 
+  const metaTitle = title.toLowerCase().includes('tastyrecipes')
+    ? title
     : `${title} | TastyRecipes`;
 
   return {
@@ -172,9 +172,9 @@ export function generateRecipeJsonLd(recipe: {
 }) {
   const ingredientsArray = recipe.ingredients
     ? recipe.ingredients.map((ing) => {
-        if (typeof ing === 'string') return ing;
-        return `${ing.quantity || ''} ${ing.name || ''}`.trim();
-      })
+      if (typeof ing === 'string') return ing;
+      return `${ing.quantity || ''} ${ing.name || ''}`.trim();
+    })
     : [];
 
   // Parse Tiptap / JSON instructions if necessary, fallback to list

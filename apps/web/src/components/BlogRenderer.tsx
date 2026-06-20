@@ -26,7 +26,7 @@ export default function BlogRenderer({ content, className = "prose dark:prose-in
   }
 
   return (
-    <div className={className}>
+    <div className={`${className} overflow-x-hidden max-w-full [&_*]:max-w-full [&_img]:max-w-full [&_table]:w-full [&_table]:table-fixed [&_pre]:overflow-x-auto [&_iframe]:max-w-full`}>
       {parsedContent.content.map((node: any, idx: number) => renderNode(node, idx))}
     </div>
   );

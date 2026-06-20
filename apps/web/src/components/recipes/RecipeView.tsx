@@ -128,7 +128,7 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
   const embedUrl = getEmbedUrl(recipe.videoUrl);
   const [selectedImage, setSelectedImage] = useState(recipe.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80");
   const [servings, setServings] = useState(recipe.servings || 4);
-  const [openCookingGuide, setOpenCookingGuide] = useState(false);
+  const [openCookingGuide, setOpenCookingGuide] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [checkedIngredients, setCheckedIngredients] = useState<Record<number, boolean>>({});
@@ -174,6 +174,22 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
     : typeof recipe.instructions === 'string'
       ? JSON.parse(recipe.instructions)
       : [];
+
+  const hasIngredients = ingredientItems.length > 0;
+  const hasInstructions = instructionItems.length > 0 && instructionItems.some((s: any) => s?.text && s.text.trim());
+  const hasNutrition = !!(
+    recipe.nutrition &&
+    (recipe.nutrition.calories ||
+      recipe.nutrition.protein ||
+      recipe.nutrition.carbohydrates ||
+      recipe.nutrition.fat ||
+      recipe.nutrition.fiber ||
+      Object.keys(recipe.nutrition).some(key => {
+        const standardKeys = new Set(['calories', 'protein', 'carbohydrates', 'fat', 'fiber']);
+        if (standardKeys.has(key.toLowerCase())) return false;
+        return !!recipe.nutrition?.[key];
+      }))
+  );
 
   const allImages = [recipe.imageUrl, ...(recipe.images || [])].filter(Boolean) as string[];
 
@@ -669,185 +685,191 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
               )}
 
               {/* Ingredients Section */}
-              <div className="flex flex-col">
-                <button
-                  onClick={() => toggleSection('ingredients')}
-                  className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                      <ShoppingBag className="w-5 h-5" />
+              {hasIngredients && (
+                <div className="flex flex-col">
+                  <button
+                    onClick={() => toggleSection('ingredients')}
+                    className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <ShoppingBag className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Ingredients</h3>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">For {servings} Servings</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Ingredients</h3>
-                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">For {servings} Servings</p>
-                    </div>
-                  </div>
-                  <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.ingredients && "rotate-180")} />
-                </button>
+                    <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.ingredients && "rotate-180")} />
+                  </button>
 
-                {openSections.ingredients && (
-                  <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="flex items-center gap-3 bg-background/50 border border-white/5 rounded-2xl p-1.5 w-fit mb-6">
-                      <button onClick={() => setServings(prev => Math.max(1, prev - 1))} className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Minus className="w-3.5 h-3.5" /></button>
-                      <span className="text-sm font-black text-white w-6 text-center">{servings}</span>
-                      <button onClick={() => setServings(prev => prev + 1)} className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Plus className="w-3.5 h-3.5" /></button>
-                    </div>
-                    <ul className="space-y-4">
-                      {ingredientItems.length > 0 ? ingredientItems.map((ing: any, idx: number) => {
-                        const isChecked = !!checkedIngredients[idx];
-                        return (
-                          <li 
-                            key={idx} 
-                            onClick={() => setCheckedIngredients(prev => ({ ...prev, [idx]: !prev[idx] }))}
-                            className="flex items-start gap-4 group cursor-pointer select-none"
-                          >
-                            <div className={cn(
-                              "mt-1.5 w-4 h-4 rounded border flex items-center justify-center transition-all",
-                              isChecked 
-                                ? "border-primary bg-primary/15 text-primary" 
-                                : "border-white/10 group-hover:border-primary group-hover:bg-primary/10"
-                            )}>
+                  {openSections.ingredients && (
+                    <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-3 bg-background/50 border border-white/5 rounded-2xl p-1.5 w-fit mb-6">
+                        <button onClick={() => setServings(prev => Math.max(1, prev - 1))} className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Minus className="w-3.5 h-3.5" /></button>
+                        <span className="text-sm font-black text-white w-6 text-center">{servings}</span>
+                        <button onClick={() => setServings(prev => prev + 1)} className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all active:scale-90"><Plus className="w-3.5 h-3.5" /></button>
+                      </div>
+                      <ul className="space-y-4">
+                        {ingredientItems.length > 0 ? ingredientItems.map((ing: any, idx: number) => {
+                          const isChecked = !!checkedIngredients[idx];
+                          return (
+                            <li 
+                              key={idx} 
+                              onClick={() => setCheckedIngredients(prev => ({ ...prev, [idx]: !prev[idx] }))}
+                              className="flex items-start gap-4 group cursor-pointer select-none"
+                            >
                               <div className={cn(
-                                "w-1.5 h-1.5 rounded-sm bg-primary transition-all duration-200",
-                                isChecked ? "scale-100 opacity-100" : "scale-50 opacity-0 group-hover:opacity-100 group-hover:scale-100"
-                              )} />
-                            </div>
-                            <span className={cn(
-                              "text-[14px] font-medium leading-relaxed transition-all duration-300",
-                              isChecked 
-                                ? "text-muted-foreground/50 line-through" 
-                                : "text-white/70 group-hover:text-white"
-                            )}>
-                              <span className={cn("font-bold", isChecked ? "text-muted-foreground/50" : "text-white")}>
-                                {ing.quantity} {ing.unit}
-                              </span>{" "}
-                              {ing.name}
-                            </span>
-                          </li>
-                        );
-                      }) : <p className="text-[11px] text-muted-foreground italic">No ingredients listed yet.</p>}
-                    </ul>
-                  </div>
-                )}
-              </div>
+                                "mt-1.5 w-4 h-4 rounded border flex items-center justify-center transition-all",
+                                isChecked 
+                                  ? "border-primary bg-primary/15 text-primary" 
+                                  : "border-white/10 group-hover:border-primary group-hover:bg-primary/10"
+                              )}>
+                                <div className={cn(
+                                  "w-1.5 h-1.5 rounded-sm bg-primary transition-all duration-200",
+                                  isChecked ? "scale-100 opacity-100" : "scale-50 opacity-0 group-hover:opacity-100 group-hover:scale-100"
+                                )} />
+                              </div>
+                              <span className={cn(
+                                "text-[14px] font-medium leading-relaxed transition-all duration-300",
+                                isChecked 
+                                  ? "text-muted-foreground/50 line-through" 
+                                  : "text-white/70 group-hover:text-white"
+                              )}>
+                                <span className={cn("font-bold", isChecked ? "text-muted-foreground/50" : "text-white")}>
+                                  {ing.quantity} {ing.unit}
+                                </span>{" "}
+                                {ing.name}
+                              </span>
+                            </li>
+                          );
+                        }) : <p className="text-[11px] text-muted-foreground italic">No ingredients listed yet.</p>}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Instructions Section */}
-              <div id="instructions" className="flex flex-col scroll-mt-20">
-                <button
-                  onClick={() => toggleSection('instructions')}
-                  className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
-                      <ClipboardList className="w-5 h-5" />
+              {hasInstructions && (
+                <div id="instructions" className="flex flex-col scroll-mt-20">
+                  <button
+                    onClick={() => toggleSection('instructions')}
+                    className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <ClipboardList className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Instructions</h3>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Step by Step Guide</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Instructions</h3>
-                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Step by Step Guide</p>
-                    </div>
-                  </div>
-                  <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.instructions && "rotate-180")} />
-                </button>
+                    <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.instructions && "rotate-180")} />
+                  </button>
 
-                {openSections.instructions && (
-                  <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="space-y-6">
-                      {(() => {
-                        if (instructionItems.length === 0) {
-                          return <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>;
-                        }
-                        const processedSteps = instructionItems.map((s: any) => {
-                          const textStr = s.text || '';
-                          const match = textStr.match(/^\s*(?:step|phase|no\.?|n°)?\s*(\d+)\s*(?:[.\-:\)]\s*|\s+)/i);
-                          let rawText = textStr;
-                          let extractedNum: number | null = null;
-                          if (match) { rawText = textStr.substring(match[0].length).trim(); extractedNum = parseInt(match[1], 10); }
-                          const lines = rawText.split('\n').map((line: string) => line.trim()).filter(Boolean);
-                          const title = lines.length > 0 ? lines[0] : '';
-                          const points = lines.slice(1).map((line: string) => line.replace(/^\s*[•\-\*\t]+\s*/, '').trim());
-                          return { title, points, extractedNum };
-                        });
-                        const hasExplicitNumbers = processedSteps.some((s: any) => s.extractedNum !== null);
-                        return (
-                          <div className="space-y-6">
-                            {processedSteps.map((s: any, idx: number) => (
-                              <div key={idx} className="animate-in fade-in duration-300">
-                                <h4 className="text-[14px] font-bold text-white tracking-tight">
-                                  {hasExplicitNumbers && s.extractedNum !== null ? s.extractedNum : idx + 1}. {s.title}
-                                </h4>
-                                {s.points.length > 0 && (
-                                  <ul className="mt-2 space-y-1.5 pl-4">
-                                    {s.points.map((pt: string, ptIdx: number) => (
-                                      <li key={ptIdx} className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
-                                        <span className="text-primary mt-1.5 text-[8px]">•</span>
-                                        <span>{pt}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })()}
+                  {openSections.instructions && (
+                    <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="space-y-6">
+                        {(() => {
+                          if (instructionItems.length === 0) {
+                            return <p className="text-[11px] text-muted-foreground italic">No instructions provided yet.</p>;
+                          }
+                          const processedSteps = instructionItems.map((s: any) => {
+                            const textStr = s.text || '';
+                            const match = textStr.match(/^\s*(?:step|phase|no\.?|n°)?\s*(\d+)\s*(?:[.\-:\)]\s*|\s+)/i);
+                            let rawText = textStr;
+                            let extractedNum: number | null = null;
+                            if (match) { rawText = textStr.substring(match[0].length).trim(); extractedNum = parseInt(match[1], 10); }
+                            const lines = rawText.split('\n').map((line: string) => line.trim()).filter(Boolean);
+                            const title = lines.length > 0 ? lines[0] : '';
+                            const points = lines.slice(1).map((line: string) => line.replace(/^\s*[•\-\*\t]+\s*/, '').trim());
+                            return { title, points, extractedNum };
+                          });
+                          const hasExplicitNumbers = processedSteps.some((s: any) => s.extractedNum !== null);
+                          return (
+                            <div className="space-y-6">
+                              {processedSteps.map((s: any, idx: number) => (
+                                <div key={idx} className="animate-in fade-in duration-300">
+                                  <h4 className="text-[14px] font-bold text-white tracking-tight">
+                                    {hasExplicitNumbers && s.extractedNum !== null ? s.extractedNum : idx + 1}. {s.title}
+                                  </h4>
+                                  {s.points.length > 0 && (
+                                    <ul className="mt-2 space-y-1.5 pl-4">
+                                      {s.points.map((pt: string, ptIdx: number) => (
+                                        <li key={ptIdx} className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-relaxed font-medium hover:text-white transition-colors">
+                                          <span className="text-primary mt-1.5 text-[8px]">•</span>
+                                          <span>{pt}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
 
               {/* Nutrition Info Section */}
-              <div className="flex flex-col">
-                <button
-                  onClick={() => toggleSection('nutrition')}
-                  className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
-                      <Activity className="w-5 h-5" />
+              {hasNutrition && (
+                <div className="flex flex-col">
+                  <button
+                    onClick={() => toggleSection('nutrition')}
+                    className="w-full flex items-center justify-between p-5 sm:p-7 hover:bg-white/[0.02] transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
+                        <Activity className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Nutrition Information</h3>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Per Serving Estimation</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-black text-white tracking-tighter font-heading">Nutrition Information</h3>
-                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Per Serving Estimation</p>
-                    </div>
-                  </div>
-                  <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.nutrition && "rotate-180")} />
-                </button>
+                    <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform duration-300", openSections.nutrition && "rotate-180")} />
+                  </button>
 
-                {openSections.nutrition && (
-                  <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                      {(() => {
-                        const standardList = [
-                          { label: 'Calories', value: recipe.nutrition?.calories ? `${recipe.nutrition.calories}` : '', color: 'text-orange-400' },
-                          { label: 'Protein', value: recipe.nutrition?.protein ? `${recipe.nutrition.protein}g` : '', color: 'text-blue-400' },
-                          { label: 'Carbs', value: recipe.nutrition?.carbohydrates ? `${recipe.nutrition.carbohydrates}g` : '', color: 'text-amber-400' },
-                          { label: 'Fat', value: recipe.nutrition?.fat ? `${recipe.nutrition.fat}g` : '', color: 'text-red-400' },
-                          { label: 'Fiber', value: recipe.nutrition?.fiber ? `${recipe.nutrition.fiber}g` : '', color: 'text-emerald-400' },
-                        ];
-                        const displayedKeys = new Set(['calories', 'protein', 'carbohydrates', 'fat', 'fiber']);
-                        const items = [...standardList];
-                        if (recipe.nutrition) {
-                          const customColors = ['text-purple-400','text-teal-400','text-indigo-400','text-pink-400','text-yellow-400'];
-                          let colorIndex = 0;
-                          Object.keys(recipe.nutrition).forEach((key) => {
-                            if (displayedKeys.has(key.toLowerCase())) return;
-                            const val = String((recipe.nutrition as any)[key] || '');
-                            if (val) { items.push({ label: key.charAt(0).toUpperCase() + key.slice(1), value: val, color: customColors[colorIndex++ % customColors.length] }); }
-                          });
-                        }
-                        return items.map(item => item.value ? item : { ...item, value: item.label === 'Calories' ? '0' : '0g' })
-                          .map(nut => (
-                            <div key={nut.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center animate-in fade-in duration-300">
-                              <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>
-                              <span className={`text-xl font-black ${nut.color}`}>{nut.value}</span>
-                            </div>
-                          ));
-                      })()}
+                  {openSections.nutrition && (
+                    <div className="px-5 pb-6 sm:px-7 sm:pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                        {(() => {
+                          const standardList = [
+                            { label: 'Calories', value: recipe.nutrition?.calories ? `${recipe.nutrition.calories}` : '', color: 'text-orange-400' },
+                            { label: 'Protein', value: recipe.nutrition?.protein ? `${recipe.nutrition.protein}g` : '', color: 'text-blue-400' },
+                            { label: 'Carbs', value: recipe.nutrition?.carbohydrates ? `${recipe.nutrition.carbohydrates}g` : '', color: 'text-amber-400' },
+                            { label: 'Fat', value: recipe.nutrition?.fat ? `${recipe.nutrition.fat}g` : '', color: 'text-red-400' },
+                            { label: 'Fiber', value: recipe.nutrition?.fiber ? `${recipe.nutrition.fiber}g` : '', color: 'text-emerald-400' },
+                          ];
+                          const displayedKeys = new Set(['calories', 'protein', 'carbohydrates', 'fat', 'fiber']);
+                          const items = [...standardList];
+                          if (recipe.nutrition) {
+                            const customColors = ['text-purple-400','text-teal-400','text-indigo-400','text-pink-400','text-yellow-400'];
+                            let colorIndex = 0;
+                            Object.keys(recipe.nutrition).forEach((key) => {
+                              if (displayedKeys.has(key.toLowerCase())) return;
+                              const val = String((recipe.nutrition as any)[key] || '');
+                              if (val) { items.push({ label: key.charAt(0).toUpperCase() + key.slice(1), value: val, color: customColors[colorIndex++ % customColors.length] }); }
+                            });
+                          }
+                          return items.map(item => item.value ? item : { ...item, value: item.label === 'Calories' ? '0' : '0g' })
+                            .map(nut => (
+                              <div key={nut.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all flex flex-col justify-center animate-in fade-in duration-300">
+                                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">{nut.label}</span>
+                                <span className={`text-xl font-black ${nut.color}`}>{nut.value}</span>
+                              </div>
+                            ));
+                        })()}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
 
             </div>
 
@@ -934,124 +956,127 @@ export default function RecipeView({ recipe, relatedRecipes }: RecipeViewProps) 
         <h1 className="text-3xl font-black mb-6 border-b-2 border-black pb-2 text-black">{recipe.title}</h1>
         
         {/* Times & Nutrition grid */}
-        <div className="grid grid-cols-2 gap-8 mb-6 border-b border-gray-300 pb-6">
-          <div>
-            <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Times</h2>
-            <ul className="text-xs space-y-1.5 text-gray-800">
-              {(() => {
-                let timingsList: { label: string; value: string }[] = [];
-                let isJson = false;
-                if (recipe.cookTime && recipe.cookTime.startsWith('[') && recipe.cookTime.endsWith(']')) {
-                  try {
-                    timingsList = JSON.parse(recipe.cookTime);
-                    isJson = Array.isArray(timingsList);
-                  } catch (e) {
-                    isJson = false;
-                  }
-                }
-                if (isJson) {
-                  return timingsList.map((item, idx) => (
-                    <li key={idx}><strong>{item.label}:</strong> {formatTimeCompact(item.value)}</li>
-                  ));
-                } else {
-                  return (
-                    <>
-                      {recipe.prepTime && <li><strong>Prep Time:</strong> {formatTimeCompact(recipe.prepTime)}</li>}
-                      {recipe.cookTime && <li><strong>Cook Time:</strong> {formatTimeCompact(recipe.cookTime)}</li>}
-                      {recipe.totalTime && <li><strong>Total Time:</strong> {formatTimeCompact(recipe.totalTime)}</li>}
-                    </>
-                  );
-                }
-              })()}
-            </ul>
+        {(recipe.prepTime || recipe.cookTime || recipe.totalTime || hasNutrition) && (
+          <div className={cn("grid gap-8 mb-6 border-b border-gray-300 pb-6", hasNutrition ? "grid-cols-2" : "grid-cols-1")}>
+            {(recipe.prepTime || recipe.cookTime || recipe.totalTime) && (
+              <div>
+                <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Times</h2>
+                <ul className="text-xs space-y-1.5 text-gray-800">
+                  {(() => {
+                    let timingsList: { label: string; value: string }[] = [];
+                    let isJson = false;
+                    if (recipe.cookTime && recipe.cookTime.startsWith('[') && recipe.cookTime.endsWith(']')) {
+                      try {
+                        timingsList = JSON.parse(recipe.cookTime);
+                        isJson = Array.isArray(timingsList);
+                      } catch (e) {
+                        isJson = false;
+                      }
+                    }
+                    if (isJson) {
+                      return timingsList.map((item, idx) => (
+                        <li key={idx}><strong>{item.label}:</strong> {formatTimeCompact(item.value)}</li>
+                      ));
+                    } else {
+                      return (
+                        <>
+                          {recipe.prepTime && <li><strong>Prep Time:</strong> {formatTimeCompact(recipe.prepTime)}</li>}
+                          {recipe.cookTime && <li><strong>Cook Time:</strong> {formatTimeCompact(recipe.cookTime)}</li>}
+                          {recipe.totalTime && <li><strong>Total Time:</strong> {formatTimeCompact(recipe.totalTime)}</li>}
+                        </>
+                      );
+                    }
+                  })()}
+                </ul>
+              </div>
+            )}
+            {hasNutrition && (
+              <div>
+                <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Nutrition (Per Serving)</h2>
+                <div className="grid grid-cols-3 gap-2">
+                  {(() => {
+                    const standardList = [
+                      { label: 'Calories', value: recipe.nutrition?.calories ? `${recipe.nutrition.calories}` : '' },
+                      { label: 'Protein', value: recipe.nutrition?.protein ? `${recipe.nutrition.protein}g` : '' },
+                      { label: 'Carbs', value: recipe.nutrition?.carbohydrates ? `${recipe.nutrition.carbohydrates}g` : '' },
+                      { label: 'Fat', value: recipe.nutrition?.fat ? `${recipe.nutrition.fat}g` : '' },
+                      { label: 'Fiber', value: recipe.nutrition?.fiber ? `${recipe.nutrition.fiber}g` : '' },
+                    ];
+                    const displayedKeys = new Set(['calories', 'protein', 'carbohydrates', 'fat', 'fiber']);
+                    const items = [...standardList];
+                    if (recipe.nutrition) {
+                      Object.keys(recipe.nutrition).forEach((key) => {
+                        if (displayedKeys.has(key.toLowerCase())) return;
+                        const val = String((recipe.nutrition as any)[key] || '');
+                        if (val) { items.push({ label: key.charAt(0).toUpperCase() + key.slice(1), value: val }); }
+                      });
+                    }
+                    return items.map(item => item.value ? item : { ...item, value: item.label === 'Calories' ? '0' : '0g' })
+                      .map(nut => (
+                        <div key={nut.label} className="p-1.5 border border-gray-300 rounded text-center">
+                          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">{nut.label}</span>
+                          <span className="text-xs font-black text-black">{nut.value}</span>
+                        </div>
+                      ));
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
-          <div>
-            <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Nutrition (Per Serving)</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {(() => {
-                const standardList = [
-                  { label: 'Calories', value: recipe.nutrition?.calories ? `${recipe.nutrition.calories}` : '' },
-                  { label: 'Protein', value: recipe.nutrition?.protein ? `${recipe.nutrition.protein}g` : '' },
-                  { label: 'Carbs', value: recipe.nutrition?.carbohydrates ? `${recipe.nutrition.carbohydrates}g` : '' },
-                  { label: 'Fat', value: recipe.nutrition?.fat ? `${recipe.nutrition.fat}g` : '' },
-                  { label: 'Fiber', value: recipe.nutrition?.fiber ? `${recipe.nutrition.fiber}g` : '' },
-                ];
-                const displayedKeys = new Set(['calories', 'protein', 'carbohydrates', 'fat', 'fiber']);
-                const items = [...standardList];
-                if (recipe.nutrition) {
-                  Object.keys(recipe.nutrition).forEach((key) => {
-                    if (displayedKeys.has(key.toLowerCase())) return;
-                    const val = String((recipe.nutrition as any)[key] || '');
-                    if (val) { items.push({ label: key.charAt(0).toUpperCase() + key.slice(1), value: val }); }
-                  });
-                }
-                return items.map(item => item.value ? item : { ...item, value: item.label === 'Calories' ? '0' : '0g' })
-                  .map(nut => (
-                    <div key={nut.label} className="p-1.5 border border-gray-300 rounded text-center">
-                      <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">{nut.label}</span>
-                      <span className="text-xs font-black text-black">{nut.value}</span>
-                    </div>
-                  ));
-              })()}
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Ingredients */}
-        <div className="mb-6 border-b border-gray-300 pb-6">
-          <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Ingredients</h2>
-          <ul className="list-disc list-inside space-y-1.5 text-xs text-gray-800">
-            {ingredientItems.length > 0 ? (
-              ingredientItems.map((ing: any, idx: number) => (
+        {hasIngredients && (
+          <div className="mb-6 border-b border-gray-300 pb-6">
+            <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Ingredients</h2>
+            <ul className="list-disc list-inside space-y-1.5 text-xs text-gray-800">
+              {ingredientItems.map((ing: any, idx: number) => (
                 <li key={idx}>
                   <span className="font-bold text-black">{ing.quantity} {ing.unit}</span> {ing.name}
                 </li>
-              ))
-            ) : (
-              <li className="italic text-gray-500">No ingredients listed yet.</li>
-            )}
-          </ul>
-        </div>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Instructions */}
-        <div className="mb-6 border-b border-gray-300 pb-6">
-          <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Instructions</h2>
-          {(() => {
-            if (instructionItems.length === 0) {
-              return <p className="italic text-xs text-gray-500">No instructions listed yet.</p>;
-            }
-            const processedSteps = instructionItems.map((s: any) => {
-              const textStr = s.text || '';
-              const match = textStr.match(/^\s*(?:step|phase|no\.?|n°)?\s*(\d+)\s*(?:[.\-:\)]\s*|\s+)/i);
-              let rawText = textStr;
-              let extractedNum: number | null = null;
-              if (match) { rawText = textStr.substring(match[0].length).trim(); extractedNum = parseInt(match[1], 10); }
-              const lines = rawText.split('\n').map((line: string) => line.trim()).filter(Boolean);
-              const title = lines.length > 0 ? lines[0] : '';
-              const points = lines.slice(1).map((line: string) => line.replace(/^\s*[•\-\*\t]+\s*/, '').trim());
-              return { title, points, extractedNum };
-            });
-            const hasExplicitNumbers = processedSteps.some((s: any) => s.extractedNum !== null);
-            return (
-              <div className="space-y-4">
-                {processedSteps.map((s: any, idx: number) => (
-                  <div key={idx} className="text-xs text-gray-800">
-                    <h4 className="font-black text-black">
-                      {hasExplicitNumbers && s.extractedNum !== null ? s.extractedNum : idx + 1}. {s.title}
-                    </h4>
-                    {s.points.length > 0 && (
-                      <ul className="list-disc list-inside mt-1 pl-4 space-y-1 text-gray-700">
-                        {s.points.map((pt: string, ptIdx: number) => (
-                          <li key={ptIdx}>{pt}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-        </div>
+        {hasInstructions && (
+          <div className="mb-6 border-b border-gray-300 pb-6">
+            <h2 className="text-sm font-black uppercase tracking-wider mb-3 text-black">Instructions</h2>
+            {(() => {
+              const processedSteps = instructionItems.map((s: any) => {
+                const textStr = s.text || '';
+                const match = textStr.match(/^\s*(?:step|phase|no\.?|n°)?\s*(\d+)\s*(?:[.\-:\)]\s*|\s+)/i);
+                let rawText = textStr;
+                let extractedNum: number | null = null;
+                if (match) { rawText = textStr.substring(match[0].length).trim(); extractedNum = parseInt(match[1], 10); }
+                const lines = rawText.split('\n').map((line: string) => line.trim()).filter(Boolean);
+                const title = lines.length > 0 ? lines[0] : '';
+                const points = lines.slice(1).map((line: string) => line.replace(/^\s*[•\-\*\t]+\s*/, '').trim());
+                return { title, points, extractedNum };
+              });
+              const hasExplicitNumbers = processedSteps.some((s: any) => s.extractedNum !== null);
+              return (
+                <div className="space-y-4">
+                  {processedSteps.map((s: any, idx: number) => (
+                    <div key={idx} className="text-xs text-gray-800">
+                      <h4 className="font-black text-black">
+                        {hasExplicitNumbers && s.extractedNum !== null ? s.extractedNum : idx + 1}. {s.title}
+                      </h4>
+                      {s.points.length > 0 && (
+                        <ul className="list-disc list-inside mt-1 pl-4 space-y-1 text-gray-700">
+                          {s.points.map((pt: string, ptIdx: number) => (
+                            <li key={ptIdx}>{pt}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Cooking Guide */}
         {recipe.content && (
